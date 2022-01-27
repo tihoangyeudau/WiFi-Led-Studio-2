@@ -4,7 +4,7 @@ from enum import Enum
 import numpy as np
 import voluptuous as vol
 
-from ledfx.devices import Device
+from wls.devices import Device
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -51,8 +51,8 @@ class RPI_WS281X(Device):
             }
         )
 
-    def __init__(self, ledfx, config):
-        super().__init__(ledfx, config)
+    def __init__(self, wls, config):
+        super().__init__(wls, config)
         self.LED_FREQ_HZ = 800000
         self.LED_DMA = 10
         self.LED_BRIGHTNESS = 255

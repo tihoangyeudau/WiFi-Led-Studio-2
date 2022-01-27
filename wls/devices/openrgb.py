@@ -4,8 +4,8 @@ import socket
 import numpy as np
 import voluptuous as vol
 
-from ledfx.devices import NetworkedDevice, packets
-from ledfx.events import DevicesUpdatedEvent
+from wls.devices import NetworkedDevice, packets
+from wls.events import DevicesUpdatedEvent
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -38,9 +38,9 @@ class OpenRGB(NetworkedDevice):
             }
         )
 
-    def __init__(self, ledfx, config):
-        super().__init__(ledfx, config)
-        self._ledfx = ledfx
+    def __init__(self, wls, config):
+        super().__init__(wls, config)
+        self._wls = wls
         self.ip_address = self._config["ip_address"]
         self.port = self._config["port"]
         self.openrgb_device_name = self._config["openrgb_name"]
@@ -52,7 +52,7 @@ class OpenRGB(NetworkedDevice):
 
             try:
                 self.openrgb_device = OpenRGBClient(
-                    self.ip_address, self.port, "LedFx", 2  # protocol_version
+                    self.ip_address, self.port, "Wls", 2  # protocol_version
                 ).get_devices_by_name(f"{self.openrgb_device_name}")[0]
                 self._online = True
             except (ConnectionRefusedError, TimeoutError):
@@ -80,7 +80,7 @@ class OpenRGB(NetworkedDevice):
             self.deactivate()
         except ValueError:
             _LOGGER.critical(
-                f"{self.openrgb_device_name} doesn't support direct mode, and isn't suitable for streamed effects from LedFx"
+                f"{self.openrgb_device_name} doesn't support direct mode, and isn't suitable for streamed effects from Wls"
             )
             self.deactivate()
         else:
@@ -102,7 +102,7 @@ class OpenRGB(NetworkedDevice):
             self.activate()
         except ConnectionAbortedError:
             _LOGGER.warning(f"Device disconnected: {self.openrgb_device_name}")
-            self._ledfx.events.fire_event(DevicesUpdatedEvent(self.id))
+            self._wls.events.fire_event(DevicesUpdatedEvent(self.id))
             self._online = False
             self.deactivate()
 

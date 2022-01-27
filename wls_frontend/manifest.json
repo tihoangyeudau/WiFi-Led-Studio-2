@@ -1,7 +1,7 @@
 {
-  "short_name": "LedFx",
-  "name": "LedFx Client by Blade",
-  "description": "Connect to any LedFx-Instance",
+  "short_name": "Wls",
+  "name": "Wls Client by Blade",
+  "description": "Connect to any Wls-Instance",
   "author": "Yeon (Blade)",
   "developer": {
     "name": "Yeon",

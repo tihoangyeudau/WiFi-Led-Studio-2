@@ -3,10 +3,10 @@ import logging
 import numpy as np
 import voluptuous as vol
 
-from ledfx.color import RGB, parse_gradient, validate_gradient
-from ledfx.effects import Effect
-from ledfx.effects.modulate import ModulateEffect
-from ledfx.effects.temporal import TemporalEffect
+from wls.color import RGB, parse_gradient, validate_gradient
+from wls.effects import Effect
+from wls.effects.modulate import ModulateEffect
+from wls.effects.temporal import TemporalEffect
 
 _LOGGER = logging.getLogger(__name__)
 

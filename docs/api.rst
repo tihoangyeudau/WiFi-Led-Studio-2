@@ -8,29 +8,29 @@ APIs marked as (upcoming) are yet to be added.
 /api/info
 ===============
 
-Information about LedFx
+Information about Wls
 
 .. rubric:: GET
 
-Returns basic information about the LedFx instance as JSON
+Returns basic information about the Wls instance as JSON
 
 .. code-block:: json
 
     {
       "url": "http://127.0.0.1:8888",
-      "name": "LedFx",
+      "name": "Wls",
       "version": "0.3.0"
     }
 
 /api/config
 ===============
 
-Endpoint for managing LedFx Configuration
+Endpoint for managing Wls Configuration
 
 .. rubric:: GET
 
-Returns the current configuration for LedFx as JSON
-A GET with no request body will return LedFx's full configuration.
+Returns the current configuration for Wls as JSON
+A GET with no request body will return Wls's full configuration.
 
 You may instead ask for any number of the config keys:
 
@@ -44,21 +44,21 @@ You may instead ask for any number of the config keys:
 - *visualisation_maxlen*
 - *audio*
 - *melbanks*
-- *wled_preferences*
+- *rml_preferences*
 - *devices*
 - *virtuals*
 - *integrations*
 - *scenes*
 - *user_presets*
-- *ledfx_presets*
+- *wls_presets*
 
-example: Get LedFx audio configuration
+example: Get Wls audio configuration
 
 .. code-block:: json
 
     "audio"
 
-example: Get LedFx audio, devices, and scenes configuration
+example: Get Wls audio, devices, and scenes configuration
 
 .. code-block:: json
 
@@ -66,8 +66,8 @@ example: Get LedFx audio, devices, and scenes configuration
 
 .. rubric:: PUT
 
-Updates LedFx configuration with any permitted keys.
-LedFx will handle the update and restart if necessary.
+Updates Wls configuration with any permitted keys.
+Wls will handle the update and restart if necessary.
 Generally, updating any core config key will trigger a restart.
 
 example:
@@ -85,35 +85,35 @@ example:
 
 .. rubric:: POST
 
-Set full LedFx config. You must provide a full, valid config.
-LedFx will restart to apply the config.
+Set full Wls config. You must provide a full, valid config.
+Wls will restart to apply the config.
 To simply update a part of the config, use PUT
 
 .. rubric:: DELETE
 
-Resets LedFx's config to default values and restarts.
+Resets Wls's config to default values and restarts.
 
 *Warning* This will irreversibly delete all your devices, settings, etc.
 
 /api/log
 =========================
 
-LedFx Logging
+Wls Logging
 
 .. rubric:: GET
 
-Opens a websocket connection through which realtime LedFx logging info will be sent.
+Opens a websocket connection through which realtime Wls logging info will be sent.
 
 /api/schema/
 =========================
 
-LedFx Schema Api
+Wls Schema Api
 
 .. rubric:: GET /api/schema/
 
-Get JSON schemas specifically defining the kind of data LedFx's API expects.
-A GET with no request body will return all of LedFx's schemas
-LedFx uses schemas to validate the following:
+Get JSON schemas specifically defining the kind of data Wls's API expects.
+A GET with no request body will return all of Wls's schemas
+Wls uses schemas to validate the following:
 
 - *devices*
 - *effects*
@@ -121,18 +121,18 @@ LedFx uses schemas to validate the following:
 - *virtuals*
 - *audio*
 - *melbanks*
-- *wled_preferences*
+- *rml_preferences*
 - *core*
 
 Like with the /api/config endpoint, you may instead ask for spefific schemas
 
-example: Get LedFx audio schema
+example: Get Wls audio schema
 
 .. code-block:: json
 
     "audio"
 
-example: Get LedFx devices and effects schema
+example: Get Wls devices and effects schema
 
 .. code-block:: json
 
@@ -141,22 +141,22 @@ example: Get LedFx devices and effects schema
 /api/schema/<schema_type>
 ============================
 
-Query a specific LedFx schema with the matching *schema_type* as JSON
+Query a specific Wls schema with the matching *schema_type* as JSON
 
 .. rubric:: GET /api/schema/<schema_type>
 
-Returns the LedFx schema with the matching *schema_type* as JSON
+Returns the Wls schema with the matching *schema_type* as JSON
 
-- *devices*: Returns all the devices registered with LedFx
+- *devices*: Returns all the devices registered with Wls
 
-- *effects*: Returns all the valid schemas for an LedFx effect
+- *effects*: Returns all the valid schemas for an Wls effect
 
-- *integrations*: Returns all the integrations registered with LedFx
+- *integrations*: Returns all the integrations registered with Wls
 
 /api/devices
 =========================
 
-Query and manage devices connected to LedFx
+Query and manage devices connected to Wls
 
 .. rubric:: GET
 
@@ -164,7 +164,7 @@ Get configuration of all devices
 
 .. rubric:: POST
 
-Adds a new device to LedFx based on the provided JSON configuration
+Adds a new device to Wls based on the provided JSON configuration
 
 /api/devices/<device_id>
 =========================
@@ -190,7 +190,7 @@ Query and manage all effects
 
 .. rubric:: GET
 
-Returns all the effects currently created in LedFx as JSON
+Returns all the effects currently created in Wls as JSON
 
 .. rubric:: POST (upcoming)
 
@@ -216,7 +216,7 @@ Deletes the effect with the matching *effect_id*.
 /api/virtuals
 =========================
 
-Query and manage virtuals connected to LedFx
+Query and manage virtuals connected to Wls
 
 .. rubric:: GET
 
@@ -224,7 +224,7 @@ Get configuration of all virtuals
 
 .. rubric:: POST
 
-Adds a new virtual to LedFx based on the provided JSON configuration
+Adds a new virtual to Wls based on the provided JSON configuration
 
 /api/virtuals/<virtual_id>
 ==========================
@@ -392,7 +392,7 @@ Delete a scene
 /api/integrations
 ================================
 
-Endpoint for managing integrations. Integrations are written to allow ledfx to communicate with other software, and
+Endpoint for managing integrations. Integrations are written to allow wls to communicate with other software, and
 vice versa.
 
 .. rubric:: GET
@@ -581,6 +581,6 @@ Delete a song trigger
    WebSocket API
 ===================
 
-In addition to the REST APIs LedFx has a WebSocket API for streaming realtime data. The primary use for this is for things like effect visualizations in the frontend.
+In addition to the REST APIs Wls has a WebSocket API for streaming realtime data. The primary use for this is for things like effect visualizations in the frontend.
 
 Will document this further once it is more well defined. The general structure will be event registration based.

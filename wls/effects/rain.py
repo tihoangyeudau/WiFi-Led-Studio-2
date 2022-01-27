@@ -3,9 +3,9 @@ from random import randint
 import numpy as np
 import voluptuous as vol
 
-from ledfx.color import parse_color, validate_color
-from ledfx.effects.audio import AudioReactiveEffect
-from ledfx.effects.droplets import DROPLET_NAMES, load_droplet
+from wls.color import parse_color, validate_color
+from wls.effects.audio import AudioReactiveEffect
+from wls.effects.droplets import DROPLET_NAMES, load_droplet
 
 
 class RainAudioEffect(AudioReactiveEffect):

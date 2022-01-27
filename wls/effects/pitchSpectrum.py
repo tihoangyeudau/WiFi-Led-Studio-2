@@ -1,9 +1,9 @@
 import voluptuous as vol
 
-from ledfx.color import RGB
-from ledfx.effects import mix_colors
-from ledfx.effects.audio import MAX_MIDI, MIN_MIDI, AudioReactiveEffect
-from ledfx.effects.gradient import GradientEffect
+from wls.color import RGB
+from wls.effects import mix_colors
+from wls.effects.audio import MAX_MIDI, MIN_MIDI, AudioReactiveEffect
+from wls.effects.gradient import GradientEffect
 
 
 class PitchSpectrumAudioEffect(AudioReactiveEffect, GradientEffect):

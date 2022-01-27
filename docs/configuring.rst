@@ -5,8 +5,8 @@
 Firmware Specific
 -------------------
 
-Once you have LedFx installed, it's time to add some devices! Make sure you have a device with appropriate
-firmware for integration with LedFx. Open the LedFx UI and navigate to the 'Device Management' page.
+Once you have Wls installed, it's time to add some devices! Make sure you have a device with appropriate
+firmware for integration with Wls. Open the Wls UI and navigate to the 'Device Management' page.
 Click the "Add Device" button at the top right of the web page. Add the device using the following
 configuration based on your firmware:
 
@@ -20,23 +20,23 @@ configuration based on your firmware:
         - Add the device as a UDP device.
         - Click 'Additional Properties' and check the 'Include Indexes' box.
 
-    * WLED_
+    * RML_
 
-        - WLED devices are now auto-configured. In most cases you will not have to change any settings in LedFx
+        - RML devices are now auto-configured. In most cases you will not have to change any settings in Wls
         - The following instructions are provided for those who wish to make changes
-        - Add WLED as UDP device
+        - Add RML as UDP device
             - Enter the name for your device and IP address
-            - Enter 21324 for the port
+            - Enter 7778 for the port
             - Enter the total number of pixels
             - Click "Show More" and enter 02 for "Data Prefix
             - Click Submit
-        - Add WLED as E1.31 device
-            - Enable E1.31 support from the 'Sync Settings' page on the WLED web-interface and reboot WLED
+        - Add RML as E1.31 device
+            - Enable E1.31 support from the 'Sync Settings' page on the RML web-interface and reboot RML
             - Enter the name and IP address
             - Enter the total number of pixels
             - Click Submit
-        - Add WLED as DDP device
-            - Enable DDP support from the 'Sync Settings' page on the WLED web-interface and reboot WLED
+        - Add RML as DDP device
+            - Enable DDP support from the 'Sync Settings' page on the RML web-interface and reboot RML
             - Enter the name and IP address
             - Enter the total number of pixels
             - Click Submit
@@ -45,4 +45,4 @@ configuration based on your firmware:
 
 .. _`Scott's Audio Reactive Firmware`: https://github.com/scottlawsonbc/audio-reactive-led-strip
 .. _ESPixelStick: https://github.com/forkineye/ESPixelStick
-.. _WLED: https://github.com/Aircoookie/WLED
+.. _RML: https://github.com/Aircoookie/RML

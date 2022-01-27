@@ -3,9 +3,9 @@ from json import JSONDecodeError
 
 from aiohttp import web
 
-from ledfx.api import RestEndpoint
-from ledfx.config import save_config
-from ledfx.utils import generate_id
+from wls.api import RestEndpoint
+from wls.config import save_config
+from wls.utils import generate_id
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ class VirtualPresetsEndpoint(RestEndpoint):
         """
         Get presets for active effect of a virtual
         """
-        virtual = self._ledfx.virtuals.get(virtual_id)
+        virtual = self._wls.virtuals.get(virtual_id)
         if virtual is None:
             response = {
                 "status": "failed",
@@ -35,13 +35,13 @@ class VirtualPresetsEndpoint(RestEndpoint):
 
         effect_id = virtual.active_effect.type
 
-        if effect_id in self._ledfx.config["ledfx_presets"].keys():
-            default = self._ledfx.config["ledfx_presets"][effect_id]
+        if effect_id in self._wls.config["wls_presets"].keys():
+            default = self._wls.config["wls_presets"][effect_id]
         else:
             default = {}
 
-        if effect_id in self._ledfx.config["user_presets"].keys():
-            custom = self._ledfx.config["user_presets"][effect_id]
+        if effect_id in self._wls.config["user_presets"].keys():
+            custom = self._wls.config["user_presets"][effect_id]
         else:
             custom = {}
 
@@ -57,7 +57,7 @@ class VirtualPresetsEndpoint(RestEndpoint):
 
     async def put(self, virtual_id, request) -> web.Response:
         """Set active effect of virtual to a preset"""
-        virtual = self._ledfx.virtuals.get(virtual_id)
+        virtual = self._wls.virtuals.get(virtual_id)
         if virtual is None:
             response = {
                 "status": "failed",
@@ -87,12 +87,12 @@ class VirtualPresetsEndpoint(RestEndpoint):
         if category not in ["default_presets", "custom_presets"]:
             response = {
                 "status": "failed",
-                "reason": f'Category {category} is not "ledfx_presets" or "user_presets"',
+                "reason": f'Category {category} is not "wls_presets" or "user_presets"',
             }
             return web.json_response(data=response, status=400)
 
         if category == "default_presets":
-            category = "ledfx_presets"
+            category = "wls_presets"
         else:
             category = "user_presets"
 
@@ -103,7 +103,7 @@ class VirtualPresetsEndpoint(RestEndpoint):
             }
             return web.json_response(data=response, status=400)
 
-        if effect_id not in self._ledfx.config[category].keys():
+        if effect_id not in self._wls.config[category].keys():
             response = {
                 "status": "failed",
                 "reason": f"Effect {effect_id} does not exist in category {category}",
@@ -117,7 +117,7 @@ class VirtualPresetsEndpoint(RestEndpoint):
             }
             return web.json_response(data=response, status=400)
 
-        if preset_id not in self._ledfx.config[category][effect_id].keys():
+        if preset_id not in self._wls.config[category][effect_id].keys():
             response = {
                 "status": "failed",
                 "reason": "Preset {} does not exist for effect {} in category {}".format(
@@ -127,11 +127,11 @@ class VirtualPresetsEndpoint(RestEndpoint):
             return web.json_response(data=response, status=400)
 
         # Create the effect and add it to the virtual
-        effect_config = self._ledfx.config[category][effect_id][preset_id][
+        effect_config = self._wls.config[category][effect_id][preset_id][
             "config"
         ]
-        effect = self._ledfx.effects.create(
-            ledfx=self._ledfx, type=effect_id, config=effect_config
+        effect = self._wls.effects.create(
+            wls=self._wls, type=effect_id, config=effect_config
         )
         try:
             virtual.set_effect(effect)
@@ -143,7 +143,7 @@ class VirtualPresetsEndpoint(RestEndpoint):
             return web.json_response(data=response, status=202)
 
         # Update and save the configuration
-        for virtual in self._ledfx.config["virtuals"]:
+        for virtual in self._wls.config["virtuals"]:
             if virtual["id"] == virtual_id:
                 # if not ('effect' in virtual):
                 virtual["effect"] = {}
@@ -151,8 +151,8 @@ class VirtualPresetsEndpoint(RestEndpoint):
                 virtual["effect"]["config"] = effect_config
                 break
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
         effect_response = {}
@@ -165,7 +165,7 @@ class VirtualPresetsEndpoint(RestEndpoint):
 
     async def post(self, virtual_id, request) -> web.Response:
         """save configuration of active virtual effect as a custom preset"""
-        virtual = self._ledfx.virtuals.get(virtual_id)
+        virtual = self._wls.virtuals.get(virtual_id)
         if virtual is None:
             response = {
                 "status": "failed",
@@ -200,21 +200,21 @@ class VirtualPresetsEndpoint(RestEndpoint):
         effect_id = virtual.active_effect.type
 
         # If no presets for the effect, create a dict to store them
-        if effect_id not in self._ledfx.config["user_presets"].keys():
-            self._ledfx.config["user_presets"][effect_id] = {}
+        if effect_id not in self._wls.config["user_presets"].keys():
+            self._wls.config["user_presets"][effect_id] = {}
 
         # Update the preset if it already exists, else create it
-        self._ledfx.config["user_presets"][effect_id][preset_id] = {}
-        self._ledfx.config["user_presets"][effect_id][preset_id][
+        self._wls.config["user_presets"][effect_id][preset_id] = {}
+        self._wls.config["user_presets"][effect_id][preset_id][
             "name"
         ] = preset_name
-        self._ledfx.config["user_presets"][effect_id][preset_id][
+        self._wls.config["user_presets"][effect_id][preset_id][
             "config"
         ] = virtual.active_effect.config
 
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
         response = {
@@ -229,7 +229,7 @@ class VirtualPresetsEndpoint(RestEndpoint):
 
     async def delete(self, virtual_id) -> web.Response:
         """clear effect of a virtual"""
-        virtual = self._ledfx.virtuals.get(virtual_id)
+        virtual = self._wls.virtuals.get(virtual_id)
         if virtual is None:
             response = {
                 "status": "failed",
@@ -240,14 +240,14 @@ class VirtualPresetsEndpoint(RestEndpoint):
         # Clear the effect
         virtual.clear_effect()
 
-        for virtual in self._ledfx.config["virtuals"]:
+        for virtual in self._wls.config["virtuals"]:
             if virtual["id"] == virtual_id:
                 if "effect" in virtual:
                     del virtual["effect"]
                     break
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
         response = {"status": "success", "effect": {}}

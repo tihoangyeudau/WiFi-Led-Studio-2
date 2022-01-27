@@ -1,5 +1,5 @@
-# from ledfx.utils import RegistryLoader, async_fire_and_forget, async_fire_and_return, async_callback
-# from ledfx.events import Event
+# from wls.utils import RegistryLoader, async_fire_and_forget, async_fire_and_return, async_callback
+# from wls.events import Event
 # import importlib
 # import pkgutil
 import logging
@@ -8,7 +8,7 @@ import logging
 # import asyncio
 import voluptuous as vol
 
-from ledfx.integrations import Integration
+from wls.integrations import Integration
 
 # import numpy as np
 
@@ -41,10 +41,10 @@ class Spotify(Integration):
         }
     )
 
-    def __init__(self, ledfx, config, active, data):
-        super().__init__(ledfx, config, active, data)
+    def __init__(self, wls, config, active, data):
+        super().__init__(wls, config, active, data)
 
-        self._ledfx = ledfx
+        self._wls = wls
         self._config = config
         self._data = {}
 

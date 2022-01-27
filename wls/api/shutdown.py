@@ -4,7 +4,7 @@ from json import JSONDecodeError
 
 from aiohttp import web
 
-from ledfx.api import RestEndpoint
+from wls.api import RestEndpoint
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -53,4 +53,4 @@ class InfoEndpoint(RestEndpoint):
             return web.json_response(data={"status": "success"}, status=200)
         finally:
             await asyncio.sleep(timeout)
-            self._ledfx.stop(self.exit_codes[action])
+            self._wls.stop(self.exit_codes[action])

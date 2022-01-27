@@ -36,12 +36,12 @@ class ErrorBoundary extends React.Component {
                 <p> Refresh page after cleaing data... </p>
                 <button style={{ height: 40, borderRadius: 10, border: '1px solid #999', color: '#fff', backgroundColor: '#600000', cursor: 'pointer'}} onClick={() => {
                     window.localStorage.removeItem('undefined')
-                    window.localStorage.removeItem('ledfx-host')
-                    window.localStorage.removeItem('ledfx-hosts')
-                    window.localStorage.removeItem('ledfx-frontend')
-                    window.localStorage.removeItem('ledfx-cloud-role')
-                    window.localStorage.removeItem('ledfx-cloud-userid')
-                    window.localStorage.removeItem('ledfx-theme')
+                    window.localStorage.removeItem('wls-host')
+                    window.localStorage.removeItem('wls-hosts')
+                    window.localStorage.removeItem('wls-frontend')
+                    window.localStorage.removeItem('wls-cloud-role')
+                    window.localStorage.removeItem('wls-cloud-userid')
+                    window.localStorage.removeItem('wls-theme')
                     window.localStorage.removeItem('jwt')
                     window.localStorage.removeItem('username')
                     window.localStorage.removeItem('BladeMod')

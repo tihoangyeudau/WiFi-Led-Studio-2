@@ -28,7 +28,7 @@ const LeftBar = () => {
         <div className={classes.logoImage}>
           <img src={logoAsset} alt="logo" className={classes.img} />
         </div>
-        LedFx
+        Wls
       </a>}
       <div className={classes.devbadge} onClick={() => window.localStorage.setItem('BladeMod', 0)} />
     </div>

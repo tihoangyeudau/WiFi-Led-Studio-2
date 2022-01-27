@@ -61,7 +61,7 @@ function createWindow(args) {
     return win
 }
 
-const NOTIFICATION_TITLE = 'LedFx Client - by Blade'
+const NOTIFICATION_TITLE = 'Wls Client - by Blade'
 const NOTIFICATION_BODY = 'Testing Notification from the Main process'
 
 function showNotification() {
@@ -79,12 +79,12 @@ var wind
 app.whenReady().then(async () => {
     nativeTheme.themeSource = 'dark';
     const thePath = process.env.PORTABLE_EXECUTABLE_DIR || path.resolve('.')
-    const ledfxCores = fs.readdirSync(thePath).filter(o => (o.length - o.indexOf('--win-portable.exe') === 18) && o.indexOf('LedFx_core') === 0)
-    const ledfxCore = ledfxCores && ledfxCores.length && ledfxCores.length > 0 && ledfxCores[ledfxCores.length - 1]
-    const integratedCore = ledfxCore && fs.existsSync(`${thePath}/${ledfxCore}`)
+    const wlsCores = fs.readdirSync(thePath).filter(o => (o.length - o.indexOf('--win-portable.exe') === 18) && o.indexOf('Wls_core') === 0)
+    const wlsCore = wlsCores && wlsCores.length && wlsCores.length > 0 && wlsCores[wlsCores.length - 1]
+    const integratedCore = wlsCore && fs.existsSync(`${thePath}/${wlsCore}`)
 
     if (integratedCore) {
-        subpy = require("child_process").spawn(`./${ledfxCore}`, ["-p", "8888"]);
+        subpy = require("child_process").spawn(`./${wlsCore}`, ["-p", "8888"]);
     }
     wind = (integratedCore) ? createWindow({additionalArguments: ["integratedCore"]}) : createWindow();
     // require('@treverix/remote/main').initialize()
@@ -107,9 +107,9 @@ app.whenReady().then(async () => {
             { label: 'seperator', type: 'separator' },
             { label: 'Dev', click: () => wind.webContents.openDevTools() },
             { label: 'seperator', type: 'separator' },
-            { label: 'Start core', click: () => subpy = require("child_process").spawn(`./${ledfxCore}`, []) },
+            { label: 'Start core', click: () => subpy = require("child_process").spawn(`./${wlsCore}`, []) },
             { label: 'Stop core', click: () => wind.webContents.send('fromMain', 'shutdown') },
-            // { label: 'Download core', click: () =>  download(wind, `https://github.com/YeonV/LedFx-Frontend-v2/releases/latest/download/LedFx_core-${app.getVersion().split('-')[1]}--win-portable.exe`, { directory: thePath, overwrite: true }).then((f) => { app.relaunch(); app.exit() }) },
+            // { label: 'Download core', click: () =>  download(wind, `https://github.com/YeonV/Wls-Frontend-v2/releases/latest/download/Wls_core-${app.getVersion().split('-')[1]}--win-portable.exe`, { directory: thePath, overwrite: true }).then((f) => { app.relaunch(); app.exit() }) },
             { label: 'Restart Client', click: () => { app.relaunch(); app.exit() }},
             { label: 'Open folder', click: () => shell.openPath(thePath) },
             { label: 'seperator', type: 'separator' },
@@ -125,14 +125,14 @@ app.whenReady().then(async () => {
             { label: 'Dev', click: () => wind.webContents.openDevTools() },
             { label: 'seperator', type: 'separator' },
             { label: 'Stop core', click: () => wind.webContents.send('fromMain', 'shutdown') },
-            // { label: 'Download core', click: () => download(wind, `https://github.com/YeonV/LedFx-Frontend-v2/releases/latest/download/LedFx_core-${app.getVersion().split('-')[1]}--win-portable.exe`, { directory: thePath, overwrite: true, onProgress: (obj)=>{wind.webContents.send('fromMain', ['download-progress', obj])} }).then((f) => { wind.webContents.send('fromMain', 'clear-frontend'); app.relaunch(); app.exit() })},
+            // { label: 'Download core', click: () => download(wind, `https://github.com/YeonV/Wls-Frontend-v2/releases/latest/download/Wls_core-${app.getVersion().split('-')[1]}--win-portable.exe`, { directory: thePath, overwrite: true, onProgress: (obj)=>{wind.webContents.send('fromMain', ['download-progress', obj])} }).then((f) => { wind.webContents.send('fromMain', 'clear-frontend'); app.relaunch(); app.exit() })},
             { label: 'Restart Client', click: () => {app.relaunch(); app.exit() }},
             { label: 'Open folder', click: () => shell.openPath(thePath) },
             { label: 'seperator', type: 'separator' },
             { label: 'Exit', click: () => app.quit() }
         ])
     }
-    tray.setToolTip(`LedFx Client${isDev ? ' DEV' : ''}`)
+    tray.setToolTip(`Wls Client${isDev ? ' DEV' : ''}`)
     tray.setContextMenu(contextMenu)
     tray.setIgnoreDoubleClickEvents(true)
     tray.on('click', (e) => wind.show())
@@ -140,15 +140,15 @@ app.whenReady().then(async () => {
     ipcMain.on("toMain", (event, parameters) => {
         console.log(parameters)
         if (parameters === 'start-core') {
-            console.log("Starting Core", ledfxCore)
+            console.log("Starting Core", wlsCore)
             if (integratedCore) {
-                subpy = require("child_process").spawn(`./${ledfxCore}`, [])
+                subpy = require("child_process").spawn(`./${wlsCore}`, [])
             }
             return
         }
         if (parameters === 'open-config') {
             console.log("Open Config")
-            shell.showItemInFolder(path.join(app.getPath('appData'), '/.ledfx/config.json'))
+            shell.showItemInFolder(path.join(app.getPath('appData'), '/.wls/config.json'))
             return
         }
         if (parameters === 'restart-client') {
@@ -157,7 +157,7 @@ app.whenReady().then(async () => {
             return
         }
         if (parameters === 'download-core') {
-            download(wind, `https://github.com/YeonV/LedFx-Frontend-v2/releases/latest/download/LedFx_core-${app.getVersion().split('-')[1]}--win-portable.exe`, { directory: thePath, overwrite: true, onProgress: (obj)=>{wind.webContents.send('fromMain', ['download-progress', obj])} }).then((f) => { wind.webContents.send('fromMain', 'clear-frontend'); app.relaunch(); app.exit() })
+            download(wind, `https://github.com/YeonV/Wls-Frontend-v2/releases/latest/download/Wls_core-${app.getVersion().split('-')[1]}--win-portable.exe`, { directory: thePath, overwrite: true, onProgress: (obj)=>{wind.webContents.send('fromMain', ['download-progress', obj])} }).then((f) => { wind.webContents.send('fromMain', 'clear-frontend'); app.relaunch(); app.exit() })
             return
         }
     });

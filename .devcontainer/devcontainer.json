@@ -13,7 +13,7 @@
       "INSTALL_NODE": "true",
       "NODE_VERSION": "lts/*",
       // User Options
-      // "USERNAME": "ledfx"
+      // "USERNAME": "wls"
     }
   },
   "runArgs": [
@@ -21,12 +21,12 @@
     "host",
   ],
   "mounts": [
-    "source=${localWorkspaceFolder}/.devcontainer/ledfx-config.yml,target=/root/.ledfx/config.json,type=bind,consistency=cached"
+    "source=${localWorkspaceFolder}/.devcontainer/wls-config.yml,target=/root/.wls/config.json,type=bind,consistency=cached"
   ],
   // Set *default* container specific settings.json values on container create.
   "settings": {
     "terminal.integrated.shell.linux": "/bin/bash",
-    "python.pythonPath": "/ledfx/venv/bin/python",
+    "python.pythonPath": "/wls/venv/bin/python",
     "python.languageServer": "Pylance",
     "python.linting.enabled": true,
     "python.formatting.provider": "black",
@@ -39,7 +39,7 @@
     "restructuredtext.linter.name": "rstcheck",
     "restructuredtext.preview.fontSize": 12,
     "restructuredtext.preview.lineHeight": 1,
-    "restructuredtext.sphinxBuildPath": "/ledfx/venv/bin/sphinx-build",
+    "restructuredtext.sphinxBuildPath": "/wls/venv/bin/sphinx-build",
     "editor.insertSpaces": true,
     "editor.tabSize": 2,
     "[javascript]": {
@@ -73,10 +73,10 @@
     3001,
     3000
   ],
-  // "postCreateCommand": "sudo chown ledfx docs/_build; sudo chown ledfx docs/node_modules; sudo chown ledfx frontend/node_modules",
+  // "postCreateCommand": "sudo chown wls docs/_build; sudo chown wls docs/node_modules; sudo chown wls frontend/node_modules",
   // Use 'postCreateCommand' to run commands after the container is created.
   // "postCreateCommand": "pip3 install --user -r requirements.txt; pip install -e .",
   // "postCreateCommand": "cd frontend; yarn: yarn install",
   // Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
-  //"remoteUser": "ledfx"
+  //"remoteUser": "wls"
 }

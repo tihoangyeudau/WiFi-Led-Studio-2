@@ -69,14 +69,14 @@ export default function CloudScreen({
 
     const handleCloudPresets = async (p, save) => {
         setActiveCloudPreset(p.Name.toLowerCase())        
-        if (p.effect.ledfx_id !== effectType) {
-            await setVirtualEffect(virtId, { type: p.effect.ledfx_id })
+        if (p.effect.wls_id !== effectType) {
+            await setVirtualEffect(virtId, { type: p.effect.wls_id })
             await getVirtuals();
         }
-        await setVirtualEffect(virtId, { virtId: virtId, type: p.effect.ledfx_id, config: p.config, active: true })
+        await setVirtualEffect(virtId, { virtId: virtId, type: p.effect.wls_id, config: p.config, active: true })
         if (save) {
             await addPreset(virtId, p.Name)
-            await getPresets(p.effect.ledfx_id)
+            await getPresets(p.effect.wls_id)
         }
         await getVirtuals()
     }
@@ -116,7 +116,7 @@ export default function CloudScreen({
                             back
                         </Button>
                         <Typography variant="h6" className={classes.title}>
-                            LedFx Cloud
+                            Wls Cloud
                         </Typography>
                     </Toolbar>
                 </AppBar>

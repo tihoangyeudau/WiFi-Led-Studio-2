@@ -37,6 +37,6 @@ The available tasks are:
 
 Task | Description
 -- | --
-Run LedFx in devmode on port 8888 | Backend
-Run Ledfx Frontend in devmode on port 3000 | Frontend
+Run Wls in devmode on port 8888 | Backend
+Run Wls Frontend in devmode on port 3000 | Frontend
 

@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 """
-Entry point for the ledfx controller. To run this script for development
+Entry point for the wls controller. To run this script for development
 purposes use:
 
     [console_scripts]
     python setup.py develop
-    ledfx
+    wls
 
 For non-development purposes run:
 
     [console_scripts]
     python setup.py install
-    ledfx
+    wls
 
 """
 
@@ -26,15 +26,15 @@ import psutil
 import yappi
 from pyupdater.client import Client
 
-import ledfx.config as config_helpers
-from ledfx.consts import (
+import wls.config as config_helpers
+from wls.consts import (
     PROJECT_NAME,
     PROJECT_VERSION,
     REQUIRED_PYTHON_STRING,
     REQUIRED_PYTHON_VERSION,
 )
-from ledfx.core import LedFxCore
-from ledfx.utils import currently_frozen
+from wls.core import WlsCore
+from wls.utils import currently_frozen
 
 # Logger Variables
 PYUPDATERLOGLEVEL = 35
@@ -132,7 +132,7 @@ def parse_args():
     parser.add_argument(
         "--version",
         action="version",
-        version=f"ledfx {PROJECT_VERSION}",
+        version=f"wls {PROJECT_VERSION}",
     )
     parser.add_argument(
         "-c",
@@ -183,7 +183,7 @@ def parse_args():
     parser.add_argument(
         "--host",
         dest="host",
-        help="The address to host LedFx web interface",
+        help="The address to host Wls web interface",
         default=None,
         type=str,
     )
@@ -191,13 +191,13 @@ def parse_args():
         "--tray",
         dest="tray",
         action="store_true",
-        help="Hide LedFx console to the system tray",
+        help="Hide Wls console to the system tray",
     )
     parser.add_argument(
         "--performance",
         dest="performance",
         action="store_true",
-        help="Profile LedFx's performance. A developer can use this to diagnose performance issues.",
+        help="Profile Wls's performance. A developer can use this to diagnose performance issues.",
     )
     parser.add_argument(
         "--offline",
@@ -209,14 +209,14 @@ def parse_args():
         "--sentry-crash-test",
         dest="sentry_test",
         action="store_true",
-        help="This crashes LedFx to test the sentry crash logger",
+        help="This crashes Wls to test the sentry crash logger",
     )
     return parser.parse_args()
 
 
 def installed_via_pip():
 
-    """Check to see if LedFx is installed via pip
+    """Check to see if Wls is installed via pip
     Returns:
         boolean
     """
@@ -226,13 +226,13 @@ def installed_via_pip():
     installed_packages = [
         r.decode().split("==")[0] for r in pip_package_command.split()
     ]
-    if "ledfx" in installed_packages:
+    if "wls" in installed_packages:
         return True
     else:
         return False
 
 
-def update_ledfx(icon=None):
+def update_wls(icon=None):
     # initialize & refresh in one update, check client
 
     def notify(msg):
@@ -254,30 +254,30 @@ def update_ledfx(icon=None):
     class ClientConfig:
         PUBLIC_KEY = "Txce3TE9BUixsBtqzDba6V5vBYltt/0pw5oKL8ueCDg"
         APP_NAME = PROJECT_NAME
-        COMPANY_NAME = "LedFx Developers"
+        COMPANY_NAME = "Wls Developers"
         HTTP_TIMEOUT = 5
         MAX_DOWNLOAD_RETRIES = 2
-        UPDATE_URLS = ["https://ledfx.app/downloads/"]
+        UPDATE_URLS = ["https://wls.app/downloads/"]
 
     client = Client(ClientConfig(), refresh=True)
     _LOGGER.log(PYUPDATERLOGLEVEL, "Checking for updates...")
     # First we check for updates.
     # If an update is found, an update object will be returned
     # If no updates are available, None will be returned
-    ledfx_update = client.update_check(PROJECT_NAME, PROJECT_VERSION)
+    wls_update = client.update_check(PROJECT_NAME, PROJECT_VERSION)
 
     # Download the update
-    if ledfx_update is not None:
+    if wls_update is not None:
         client.add_progress_hook(log_status_info)
         _LOGGER.log(PYUPDATERLOGLEVEL, "Update found!")
         notify(
-            "Downloading update, please wait... LedFx will restart when complete."
+            "Downloading update, please wait... Wls will restart when complete."
         )
-        ledfx_update.download()
+        wls_update.download()
         # Install and restart
-        if ledfx_update.is_downloaded():
-            notify("Download complete. Restarting LedFx...")
-            ledfx_update.extract_restart()
+        if wls_update.is_downloaded():
+            notify("Download complete. Restarting Wls...")
+            wls_update.extract_restart()
         else:
             notify("Unable to download update.")
     else:
@@ -323,11 +323,11 @@ def main():
                 "Offline Mode Enabled - Please check for updates regularly."
             )
         else:
-            import ledfx.sentry_config  # noqa: F401
+            import wls.sentry_config  # noqa: F401
 
     if args.sentry_test:
-        """This will crash LedFx and submit a Sentry error if Sentry is configured"""
-        _LOGGER.warning("Steering LedFx into a brick wall")
+        """This will crash Wls and submit a Sentry error if Sentry is configured"""
+        _LOGGER.warning("Steering Wls into a brick wall")
         div_by_zero = 1 / 0
 
     if args.tray or currently_frozen():
@@ -351,14 +351,14 @@ def main():
                 current_directory, "..", "icons/" "tray.png"
             )
         icon = pystray.Icon(
-            "LedFx", icon=Image.open(icon_location), title="LedFx"
+            "Wls", icon=Image.open(icon_location), title="Wls"
         )
         icon.visible = True
     else:
         icon = None
 
     if not args.offline_mode and currently_frozen():
-        update_ledfx(icon)
+        update_wls(icon)
 
     if icon:
         icon.run(setup=entry_point)
@@ -372,13 +372,13 @@ def entry_point(icon=None):
 
     exit_code = 4
     while exit_code == 4:
-        _LOGGER.info("LedFx Core is initializing")
+        _LOGGER.info("Wls Core is initializing")
 
         if args.performance:
             print("Collecting performance data...")
             yappi.start()
 
-        ledfx = LedFxCore(
+        wls = WlsCore(
             config_dir=args.config,
             host=args.host,
             port=args.port,
@@ -386,7 +386,7 @@ def entry_point(icon=None):
             icon=icon,
         )
 
-        exit_code = ledfx.start(open_ui=args.open_ui)
+        exit_code = wls.start(open_ui=args.open_ui)
 
         if args.performance:
             print("Finished collecting performance data")
@@ -401,7 +401,7 @@ def entry_point(icon=None):
                 f"Saved performance data to config directory      : {filename}"
             )
             print(
-                "Please send the performance data to a developer : https://ledfx.app/contact/"
+                "Please send the performance data to a developer : https://wls.app/contact/"
             )
 
     if icon:

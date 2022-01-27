@@ -3,7 +3,7 @@ import useStore from '../../utils/apiStore';
 import { Accordion, AccordionSummary, Typography, AccordionDetails } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import AudioCard from './AudioCard';
-import WledCard from './WledCard';
+import RmlCard from './RmlCard';
 import Webaudio from './Webaudio';
 import ClientAudioCard from './ClientAudioCard';
 import { useStyles } from './SettingsComponents'
@@ -77,18 +77,18 @@ const Settings = () => {
           </AccordionDetails>
         </Accordion>
 
-        {features['wled'] &&
+        {features['rml'] &&
           <Accordion expanded={settingsExpanded === 'all' || settingsExpanded === 'panel4'} onChange={(event, isExpanded)=>handleExpanded('panel4', event, isExpanded)}>
             <AccordionSummary
               expandIcon={<ExpandMore />}
               aria-controls="panel4a-content"
               id="panel4a-header"
             >
-              <Typography>WLED Settings</Typography>
+              <Typography>RML Settings</Typography>
             </AccordionSummary>
             <AccordionDetails>
               <div>
-                <WledCard className={`${classes.card} step-settings-five`} />
+                <RmlCard className={`${classes.card} step-settings-five`} />
               </div>
             </AccordionDetails>
           </Accordion>}

@@ -1,9 +1,9 @@
 import numpy as np
 import voluptuous as vol
 
-from ledfx.color import parse_color, validate_color
-from ledfx.effects.modulate import ModulateEffect
-from ledfx.effects.temporal import TemporalEffect
+from wls.color import parse_color, validate_color
+from wls.effects.modulate import ModulateEffect
+from wls.effects.temporal import TemporalEffect
 
 
 class SingleColorEffect(TemporalEffect, ModulateEffect):

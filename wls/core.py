@@ -6,42 +6,42 @@ import warnings
 import webbrowser
 from concurrent.futures import ThreadPoolExecutor
 
-from ledfx.color import (
-    LEDFX_COLORS,
-    LEDFX_GRADIENTS,
+from wls.color import (
+    WLS_COLORS,
+    WLS_GRADIENTS,
     parse_color,
     parse_gradient,
     validate_color,
     validate_gradient,
 )
-from ledfx.config import get_ssl_certs, load_config, save_config
-from ledfx.devices import Devices
-from ledfx.effects import Effects
-from ledfx.effects.math import interpolate_pixels
-from ledfx.events import (
+from wls.config import get_ssl_certs, load_config, save_config
+from wls.devices import Devices
+from wls.effects import Effects
+from wls.effects.math import interpolate_pixels
+from wls.events import (
     Event,
     Events,
-    LedFxShutdownEvent,
+    WlsShutdownEvent,
     VisualisationUpdateEvent,
 )
-from ledfx.http_manager import HttpServer
-from ledfx.integrations import Integrations
-from ledfx.presets import ledfx_presets
-from ledfx.scenes import Scenes
-from ledfx.utils import (
+from wls.http_manager import HttpServer
+from wls.integrations import Integrations
+from wls.presets import wls_presets
+from wls.scenes import Scenes
+from wls.utils import (
     RollingQueueHandler,
     UserDefaultCollection,
     async_fire_and_forget,
     currently_frozen,
 )
-from ledfx.virtuals import Virtuals
+from wls.virtuals import Virtuals
 
 _LOGGER = logging.getLogger(__name__)
 if currently_frozen():
     warnings.filterwarnings("ignore")
 
 
-class LedFxCore:
+class WlsCore:
     def __init__(
         self,
         config_dir,
@@ -53,7 +53,7 @@ class LedFxCore:
         self.icon = icon
         self.config_dir = config_dir
         self.config = load_config(config_dir)
-        self.config["ledfx_presets"] = ledfx_presets
+        self.config["wls_presets"] = wls_presets
         self.host = host if host else self.config["host"]
         self.port = port if port else self.config["port"]
         self.port_s = port_s if port_s else self.config["port_s"]
@@ -83,7 +83,7 @@ class LedFxCore:
         self.events = Events(self)
         self.setup_visualisation_events()
         self.http = HttpServer(
-            ledfx=self, host=self.host, port=self.port, port_s=self.port_s
+            wls=self, host=self.host, port=self.port, port_s=self.port_s
         )
         self.exit_code = None
 
@@ -116,7 +116,7 @@ class LedFxCore:
             webbrowser.get().open(url)
         except webbrowser.Error:
             _LOGGER.warning(
-                f"Failed to open default web browser. To access LedFx's web ui, open {url} in your browser. To prevent this error in future, configure a default browser for your system."
+                f"Failed to open default web browser. To access Wls's web ui, open {url} in your browser. To prevent this error in future, configure a default browser for your system."
             )
 
     def setup_icon_menu(self):
@@ -124,7 +124,7 @@ class LedFxCore:
 
         self.icon.menu = pystray.Menu(
             pystray.MenuItem("Open", self.open_ui, default=True),
-            pystray.MenuItem("Quit Ledfx", self.stop),
+            pystray.MenuItem("Quit Wls", self.stop),
         )
 
     def setup_visualisation_events(self):
@@ -175,7 +175,7 @@ class LedFxCore:
 
     def setup_logqueue(self):
         def log_filter(record):
-            return (record.name != "ledfx.api.log") and (record.levelno >= 20)
+            return (record.name != "wls.api.log") and (record.levelno >= 20)
 
         self.logqueue = asyncio.Queue(maxsize=100)
         logqueue_handler = RollingQueueHandler(self.logqueue)
@@ -210,7 +210,7 @@ class LedFxCore:
         except BaseException:
             # Catch all other exceptions and terminate the application. The loop
             # exception handler will take care of logging the actual error and
-            # LedFx will cleanly shutdown.
+            # Wls will cleanly shutdown.
             self.loop.run_until_complete(self.async_stop(exit_code=1))
             pass
         finally:
@@ -219,7 +219,7 @@ class LedFxCore:
         return self.exit_code
 
     async def async_start(self, open_ui=False):
-        _LOGGER.info("Starting LedFx")
+        _LOGGER.info("Starting Wls")
         await self.http.start(get_ssl_certs(config_dir=self.config_dir))
         if self.icon is not None and self.icon.HAS_NOTIFICATION:
             self.icon.notify(
@@ -233,7 +233,7 @@ class LedFxCore:
         self.colors = UserDefaultCollection(
             self,
             "Colors",
-            LEDFX_COLORS,
+            WLS_COLORS,
             "user_colors",
             validate_color,
             parse_color,
@@ -241,7 +241,7 @@ class LedFxCore:
         self.gradients = UserDefaultCollection(
             self,
             "Gradients",
-            LEDFX_GRADIENTS,
+            WLS_GRADIENTS,
             "user_gradients",
             validate_gradient,
             parse_gradient,
@@ -251,17 +251,17 @@ class LedFxCore:
         self.devices.create_from_config(self.config["devices"])
         await self.devices.async_initialize_devices()
 
-        # sync_mode = WLED_CONFIG_SCHEMA(self.config["wled_preferences"])[
-        #     "wled_preferred_mode"
+        # sync_mode = RML_CONFIG_SCHEMA(self.config["rml_preferences"])[
+        #     "rml_preferred_mode"
         # ]
         # if sync_mode:
-        #     await self.devices.set_wleds_sync_mode(sync_mode)
+        #     await self.devices.set_rmls_sync_mode(sync_mode)
 
         self.virtuals.create_from_config(self.config["virtuals"])
         self.integrations.create_from_config(self.config["integrations"])
 
         if self.config["scan_on_startup"]:
-            async_fire_and_forget(self.devices.find_wled_devices(), self.loop)
+            async_fire_and_forget(self.devices.find_rml_devices(), self.loop)
 
         async_fire_and_forget(
             self.integrations.activate_integrations(), self.loop
@@ -279,24 +279,24 @@ class LedFxCore:
         if not self.loop:
             return
 
-        print("Stopping LedFx.")
+        print("Stopping Wls.")
 
         # 1 = Error
         # 2 = Direct User Input
         # 3 = API Request (shutdown)
-        # 4 = Restart (stop then restart ledfx core)
+        # 4 = Restart (stop then restart wls core)
 
         if exit_code == 1:
-            _LOGGER.info("LedFx encountered an error. Shutting Down.")
+            _LOGGER.info("Wls encountered an error. Shutting Down.")
         if exit_code == 2:
-            _LOGGER.info("LedFx Keyboard Interrupt. Shutting Down.")
+            _LOGGER.info("Wls Keyboard Interrupt. Shutting Down.")
         if exit_code == 3:
-            _LOGGER.info("LedFx Shutdown Request via API. Shutting Down.")
+            _LOGGER.info("Wls Shutdown Request via API. Shutting Down.")
         if exit_code == 4:
-            _LOGGER.info("LedFx is restarting.")
+            _LOGGER.info("Wls is restarting.")
 
         # Fire a shutdown event and flush the loop
-        self.events.fire_event(LedFxShutdownEvent())
+        self.events.fire_event(WlsShutdownEvent())
         await asyncio.sleep(0)
 
         _LOGGER.info("Stopping HttpServer...")

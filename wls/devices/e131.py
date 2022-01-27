@@ -4,7 +4,7 @@ import numpy as np
 import sacn
 import voluptuous as vol
 
-from ledfx.devices import NetworkedDevice
+from wls.devices import NetworkedDevice
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -42,8 +42,8 @@ class E131Device(NetworkedDevice):
         }
     )
 
-    def __init__(self, ledfx, config):
-        super().__init__(ledfx, config)
+    def __init__(self, wls, config):
+        super().__init__(wls, config)
         # Since RGBW data is 4 packets, we can use 512 for RGBW LEDs; 512/4 = 128
         # The 129th pixels data will span into the next universe correctly
         # If it's not, we lose nothing by using a smaller universe size and keeping things easy for the end user (and us!)

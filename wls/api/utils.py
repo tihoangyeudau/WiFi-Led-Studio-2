@@ -3,9 +3,9 @@ import collections
 
 import voluptuous as vol
 
-from ledfx.config import _default_wled_settings
-from ledfx.effects.audio import AudioInputSource
-from ledfx.utils import AVAILABLE_FPS, generate_title
+from wls.config import _default_rml_settings
+from wls.effects.audio import AudioInputSource
+from wls.utils import AVAILABLE_FPS, generate_title
 
 TYPES_MAP = {
     int: "integer",
@@ -25,7 +25,7 @@ PERMITTED_KEYS = {
         "max_frequencies",
         "min_frequency",
     ),
-    "wled_preferences": tuple(_default_wled_settings.keys()),
+    "rml_preferences": tuple(_default_rml_settings.keys()),
     "core": (
         "host",
         "port",

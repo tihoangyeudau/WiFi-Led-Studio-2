@@ -1,31 +1,31 @@
 =====================================================
-   Welcome to LedFx ✨ *-Making music come alive!*
+   Welcome to Wls ✨ *-Making music come alive!*
 =====================================================
 |Build Status| |License| |Build Status Docs| |Discord|
 |Contributor Covenant|
 
 .. image:: https://i.imgur.com/SFWfhFr.png
 
-LedFx website: https://ledfx.app/
+Wls website: https://wls.app/
 
-What is LedFx?
+What is Wls?
 ----------------
 
-What LedFx offers is the ability to take audio input, and instantaneously processes the audio into realtime light show to multiple LED strips/matrix.
-No need to spend hours on end to program one song to program your LEDs, as LedFx will do this all for you!
+What Wls offers is the ability to take audio input, and instantaneously processes the audio into realtime light show to multiple LED strips/matrix.
+No need to spend hours on end to program one song to program your LEDs, as Wls will do this all for you!
 
-LedFx real-time LED strip music visualization effect controller using is a network based devices (ESP8266/ESP32/Raspberry Pi 4) with support for advanced real-time audio effects! LedFx can control multiple devices and works great with cheap ESP8266/ESP32 nodes allowing for cost effective synchronized effects across your entire house!
+Wls real-time LED strip music visualization effect controller using is a network based devices (ESP8266/ESP32/Raspberry Pi 4) with support for advanced real-time audio effects! Wls can control multiple devices and works great with cheap ESP8266/ESP32 nodes allowing for cost effective synchronized effects across your entire house!
 
 Demos
 -------
 
-We are actively adding and perfecting the effects, but here is a quick demo of LedFx running three different effects synced across three different ESP8266 devices:
+We are actively adding and perfecting the effects, but here is a quick demo of Wls running three different effects synced across three different ESP8266 devices:
 
-.. image:: https://raw.githubusercontent.com/LedFx/LedFx/gh-pages-old/demos/ledfx_demo-small.gif
+.. image:: https://raw.githubusercontent.com/Wls/Wls/gh-pages-old/demos/wls_demo-small.gif
 
 📑 Quick start guide and documentation📖
 ------------------------------------------
-Windows users can use the installer from the LedFx website: https://ledfx.app/download/
+Windows users can use the installer from the Wls website: https://wls.app/download/
 
 Mac and Linux are also supported, though currently do not have installers.
 For detailed installation instructions, see the `installation documentation`_.
@@ -33,7 +33,7 @@ For detailed installation instructions, see the `installation documentation`_.
 😍 Show me how to make one!
 -----------------------------
 
-The below image describes a basic setup - LedFx running on PC, communicating with a WLED Device controlling an LED strip.
+The below image describes a basic setup - Wls running on PC, communicating with a RML Device controlling an LED strip.
 
 .. image:: https://i.imgur.com/vzyHNwG.png
 
@@ -43,10 +43,10 @@ The below image describes a basic setup - LedFx running on PC, communicating wit
 
    * - Component
      - Example
-   * - Computer running LedFx
-     - Windows 10, `LedFx.exe`_
+   * - Computer running Wls
+     - Windows 10, `Wls.exe`_
    * - Networked device controlling LED Strip
-     - ESP8266 NODEMCU v3 running `WLED`_
+     - ESP8266 NODEMCU v3 running `RML`_
    * - Addressable LED strip
      - DC5V WS2812B 5 meters 60LED/m IP67
    * - Power supply for LED Strip and ESP
@@ -55,25 +55,25 @@ The below image describes a basic setup - LedFx running on PC, communicating wit
      - Soldering iron/solder
 
 #. **Build your networked LED Strip.**
-      - For most, this is the difficult step. Don't worry! There's guides here and online, and plenty of people able to help on WLED and LedFx Discord.
-      - Follow the WLED guide to connect the LED strip and ESP together: https://github.com/Aircoookie/WLED/wiki.
-      - Flash WLED to the ESP device: https://github.com/Aircoookie/WLED/wiki/Install-WLED-binary
-      - Ensure all WLED devices are powered on, and connected to your Wi-Fi.
-      - Test you can access the WLED web interface from your PC. If so, then you're good to go!
+      - For most, this is the difficult step. Don't worry! There's guides here and online, and plenty of people able to help on RML and Wls Discord.
+      - Follow the RML guide to connect the LED strip and ESP together: https://github.com/Aircoookie/RML/wiki.
+      - Flash RML to the ESP device: https://github.com/Aircoookie/RML/wiki/Install-RML-binary
+      - Ensure all RML devices are powered on, and connected to your Wi-Fi.
+      - Test you can access the RML web interface from your PC. If so, then you're good to go!
 
-#. **Install LedFx.**
-      - After you have WLED installed on your ESP device, download: `LedFx.exe`_ and install LedFx.
-      - For Mac and Linux, see the `installation documentation`_ or `LedFx Guide`_.
+#. **Install Wls.**
+      - After you have RML installed on your ESP device, download: `Wls.exe`_ and install Wls.
+      - For Mac and Linux, see the `installation documentation`_ or `Wls Guide`_.
 
-#. **Direct computer audio output to LedFx.**
+#. **Direct computer audio output to Wls.**
       - Follow guide, `How to: Enable Stereo Mix in Windows 10`_.
       - Alternatively use `Voicemeeter`_. `Voicemeeter tutorial`_.
-      - More information for `Linux and macOS users here <https://ledfx.readthedocs.io/en/latest/directing_audio.html>`_.
+      - More information for `Linux and macOS users here <https://wls.readthedocs.io/en/latest/directing_audio.html>`_.
       - Play some music in the background.
 
-#. **Start LedFx.**
-      - Your WLED devices should appear in LedFx, automagically configured and ready to go! 🎆🔥
-      - If not, on the left hand side, click on Device Management -> ``Find WLED devices`` button, or ``Add Device`` to add them manually.
+#. **Start Wls.**
+      - Your RML devices should appear in Wls, automagically configured and ready to go! 🎆🔥
+      - If not, on the left hand side, click on Device Management -> ``Find RML devices`` button, or ``Add Device`` to add them manually.
       - If they're still not showing up, make sure they're powered on and properly connected to your WiFi.
 
 #. **Start using effects!**
@@ -81,10 +81,10 @@ The below image describes a basic setup - LedFx running on PC, communicating wit
       - Your lights should now be reacting realtime to your music! Enjoy the show 🌈
 
 
-🧑‍💻 Join the LedFx Community
+🧑‍💻 Join the Wls Community
 ------------------------------
 
-Join the Discord server to discuss everything about LedFx!  |Discord|
+Join the Discord server to discuss everything about Wls!  |Discord|
 
 To join, click on the Discord button below:
 
@@ -94,7 +94,7 @@ To join, click on the Discord button below:
 
 Contributing
 --------------
-Pull requests are welcome. Once tested, contact LedFx developer community on Discord to discuss the next step.
+Pull requests are welcome. Once tested, contact Wls developer community on Discord to discuss the next step.
 We expect and require all contributors to read, understand and follow our code of conduct.
 
 Credits: `Contributors-&-About`_
@@ -105,20 +105,20 @@ License
 
 
 .. _`MIT`: https://choosealicense.com/licenses/mit/
-.. _`LedFx.exe`: https://ledfx.app/download/
-.. _`LedFx Guide`: https://ledfx.readthedocs.io/en/dev/index.html
-.. _`WLED`: https://github.com/Aircoookie/WLED/wiki
-.. _`installation documentation`: https://ledfx.readthedocs.io/en/dev/installing.html
-.. _`Contributors-&-About`: https://ledfx.app/about/
+.. _`Wls.exe`: https://wls.app/download/
+.. _`Wls Guide`: https://wls.readthedocs.io/en/dev/index.html
+.. _`RML`: https://github.com/Aircoookie/RML/wiki
+.. _`installation documentation`: https://wls.readthedocs.io/en/dev/installing.html
+.. _`Contributors-&-About`: https://wls.app/about/
 .. _`How to: Enable Stereo Mix in Windows 10`: https://thegeekpage.com/stereo-mix/
 .. _`Voicemeeter`: https://vb-audio.com/Voicemeeter/index.htm
 .. _`Voicemeeter tutorial`: https://youtu.be/ZXKDzYXS60o?start=27&end=163
 
-.. |Build Status| image:: https://github.com/LedFx/LedFx/actions/workflows/ci-build.yml/badge.svg
-   :target: https://github.com/LedFx/LedFx/actions/workflows/ci-build.yml
+.. |Build Status| image:: https://github.com/Wls/Wls/actions/workflows/ci-build.yml/badge.svg
+   :target: https://github.com/Wls/Wls/actions/workflows/ci-build.yml
    :alt: Build Status
-.. |Build Status Docs| image:: https://readthedocs.org/projects/ledfx/badge/?version=dev
-   :target: https://ledfx.readthedocs.io/
+.. |Build Status Docs| image:: https://readthedocs.org/projects/wls/badge/?version=dev
+   :target: https://wls.readthedocs.io/
    :alt: Documentation Status
 .. |License| image:: https://img.shields.io/badge/license-MIT-blue.svg
    :alt: License

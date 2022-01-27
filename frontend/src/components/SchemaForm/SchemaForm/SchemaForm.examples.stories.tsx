@@ -33,8 +33,8 @@ export default {
 // eslint-disable-next-line
 const Template: ComponentStory<typeof BladeSchemaForm> = (args) => <BladeSchemaForm {...args} />;
 
-export const AddDeviceAdaLight = Template.bind({});
-AddDeviceAdaLight.args = {
+export const AddDeviceAmbilightUSB = Template.bind({});
+AddDeviceAmbilightUSB.args = {
   schema: {
     properties: {
       name: {
@@ -65,7 +65,7 @@ AddDeviceAdaLight.args = {
         type: 'string',
         enum: ['COM1'],
         title: 'Com Port',
-        description: 'COM port for Adalight compatible device',
+        description: 'COM port for AmbilightUSB compatible device',
       },
       baudrate: {
         type: 'integer',
@@ -107,8 +107,8 @@ AddDeviceAdaLight.args = {
   hideToggle: false,
 };
 
-export const AddDeviceWLED = Template.bind({});
-AddDeviceWLED.args = {
+export const AddDeviceRML = Template.bind({});
+AddDeviceRML.args = {
   schema: {
     properties: {
       name: {
@@ -145,7 +145,7 @@ AddDeviceWLED.args = {
         enum: ['UDP', 'DDP', 'E131'],
         title: 'Sync Mode',
         description:
-          'Streaming protocol to WLED device. Recommended: UDP<480px, DDP>480px',
+          'Streaming protocol to RML device. Recommended: UDP<480px, DDP>480px',
         default: 'UDP',
       },
       timeout: {
@@ -153,7 +153,7 @@ AddDeviceWLED.args = {
         minimum: 0,
         maximum: 255,
         title: 'Timeout',
-        description: 'Time between LedFx effect off and WLED effect activate',
+        description: 'Time between Wls effect off and RML effect activate',
         default: 1,
       },
     },
@@ -220,7 +220,7 @@ AddDeviceUDP.args = {
         maximum: 65535,
         title: 'Port',
         description: 'Port for the UDP device',
-        default: 21324,
+        default: 7778,
       },
       udp_packet_type: {
         type: 'string',

@@ -67,7 +67,7 @@ const PresetsCard = ({ virtual, effectType, presets, style }) => {
       }
     })
     const exists = await existing.data
-    const eff = await cloud.get(`effects?ledfx_id=${effectType}`, {
+    const eff = await cloud.get(`effects?wls_id=${effectType}`, {
       headers: {
         Authorization:
           `Bearer ${localStorage.getItem('jwt')}`,
@@ -80,7 +80,7 @@ const PresetsCard = ({ virtual, effectType, presets, style }) => {
         Name: list[preset].name,
         config: virtual.effect.config,
         effect: effId,
-        user: localStorage.getItem('ledfx-cloud-userid')
+        user: localStorage.getItem('wls-cloud-userid')
       }, {
         headers: {
           Authorization:
@@ -92,7 +92,7 @@ const PresetsCard = ({ virtual, effectType, presets, style }) => {
         Name: list[preset].name,
         config: virtual.effect.config,
         effect: effId,
-        user: localStorage.getItem('ledfx-cloud-userid')
+        user: localStorage.getItem('wls-cloud-userid')
       }, {
         headers: {
           Authorization:

@@ -5,7 +5,7 @@ __author__ = "Austin Hodges"
 __copyright__ = "Austin Hodges"
 __license__ = "mit"
 
-PROJECT_NAME = "LedFx"
+PROJECT_NAME = "Wls"
 
 REQUIRED_PYTHON_VERSION = (3, 8, 0)
 REQUIRED_PYTHON_STRING = ">={}.{}.{}".format(

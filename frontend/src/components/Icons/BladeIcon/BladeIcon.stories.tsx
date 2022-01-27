@@ -22,9 +22,9 @@ const Template: ComponentStory<typeof BladeIcon> = (args) => <BladeIcon {...args
 export const Default = Template.bind({});
 Default.args = {};
 
-export const WLED = Template.bind({});
-WLED.args = {
-  name: 'wled',
+export const RML = Template.bind({});
+RML.args = {
+  name: 'rml',
 };
 
 export const MUI = Template.bind({});

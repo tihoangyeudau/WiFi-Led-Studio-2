@@ -8,9 +8,9 @@ import logging
 import aiohttp
 import voluptuous as vol
 
-# from ledfx.events import Event
-from ledfx.integrations import Integration
-from ledfx.utils import async_fire_and_forget, resolve_destination
+# from wls.events import Event
+from wls.integrations import Integration
+from wls.utils import async_fire_and_forget, resolve_destination
 
 # import time
 # import os
@@ -49,10 +49,10 @@ class QLC(Integration):
         }
     )
 
-    def __init__(self, ledfx, config, active, data):
-        super().__init__(ledfx, config, active, data)
+    def __init__(self, wls, config, active, data):
+        super().__init__(wls, config, active, data)
 
-        self._ledfx = ledfx
+        self._wls = wls
         self._config = config
         self._client = None
         self._data = []
@@ -102,7 +102,7 @@ class QLC(Integration):
         # If it doesn't already exist, add it as a new entry to data
         else:
             self.data.append([event_type, event_filter, active, qlc_payload])
-        # Finally, subscribe to the ledfx event if the listener is now active
+        # Finally, subscribe to the wls event if the listener is now active
         if active:
             self._add_listener(event_type, event_filter, qlc_payload)
         _LOGGER.info(
@@ -149,7 +149,7 @@ class QLC(Integration):
         return False  # failed to find event_type with this event_filter
 
     def _remove_listener(self, event_type, event_filter):
-        """Internal function to remove ledfx events listener if it exists"""
+        """Internal function to remove wls events listener if it exists"""
         for idx, entry in enumerate(self._listeners):
             _event_type, _event_filter, listener = entry
             if (_event_type == event_type) and (_event_filter == event_filter):
@@ -167,13 +167,13 @@ class QLC(Integration):
                     f"QLC+ sent payload, triggered by event '{event_type}' with filter {event_filter}"
                 )
                 async_fire_and_forget(
-                    self._send_payload(qlc_payload), loop=self._ledfx.loop
+                    self._send_payload(qlc_payload), loop=self._wls.loop
                 )
 
             return callback
 
         callback = make_callback(qlc_payload)
-        listener = self._ledfx.events.add_listener(
+        listener = self._wls.events.add_listener(
             callback, event_type, event_filter
         )
         # store "listener", a function to remove the listener later if needed
@@ -204,7 +204,7 @@ class QLC(Integration):
 
     async def connect(self):
         resolved_ip = await resolve_destination(
-            self._ledfx.loop, self._config["ip_address"]
+            self._wls.loop, self._config["ip_address"]
         )
         domain = f"{resolved_ip }:{self._config['port']}"
         url = f"http://{domain}/qlcplusWS"
@@ -220,7 +220,7 @@ class QLC(Integration):
         if self._client is not None:
             # fire and forget bc for some reason close() never returns... -o-
             async_fire_and_forget(
-                self._client.disconnect(), loop=self._ledfx.loop
+                self._client.disconnect(), loop=self._wls.loop
             )
             await super().disconnect("Disconnected from QLC+ websocket")
         else:

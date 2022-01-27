@@ -5,26 +5,26 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: LedFx",
+            "name": "Python: Wls",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/ledfx/__main__.py",
+            "program": "${workspaceFolder}/wls/__main__.py",
             "console": "integratedTerminal",
             "justMyCode": false,
             "windows": {
-                "program": "${workspaceFolder}\\ledfx\\__main__.py"
+                "program": "${workspaceFolder}\\wls\\__main__.py"
             }
         },
         {
-            "name": "Python: LedFx Verbose Logging",
+            "name": "Python: Wls Verbose Logging",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/ledfx/__main__.py",
+            "program": "${workspaceFolder}/wls/__main__.py",
             "args": ["-vv"],
             "console": "integratedTerminal",
             "justMyCode": false,
             "windows": {
-                "program": "${workspaceFolder}\\ledfx\\__main__.py"
+                "program": "${workspaceFolder}\\wls\\__main__.py"
             }
         },
         {

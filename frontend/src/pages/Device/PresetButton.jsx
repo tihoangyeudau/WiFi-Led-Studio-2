@@ -87,14 +87,14 @@ export default function PresetButton({ delPreset, uploadPresetCloud, deletePrese
                         </ListItemIcon>
                         <ListItemText>Copy Preset</ListItemText>
                     </MenuItem>
-                {(window.localStorage.getItem('ledfx-cloud-role') === 'creator') && features['cloud'] && isLogged &&
+                {(window.localStorage.getItem('wls-cloud-role') === 'creator') && features['cloud'] && isLogged &&
                     <MenuItem onClick={(e) => { uploadPresetCloud(e); setAnchorEl(null); }}>
                         <ListItemIcon>
                             <CloudUpload fontSize="small" />
                         </ListItemIcon>
                         <ListItemText>Upload to Cloud</ListItemText>
                     </MenuItem>}
-                {(window.localStorage.getItem('ledfx-cloud-role') === 'creator') && features['cloud'] && isLogged &&
+                {(window.localStorage.getItem('wls-cloud-role') === 'creator') && features['cloud'] && isLogged &&
                     <MenuItem onClick={(e) => { deletePresetCloud(e); setAnchorEl(null); }}>
                         <ListItemIcon>
                             <CloudOff fontSize="small" />

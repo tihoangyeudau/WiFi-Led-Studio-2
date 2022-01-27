@@ -7,15 +7,15 @@ import numpy as np
 import voluptuous as vol
 import zeroconf
 
-from ledfx.effects import DummyEffect
-from ledfx.effects.math import interpolate_pixels
-from ledfx.effects.melbank import (
+from wls.effects import DummyEffect
+from wls.effects.math import interpolate_pixels
+from wls.effects.melbank import (
     MAX_FREQ,
     MIN_FREQ,
     MIN_FREQ_DIFFERENCE,
     FrequencyRange,
 )
-from ledfx.events import (
+from wls.events import (
     EffectClearedEvent,
     EffectSetEvent,
     Event,
@@ -25,9 +25,9 @@ from ledfx.events import (
     VirtualUpdateEvent,
 )
 
-# from ledfx.config import save_config
-from ledfx.transitions import Transitions
-from ledfx.utils import fps_to_sleep_interval
+# from wls.config import save_config
+from wls.transitions import Transitions
+from wls.utils import fps_to_sleep_interval
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -122,8 +122,8 @@ class Virtual:
     _active_effect = None
     _transition_effect = None
 
-    def __init__(self, ledfx, config):
-        self._ledfx = ledfx
+    def __init__(self, wls, config):
+        self._wls = wls
         self._config = config
         # the multiplier to fade in/out of an effect. -ve values mean fading
         # in, +ve mean fading out
@@ -145,7 +145,7 @@ class Virtual:
         self.active = False
 
     def _valid_id(self, id):
-        device = self._ledfx.devices.get(id)
+        device = self._wls.devices.get(id)
         if device is not None:
             return id
         else:
@@ -155,7 +155,7 @@ class Virtual:
 
     def activate_segments(self, segments):
         for device_id, start_pixel, end_pixel, invert in segments:
-            device = self._ledfx.devices.get(device_id)
+            device = self._wls.devices.get(device_id)
             if not device.is_active():
                 device.activate()
             device.add_segment(self.id, start_pixel, end_pixel, force=True)
@@ -174,7 +174,7 @@ class Virtual:
 
         device_id, start_pixel, end_pixel, invert = segment
 
-        device = self._ledfx.devices.get(device_id)
+        device = self._wls.devices.get(device_id)
 
         if device is None:
             msg = f"Invalid device id: {device_id}"
@@ -250,14 +250,14 @@ class Virtual:
 
         # Create the effect and add it to the virtual
         try:
-            effect_config = self._ledfx.config[category][effect_id][preset_id][
+            effect_config = self._wls.config[category][effect_id][preset_id][
                 "config"
             ]
         except KeyError:
             _LOGGER.error(f"Cannot find preset: {preset_info}")
             return
-        effect = self._ledfx.effects.create(
-            ledfx=self._ledfx, type=effect_id, config=effect_config
+        effect = self._wls.effects.create(
+            wls=self._wls, type=effect_id, config=effect_config
         )
         self.set_effect(effect)
 
@@ -281,7 +281,7 @@ class Virtual:
 
         self._active_effect = effect
         self._active_effect.activate(self)
-        self._ledfx.events.fire_event(
+        self._wls.events.fire_event(
             EffectSetEvent(
                 self._active_effect.name,
                 self._active_effect.id,
@@ -305,7 +305,7 @@ class Virtual:
         self._active_effect = None
 
     def clear_effect(self):
-        self._ledfx.events.fire_event(EffectClearedEvent())
+        self._wls.events.fire_event(EffectClearedEvent())
 
         self._transition_effect = self._active_effect
         self._active_effect = DummyEffect(self.pixel_count)
@@ -315,7 +315,7 @@ class Virtual:
         )
         self.transition_frame_counter = 0
 
-        self._ledfx.loop.call_later(
+        self._wls.loop.call_later(
             self._config["transition_time"], self.clear_frame
         )
 
@@ -337,7 +337,7 @@ class Virtual:
             # Clear all the pixel data before deactivating the device
             self.assembled_frame = np.zeros((self.pixel_count, 3))
             self.flush(self.assembled_frame)
-            self._ledfx.events.fire_event(
+            self._wls.events.fire_event(
                 VirtualUpdateEvent(self.id, self.assembled_frame)
             )
 
@@ -356,19 +356,19 @@ class Virtual:
                 and self._active_effect.is_active
                 and hasattr(self._active_effect, "pixels")
             ):
-                # self.assembled_frame = await self._ledfx.loop.run_in_executor(
-                #     self._ledfx.thread_executor, self.assemble_frame
+                # self.assembled_frame = await self._wls.loop.run_in_executor(
+                #     self._wls.thread_executor, self.assemble_frame
                 # )
                 self.assembled_frame = self.assemble_frame()
                 if self.assembled_frame is not None and not self._paused:
                     if not self._config["preview_only"]:
-                        # self._ledfx.thread_executor.submit(self.flush)
-                        # await self._ledfx.loop.run_in_executor(
-                        #     self._ledfx.thread_executor, self.flush
+                        # self._wls.thread_executor.submit(self.flush)
+                        # await self._wls.loop.run_in_executor(
+                        #     self._wls.thread_executor, self.flush
                         # )
                         self.flush()
 
-                    self._ledfx.events.fire_event(
+                    self._wls.events.fire_event(
                         VirtualUpdateEvent(self.id, self.assembled_frame)
                     )
 
@@ -456,8 +456,8 @@ class Virtual:
 
         self._thread = threading.Thread(target=self.thread_function)
         self._thread.start()
-        self._ledfx.events.fire_event(VirtualPauseEvent(self.id))
-        # self._task = self._ledfx.loop.create_task(self.thread_function())
+        self._wls.events.fire_event(VirtualPauseEvent(self.id))
+        # self._task = self._wls.loop.create_task(self.thread_function())
         # self._task.add_done_callback(lambda task: task.result())
 
     def deactivate(self):
@@ -465,7 +465,7 @@ class Virtual:
         if hasattr(self, "_thread"):
             self._thread.join()
         self.deactivate_segments()
-        self._ledfx.events.fire_event(VirtualPauseEvent(self.id))
+        self._wls.events.fire_event(VirtualPauseEvent(self.id))
 
     # @lru_cache(maxsize=32)
     # def _normalized_linspace(self, size):
@@ -516,7 +516,7 @@ class Virtual:
                             device_end,
                         )
                     )
-            device = self._ledfx.devices.get(device_id)
+            device = self._wls.devices.get(device_id)
             if device is None:
                 _LOGGER.warning(
                     f"Virtual {self.id}: No active devices - Deactivating."
@@ -593,7 +593,7 @@ class Virtual:
         Return an iterable of the device object of each segment of the virtual
         """
         return list(
-            self._ledfx.devices.get(device_id)
+            self._wls.devices.get(device_id)
             for device_id in {segment[0] for segment in self._segments}
         )
 
@@ -653,11 +653,11 @@ class Virtual:
                 self.frame_transitions = self.transitions[
                     _config["transition_mode"]
                 ]
-                if self._ledfx.config["global_transitions"]:
-                    for virtual_id in self._ledfx.virtuals:
+                if self._wls.config["global_transitions"]:
+                    for virtual_id in self._wls.virtuals:
                         if virtual_id == self.id:
                             continue
-                        virtual = self._ledfx.virtuals.get(virtual_id)
+                        virtual = self._wls.virtuals.get(virtual_id)
                         virtual.frame_transitions = virtual.transitions[
                             _config["transition_mode"]
                         ]
@@ -712,7 +712,7 @@ class Virtual:
             self._config["frequency_min"], self._config["frequency_max"]
         )
 
-        self._ledfx.events.fire_event(
+        self._wls.events.fire_event(
             VirtualConfigUpdateEvent(self.id, self._config)
         )
 
@@ -720,48 +720,48 @@ class Virtual:
 class Virtuals:
     """Thin wrapper around the device registry that manages virtuals"""
 
-    PACKAGE_NAME = "ledfx.virtuals"
+    PACKAGE_NAME = "wls.virtuals"
     _paused = False
 
-    def __init__(self, ledfx):
-        # super().__init__(ledfx, Virtual, self.PACKAGE_NAME)
+    def __init__(self, wls):
+        # super().__init__(wls, Virtual, self.PACKAGE_NAME)
 
         def cleanup_effects(e):
             self.clear_all_effects()
 
-        self._ledfx = ledfx
-        self._ledfx.events.add_listener(cleanup_effects, Event.LEDFX_SHUTDOWN)
+        self._wls = wls
+        self._wls.events.add_listener(cleanup_effects, Event.WLS_SHUTDOWN)
         self._zeroconf = zeroconf.Zeroconf()
         self._virtuals = {}
 
     def create_from_config(self, config):
         for virtual in config:
             _LOGGER.debug(f"Loading virtual from config: {virtual}")
-            self._ledfx.virtuals.create(
+            self._wls.virtuals.create(
                 id=virtual["id"],
                 config=virtual["config"],
                 is_device=virtual["is_device"],
-                ledfx=self._ledfx,
+                wls=self._wls,
             )
             if "segments" in virtual:
-                self._ledfx.virtuals.get(virtual["id"]).update_segments(
+                self._wls.virtuals.get(virtual["id"]).update_segments(
                     virtual["segments"]
                 )
             if "effect" in virtual:
                 try:
-                    effect = self._ledfx.effects.create(
-                        ledfx=self._ledfx,
+                    effect = self._wls.effects.create(
+                        wls=self._wls,
                         type=virtual["effect"]["type"],
                         config=virtual["effect"]["config"],
                     )
-                    self._ledfx.virtuals.get(virtual["id"]).set_effect(effect)
+                    self._wls.virtuals.get(virtual["id"]).set_effect(effect)
                 except vol.MultipleInvalid:
                     _LOGGER.warning(
                         "Effect schema changed. Not restoring effect"
                     )
                 except RuntimeError:
                     pass
-            self._ledfx.events.fire_event(
+            self._wls.events.fire_event(
                 VirtualConfigUpdateEvent(virtual["id"], virtual["config"])
             )
 
@@ -816,7 +816,7 @@ class Virtuals:
         self._paused = not self._paused
         for virtual in self.values():
             virtual._paused = self._paused
-        self._ledfx.events.fire_event(GlobalPauseEvent())
+        self._wls.events.fire_event(GlobalPauseEvent())
 
     def get(self, *args):
         return self._virtuals.get(*args)

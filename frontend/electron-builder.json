@@ -1,10 +1,10 @@
 {
     "publish": {
         "provider": "generic",
-        "url": "https://github.com/YeonV/LedFx-Frontend-v2"
+        "url": "https://github.com/YeonV/Wls-Frontend-v2"
     },
-    "productName": "LedFx-Client",
-    "appId": "com.ledfx.app",
+    "productName": "Wls-Client",
+    "appId": "com.wls.app",
     "directories": {
         "buildResources": "buildResources",
         "output": "release"

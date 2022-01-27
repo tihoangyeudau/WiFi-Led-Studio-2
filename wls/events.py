@@ -9,7 +9,7 @@ _LOGGER = logging.getLogger(__name__)
 class Event:
     """Base for events"""
 
-    LEDFX_SHUTDOWN = "shutdown"
+    WLS_SHUTDOWN = "shutdown"
     DEVICE_UPDATE = "device_update"
     DEVICES_UPDATED = "devices_updated"
     VIRTUAL_UPDATE = "virtual_update"
@@ -157,11 +157,11 @@ class VirtualConfigUpdateEvent(Event):
         self.config = config
 
 
-class LedFxShutdownEvent(Event):
-    """Event emitted when LedFx is shutting down"""
+class WlsShutdownEvent(Event):
+    """Event emitted when Wls is shutting down"""
 
     def __init__(self):
-        super().__init__(Event.LEDFX_SHUTDOWN)
+        super().__init__(Event.WLS_SHUTDOWN)
 
 
 class EventListener:
@@ -179,8 +179,8 @@ class EventListener:
 
 
 class Events:
-    def __init__(self, ledfx):
-        self._ledfx = ledfx
+    def __init__(self, wls):
+        self._wls = wls
         self._listeners = {}
 
     def fire_event(self, event: Event) -> None:
@@ -191,7 +191,7 @@ class Events:
 
         for listener in listeners:
             if not listener.filter_event(event):
-                self._ledfx.loop.call_soon_threadsafe(listener.callback, event)
+                self._wls.loop.call_soon_threadsafe(listener.callback, event)
 
     def add_listener(
         self,

@@ -3,9 +3,9 @@ from json import JSONDecodeError
 
 from aiohttp import web
 
-from ledfx.api import RestEndpoint
+from wls.api import RestEndpoint
 
-# from ledfx.config import save_config
+# from wls.config import save_config
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ class BPMEndpoint(RestEndpoint):
         return web.json_response(data=response, status=200)
 
     async def put(self, request) -> web.Response:
-        """Set LedFx's internal BPM data"""
+        """Set Wls's internal BPM data"""
         try:
             data = await request.json()
         except JSONDecodeError:

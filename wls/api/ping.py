@@ -4,8 +4,8 @@ import numpy as np
 from aiohttp import web
 from tcp_latency import measure_latency
 
-from ledfx.api import RestEndpoint
-from ledfx.utils import resolve_destination
+from wls.api import RestEndpoint
+from wls.utils import resolve_destination
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -16,15 +16,15 @@ class InfoEndpoint(RestEndpoint):
 
     async def get(self, device_id) -> web.Response:
 
-        device = self._ledfx.devices.get(device_id)
+        device = self._wls.devices.get(device_id)
 
         if device is None:
             response = {f"{device_id} not found": 404}
             return web.json_response(data=response, status=404)
 
         ping_target = await resolve_destination(
-            self._ledfx.loop,
-            self._ledfx.thread_executor,
+            self._wls.loop,
+            self._wls.thread_executor,
             device.config["ip_address"],
         )
         output = measure_latency(

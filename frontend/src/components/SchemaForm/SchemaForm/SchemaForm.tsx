@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
 
 /**
  * Dynamically render Forms based on a `schema` <br />
- * most schemas retrived from ledfx/api/schema are read-only <br />
+ * most schemas retrived from wls/api/schema are read-only <br />
  * to enable write, please provide the key `permitted_keys`
  */
 const SchemaForm = ({

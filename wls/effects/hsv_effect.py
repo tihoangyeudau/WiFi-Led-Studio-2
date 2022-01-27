@@ -2,8 +2,8 @@ import time
 
 import numpy as np
 
-from ledfx.effects import Effect
-from ledfx.effects.gradient import GradientEffect
+from wls.effects import Effect
+from wls.effects.gradient import GradientEffect
 
 """
 # Example plots of the wavefunctions
@@ -72,8 +72,8 @@ class HSVEffect(GradientEffect):
     _conversion_factor = 65.536 * 1e9
     _hsv_roll_counter = 0
 
-    def __init__(self, ledfx, config):
-        super().__init__(ledfx, config)
+    def __init__(self, wls, config):
+        super().__init__(wls, config)
         self._dt = 0
         self.hsv_array = None
 

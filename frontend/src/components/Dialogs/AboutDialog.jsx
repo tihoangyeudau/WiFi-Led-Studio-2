@@ -45,7 +45,7 @@ export default function AboutDialog({ className, children, startIcon, title }) {
                 }}
             >
                 <DialogTitle id="about-dialog-title">
-                    {"About LedFx"}
+                    {"About Wls"}
                 </DialogTitle>
                 <DialogContent>
                     
@@ -54,7 +54,7 @@ export default function AboutDialog({ className, children, startIcon, title }) {
                                 <CardHeader title="Backend" />
                                 <CardContent style={{ paddingTop: 0 }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between'}}>version: <span>{bversion}</span> </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between'}}>commit: <Link href={`https://github.com/LedFx/LedFx/commit/${bcommit}`} target="_blank">{bcommit.substring(0, 6)}</Link></div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between'}}>commit: <Link href={`https://github.com/Wls/Wls/commit/${bcommit}`} target="_blank">{bcommit.substring(0, 6)}</Link></div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between'}}>config_version: <span>{config.configuration_version}</span> </div>    
                                 </CardContent>
                             </Card>
@@ -62,8 +62,8 @@ export default function AboutDialog({ className, children, startIcon, title }) {
                                 <CardHeader title="Frontend" />
                                 <CardContent style={{ paddingTop: 0 }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between'}}>version: <span>{fversion.version}</span></div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between'}}>commit: <Link href={`https://github.com/YeonV/LedFx-Frontend-v2/commit/${gitInfo.commit.hash}`} target="_blank">{gitInfo.commit.shortHash}</Link></div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between'}}>config_version: <span>{localStorage.getItem('ledfx-frontend')}</span></div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between'}}>commit: <Link href={`https://github.com/YeonV/Wls-Frontend-v2/commit/${gitInfo.commit.hash}`} target="_blank">{gitInfo.commit.shortHash}</Link></div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between'}}>config_version: <span>{localStorage.getItem('wls-frontend')}</span></div>
                                 </CardContent>
                             </Card>              
                         </div>

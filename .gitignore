@@ -62,12 +62,12 @@ formatting_test.bat
 
 
 # Misc
-.devcontainer/ledfx-config.yml
+.devcontainer/wls-config.yml
 frontend/*.eslintcache
 *.eslintcache
 
 
 #Pycache from numba
-ledfx/effects/__pycache__/*
-ledfx/__pycache__/*
+wls/effects/__pycache__/*
+wls/__pycache__/*
 __pycache__/*

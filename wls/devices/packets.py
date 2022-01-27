@@ -107,9 +107,9 @@ def build_dnrgb_packet(
     return packet
 
 
-def build_adalight_packet(data: np.ndarray, color_order: str):
+def build_ambilightusb_packet(data: np.ndarray, color_order: str):
     """
-    Generic Adalight serial packet encoding
+    Generic AmbilightUSB serial packet encoding
 
     Header: [A, d, a, pixel count high byte, pixel count low byte, pixel count checksum]
     Byte 	Description

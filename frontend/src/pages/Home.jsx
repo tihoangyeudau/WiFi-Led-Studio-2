@@ -59,7 +59,7 @@ export default function Home(props) {
           margin: '0.5rem auto 2rem auto',
         }}
       >
-        <CardHeader title="Welcome to LedFx" />
+        <CardHeader title="Welcome to Wls" />
         <CardContent>
           Complete Frontend Rewrite... from scratch
           <ul>
@@ -94,7 +94,7 @@ export default function Home(props) {
                   (scanning / 30) * 100,
                 )}%`}</Typography>
               </Box>
-            </> : 'WLED-scan'}
+            </> : 'RML-scan'}
           </Button>
           <Button variant="outlined" onClick={()=>{
             deleteFrontendConfig()

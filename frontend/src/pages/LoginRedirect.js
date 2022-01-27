@@ -39,8 +39,8 @@ const LoginRedirect = (props) => {
         })
         const user = await me.data
         // console.log(user)
-        localStorage.setItem('ledfx-cloud-userid', user.id);
-        localStorage.setItem('ledfx-cloud-role', user.role.type);
+        localStorage.setItem('wls-cloud-userid', user.id);
+        localStorage.setItem('wls-cloud-role', user.role.type);
         setText(`You have been successfully logged in as ${localStorage.getItem('username')}. You will be redirected in a few seconds...`);
         setTimeout(() => history.push('/devices'), 2000); // Redirect to homepage after 3 sec
       })

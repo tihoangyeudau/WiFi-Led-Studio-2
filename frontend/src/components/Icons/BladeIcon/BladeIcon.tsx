@@ -1,5 +1,5 @@
 import { Icon } from '@material-ui/core';
-import Wled from '../Wled';
+import Rml from '../Rml';
 // import RazerMouse from '../RazerMouse';
 // import RazerLogo from '../RazerLogo';
 import {
@@ -72,8 +72,8 @@ function BladeIcon({
             marginTop: '3px',
           }}
         />
-      ) : name.startsWith('wled') ? (
-        <Wled />
+      ) : name.startsWith('rml') ? (
+        <Rml />
       ) : name.startsWith('mdi:') ? (
         <span
           style={{ position: 'relative', display: 'flex' }}
@@ -117,8 +117,8 @@ function BladeIcon({
             marginTop: '3px',
           }}
         />
-      ) : name.startsWith('wled') ? (
-        <Wled />
+      ) : name.startsWith('rml') ? (
+        <Rml />
       ) : name.startsWith('razer:mouse') ? (
         <RazerMouse />
       ) : name.startsWith('razer:logo') ? (

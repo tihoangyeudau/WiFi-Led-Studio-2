@@ -3,7 +3,7 @@ import logging
 import numpy as np
 import voluptuous as vol
 
-from ledfx.effects import Effect
+from wls.effects import Effect
 
 _LOGGER = logging.getLogger(__name__)
 _rate = 60

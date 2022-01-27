@@ -11,13 +11,13 @@ const filter = createFilterOptions();
 
 export default function NoHostDialog() {
   //TODO CHANGE HERE LATER
-  const dialogOpen = window.localStorage.getItem('ledfx-newbase') === '1' ? false : useStore((state) => ( state.dialogs.nohost?.open) || false);
+  const dialogOpen = window.localStorage.getItem('wls-newbase') === '1' ? false : useStore((state) => ( state.dialogs.nohost?.open) || false);
   const edit = useStore((state) => state.dialogs.nohost?.edit || false);
   const setDialogOpen = useStore((state) => state.setDialogOpen);
   const setDisconnected = useStore((state) => state.setDisconnected);
   const setHost = useStore((state) => state.setHost);
-  const storedURL = window.localStorage.getItem('ledfx-host');
-  const storedURLs = JSON.parse(window.localStorage.getItem('ledfx-hosts')) || [{ title: 'http://localhost:8888' }];
+  const storedURL = window.localStorage.getItem('wls-host');
+  const storedURLs = JSON.parse(window.localStorage.getItem('wls-hosts')) || [{ title: 'http://localhost:8888' }];
   const [hosts, setHosts] = useState([{ title: 'http://localhost:8888' }]);
   const [hostvalue, setHostvalue] = useState({ title: 'http://localhost:8888' });
   const [progress, setProgress] = useState(0);
@@ -39,9 +39,9 @@ export default function NoHostDialog() {
     if (typeof hostvalue !== 'string') {
       setHost(hostvalue.title);
       if (!hosts.some(h => h.title === hostvalue.title)) {
-        window.localStorage.setItem('ledfx-hosts', JSON.stringify([...hosts, hostvalue]))
+        window.localStorage.setItem('wls-hosts', JSON.stringify([...hosts, hostvalue]))
       } else {
-        window.localStorage.setItem('ledfx-hosts', JSON.stringify([...hosts]))
+        window.localStorage.setItem('wls-hosts', JSON.stringify([...hosts]))
       }
     } else {
       setHost(hostvalue);
@@ -53,7 +53,7 @@ export default function NoHostDialog() {
 
   const handleDelete = (e, title) => {
     e.stopPropagation();
-    window.localStorage.setItem('ledfx-hosts', JSON.stringify(hosts.filter(h => h.title !== title)))
+    window.localStorage.setItem('wls-hosts', JSON.stringify(hosts.filter(h => h.title !== title)))
     setHosts(hosts.filter(h => h.title !== title))
   }
 
@@ -64,8 +64,8 @@ export default function NoHostDialog() {
 
   useEffect(() => {
     if (!storedURL){
-      setHost(isElectron() ? 'http://localhost:8888' : window.localStorage.getItem('ledfx-newbase') === '1' ? 'http://localhost:8080' : window.location.href.split('/#')[0])
-      window.localStorage.setItem('ledfx-host', isElectron() ? 'http://localhost:8888' : window.localStorage.getItem('ledfx-newbase') === '1' ? 'http://localhost:8080' : window.location.href.split('/#')[0]);
+      setHost(isElectron() ? 'http://localhost:8888' : window.localStorage.getItem('wls-newbase') === '1' ? 'http://localhost:8080' : window.location.href.split('/#')[0])
+      window.localStorage.setItem('wls-host', isElectron() ? 'http://localhost:8888' : window.localStorage.getItem('wls-newbase') === '1' ? 'http://localhost:8080' : window.location.href.split('/#')[0]);
       window.location.href = window.location.href
     }
   }, []);
@@ -78,7 +78,7 @@ export default function NoHostDialog() {
         aria-labelledby="form-dialog-title"
       >
         <DialogTitle id="form-dialog-title">
-          {edit ? 'LedFx-Core Host' : window.process?.argv.indexOf("integratedCore") === -1 ? 'No LedFx-Core found' : 'LedFx-Core not ready'}
+          {edit ? 'Wls-Core Host' : window.process?.argv.indexOf("integratedCore") === -1 ? 'No Wls-Core found' : 'Wls-Core not ready'}
         </DialogTitle>
         <DialogContent>
           {!edit && (

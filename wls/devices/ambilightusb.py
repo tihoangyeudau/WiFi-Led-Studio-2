@@ -3,7 +3,7 @@ import logging
 import serial
 import voluptuous as vol
 
-from ledfx.devices import SerialDevice, packets
+from wls.devices import SerialDevice, packets
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -17,8 +17,8 @@ COLOR_ORDERS = [
 ]
 
 
-class AdalightDevice(SerialDevice):
-    """Adalight device support"""
+class AmbilightUSBDevice(SerialDevice):
+    """AmbilightUSB device support"""
 
     @staticmethod
     @property
@@ -36,15 +36,15 @@ class AdalightDevice(SerialDevice):
             }
         )
 
-    def __init__(self, ledfx, config):
-        super().__init__(ledfx, config)
-        self._device_type = "Adalight"
+    def __init__(self, wls, config):
+        super().__init__(wls, config)
+        self._device_type = "AmbilightUSB"
         self.color_order = self._config["color_order"]
 
     def flush(self, data):
         try:
             self.serial.write(
-                packets.build_adalight_packet(data, self.color_order)
+                packets.build_ambilightusb_packet(data, self.color_order)
             )
 
         except serial.SerialException:

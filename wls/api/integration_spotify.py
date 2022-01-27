@@ -1,11 +1,11 @@
-# from ledfx.events import Event
+# from wls.events import Event
 import logging
 from json import JSONDecodeError
 
 from aiohttp import web
 
-from ledfx.api import RestEndpoint
-from ledfx.config import save_config
+from wls.api import RestEndpoint
+from wls.config import save_config
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ class QLCEndpoint(RestEndpoint):
 
     async def get(self, integration_id) -> web.Response:
         """Get all song triggers"""
-        integration = self._ledfx.integrations.get(integration_id)
+        integration = self._wls.integrations.get(integration_id)
         if (integration is None) or (integration.type != "spotify"):
             response = {"not found": 404}
             return web.json_response(data=response, status=404)
@@ -28,7 +28,7 @@ class QLCEndpoint(RestEndpoint):
 
     async def put(self, integration_id, request) -> web.Response:
         """Update a Spotify song trigger"""
-        integration = self._ledfx.integrations.get(integration_id)
+        integration = self._wls.integrations.get(integration_id)
         if (integration is None) or (integration.type != "spotify"):
             response = {"not found": 404}
             return web.json_response(data=response, status=404)
@@ -41,7 +41,7 @@ class QLCEndpoint(RestEndpoint):
 
     async def post(self, integration_id, request) -> web.Response:
         """Add Spotify song trigger"""
-        integration = self._ledfx.integrations.get(integration_id)
+        integration = self._wls.integrations.get(integration_id)
         if (integration is None) or (integration.type != "spotify"):
             response = {"not found": 404}
             return web.json_response(data=response, status=404)
@@ -66,7 +66,7 @@ class QLCEndpoint(RestEndpoint):
             }
             return web.json_response(data=response, status=400)
 
-        if scene_id not in self._ledfx.config["scenes"].keys():
+        if scene_id not in self._wls.config["scenes"].keys():
             response = {
                 "status": "failed",
                 "reason": f"Scene {scene_id} does not exist",
@@ -83,7 +83,7 @@ class QLCEndpoint(RestEndpoint):
         integration.add_trigger(scene_id, song_id, song_name, song_position)
 
         save_config(
-            config=self._ledfx.config, config_dir=self._ledfx.config_dir
+            config=self._wls.config, config_dir=self._wls.config_dir
         )
 
         response = {"status": "success"}
@@ -91,7 +91,7 @@ class QLCEndpoint(RestEndpoint):
 
     async def delete(self, integration_id, request) -> web.Response:
         """Delete a Spotify song trigger"""
-        integration = self._ledfx.integrations.get(integration_id)
+        integration = self._wls.integrations.get(integration_id)
         if (integration is None) or (integration.type != "spotify"):
             response = {"not found": 404}
             return web.json_response(data=response, status=404)
@@ -117,7 +117,7 @@ class QLCEndpoint(RestEndpoint):
 
         # Update and save the config
         save_config(
-            config=self._ledfx.config, config_dir=self._ledfx.config_dir
+            config=self._wls.config, config_dir=self._wls.config_dir
         )
 
         response = {"status": "success"}

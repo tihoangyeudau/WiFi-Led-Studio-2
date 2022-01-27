@@ -10,11 +10,11 @@ import serial.tools.list_ports
 import voluptuous as vol
 import zeroconf
 
-from ledfx.config import save_config
-from ledfx.events import DeviceUpdateEvent, Event
-from ledfx.utils import (
+from wls.config import save_config
+from wls.events import DeviceUpdateEvent, Event
+from wls.utils import (
     AVAILABLE_FPS,
-    WLED,
+    RML,
     BaseRegistry,
     RegistryLoader,
     async_fire_and_forget,
@@ -67,8 +67,8 @@ class Device(BaseRegistry):
 
     _active = False
 
-    def __init__(self, ledfx, config):
-        self._ledfx = ledfx
+    def __init__(self, wls, config):
+        self._wls = wls
         self._config = config
         self._segments = []
         self._pixels = None
@@ -101,8 +101,8 @@ class Device(BaseRegistry):
             f"Device {self.name} config updated to {validated_config}."
         )
 
-        for virtual_id in self._ledfx.virtuals:
-            virtual = self._ledfx.virtuals.get(virtual_id)
+        for virtual_id in self._wls.virtuals:
+            virtual = self._wls.virtuals.get(virtual_id)
             if virtual.is_device == self.id:
                 segments = [[self.id, 0, self.pixel_count - 1, False]]
                 virtual.update_segments(segments)
@@ -143,7 +143,7 @@ class Device(BaseRegistry):
             self.flush(frame)
             # _LOGGER.debug(f"Device {self.id} flushed by Virtual {virtual_id}")
 
-            self._ledfx.events.fire_event(DeviceUpdateEvent(self.id, frame))
+            self._wls.events.fire_event(DeviceUpdateEvent(self.id, frame))
 
     def assemble_frame(self):
         """
@@ -208,7 +208,7 @@ class Device(BaseRegistry):
     @cached_property
     def _virtuals_objs(self):
         return list(
-            self._ledfx.virtuals.get(virtual_id)
+            self._wls.virtuals.get(virtual_id)
             for virtual_id in self.virtuals
         )
 
@@ -247,8 +247,8 @@ class Device(BaseRegistry):
                 + 1
             )
             if overlap > 0:
-                virtual_name = self._ledfx.virtuals.get(virtual_id).name
-                blocking_virtual = self._ledfx.virtuals.get(_virtual_id)
+                virtual_name = self._wls.virtuals.get(virtual_id).name
+                blocking_virtual = self._wls.virtuals.get(_virtual_id)
                 if force:
                     blocking_virtual.deactivate()
                 else:
@@ -283,7 +283,7 @@ class Device(BaseRegistry):
     def remove_from_virtuals(self):
         # delete segments for this device in any virtuals
 
-        for virtual in self._ledfx.virtuals.values():
+        for virtual in self._wls.virtuals.values():
             if not any(segment[0] == self.id for segment in virtual._segments):
                 continue
 
@@ -296,11 +296,11 @@ class Device(BaseRegistry):
                 if segment[0] != self.id
             )
 
-            # Update ledfx's config
-            for idx, item in enumerate(self._ledfx.config["virtuals"]):
+            # Update wls's config
+            for idx, item in enumerate(self._wls.config["virtuals"]):
                 if item["id"] == virtual.id:
                     item["segments"] = virtual.segments
-                    self._ledfx.config["virtuals"][idx] = item
+                    self._wls.config["virtuals"][idx] = item
                     break
 
             if active:
@@ -329,8 +329,8 @@ class NetworkedDevice(Device):
     async def resolve_address(self, success_callback=None):
         try:
             self._destination = await resolve_destination(
-                self._ledfx.loop,
-                self._ledfx.thread_executor,
+                self._wls.loop,
+                self._wls.thread_executor,
                 self._config["ip_address"],
             )
             _LOGGER.info(
@@ -348,7 +348,7 @@ class NetworkedDevice(Device):
             callback = partial(self.activate, *args, **kwargs)
             async_fire_and_forget(
                 self.resolve_address(success_callback=callback),
-                loop=self._ledfx.loop,
+                loop=self._wls.loop,
             )
         else:
             self._online = True
@@ -361,7 +361,7 @@ class NetworkedDevice(Device):
                 f"Device {self.name}: Searching for device... Is it online?"
             )
             async_fire_and_forget(
-                self.resolve_address(), loop=self._ledfx.loop
+                self.resolve_address(), loop=self._wls.loop
             )
             return
         else:
@@ -411,7 +411,7 @@ class SerialDevice(Device):
         {
             vol.Required(
                 "com_port",
-                description="COM port for Adalight compatible device",
+                description="COM port for AmbilightUSB compatible device",
                 default="",
             ): vol.In(list(AvailableCOMPorts.available_ports)),
             vol.Required(
@@ -420,8 +420,8 @@ class SerialDevice(Device):
         }
     )
 
-    def __init__(self, ledfx, config):
-        super().__init__(ledfx, config)
+    def __init__(self, wls, config):
+        super().__init__(wls, config)
         self.serial = None
         self.baudrate = self._config["baudrate"]
         self.com_port = self._config["com_port"]
@@ -451,27 +451,27 @@ class SerialDevice(Device):
 class Devices(RegistryLoader):
     """Thin wrapper around the device registry that manages devices"""
 
-    PACKAGE_NAME = "ledfx.devices"
+    PACKAGE_NAME = "wls.devices"
 
-    def __init__(self, ledfx):
-        super().__init__(ledfx, Device, self.PACKAGE_NAME)
+    def __init__(self, wls):
+        super().__init__(wls, Device, self.PACKAGE_NAME)
 
         def on_shutdown(e):
             self._zeroconf.close()
             self.deactivate_devices()
 
-        self._ledfx.events.add_listener(on_shutdown, Event.LEDFX_SHUTDOWN)
+        self._wls.events.add_listener(on_shutdown, Event.WLS_SHUTDOWN)
         self._zeroconf = zeroconf.Zeroconf()
 
     def create_from_config(self, config):
         for device in config:
             _LOGGER.info(f"Loading device from config: {device}")
             try:
-                self._ledfx.devices.create(
+                self._wls.devices.create(
                     id=device["id"],
                     type=device["type"],
                     config=device["config"],
-                    ledfx=self._ledfx,
+                    wls=self._wls,
                 )
             except vol.MultipleInvalid as e:
                 _LOGGER.exception(e)
@@ -508,13 +508,13 @@ class Devices(RegistryLoader):
             device_ip = device_config["ip_address"]
             try:
                 resolved_dest = await resolve_destination(
-                    self._ledfx.loop, self._ledfx.thread_executor, device_ip
+                    self._wls.loop, self._wls.thread_executor, device_ip
                 )
             except ValueError:
                 _LOGGER.error(f"Discarding device {device_ip}")
                 return
 
-            for existing_device in self._ledfx.devices.values():
+            for existing_device in self._wls.devices.values():
                 if "ip_address" in existing_device.config.keys() and (
                     existing_device.config["ip_address"] == device_ip
                     or existing_device.config["ip_address"] == resolved_dest
@@ -544,61 +544,61 @@ class Devices(RegistryLoader):
                         _LOGGER.info(msg)
                         raise ValueError(msg)
 
-        # If WLED device, get all the necessary config from the device itself
-        if device_type == "wled":
-            wled = WLED(resolved_dest)
-            wled_config = await wled.get_config()
+        # If RML device, get all the necessary config from the device itself
+        if device_type == "rml":
+            rml = RML(resolved_dest)
+            rml_config = await rml.get_config()
 
-            led_info = wled_config["leds"]
-            # If we've found the device via WLED scan, it won't have a custom name from the frontend
-            # However if it's "WLED" (i.e, Default) then we will name the device exactly how WLED does, by using the second half of it's MAC address
-            # This allows us to respect the users choice of names if adding a WLED device via frontend
+            led_info = rml_config["leds"]
+            # If we've found the device via RML scan, it won't have a custom name from the frontend
+            # However if it's "RML" (i.e, Default) then we will name the device exactly how RML does, by using the second half of it's MAC address
+            # This allows us to respect the users choice of names if adding a RML device via frontend
             # I turned black off as this logic is clearer on one line
             # fmt: off
             if "name" in device_config.keys() and device_config["name"] is not None:
-                wled_name = device_config["name"]
-            elif wled_config["name"] == "WLED":
-                wled_name = f"{wled_config['name']}-{wled_config['mac'][6:]}".upper()
+                rml_name = device_config["name"]
+            elif rml_config["name"] == "RML":
+                rml_name = f"{rml_config['name']}-{rml_config['mac'][6:]}".upper()
             else:
-                wled_name = wled_config['name']
+                rml_name = rml_config['name']
             # fmt: on
-            wled_count = led_info["count"]
-            wled_rgbmode = led_info["rgbw"]
+            rml_count = led_info["count"]
+            rml_rgbmode = led_info["rgbw"]
 
-            wled_config = {
-                "name": wled_name,
-                "pixel_count": wled_count,
-                "icon_name": "wled",
-                "rgbw_led": wled_rgbmode,
+            rml_config = {
+                "name": rml_name,
+                "pixel_count": rml_count,
+                "icon_name": "rml",
+                "rgbw_led": rml_rgbmode,
             }
 
             # determine sync mode
             # UDP < 480
-            # DDP or E131 depending on: ledfx's configured preferred mode first, else the device's mode
+            # DDP or E131 depending on: wls's configured preferred mode first, else the device's mode
             # ARTNET can do one
 
-            if wled_count > 480:
-                await wled.get_sync_settings()
-                sync_mode = wled.get_sync_mode()
+            if rml_count > 480:
+                await rml.get_sync_settings()
+                sync_mode = rml.get_sync_mode()
             else:
                 sync_mode = "UDP"
 
-                # preferred_mode = self._ledfx.config["wled_preferences"][
-                #     "wled_preferred_mode"
+                # preferred_mode = self._wls.config["rml_preferences"][
+                #     "rml_preferred_mode"
                 # ]
                 # if preferred_mode:
                 #     sync_mode = preferred_mode
                 # else:
-                #     await wled.get_sync_settings()
-                #     sync_mode = wled.get_sync_mode()
+                #     await rml.get_sync_settings()
+                #     sync_mode = rml.get_sync_mode()
 
             if sync_mode == "ARTNET":
-                msg = f"Cannot add WLED device at {resolved_dest}. Unsupported mode: 'ARTNET', and too many pixels for UDP sync (>480)"
+                msg = f"Cannot add RML device at {resolved_dest}. Unsupported mode: 'ARTNET', and too many pixels for UDP sync (>480)"
                 _LOGGER.warning(msg)
                 raise ValueError(msg)
 
-            wled_config["sync_mode"] = sync_mode
-            device_config.update(wled_config)
+            rml_config["sync_mode"] = sync_mode
+            device_config.update(rml_config)
 
         device_id = generate_id(device_config["name"])
 
@@ -608,18 +608,18 @@ class Devices(RegistryLoader):
                 device_type, device_config
             )
         )
-        device = self._ledfx.devices.create(
+        device = self._wls.devices.create(
             id=device_id,
             type=device_type,
             config=device_config,
-            ledfx=self._ledfx,
+            wls=self._wls,
         )
 
         if hasattr(device, "async_initialize"):
             await device.async_initialize()
 
         # Update and save the configuration
-        self._ledfx.config["devices"].append(
+        self._wls.config["devices"].append(
             {
                 "id": device.id,
                 "type": device.type,
@@ -637,10 +637,10 @@ class Devices(RegistryLoader):
         segments = [[device.id, 0, device_config["pixel_count"] - 1, False]]
 
         # Create the virtual
-        virtual = self._ledfx.virtuals.create(
+        virtual = self._wls.virtuals.create(
             id=virtual_id,
             config=virtual_config,
-            ledfx=self._ledfx,
+            wls=self._wls,
             is_device=device.id,
         )
 
@@ -648,7 +648,7 @@ class Devices(RegistryLoader):
         virtual.update_segments(segments)
 
         # Update the configuration
-        self._ledfx.config["virtuals"].append(
+        self._wls.config["virtuals"].append(
             {
                 "id": virtual.id,
                 "config": virtual.config,
@@ -659,41 +659,41 @@ class Devices(RegistryLoader):
 
         # Finally, save the config to file!
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
         return device
 
-    async def set_wleds_sync_mode(self, mode):
+    async def set_rmls_sync_mode(self, mode):
         for device in self.values():
             if (
-                device.type == "wled"
+                device.type == "rml"
                 and device.pixel_count > 480
                 and device.config["sync_mode"] != mode
             ):
-                device.wled.set_sync_mode(mode)
-                await device.wled.flush_sync_settings()
+                device.rml.set_sync_mode(mode)
+                await device.rml.flush_sync_settings()
                 device.update_config({"sync_mode": mode})
 
-    async def find_wled_devices(self):
-        # Scan the LAN network that match WLED using zeroconf - Multicast DNS
+    async def find_rml_devices(self):
+        # Scan the LAN network that match RML using zeroconf - Multicast DNS
         # Service Discovery Library
-        _LOGGER.info("Scanning for WLED devices...")
-        wled_listener = WLEDListener(self._ledfx)
-        wledbrowser = self._zeroconf.add_service_listener(
-            "_wled._tcp.local.", wled_listener
+        _LOGGER.info("Scanning for RML devices...")
+        rml_listener = RMLListener(self._wls)
+        rmlbrowser = self._zeroconf.add_service_listener(
+            "_rml._tcp.local.", rml_listener
         )
         try:
             await asyncio.sleep(30)
         finally:
             _LOGGER.info("Scan Finished")
-            self._zeroconf.remove_service_listener(wled_listener)
+            self._zeroconf.remove_service_listener(rml_listener)
 
 
-class WLEDListener(zeroconf.ServiceBrowser):
-    def __init__(self, _ledfx):
-        self._ledfx = _ledfx
+class RMLListener(zeroconf.ServiceBrowser):
+    def __init__(self, _wls):
+        self._wls = _wls
 
     def remove_service(self, zeroconf_obj, type, name):
         _LOGGER.info(f"Service {name} removed")
@@ -705,7 +705,7 @@ class WLEDListener(zeroconf.ServiceBrowser):
             hostname = str(info.server).rstrip(".")
             _LOGGER.info(f"Found device: {hostname}")
 
-            device_type = "wled"
+            device_type = "rml"
             device_config = {"ip_address": hostname}
 
             def handle_exception(future):
@@ -713,7 +713,7 @@ class WLEDListener(zeroconf.ServiceBrowser):
                 exc = future.exception()
 
             async_fire_and_forget(
-                self._ledfx.devices.add_new_device(device_type, device_config),
-                loop=self._ledfx.loop,
+                self._wls.devices.add_new_device(device_type, device_config),
+                loop=self._wls.loop,
                 exc_handler=handle_exception,
             )

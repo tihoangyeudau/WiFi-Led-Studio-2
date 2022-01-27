@@ -3,19 +3,19 @@ import logging
 import voluptuous as vol
 from pkg_resources import parse_version
 
-from ledfx.devices import NetworkedDevice
-from ledfx.devices.ddp import DDPDevice
-from ledfx.devices.e131 import E131Device
-from ledfx.devices.udp import UDPRealtimeDevice
-from ledfx.utils import WLED
+from wls.devices import NetworkedDevice
+from wls.devices.ddp import DDPDevice
+from wls.devices.e131 import E131Device
+from wls.devices.udp import UDPRealtimeDevice
+from wls.utils import RML
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class WLEDDevice(NetworkedDevice):
+class RMLDevice(NetworkedDevice):
     """
-    Dedicated WLED device support
-    This class fetches its config (px count, etc) from the WLED device
+    Dedicated RML device support
+    This class fetches its config (px count, etc) from the RML device
     at launch, and lets the user choose a sync mode to use.
     """
 
@@ -23,12 +23,12 @@ class WLEDDevice(NetworkedDevice):
         {
             vol.Optional(
                 "sync_mode",
-                description="Streaming protocol to WLED device. Recommended: UDP<480px, DDP>480px",
+                description="Streaming protocol to RML device. Recommended: UDP<480px, DDP>480px",
                 default="UDP",
             ): vol.In(["UDP", "DDP", "E131"]),
             vol.Optional(
                 "timeout",
-                description="Time between LedFx effect off and WLED effect activate",
+                description="Time between Wls effect off and RML effect activate",
                 default=1,
             ): vol.All(int, vol.Range(0, 255)),
         }
@@ -45,7 +45,7 @@ class WLEDDevice(NetworkedDevice):
             "name": None,
             "ip_address": None,
             "pixel_count": None,
-            "port": 21324,
+            "port": 7778,
             "udp_packet_type": "DNRGB",
             "timeout": 1,
             "minimise_traffic": True,
@@ -66,8 +66,8 @@ class WLEDDevice(NetworkedDevice):
         },
     }
 
-    def __init__(self, ledfx, config):
-        super().__init__(ledfx, config)
+    def __init__(self, wls, config):
+        super().__init__(wls, config)
         self.subdevice = None
 
     def config_updated(self, config):
@@ -87,7 +87,7 @@ class WLEDDevice(NetworkedDevice):
         config["pixel_count"] = self._config["pixel_count"]
         config["refresh_rate"] = self._config["refresh_rate"]
 
-        self.subdevice = device(self._ledfx, config)
+        self.subdevice = device(self._wls, config)
         self.subdevice._destination = self._destination
 
     def activate(self):
@@ -110,35 +110,35 @@ class WLEDDevice(NetworkedDevice):
         # if not self._destination:
         #     self.setup_subdevice()
         #     return
-        self.wled = WLED(self._destination)
-        wled_config = await self.wled.get_config()
+        self.rml = RML(self._destination)
+        rml_config = await self.rml.get_config()
 
-        led_info = wled_config["leds"]
-        wled_name = wled_config["name"]
-        wled_count = led_info["count"]
-        wled_rgbmode = led_info["rgbw"]
-        wled_version = wled_config["ver"]
+        led_info = rml_config["leds"]
+        rml_name = rml_config["name"]
+        rml_count = led_info["count"]
+        rml_rgbmode = led_info["rgbw"]
+        rml_version = rml_config["ver"]
 
-        wled_config = {
-            "name": wled_name,
-            "pixel_count": wled_count,
-            "rgbw_led": wled_rgbmode,
+        rml_config = {
+            "name": rml_name,
+            "pixel_count": rml_count,
+            "rgbw_led": rml_rgbmode,
         }
 
-        self._config.update(wled_config)
+        self._config.update(rml_config)
         self.setup_subdevice()
 
         # Currently *assuming* that this PR gets released in 0.13
-        # https://github.com/Aircoookie/WLED/pull/1944
-        if parse_version(wled_version) >= parse_version("0.13.0"):
+        # https://github.com/Aircoookie/RML/pull/1944
+        if parse_version(rml_version) >= parse_version("0.13.0"):
             _LOGGER.info(
-                f"WLED Version Supports Sync Setting API: {wled_version}"
+                f"RML Version Supports Sync Setting API: {rml_version}"
             )
-            wled_sync_settings = await self.wled.get_sync_settings()
-        # self.wled.enable_realtime_gamma()
-        # self.wled.set_inactivity_timeout(self._config["timeout"])
-        # self.wled.first_universe()
-        # self.wled.first_dmx_address()
-        # self.wled.multirgb_dmx_mode()
+            rml_sync_settings = await self.rml.get_sync_settings()
+        # self.rml.enable_realtime_gamma()
+        # self.rml.set_inactivity_timeout(self._config["timeout"])
+        # self.rml.first_universe()
+        # self.rml.first_dmx_address()
+        # self.rml.multirgb_dmx_mode()
 
-        # await self.wled.flush_sync_settings()
+        # await self.rml.flush_sync_settings()

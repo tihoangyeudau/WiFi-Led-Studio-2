@@ -2,9 +2,9 @@ import logging
 
 import voluptuous as vol
 
-from ledfx.config import save_config
-from ledfx.events import SceneActivatedEvent, SceneDeletedEvent
-from ledfx.utils import generate_id
+from wls.config import save_config
+from wls.events import SceneActivatedEvent, SceneDeletedEvent
+from wls.utils import generate_id
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -14,15 +14,15 @@ class Scenes:
 
     # Interfaces directly with config - no real need to create Scene objects.
 
-    def __init__(self, ledfx):
-        self._ledfx = ledfx
-        self._scenes = self._ledfx.config["scenes"]
+    def __init__(self, wls):
+        self._wls = wls
+        self._scenes = self._wls.config["scenes"]
 
         def virtuals_validator(virtual_ids):
             return list(
                 virtual_id
                 for virtual_id in virtual_ids
-                if self._ledfx.virtuals.get(virtual_id)
+                if self._wls.virtuals.get(virtual_id)
             )
 
         self.SCENE_SCHEMA = vol.Schema(
@@ -41,10 +41,10 @@ class Scenes:
         )
 
     def save_to_config(self):
-        self._ledfx.config["scenes"] = self._scenes
+        self._wls.config["scenes"] = self._scenes
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
     def create_from_config(self, config):
@@ -81,7 +81,7 @@ class Scenes:
             return
 
         for virtual_id in scene["virtuals"]:
-            virtual = self._ledfx.virtuals.get(virtual_id)
+            virtual = self._wls.virtuals.get(virtual_id)
             if not virtual:
                 # virtual has been deleted since scene was created
                 # remove from scene?
@@ -90,22 +90,22 @@ class Scenes:
             # clear active effect of virtual if no effect in scene
             if scene["virtuals"][virtual.id]:
                 # Create the effect and add it to the virtual
-                effect = self._ledfx.effects.create(
-                    ledfx=self._ledfx,
+                effect = self._wls.effects.create(
+                    wls=self._wls,
                     type=scene["virtuals"][virtual.id]["type"],
                     config=scene["virtuals"][virtual.id]["config"],
                 )
                 virtual.set_effect(effect)
             else:
                 virtual.clear_effect()
-        self._ledfx.events.fire_event(SceneActivatedEvent(scene_id))
+        self._wls.events.fire_event(SceneActivatedEvent(scene_id))
 
     def destroy(self, scene_id):
         """Deletes a scene"""
 
         if not self._scenes.pop(scene_id, None):
             _LOGGER.error("Cannot delete non-existent scene id: {scene_id}")
-        self._ledfx.events.fire_event(SceneDeletedEvent(scene_id))
+        self._wls.events.fire_event(SceneDeletedEvent(scene_id))
         self.save_to_config()
 
     def __iter__(self):

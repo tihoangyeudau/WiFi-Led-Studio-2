@@ -8,8 +8,8 @@ const steps = [
     selector: '.step-zero',
     content: (
       <div>
-        <h2>LedFx Tour</h2>
-        Welcome to LedFx! Feel free to follow this tour and we&apos;ll show you
+        <h2>Wls Tour</h2>
+        Welcome to Wls! Feel free to follow this tour and we&apos;ll show you
         around 😊
       </div>
     ),
@@ -34,7 +34,7 @@ const steps = [
     content: (
       <div>
         <h2>Menu</h2>
-        LedFx actions and settings can be found up here
+        Wls actions and settings can be found up here
         <ul style={{ paddingLeft: '1rem' }}>
           <li>👨‍🏫 You can access a tour for other pages in this menu</li>
           <li>
@@ -73,11 +73,11 @@ const steps = [
           </li>
           <li>Add Scene: Save the active effects of all devices</li>
           <li>
-            Add Integration: Connect LedFx to other software (upcoming...)
+            Add Integration: Connect Wls to other software (upcoming...)
           </li>
         </ul>
         I&apos;d recommend you now close this tour and add your first devices to
-        LedFx 🎉
+        Wls 🎉
       </div>
     ),
     style: {

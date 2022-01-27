@@ -1,4 +1,4 @@
-# from ledfx.events import Event
+# from wls.events import Event
 # import importlib
 # import pkgutil
 import asyncio
@@ -14,19 +14,19 @@ import numpy as np
 import rtmidi
 import voluptuous as vol
 
-from ledfx.config import get_default_config_directory
-from ledfx.effects import Effect
-from ledfx.events import Event
-from ledfx.integrations import Integration
-from ledfx.utils import async_fire_and_forget
-from ledfx.virtuals import Virtual
+from wls.config import get_default_config_directory
+from wls.effects import Effect
+from wls.events import Event
+from wls.integrations import Integration
+from wls.utils import async_fire_and_forget
+from wls.virtuals import Virtual
 
 # some thoughts
 
 # Virtuals are ordered [0-len(virtuals)] (modifiable order, drag and drop) for automatic consistency across all regions
 
 # A REGION has a DRIVER. A DRIVER controls the action of a region's INPUT.
-# A DRIVER has an ENDPOINT - "effect", "virtual_config", "virtual_preset", or "scene". This is the component of LedFx that the driver interacts with
+# A DRIVER has an ENDPOINT - "effect", "virtual_config", "virtual_preset", or "scene". This is the component of Wls that the driver interacts with
 
 # DRIVERS:
 
@@ -145,7 +145,7 @@ def list_midi_mappings():
         f
         for f in os.listdir(config_dir)
         if os.path.isfile(os.path.join(config_dir, f))
-        and f.startswith("LedFxMidiMap")
+        and f.startswith("WlsMidiMap")
         and f.endswith(".json")
     ]
 
@@ -163,7 +163,7 @@ class MIDI(Integration):
     """MIDI Integration"""
 
     NAME = "MIDI"
-    DESCRIPTION = "Control LedFx with a MIDI device"
+    DESCRIPTION = "Control Wls with a MIDI device"
 
     @staticmethod
     @property
@@ -186,7 +186,7 @@ class MIDI(Integration):
             midi_mapping_guess = next(
                 i
                 for i, x in enumerate(midi_mappings)
-                if x.lstrip("LedFxMidiMap ").rstrip(".json").lower()
+                if x.lstrip("WlsMidiMap ").rstrip(".json").lower()
                 in midi_devices[0]
             )
         except StopIteration:
@@ -245,10 +245,10 @@ class MIDI(Integration):
         }
     )
 
-    def __init__(self, ledfx, config, active, data):
-        super().__init__(ledfx, config, active, data)
+    def __init__(self, wls, config, active, data):
+        super().__init__(wls, config, active, data)
 
-        self._ledfx = ledfx
+        self._wls = wls
         self._port = None
         self._config = self.CONFIG_SCHEMA.fget()(config)
         self.restore_from_data(data)
@@ -268,7 +268,7 @@ class MIDI(Integration):
         # this is just an example to show functionality.
         _virtual_ids = ["outer", "inner", "all"]
         self.virtual_targets = tuple(
-            self._ledfx.virtuals.get(i) for i in _virtual_ids
+            self._wls.virtuals.get(i) for i in _virtual_ids
         )
 
         # This efficiently describes the attributes of different
@@ -284,7 +284,7 @@ class MIDI(Integration):
         #        - "input_position": the endpoint will choose a target based on the input's position
         #        - "value": the value to set
 
-        # "target":         the endpoint's target, some part of ledfx
+        # "target":         the endpoint's target, some part of wls
         #   args - "input_position": if applicable, to choose a target based on the input position
 
         # "target_count":   the number of possible targets this endpoint has
@@ -354,7 +354,7 @@ class MIDI(Integration):
                     target.activate(value)
                 ),
                 "refresh_event_listener": Event.SCENE_ACTIVATED,
-                "target": lambda self, _: self._ledfx.scenes,
+                "target": lambda self, _: self._wls.scenes,
                 "target_count": lambda self: 1,
             },
         }
@@ -370,7 +370,7 @@ class MIDI(Integration):
                     ("preset", "user_presets", "strobe", "default"),
                     ("preset", "user_presets", "strobe", "intense"),
                     ("preset", "user_presets", "real_strobe", "gentle"),
-                    ("preset", "ledfx_presets", "pitchSpectrum", "reset"),
+                    ("preset", "wls_presets", "pitchSpectrum", "reset"),
                 )
                 region.driver.set_options(options)
             elif region.name == "Faders":
@@ -405,10 +405,10 @@ class MIDI(Integration):
 
     def load_mapping(self):
         """
-        Load an LedFx MIDI mapping
+        Load an Wls MIDI mapping
         """
         mapping_path = os.path.join(
-            self._ledfx.config_dir, self._config["midi_mapping"]
+            self._wls.config_dir, self._config["midi_mapping"]
         )
 
         if not os.path.exists(mapping_path):
@@ -592,10 +592,10 @@ class MIDI(Integration):
                 f"Invalid MIDI device: {midi_device}. Valid devices: {list_midi_devices()}"
             )
             return
-        self.disconnected_task = self._ledfx.loop.create_task(
+        self.disconnected_task = self._wls.loop.create_task(
             self.poll_midi_closed()
         )
-        async_fire_and_forget(self.connect_animation(), self._ledfx.loop)
+        async_fire_and_forget(self.connect_animation(), self._wls.loop)
         await super().connect(f"Opened MIDI port on {midi_device}")
 
     async def connect_animation(self):
@@ -656,7 +656,7 @@ class MIDI(Integration):
     def create_driver(self, region, endpoint_type):
         """
         Creates a driver for a region.
-        This connects the regions inputs to a ledfx "endpoint" (some module of ledfx)
+        This connects the regions inputs to a wls "endpoint" (some module of wls)
         """
         input_type = region.input_type
         dimensionality = region.dimensionality
@@ -671,7 +671,7 @@ class MIDI(Integration):
             f"{endpoint_type.title()}_Endpoint",
             (object,),
             {
-                "_ledfx": self._ledfx,
+                "_wls": self._wls,
                 "endpoint_type": endpoint_type,
                 "input_type": input_type,
                 "options": endpoint_config.get("input_options").get(
@@ -704,7 +704,7 @@ class Driver:
         input_type 0 generic  : just the option key
                                 eg. ("flip",)
         input_type 0 "preset" : option key and preset info
-                                eg. ("preset", "ledfx", "energy", "fast_rgb")
+                                eg. ("preset", "wls", "energy", "fast_rgb")
         input type 0 "scene"  : option key and scene id
                                 eg. ("scene", "my_cool_scene")
         input type 1 generic  : option key and a lambda to scale midi input to endpoint range

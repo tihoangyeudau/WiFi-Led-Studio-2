@@ -4,8 +4,8 @@ from json import JSONDecodeError
 import voluptuous
 from aiohttp import web
 
-from ledfx.api import RestEndpoint
-from ledfx.config import save_config
+from wls.api import RestEndpoint
+from wls.config import save_config
 import asyncio
 
 _LOGGER = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ class DeviceEndpoint(RestEndpoint):
     ENDPOINT_PATH = "/api/devices/{device_id}"
 
     async def get(self, device_id) -> web.Response:
-        device = self._ledfx.devices.get(device_id)
+        device = self._wls.devices.get(device_id)
         if device is None:
             response = {"not found": 404}
             return web.json_response(data=response, status=404)
@@ -26,7 +26,7 @@ class DeviceEndpoint(RestEndpoint):
         return web.json_response(data=response, status=200)
 
     async def put(self, device_id, request) -> web.Response:
-        device = self._ledfx.devices.get(device_id)
+        device = self._wls.devices.get(device_id)
         if device is None:
             response = {"not found": 404}
             return web.json_response(data=response, status=404)
@@ -67,31 +67,31 @@ class DeviceEndpoint(RestEndpoint):
             return web.json_response(data=response, status=status)
 
         # Update and save the configuration
-        for device in self._ledfx.config["devices"]:
+        for device in self._wls.config["devices"]:
             if device["id"] == device_id:
                 device["config"] = device_config
                 break
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
         return web.json_response(data=response, status=status)
 
     async def post(self, device_id, request) -> web.Response:
-        device = self._ledfx.devices.get(device_id)
+        device = self._wls.devices.get(device_id)
         if device is None:
             response = {"not found": 404}
             return web.json_response(data=response, status=404)      
 
         try:
-            if device.type == 'wled':
+            if device.type == 'rml':
                 await device.resolve_address()
             status = 200
 
             response = {"status": "success", "virtuals": {}}
-            response["paused"] = self._ledfx.virtuals._paused
-            for virtual in self._ledfx.virtuals.values():
+            response["paused"] = self._wls.virtuals._paused
+            for virtual in self._wls.virtuals.values():
                 response["virtuals"][virtual.id] = {
                     "config": virtual.config,
                     "id": virtual.id,
@@ -122,24 +122,24 @@ class DeviceEndpoint(RestEndpoint):
         return web.json_response(data=response, status=status)
 
     async def delete(self, device_id) -> web.Response:
-        device = self._ledfx.devices.get(device_id)
+        device = self._wls.devices.get(device_id)
         if device is None:
             response = {"not found": 404}
             return web.json_response(data=response, status=404)
 
         device.clear_effect()
         device.remove_from_virtuals()
-        self._ledfx.devices.destroy(device_id)
+        self._wls.devices.destroy(device_id)
 
         # Update and save the configuration
-        self._ledfx.config["devices"] = [
+        self._wls.config["devices"] = [
             device
-            for device in self._ledfx.config["devices"]
+            for device in self._wls.config["devices"]
             if device["id"] != device_id
         ]
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
         response = {"status": "success"}

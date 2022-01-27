@@ -3,7 +3,7 @@ from json import JSONDecodeError
 
 from aiohttp import web
 
-from ledfx.api import RestEndpoint
+from wls.api import RestEndpoint
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ class DevicesEndpoint(RestEndpoint):
 
     async def get(self) -> web.Response:
         response = {"status": "success", "devices": {}}
-        for device in self._ledfx.devices.values():
+        for device in self._wls.devices.values():
             response["devices"][device.id] = {
                 "config": device.config,
                 "id": device.id,
@@ -54,7 +54,7 @@ class DevicesEndpoint(RestEndpoint):
             return web.json_response(data=response, status=400)
 
         try:
-            device = await self._ledfx.devices.add_new_device(
+            device = await self._wls.devices.add_new_device(
                 device_type, device_config
             )
         except ValueError as msg:

@@ -5,12 +5,12 @@ spec_root = os.path.abspath(SPECPATH)
 
 block_cipher = None
 
-a = Analysis([f'{spec_root}\\ledfx\\__main__.py'],
-             pathex=[f'{spec_root}', f'{spec_root}\\ledfx'],
+a = Analysis([f'{spec_root}\\wls\\__main__.py'],
+             pathex=[f'{spec_root}', f'{spec_root}\\wls'],
              binaries=[],
              datas=[(f'{spec_root}/icons','icons/'), (f'{spec_root}/icons/tray.png','.'),
-             (f'C:/Users/tuant/AppData/Local/Programs/Python/Python310/Scripts/build/exe.win-amd64-3.10/lib/ledfx','ledfx/'),
-             (f'C:/Users/tuant/AppData/Local/Programs/Python/Python310/Scripts/build/exe.win-amd64-3.10/lib/ledfx_frontend','ledfx_frontend/'),
+             (f'C:/Users/tuant/AppData/Local/Programs/Python/Python310/Scripts/build/exe.win-amd64-3.10/lib/wls','wls/'),
+             (f'C:/Users/tuant/AppData/Local/Programs/Python/Python310/Scripts/build/exe.win-amd64-3.10/lib/wls_frontend','wls_frontend/'),
              (f'C:/Users/tuant/AppData/Local/Programs/Python/Python310/Lib/site-packages/cuesdk','cuesdk/')],
              hiddenimports=['cuesdk','sacn', 'pyaudio', 'aubio', 'numpy', 'math', 'voluptuous', 'numpy', 'aiohttp',
              'sentry_sdk', 'sentry_sdk.integrations.django','sentry_sdk.integrations.flask','sentry_sdk.integrations.bottle','sentry_sdk.integrations.falcon','sentry_sdk.integrations.sanic',
@@ -28,7 +28,7 @@ exe = EXE(pyz,
           a.scripts,
           [],
           exclude_binaries=True,
-          name='LedFx',
+          name='Wls',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
@@ -43,4 +43,4 @@ coll = COLLECT(exe,
                strip=False,
                upx=True,
                upx_exclude=[],
-               name='LedFx')
+               name='Wls')

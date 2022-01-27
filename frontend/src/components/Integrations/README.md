@@ -11,7 +11,7 @@
 
 Upcoming new shit
 
-Extend LedFx with integrations:
+Extend Wls with integrations:
 
 - mqtt
 - mqtt-hass

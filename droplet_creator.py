@@ -36,7 +36,7 @@ for frame_counter, x in enumerate(droplet):
 
 # automatically generate filename and save
 dir_path = os.path.dirname(os.path.realpath(__file__))
-droplets_location = os.path.join(dir_path, "ledfx", "effects", "droplets")
+droplets_location = os.path.join(dir_path, "wls", "effects", "droplets")
 assert os.path.isdir(droplets_location)
 
 path = os.path.join(droplets_location, f"{NAME}.npy")
@@ -46,4 +46,4 @@ while os.path.exists(path):
     path = os.path.join(droplets_location, f"{NAME}_{i}.npy")
 
 np.save(path, droplet)
-print(f"Done! Saved as {NAME}_{i}.npy - restart LedFx to see it in action.")
+print(f"Done! Saved as {NAME}_{i}.npy - restart Wls to see it in action.")

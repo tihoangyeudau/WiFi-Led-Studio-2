@@ -9,4 +9,4 @@
 
 # Components
 
-We are using [material-ui](https://material-ui.com/components/cards/) to build components used by LedFx.
+We are using [material-ui](https://material-ui.com/components/cards/) to build components used by Wls.

@@ -1,8 +1,8 @@
 import numpy as np
 import voluptuous as vol
 
-from ledfx.effects.audio import AudioReactiveEffect
-from ledfx.effects.gradient import GradientEffect
+from wls.effects.audio import AudioReactiveEffect
+from wls.effects.gradient import GradientEffect
 
 
 class MultiBarAudioEffect(AudioReactiveEffect, GradientEffect):

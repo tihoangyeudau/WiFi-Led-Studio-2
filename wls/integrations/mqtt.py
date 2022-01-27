@@ -3,10 +3,10 @@ import logging
 import paho.mqtt.client as mqtt
 import voluptuous as vol
 
-from ledfx.events import SceneActivatedEvent
+from wls.events import SceneActivatedEvent
 
-# from ledfx.events import Event
-from ledfx.integrations import Integration
+# from wls.events import Event
+from wls.integrations import Integration
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -50,10 +50,10 @@ class MQTT(Integration):
         }
     )
 
-    def __init__(self, ledfx, config, active, data):
-        super().__init__(ledfx, config, active, data)
+    def __init__(self, wls, config, active, data):
+        super().__init__(wls, config, active, data)
 
-        self._ledfx = ledfx
+        self._wls = wls
         self._config = config
         self._client = None
         self._data = []
@@ -69,11 +69,11 @@ class MQTT(Integration):
         client.publish(f"{self._config['topic']}/STAT", "online")
         client.publish(
             f"{self._config['topic']}/SCENES",
-            str(self._ledfx.config["scenes"]),
+            str(self._wls.config["scenes"]),
         )
         client.publish(
             f"{self._config['topic']}/DEVICES",
-            str(self._ledfx.config["virtuals"]),
+            str(self._wls.config["virtuals"]),
         )
 
     def on_message(self, client, userdata, msg):
@@ -89,17 +89,17 @@ class MQTT(Integration):
                     "reason": 'Required attribute "scene_id" was not provided',
                 }
                 return _LOGGER.warning(response)
-            _LOGGER.warning(str(self._ledfx.config["scenes"].keys()))
-            if scene_id not in self._ledfx.config["scenes"].keys():
+            _LOGGER.warning(str(self._wls.config["scenes"].keys()))
+            if scene_id not in self._wls.config["scenes"].keys():
                 response = {
                     "status": "failed",
                     "reason": f'Scene "{scene_id}" does not exist',
                 }
                 return _LOGGER.warning(response)
 
-            scene = self._ledfx.config["scenes"][scene_id]
+            scene = self._wls.config["scenes"][scene_id]
 
-            for virtual in self._ledfx.virtuals.values():
+            for virtual in self._wls.virtuals.values():
                 # Check virtual is in scene, make no changes if it isn't
                 if virtual.id not in scene["virtuals"].keys():
                     _LOGGER.info(
@@ -113,8 +113,8 @@ class MQTT(Integration):
                 # clear active effect of virtual if no effect in scene
                 if scene["virtuals"][virtual.id]:
                     # Create the effect and add it to the virtual
-                    effect = self._ledfx.effects.create(
-                        ledfx=self._ledfx,
+                    effect = self._wls.effects.create(
+                        wls=self._wls,
                         type=scene["virtuals"][virtual.id]["type"],
                         config=scene["virtuals"][virtual.id]["config"],
                     )
@@ -122,7 +122,7 @@ class MQTT(Integration):
                 else:
                     virtual.clear_effect()
 
-            self._ledfx.events.fire_event(SceneActivatedEvent(scene["name"]))
+            self._wls.events.fire_event(SceneActivatedEvent(scene["name"]))
             # SET SCENE END
 
     async def connect(self):

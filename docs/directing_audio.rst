@@ -2,7 +2,7 @@
 Directing Audio
 ===============
 
-Here we explain how to pipe your system audio directly to LedFx without
+Here we explain how to pipe your system audio directly to Wls without
 having to use a microphone or any other peripheral devices.
 
 Linux
@@ -18,7 +18,7 @@ Tested on Ubuntu 20.10 64-bit
 
 .. rubric:: Instructions
 
--  In the LedFx UI under "Settings" -> "Audio Input", choose "pulse" as
+-  In the Wls UI under "Settings" -> "Audio Input", choose "pulse" as
    the current device
 
 .. image:: ./_static/direct_audio_linux_1.png
@@ -57,7 +57,7 @@ Tested on macOS Catalina 10.15.7
    :align: center
    :width: 100%
 
--  In the LedFx UI under "Settings" -> "Audio Input", choose "BlackHole
+-  In the Wls UI under "Settings" -> "Audio Input", choose "BlackHole
    2ch" as the current device
 
 .. image:: ./_static/directing_audio_macos_3.png
@@ -70,7 +70,7 @@ Tested on macOS Catalina 10.15.7
    audio output of individual applications but requires expensive
    license to run more than 20 minutes.
 
-.. |LedFx UI| image:: ./_static/direct_audio_linux_1.png
+.. |Wls UI| image:: ./_static/direct_audio_linux_1.png
 .. |PulseAudio Volume Control| image:: ./_static/direct_audio_linux_2.png
 .. |Multi Output Device 1| image:: ./_static/directing_audio_macos_1.png
 .. |Multi Output Device 2| image:: ./_static/directing_audio_macos_2.png

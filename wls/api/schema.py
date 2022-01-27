@@ -3,11 +3,11 @@ from json import JSONDecodeError
 
 from aiohttp import web
 
-from ledfx.api import RestEndpoint
-from ledfx.api.utils import PERMITTED_KEYS, convertToJsonSchema
-from ledfx.config import CORE_CONFIG_SCHEMA, WLED_CONFIG_SCHEMA
-from ledfx.effects.audio import AudioInputSource
-from ledfx.effects.melbank import Melbanks
+from wls.api import RestEndpoint
+from wls.api.utils import PERMITTED_KEYS, convertToJsonSchema
+from wls.config import CORE_CONFIG_SCHEMA, RML_CONFIG_SCHEMA
+from wls.effects.audio import AudioInputSource
+from wls.effects.melbank import Melbanks
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -23,13 +23,13 @@ class SchemaEndpoint(RestEndpoint):
         "virtuals",
         "audio",
         "melbanks",
-        "wled_preferences",
+        "rml_preferences",
         "core",
     }
 
     async def get(self, request) -> web.Response:
         """
-        Get ledfx schemas.
+        Get wls schemas.
         You may ask for a specific schema/schemas in the request body
         eg. "audio" will return audio schema
         eg. ["audio", "melbanks"] will return audio and melbanks schema
@@ -65,7 +65,7 @@ class SchemaEndpoint(RestEndpoint):
                 for (
                     device_type,
                     device,
-                ) in self._ledfx.devices.classes().items():
+                ) in self._wls.devices.classes().items():
                     response["devices"][device_type] = {
                         "schema": convertToJsonSchema(device.schema()),
                         "id": device_type,
@@ -77,7 +77,7 @@ class SchemaEndpoint(RestEndpoint):
                 for (
                     effect_type,
                     effect,
-                ) in self._ledfx.effects.classes().items():
+                ) in self._wls.effects.classes().items():
                     response["effects"][effect_type] = {
                         "schema": convertToJsonSchema(effect.schema()),
                         "id": effect_type,
@@ -91,7 +91,7 @@ class SchemaEndpoint(RestEndpoint):
                 for (
                     integration_type,
                     integration,
-                ) in self._ledfx.integrations.classes().items():
+                ) in self._wls.integrations.classes().items():
                     response["integrations"][integration_type] = {
                         "schema": convertToJsonSchema(integration.schema()),
                         "id": integration_type,
@@ -103,7 +103,7 @@ class SchemaEndpoint(RestEndpoint):
                 # Get virtuals schema
                 response["virtuals"] = {
                     "schema": convertToJsonSchema(
-                        self._ledfx.virtuals.schema()
+                        self._wls.virtuals.schema()
                     ),
                 }
 
@@ -137,16 +137,16 @@ class SchemaEndpoint(RestEndpoint):
                     },
                 }
 
-            elif schema == "wled_preferences":
-                # Get wled schema
-                response["wled_preferences"] = {
+            elif schema == "rml_preferences":
+                # Get rml schema
+                response["rml_preferences"] = {
                     "schema": {
                         **convertToJsonSchema(
-                            WLED_CONFIG_SCHEMA,
+                            RML_CONFIG_SCHEMA,
                         ),
                         **{
                             "permitted_keys": PERMITTED_KEYS[
-                                "wled_preferences"
+                                "rml_preferences"
                             ]
                         },
                     },

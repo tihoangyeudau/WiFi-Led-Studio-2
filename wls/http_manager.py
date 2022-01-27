@@ -6,8 +6,8 @@ import time
 
 from aiohttp import web
 
-import ledfx_frontend
-from ledfx.api import RestApi
+import wls_frontend
+from wls.api import RestApi
 
 try:
     base_path = sys._MEIPASS
@@ -18,15 +18,15 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class HttpServer:
-    def __init__(self, ledfx, host, port, port_s):
+    def __init__(self, wls, host, port, port_s):
         """Initialize the HTTP server"""
 
         self.app = web.Application()
-        self.api = RestApi(ledfx)
+        self.api = RestApi(wls)
 
         self.register_routes()
 
-        self._ledfx = ledfx
+        self._wls = wls
         self.host = host
         self.port = port
         self.port_s = port_s
@@ -36,7 +36,7 @@ class HttpServer:
         self.api.register_routes(self.app)
         self.app.router.add_static(
             "/favicon",
-            path=ledfx_frontend.where() + "/favicon",
+            path=wls_frontend.where() + "/favicon",
             name="favicon",
         )
         self.app.router.add_route("get", "/manifest.json", self.manifest)
@@ -44,19 +44,19 @@ class HttpServer:
 
         self.app.router.add_static(
             "/static",
-            path=ledfx_frontend.where() + "/static",
+            path=wls_frontend.where() + "/static",
             name="static",
         )
 
     async def index(self, response):
 
         return web.FileResponse(
-            path=ledfx_frontend.where() + "/index.html", status=200
+            path=wls_frontend.where() + "/index.html", status=200
         )
 
     async def manifest(self, response):
         return web.FileResponse(
-            path=ledfx_frontend.where() + "/manifest.json", status=200
+            path=wls_frontend.where() + "/manifest.json", status=200
         )
 
     async def start(self, ssl_certs=None):
@@ -96,15 +96,15 @@ class HttpServer:
             error,
         )
         _LOGGER.error(
-            "Is LedFx Already Running? If not, try a different port."
+            "Is Wls Already Running? If not, try a different port."
         )
-        if self._ledfx.icon is not None:
-            if self._ledfx.icon.HAS_NOTIFICATION:
-                self._ledfx.icon.notify(
-                    f"Failed to start: something is running on port {self.port}\nIs LedFx already running?"
+        if self._wls.icon is not None:
+            if self._wls.icon.HAS_NOTIFICATION:
+                self._wls.icon.notify(
+                    f"Failed to start: something is running on port {self.port}\nIs Wls already running?"
                 )
         time.sleep(2)
-        self._ledfx.stop(1)
+        self._wls.stop(1)
 
     async def stop(self):
         await self.app.shutdown()

@@ -4,7 +4,7 @@ import struct
 
 import voluptuous as vol
 
-from ledfx.devices import NetworkedDevice
+from wls.devices import NetworkedDevice
 
 _LOGGER = logging.getLogger(__name__)
 

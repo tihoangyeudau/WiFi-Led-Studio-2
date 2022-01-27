@@ -8,17 +8,17 @@ import sys
 import voluptuous as vol
 from pkg_resources import parse_version
 
-from ledfx.consts import CONFIGURATION_VERSION
+from wls.consts import CONFIGURATION_VERSION
 
-CONFIG_DIRECTORY = ".ledfx"
+CONFIG_DIRECTORY = ".wls"
 CONFIG_FILE_NAME = "config.json"
 PRESETS_FILE_NAME = "presets.json"
 
 PRIVATE_KEY_FILE = "privkey.pem"
 CHAIN_KEY_FILE = "fullchain.pem"
 
-_default_wled_settings = {
-    "wled_preferred_mode": "UDP",
+_default_rml_settings = {
+    "rml_preferred_mode": "UDP",
     "realtime_gamma_enabled": False,
     "force_max_brightness": False,
     "realtime_dmx_mode": "MultiRGB",
@@ -29,13 +29,13 @@ _default_wled_settings = {
 
 
 # adds the {setting: ..., user: ...} thing to the defaults dict
-def parse_default_wled_setting(setting):
+def parse_default_rml_setting(setting):
     key, value = setting
     return (key, {"setting": value, "user_enabled": False})
 
 
-# creates validators for the different wled preferences
-def wled_validator_generator(data_type):
+# creates validators for the different rml preferences
+def rml_validator_generator(data_type):
     return vol.Schema(
         {
             vol.Optional("setting"): data_type,
@@ -45,22 +45,22 @@ def wled_validator_generator(data_type):
 
 
 # creates the vol.optionals using the above two functions
-def wled_optional_generator(setting):
+def rml_optional_generator(setting):
     key, default = setting
     return (
         vol.Optional(key, default=default),
-        wled_validator_generator(type(default["setting"])),
+        rml_validator_generator(type(default["setting"])),
     )
 
 
 # generate the default settings with the setting, user enabled dict thing
-_default_wled_settings = dict(
-    map(parse_default_wled_setting, _default_wled_settings.items())
+_default_rml_settings = dict(
+    map(parse_default_rml_setting, _default_rml_settings.items())
 )
 
 # generate the config schema to validate changes
-WLED_CONFIG_SCHEMA = vol.Schema(
-    dict(map(wled_optional_generator, _default_wled_settings.items()))
+RML_CONFIG_SCHEMA = vol.Schema(
+    dict(map(rml_optional_generator, _default_rml_settings.items()))
 )
 
 CORE_CONFIG_SCHEMA = vol.Schema(
@@ -73,7 +73,7 @@ CORE_CONFIG_SCHEMA = vol.Schema(
         vol.Optional("virtuals", default=[]): list,
         vol.Optional("audio", default={}): dict,
         vol.Optional("melbanks", default={}): dict,
-        vol.Optional("ledfx_presets", default={}): dict,
+        vol.Optional("wls_presets", default={}): dict,
         vol.Optional("user_presets", default={}): dict,
         vol.Optional("scenes", default={}): dict,
         vol.Optional("integrations", default=[]): list,
@@ -91,7 +91,7 @@ CORE_CONFIG_SCHEMA = vol.Schema(
         vol.Optional("user_colors", default={}): dict,
         vol.Optional("user_gradients", default={}): dict,
         vol.Optional("scan_on_startup", default=False): bool,
-        vol.Optional("wled_preferences", default={}): dict,
+        vol.Optional("rml_preferences", default={}): dict,
         vol.Optional(
             "configuration_version", default=CONFIGURATION_VERSION
         ): str,
@@ -134,11 +134,11 @@ def get_preset_file(config_dir: str) -> str:
 
 def get_profile_dump_location(config_dir) -> str:
     date_time = datetime.datetime.now().strftime("%d-%m-%y_%H-%M-%S")
-    return os.path.join(config_dir, f"LedFx_{date_time}.profile")
+    return os.path.join(config_dir, f"Wls_{date_time}.profile")
 
 
 def get_log_file_location(config_dir):
-    log_file_path = os.path.abspath(os.path.join(config_dir, "LedFx.log"))
+    log_file_path = os.path.abspath(os.path.join(config_dir, "Wls.log"))
     return log_file_path
 
 
@@ -232,7 +232,7 @@ def load_config(config_dir: str) -> dict:
                 # If there's no config version in the config, it's pre-1.0.0 and won't work
                 # Probably scope to iterate through it and create a virtual for every device, but that's beyond me
                 _LOGGER.info(
-                    f"LedFx Configuration Version: {config_json['configuration_version']}"
+                    f"Wls Configuration Version: {config_json['configuration_version']}"
                 )
                 assert parse_version(
                     config_json["configuration_version"]
@@ -241,7 +241,7 @@ def load_config(config_dir: str) -> dict:
             except (KeyError, AssertionError):
                 create_backup(config_dir, config_file, "VERSION")
                 _LOGGER.warning(
-                    f"LedFx config version: {CONFIGURATION_VERSION}, your config version: {config_json.get('configuration_version', 'UNDEFINED (old!)')}"
+                    f"Wls config version: {CONFIGURATION_VERSION}, your config version: {config_json.get('configuration_version', 'UNDEFINED (old!)')}"
                 )
                 try:
                     config = migrate_config(config_json)
@@ -279,7 +279,7 @@ def migrate_config(old_config):
         "High Frequency (6kHz-24kHz)": "High",
     }
 
-    class DummyLedfx:
+    class DummyWls:
         def dev_enabled(_):
             return False
 
@@ -287,9 +287,9 @@ def migrate_config(old_config):
 
     import voluptuous as vol
 
-    from ledfx.effects import Effects
+    from wls.effects import Effects
 
-    effects = Effects(DummyLedfx()).classes()
+    effects = Effects(DummyWls()).classes()
 
     # initialise some things that will help us match up old effect info to new effect info
     def get_matching_effect_id(dirty_effect_id):
@@ -348,7 +348,7 @@ def migrate_config(old_config):
     for device in old_config.get("devices", ()):
         if device["type"].lower() == "fxmatrix":
             _LOGGER.warning(
-                "FXMatrix devices are no longer supported. Add it as plain UDP or WLED."
+                "FXMatrix devices are no longer supported. Add it as plain UDP or RML."
             )
             continue
         device.pop("effect", None)
@@ -383,7 +383,7 @@ def migrate_config(old_config):
                 }
         new_config["virtuals"] = virtuals
     else:  # time to make some virtuals
-        from ledfx.utils import generate_id
+        from wls.utils import generate_id
 
         new_config["virtuals"] = []
         for device in new_config["devices"]:
@@ -532,7 +532,7 @@ def save_config(config: dict, config_dir: str) -> None:
     _LOGGER.info(("Saving configuration file to {}").format(config_dir))
     config["configuration_version"] = CONFIGURATION_VERSION
     config_view = dict(config)
-    unneeded_keys = ["ledfx_presets"]
+    unneeded_keys = ["wls_presets"]
     for key in [key for key in config_view if key in unneeded_keys]:
         del config_view[key]
 

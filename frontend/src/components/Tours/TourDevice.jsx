@@ -45,7 +45,7 @@ const steps = [
       <div>
         <h2>Presets</h2>
         Easily save and apply the settings of an effect.
-        LedFx has some built in presets, and you can save your own too
+        Wls has some built in presets, and you can save your own too
       </div>
     ),
     style: {

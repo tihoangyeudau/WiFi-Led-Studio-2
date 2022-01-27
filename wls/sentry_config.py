@@ -1,10 +1,10 @@
 import sentry_sdk
 from sentry_sdk.integrations.aiohttp import AioHttpIntegration
 
-from ledfx.consts import DEV, PROJECT_VERSION
+from wls.consts import DEV, PROJECT_VERSION
 
 # Place your key between the quotes if you have a sentry.io account and wish to use it.
-# Otherwise the LedFx sentry key is inserted here during deployment.
+# Otherwise the Wls sentry key is inserted here during deployment.
 
 sentry_dsn = "DSN"
 if (
@@ -15,7 +15,7 @@ if (
         sentry_dsn,
         traces_sample_rate=1,
         integrations=[AioHttpIntegration()],
-        release=f"ledfx@{PROJECT_VERSION}",
+        release=f"wls@{PROJECT_VERSION}",
     )
 elif DEV > 0:
 
@@ -32,5 +32,5 @@ elif DEV > 0:
         sentry_dsn,
         traces_sample_rate=1,
         integrations=[AioHttpIntegration()],
-        release=f"ledfx@{PROJECT_VERSION}-{commit_hash}",
+        release=f"wls@{PROJECT_VERSION}-{commit_hash}",
     )

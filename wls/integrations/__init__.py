@@ -4,9 +4,9 @@
 # import requests
 import logging
 
-# from ledfx.config import save_config
-from ledfx.events import Event
-from ledfx.utils import BaseRegistry, RegistryLoader, async_fire_and_forget
+# from wls.config import save_config
+from wls.events import Event
+from wls.utils import BaseRegistry, RegistryLoader, async_fire_and_forget
 
 # import asyncio
 
@@ -22,8 +22,8 @@ class Integration(BaseRegistry):
     # 2: disconnecting
     # 3: connecting
 
-    def __init__(self, ledfx, config, active, data):
-        self._ledfx = ledfx
+    def __init__(self, wls, config, active, data):
+        self._wls = wls
         self._config = config
         self._active = active
         self._data = data
@@ -31,7 +31,7 @@ class Integration(BaseRegistry):
 
     def __del__(self):
         if self._active:
-            async_fire_and_forget(self.deactivate(), self._ledfx.loop)
+            async_fire_and_forget(self.deactivate(), self._wls.loop)
 
     async def activate(self):
         _LOGGER.info(
@@ -39,7 +39,7 @@ class Integration(BaseRegistry):
         )
         self._active = True
         self._status = 3
-        async_fire_and_forget(self.connect(), self._ledfx.loop)
+        async_fire_and_forget(self.connect(), self._wls.loop)
 
     async def deactivate(self):
         _LOGGER.info(
@@ -47,7 +47,7 @@ class Integration(BaseRegistry):
         )
         self._active = False
         self._status = 2
-        async_fire_and_forget(self.disconnect(), self._ledfx.loop)
+        async_fire_and_forget(self.disconnect(), self._wls.loop)
 
     async def reconnect(self):
         _LOGGER.info(
@@ -109,32 +109,32 @@ class Integration(BaseRegistry):
 class Integrations(RegistryLoader):
     """Thin wrapper around the integration registry that manages integrations"""
 
-    PACKAGE_NAME = "ledfx.integrations"
+    PACKAGE_NAME = "wls.integrations"
 
-    def __init__(self, ledfx):
-        super().__init__(ledfx, Integration, self.PACKAGE_NAME)
+    def __init__(self, wls):
+        super().__init__(wls, Integration, self.PACKAGE_NAME)
 
         def on_shutdown(e):
             for integration in self.values():
                 integration.on_shutdown()
 
             async_fire_and_forget(
-                self.close_all_connections(), self._ledfx.loop
+                self.close_all_connections(), self._wls.loop
             )
 
-        self._ledfx.events.add_listener(on_shutdown, Event.LEDFX_SHUTDOWN)
+        self._wls.events.add_listener(on_shutdown, Event.WLS_SHUTDOWN)
 
     def create_from_config(self, config):
         for integration in config:
             _LOGGER.info(f"Loading integration from config: {integration}")
             try:
-                self._ledfx.integrations.create(
+                self._wls.integrations.create(
                     id=integration["id"],
                     type=integration["type"],
                     active=integration["active"],
                     config=integration["config"],
                     data=integration["data"],
-                    ledfx=self._ledfx,
+                    wls=self._wls,
                 )
             except Exception as e:
                 _LOGGER.warning(f"Failed to load MIDI integration: {e}")

@@ -2,7 +2,7 @@ import logging
 
 from aiohttp import web
 
-from ledfx.api import RestEndpoint
+from wls.api import RestEndpoint
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -13,7 +13,7 @@ class SpecifiedDeviceStatusEndpoint(RestEndpoint):
     ENDPOINT_PATH = "/api/device-status/{virtual_id}"
 
     async def get(self, virtual_id) -> web.Response:
-        virtual = self._ledfx.virtuals.get(virtual_id)
+        virtual = self._wls.virtuals.get(virtual_id)
         if virtual is None:
             return web.json_response(data={"not found": 404}, status=404)
         response = {"active": virtual.active_effect}

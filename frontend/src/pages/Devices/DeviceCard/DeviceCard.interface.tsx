@@ -92,7 +92,7 @@ export interface DeviceCardProps {
    */
 }
 export const DeviceCardDefaults: DeviceCardProps = {
-  deviceName: 'My Wled',
+  deviceName: 'Đèn của tôi',
   online: true,
   effectName: undefined,
   virtId: 'yz-quad',
@@ -104,7 +104,7 @@ export const DeviceCardDefaults: DeviceCardProps = {
   handlePlayPause: () => console.log('PLAY/PAUSE'), // eslint-disable-line no-console
   linkTo: '/',
   additionalStyle: {},
-  iconName: 'wled',
+  iconName: 'rml',
   colorIndicator: true,
   isPlaying: true,
   isStreaming: false,

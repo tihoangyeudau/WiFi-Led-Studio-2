@@ -142,7 +142,7 @@ const AddDeviceDialog = () => {
       </DialogTitle>
       <DialogContent>
         <DialogContentText>
-          To add a device to LedFx, please first select the type of device you
+          To add a device to Wls, please first select the type of device you
           wish to add then provide the necessary configuration.
         </DialogContentText>
         <div className={classes.wrapper}>

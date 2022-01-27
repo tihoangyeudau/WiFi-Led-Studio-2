@@ -144,7 +144,7 @@ const AddIntegrationDialog = () => {
       </DialogTitle>
       <DialogContent>
         <DialogContentText>
-          To add an interation to LedFx, please first select the type of integration you
+          To add an interation to Wls, please first select the type of integration you
           wish to add then provide the necessary configuration.
         </DialogContentText>
         <div className={classes.wrapper}>

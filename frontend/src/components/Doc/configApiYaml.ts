@@ -1,10 +1,10 @@
 export const configApiYaml = `
 openapi: 3.1.0
 info:
-  title: LedFx API
+  title: Wls API
   version: '1.0'
-  summary: LedFx API
-  description: LedFx API
+  summary: Wls API
+  description: Wls API
   contact: {}
   license:
     name: GPL3
@@ -41,7 +41,7 @@ paths:
                           timeout: 0
                           udp_packet_type: ''
                         id: Couch
-                        type: wled
+                        type: rml
                       - config:
                           center_offset: 0
                           ip_address: 192.168.1.178
@@ -52,7 +52,7 @@ paths:
                           timeout: 0
                           udp_packet_type: ''
                         id: Kitchen
-                        type: wled
+                        type: rml
                       - config:
                           center_offset: 0
                           ip_address: 192.168.1.176
@@ -63,7 +63,7 @@ paths:
                           timeout: 0
                           udp_packet_type: ''
                         id: TV-WZ
-                        type: wled
+                        type: rml
                       - config:
                           center_offset: 0
                           ip_address: ''
@@ -73,8 +73,8 @@ paths:
                           refresh_rate: 0
                           timeout: 0
                           udp_packet_type: ''
-                        id: wled-yz
-                        type: wled
+                        id: rml-yz
+                        type: rml
                       - config:
                           center_offset: 0
                           ip_address: 192.168.1.171
@@ -85,7 +85,7 @@ paths:
                           timeout: 0
                           udp_packet_type: ''
                         id: Logo-II
-                        type: wled
+                        type: rml
                       - config:
                           center_offset: 0
                           ip_address: 192.168.1.170
@@ -96,7 +96,7 @@ paths:
                           timeout: 0
                           udp_packet_type: ''
                         id: yz-quad-1
-                        type: wled
+                        type: rml
                     host: ''
                     offline: false
                     open-ui: false
@@ -111,7 +111,7 @@ paths:
                           center_offset: 0
                           frequency_max: 15000
                           frequency_min: 20
-                          icon_name: wled
+                          icon_name: rml
                           mapping: span
                           max_brightness: 1
                           name: Couch
@@ -137,7 +137,7 @@ paths:
                           center_offset: 0
                           frequency_max: 15000
                           frequency_min: 20
-                          icon_name: wled
+                          icon_name: rml
                           mapping: span
                           max_brightness: 1
                           name: Kitchen
@@ -163,7 +163,7 @@ paths:
                           center_offset: 0
                           frequency_max: 15000
                           frequency_min: 20
-                          icon_name: wled
+                          icon_name: rml
                           mapping: span
                           max_brightness: 1
                           name: TV-WZ
@@ -189,7 +189,7 @@ paths:
                           center_offset: 0
                           frequency_max: 15000
                           frequency_min: 20
-                          icon_name: wled
+                          icon_name: rml
                           mapping: span
                           max_brightness: 1
                           name: Logo
@@ -203,10 +203,10 @@ paths:
                             color: '#eee000'
                           name: Single Color
                           type: singleColor
-                        id: wled-yz
-                        is_device: wled-yz
+                        id: rml-yz
+                        is_device: rml-yz
                         segments:
-                          - - wled-yz
+                          - - rml-yz
                             - 0
                             - 28
                             - false
@@ -215,7 +215,7 @@ paths:
                           center_offset: 0
                           frequency_max: 15000
                           frequency_min: 20
-                          icon_name: wled
+                          icon_name: rml
                           mapping: span
                           max_brightness: 1
                           name: Logo-II
@@ -241,7 +241,7 @@ paths:
                           center_offset: 0
                           frequency_max: 15000
                           frequency_min: 20
-                          icon_name: wled
+                          icon_name: rml
                           mapping: span
                           max_brightness: 1
                           name: YZ_QUAD_1
@@ -423,7 +423,7 @@ paths:
                   - version
                   - very-verbose
                   - virtuals
-      description: Get the whole LedFx config-tree
+      description: Get the whole Wls config-tree
   /devices:
     get:
       summary: GET Devices
@@ -497,7 +497,7 @@ paths:
                           timeout: 0
                           udp_packet_type: ''
                         id: Couch
-                        type: wled
+                        type: rml
                       - config:
                           center_offset: 0
                           ip_address: 192.168.1.178
@@ -508,7 +508,7 @@ paths:
                           timeout: 0
                           udp_packet_type: ''
                         id: Kitchen
-                        type: wled
+                        type: rml
                       - config:
                           center_offset: 0
                           ip_address: 192.168.1.176
@@ -519,7 +519,7 @@ paths:
                           timeout: 0
                           udp_packet_type: ''
                         id: TV-WZ
-                        type: wled
+                        type: rml
                       - config:
                           center_offset: 0
                           ip_address: ''
@@ -529,8 +529,8 @@ paths:
                           refresh_rate: 0
                           timeout: 0
                           udp_packet_type: ''
-                        id: wled-yz
-                        type: wled
+                        id: rml-yz
+                        type: rml
                       - config:
                           center_offset: 0
                           ip_address: 192.168.1.171
@@ -541,7 +541,7 @@ paths:
                           timeout: 0
                           udp_packet_type: ''
                         id: Logo-II
-                        type: wled
+                        type: rml
                       - config:
                           center_offset: 0
                           ip_address: 192.168.1.170
@@ -552,9 +552,9 @@ paths:
                           timeout: 0
                           udp_packet_type: ''
                         id: yz-quad-1
-                        type: wled
+                        type: rml
       operationId: get-devices
-      description: Get the whole LedFx devices-tree
+      description: Get the whole Wls devices-tree
   /virtuals:
     get:
       summary: GET virtuals
@@ -673,7 +673,7 @@ paths:
                           center_offset: 0
                           frequency_max: 15000
                           frequency_min: 20
-                          icon_name: wled
+                          icon_name: rml
                           mapping: span
                           max_brightness: 1
                           name: Couch
@@ -699,7 +699,7 @@ paths:
                           center_offset: 0
                           frequency_max: 15000
                           frequency_min: 20
-                          icon_name: wled
+                          icon_name: rml
                           mapping: span
                           max_brightness: 1
                           name: Kitchen
@@ -725,7 +725,7 @@ paths:
                           center_offset: 0
                           frequency_max: 15000
                           frequency_min: 20
-                          icon_name: wled
+                          icon_name: rml
                           mapping: span
                           max_brightness: 1
                           name: TV-WZ
@@ -751,7 +751,7 @@ paths:
                           center_offset: 0
                           frequency_max: 15000
                           frequency_min: 20
-                          icon_name: wled
+                          icon_name: rml
                           mapping: span
                           max_brightness: 1
                           name: Logo
@@ -765,10 +765,10 @@ paths:
                             color: '#eee000'
                           name: Single Color
                           type: singleColor
-                        id: wled-yz
-                        is_device: wled-yz
+                        id: rml-yz
+                        is_device: rml-yz
                         segments:
-                          - - wled-yz
+                          - - rml-yz
                             - 0
                             - 28
                             - false
@@ -777,7 +777,7 @@ paths:
                           center_offset: 0
                           frequency_max: 15000
                           frequency_min: 20
-                          icon_name: wled
+                          icon_name: rml
                           mapping: span
                           max_brightness: 1
                           name: Logo-II
@@ -803,7 +803,7 @@ paths:
                           center_offset: 0
                           frequency_max: 15000
                           frequency_min: 20
-                          icon_name: wled
+                          icon_name: rml
                           mapping: span
                           max_brightness: 1
                           name: YZ_QUAD_1
@@ -825,7 +825,7 @@ paths:
                             - 291
                             - false
       operationId: get-virtuals
-      description: Get the whole LedFx virtuals-tree
+      description: Get the whole Wls virtuals-tree
   '/virtuals/{virtualId}':
     get:
       summary: GET Virtual
@@ -938,7 +938,7 @@ paths:
                       center_offset: 0
                       frequency_max: 15000
                       frequency_min: 20
-                      icon_name: wled
+                      icon_name: rml
                       mapping: span
                       max_brightness: 1
                       name: Couch
@@ -1084,7 +1084,7 @@ paths:
                           center_offset: 0
                           frequency_max: 15000
                           frequency_min: 20
-                          icon_name: wled
+                          icon_name: rml
                           mapping: span
                           max_brightness: 1
                           name: Couch
@@ -1110,7 +1110,7 @@ paths:
                           center_offset: 0
                           frequency_max: 15000
                           frequency_min: 20
-                          icon_name: wled
+                          icon_name: rml
                           mapping: span
                           max_brightness: 1
                           name: Kitchen
@@ -1136,7 +1136,7 @@ paths:
                           center_offset: 0
                           frequency_max: 15000
                           frequency_min: 20
-                          icon_name: wled
+                          icon_name: rml
                           mapping: span
                           max_brightness: 1
                           name: TV-WZ
@@ -1162,7 +1162,7 @@ paths:
                           center_offset: 0
                           frequency_max: 15000
                           frequency_min: 20
-                          icon_name: wled
+                          icon_name: rml
                           mapping: span
                           max_brightness: 1
                           name: Logo
@@ -1176,10 +1176,10 @@ paths:
                             color: '#eee000'
                           name: Single Color
                           type: singleColor
-                        id: wled-yz
-                        is_device: wled-yz
+                        id: rml-yz
+                        is_device: rml-yz
                         segments:
-                          - - wled-yz
+                          - - rml-yz
                             - 0
                             - 28
                             - false
@@ -1188,7 +1188,7 @@ paths:
                           center_offset: 0
                           frequency_max: 15000
                           frequency_min: 20
-                          icon_name: wled
+                          icon_name: rml
                           mapping: span
                           max_brightness: 1
                           name: Logo-II
@@ -1214,7 +1214,7 @@ paths:
                           center_offset: 0
                           frequency_max: 15000
                           frequency_min: 20
-                          icon_name: wled
+                          icon_name: rml
                           mapping: span
                           max_brightness: 1
                           name: YZ_QUAD_1

@@ -1,7 +1,7 @@
 {
-  "name": "ledfx",
+  "name": "wls",
   "version": "2.0.0-beta38",
-  "description": "LedFx - BladeMOD",
+  "description": "Wls - BladeMOD",
   "author": "YeonV aka Blade",
   "private": true,
   "main": "public/electron.js",
@@ -76,10 +76,10 @@
     "postinstall": "electron-builder install-app-deps",
     "storybook": "start-storybook -p 6006 -s public",
     "build-storybook": "build-storybook -s public",
-    "build-storybookgh": "PUBLIC_URL=/LedFx-Frontend-v2/docs build-storybook -s public",
-    "build-storybookwin": "set PUBLIC_URL=/LedFx-Frontend-v2/docs && build-storybook -s public",
-    "copyFilesUp": "rimraf ../ledfx_frontend && cp -r ./build/ ../ledfx_frontend",
-    "copyFilesUp_win": "rmdir /s /q ..\\ledfx_frontend 2>nul & ren build ledfx_frontend && move ledfx_frontend .."
+    "build-storybookgh": "PUBLIC_URL=/Wls-Frontend-v2/docs build-storybook -s public",
+    "build-storybookwin": "set PUBLIC_URL=/Wls-Frontend-v2/docs && build-storybook -s public",
+    "copyFilesUp": "rimraf ../wls_frontend && cp -r ./build/ ../wls_frontend",
+    "copyFilesUp_win": "rmdir /s /q ..\\wls_frontend 2>nul & ren build wls_frontend && move wls_frontend .."
   },
   "eslintConfig": {
     "extends": [
@@ -153,13 +153,13 @@
   "build": {
     "win": {
       "icon": "build/icon.ico",
-      "artifactName": "LedFx_client-${channel}--${os}.${ext}"
+      "artifactName": "Wls_client-${channel}--${os}.${ext}"
     },
     "portable": {
-      "artifactName": "LedFx_client-${channel}--${os}-portable.${ext}"
+      "artifactName": "Wls_client-${channel}--${os}-portable.${ext}"
     },
     "nsis": {
-      "artifactName": "LedFx_client-${channel}--${os}-setup.${ext}"
+      "artifactName": "Wls_client-${channel}--${os}-setup.${ext}"
     },
     "linux": {
       "icon": "build/icon.png"

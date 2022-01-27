@@ -2,7 +2,7 @@ import axios from 'axios';
 import { SetState } from 'zustand';
 
 const baseURL = 'http://localhost:8888';
-const storedURL = window.localStorage.getItem('ledfx-host');
+const storedURL = window.localStorage.getItem('wls-host');
 
 const api = axios.create({
   baseURL: storedURL || baseURL,
@@ -18,14 +18,14 @@ type UiState = {
   },
 }
 
-type LedFxState = {
+type WlsState = {
   path: ''
   set: SetState<UiState>
   method: 'GET' | 'POST' | 'PUT' | 'DELETE'
   body: Record<string, unknown>
 }
 
-export const Ledfx = async (state: LedFxState) => {
+export const Wls = async (state: WlsState) => {
   try {
     let response: any = null;
     switch (state.method) {
@@ -117,4 +117,4 @@ export const Ledfx = async (state: LedFxState) => {
   }
 };
 
-export default Ledfx;
+export default Wls;

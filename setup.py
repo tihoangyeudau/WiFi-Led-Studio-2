@@ -2,19 +2,19 @@
 
 from setuptools import setup
 
-import ledfx.consts as const
+import wls.consts as const
 
-PROJECT_DOCS = "https://ledfx.readthedocs.io"
-PROJECT_PACKAGE_NAME = "ledfx"
+PROJECT_DOCS = "https://wls.readthedocs.io"
+PROJECT_PACKAGE_NAME = "wls"
 PROJECT_VERSION = const.PROJECT_VERSION
 PROJECT_LICENSE = "The MIT License"
 PROJECT_AUTHOR = "Austin Hodges"
 PROJECT_AUTHOR_EMAIL = "austin.b.hodges@gmail.com"
-PROJECT_MAINTAINER = "LedFx Developers"
-PROJECT_MAINTAINER_EMAIL = "ledfx.app@gmail.com"
-PROJECT_URL = "https://github.com/LedFx/LedFx"
-PROJECT_WEBSITE = "https://ledfx.app"
-PROJECT_DOCS = "https://ledfx.readthedocs.io"
+PROJECT_MAINTAINER = "Wls Developers"
+PROJECT_MAINTAINER_EMAIL = "wls.app@gmail.com"
+PROJECT_URL = "https://github.com/Wls/Wls"
+PROJECT_WEBSITE = "https://wls.app"
+PROJECT_DOCS = "https://wls.readthedocs.io"
 
 # Need to install numpy first
 SETUP_REQUIRES = [
@@ -74,5 +74,5 @@ setup(
     install_requires=INSTALL_REQUIRES,
     setup_requires=SETUP_REQUIRES,
     python_requires=const.REQUIRED_PYTHON_STRING,
-    entry_points={"console_scripts": ["ledfx = ledfx.__main__:main"]},
+    entry_points={"console_scripts": ["wls = wls.__main__:main"]},
 )

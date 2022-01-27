@@ -12,7 +12,7 @@ export interface BladeIconProps {
    */
   card?: boolean;
   /**
-   * examples: `wled`, `Light`, `mdi:led-strip`
+   * examples: `rml`, `Light`, `mdi:led-strip`
    */
   name?: string;
   /**

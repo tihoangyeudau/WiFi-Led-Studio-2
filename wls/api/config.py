@@ -4,11 +4,11 @@ from json import JSONDecodeError
 import voluptuous as vol
 from aiohttp import web
 
-from ledfx.api import RestEndpoint
-from ledfx.api.utils import PERMITTED_KEYS
-from ledfx.config import CORE_CONFIG_SCHEMA, WLED_CONFIG_SCHEMA, save_config
-from ledfx.effects.audio import AudioInputSource
-from ledfx.effects.melbank import Melbanks
+from wls.api import RestEndpoint
+from wls.api.utils import PERMITTED_KEYS
+from wls.config import CORE_CONFIG_SCHEMA, RML_CONFIG_SCHEMA, save_config
+from wls.effects.audio import AudioInputSource
+from wls.effects.melbank import Melbanks
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ class ConfigEndpoint(RestEndpoint):
 
     async def get(self, request) -> web.Response:
         """
-        Get complete ledfx config.
+        Get complete wls config.
         You may ask for a specific key/keys in the request body
         eg. "audio" will return audio config
         eg. ["audio", "melbanks"] will return audio and melbanks config
@@ -60,14 +60,14 @@ class ConfigEndpoint(RestEndpoint):
 
         response = {}
         for key in keys:
-            config = self._ledfx.config.get(key)
+            config = self._wls.config.get(key)
 
             if key == "audio":
                 config = AudioInputSource.AUDIO_CONFIG_SCHEMA.fget()(config)
             elif key == "melbanks":
                 config = Melbanks.CONFIG_SCHEMA(config)
-            elif key == "wled_preferences":
-                config = WLED_CONFIG_SCHEMA(config)
+            elif key == "rml_preferences":
+                config = RML_CONFIG_SCHEMA(config)
 
             response[key] = config
 
@@ -75,13 +75,13 @@ class ConfigEndpoint(RestEndpoint):
 
     async def delete(self) -> web.Response:
         """
-        Resets config to defaults and restarts ledfx
+        Resets config to defaults and restarts wls
         """
-        self._ledfx.config = CORE_CONFIG_SCHEMA({})
+        self._wls.config = CORE_CONFIG_SCHEMA({})
 
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
         response = {
@@ -92,13 +92,13 @@ class ConfigEndpoint(RestEndpoint):
             },
         }
 
-        self._ledfx.loop.call_soon_threadsafe(self._ledfx.stop, 4)
+        self._wls.loop.call_soon_threadsafe(self._wls.stop, 4)
 
         return web.json_response(data=response, status=200)
 
     async def post(self, request) -> web.Response:
         """
-        Loads a complete config and restarts ledfx
+        Loads a complete config and restarts wls
         """
         try:
             config = await request.json()
@@ -106,8 +106,8 @@ class ConfigEndpoint(RestEndpoint):
             audio_config = AudioInputSource.AUDIO_CONFIG_SCHEMA.fget()(
                 config.pop("audio", {})
             )
-            wled_config = WLED_CONFIG_SCHEMA(
-                config.pop("wled_preferences", {})
+            rml_config = RML_CONFIG_SCHEMA(
+                config.pop("rml_preferences", {})
             )
             melbanks_config = Melbanks.CONFIG_SCHEMA(
                 config.pop("melbanks", {})
@@ -115,17 +115,17 @@ class ConfigEndpoint(RestEndpoint):
             core_config = CORE_CONFIG_SCHEMA(config)
 
             core_config["audio"] = audio_config
-            core_config["wled_preferences"] = wled_config
+            core_config["rml_preferences"] = rml_config
             core_config["melbanks"] = melbanks_config
 
-            self._ledfx.config = core_config
+            self._wls.config = core_config
 
             save_config(
-                config=self._ledfx.config,
-                config_dir=self._ledfx.config_dir,
+                config=self._wls.config,
+                config_dir=self._wls.config_dir,
             )
 
-            self._ledfx.loop.call_soon_threadsafe(self._ledfx.stop, 4)
+            self._wls.loop.call_soon_threadsafe(self._wls.stop, 4)
 
             return web.json_response(data={"status": "success"}, status=200)
 
@@ -144,7 +144,7 @@ class ConfigEndpoint(RestEndpoint):
 
     async def put(self, request) -> web.Response:
         """
-        Updates ledfx config
+        Updates wls config
         """
         try:
             config = await request.json()
@@ -154,10 +154,10 @@ class ConfigEndpoint(RestEndpoint):
                 AudioInputSource.AUDIO_CONFIG_SCHEMA.fget(),
                 "audio",
             )
-            wled_config = validate_and_trim_config(
-                config.pop("wled_preferences", {}),
-                WLED_CONFIG_SCHEMA,
-                "wled_preferences",
+            rml_config = validate_and_trim_config(
+                config.pop("rml_preferences", {}),
+                RML_CONFIG_SCHEMA,
+                "rml_preferences",
             )
             melbanks_config = validate_and_trim_config(
                 config.pop("melbanks", {}), Melbanks.CONFIG_SCHEMA, "melbanks"
@@ -166,42 +166,42 @@ class ConfigEndpoint(RestEndpoint):
                 config, CORE_CONFIG_SCHEMA, "core"
             )
 
-            self._ledfx.config["audio"].update(audio_config)
-            self._ledfx.config["melbanks"].update(melbanks_config)
-            self._ledfx.config.update(core_config)
+            self._wls.config["audio"].update(audio_config)
+            self._wls.config["melbanks"].update(melbanks_config)
+            self._wls.config.update(core_config)
 
-            # handle special case wled_preferences nested dict
-            for key in wled_config:
-                if key in self._ledfx.config["wled_preferences"]:
-                    self._ledfx.config["wled_preferences"][key].update(
-                        wled_config[key]
+            # handle special case rml_preferences nested dict
+            for key in rml_config:
+                if key in self._wls.config["rml_preferences"]:
+                    self._wls.config["rml_preferences"][key].update(
+                        rml_config[key]
                     )
                 else:
-                    self._ledfx.config["wled_preferences"][key] = wled_config[
+                    self._wls.config["rml_preferences"][key] = rml_config[
                         key
                     ]
 
             # TODO
-            # Do something if wled preferences config is updated
+            # Do something if rml preferences config is updated
 
             if (
-                hasattr(self._ledfx, "audio")
-                and self._ledfx.audio is not None
+                hasattr(self._wls, "audio")
+                and self._wls.audio is not None
                 and audio_config
             ):
-                self._ledfx.audio.update_config(self._ledfx.config["audio"])
+                self._wls.audio.update_config(self._wls.config["audio"])
 
-            if hasattr(self._ledfx, "audio") and melbanks_config:
-                self._ledfx.audio.melbanks.update_config(
-                    self._ledfx.config["melbanks"]
+            if hasattr(self._wls, "audio") and melbanks_config:
+                self._wls.audio.melbanks.update_config(
+                    self._wls.config["melbanks"]
                 )
 
             if core_config:
-                self._ledfx.loop.call_soon_threadsafe(self._ledfx.stop, 4)
+                self._wls.loop.call_soon_threadsafe(self._wls.stop, 4)
 
             save_config(
-                config=self._ledfx.config,
-                config_dir=self._ledfx.config_dir,
+                config=self._wls.config,
+                config_dir=self._wls.config_dir,
             )
 
             return web.json_response(data={"status": "success"}, status=200)

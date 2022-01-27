@@ -20,7 +20,7 @@ class Gradient:
         where each color is associated with a % value for its position in the gradient
         """
         # If gradient is predefined, get the definition
-        gradient_str = LEDFX_GRADIENTS.get(gradient_str, gradient_str)
+        gradient_str = WLS_GRADIENTS.get(gradient_str, gradient_str)
         # Get mode
         mode, angle_colors = gradient_str.split("(", 1)
         mode.strip("-gradient")
@@ -61,8 +61,8 @@ def parse_color(color: (str, list, tuple)) -> RGB:
         if not isinstance(color, str):
             raise ValueError
         # Try to find the color in the pre-defined dict
-        if color in LEDFX_COLORS:
-            color = LEDFX_COLORS[color]
+        if color in WLS_COLORS:
+            color = WLS_COLORS[color]
         # Try to parse it as a HEX (with or without alpha)
         if color.startswith("#"):
             color = color.strip("#")
@@ -98,7 +98,7 @@ def validate_gradient(gradient: str) -> str:
     return gradient
 
 
-LEDFX_COLORS = {
+WLS_COLORS = {
     "red": "#ff0000",
     "orange-deep": "#ff2800",
     "orange": "#ff7800",
@@ -138,7 +138,7 @@ LEDFX_COLORS = {
     "violetred": "#d02090",
 }
 
-LEDFX_GRADIENTS = {
+WLS_GRADIENTS = {
     "Rainbow": "linear-gradient(90deg, rgb(255, 0, 0) 0%, rgb(255, 120, 0) 14%, rgb(255, 200, 0) 28%, rgb(0, 255, 0) 42%, rgb(0, 199, 140) 56%, rgb(0, 0, 255) 70%, rgb(128, 0, 128) 84%, rgb(255, 0, 178) 98%)",
     "Dancefloor": "linear-gradient(90deg, rgb(255, 0, 0) 0%, rgb(255, 0, 178) 50%, rgb(0, 0, 255) 100%)",
     "Plasma": "linear-gradient(90deg, rgb(0, 0, 255) 0%, rgb(128, 0, 128) 25%, rgb(255, 0, 0) 50%, rgb(255, 40, 0) 75%, rgb(255, 200, 0) 100%)",

@@ -7,9 +7,9 @@ import numpy as np
 import voluptuous as vol
 from aiohttp import web
 
-from ledfx.api import RestEndpoint
-from ledfx.events import Event
-from ledfx.utils import empty_queue
+from wls.api import RestEndpoint
+from wls.events import Event
+from wls.utils import empty_queue
 
 _LOGGER = logging.getLogger(__name__)
 MAX_PENDING_MESSAGES = 256
@@ -47,7 +47,7 @@ class WebsocketEndpoint(RestEndpoint):
 
     async def get(self, request) -> web.Response:
         try:
-            return await WebsocketConnection(self._ledfx).handle(request)
+            return await WebsocketConnection(self._wls).handle(request)
         except ConnectionResetError:
             _LOGGER.debug(
                 "Connection Reset Error on Websocket Connection - retrying."
@@ -55,8 +55,8 @@ class WebsocketEndpoint(RestEndpoint):
 
 
 class WebsocketConnection:
-    def __init__(self, ledfx):
-        self._ledfx = ledfx
+    def __init__(self, wls):
+        self._wls = wls
         self._socket = None
         self._listeners = {}
         self._receiver_task = None
@@ -169,14 +169,14 @@ class WebsocketConnection:
 
         _LOGGER.info("Websocket connected.")
 
-        self._receiver_task = asyncio.current_task(loop=self._ledfx.loop)
-        self._sender_task = self._ledfx.loop.create_task(self._sender())
+        self._receiver_task = asyncio.current_task(loop=self._wls.loop)
+        self._sender_task = self._wls.loop.create_task(self._sender())
 
         def shutdown_handler(e):
             self.close()
 
-        remove_listeners = self._ledfx.events.add_listener(
-            shutdown_handler, Event.LEDFX_SHUTDOWN
+        remove_listeners = self._wls.events.add_listener(
+            shutdown_handler, Event.WLS_SHUTDOWN
         )
 
         try:
@@ -237,7 +237,7 @@ class WebsocketConnection:
                 message.get("event_type"), message.get("event_filter")
             )
         )
-        self._listeners[message["id"]] = self._ledfx.events.add_listener(
+        self._listeners[message["id"]] = self._wls.events.add_listener(
             notify_websocket,
             message.get("event_type"),
             message.get("event_filter", {}),

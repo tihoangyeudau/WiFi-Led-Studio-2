@@ -2,7 +2,7 @@ import logging
 
 from aiohttp import web
 
-from ledfx.api import RestEndpoint
+from wls.api import RestEndpoint
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -14,7 +14,7 @@ class DeviceStatusEndpoint(RestEndpoint):
 
     async def get(self) -> web.Response:
         response = {"active": [], "inactive": []}
-        for virtual in self._ledfx.virtuals.values():
+        for virtual in self._wls.virtuals.values():
             if virtual.active_effect:
                 response["active"].append(virtual.id)
             else:

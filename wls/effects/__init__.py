@@ -1,14 +1,14 @@
 import colorsys
 import logging
 
-# from ledfx.effects.audio import FREQUENCY_RANGES
+# from wls.effects.audio import FREQUENCY_RANGES
 from functools import lru_cache
 
 import numpy as np
 import voluptuous as vol
 
-from ledfx.color import parse_color, validate_color
-from ledfx.utils import BaseRegistry, RegistryLoader
+from wls.color import parse_color, validate_color
+from wls.utils import BaseRegistry, RegistryLoader
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -231,8 +231,8 @@ class Effect(BaseRegistry):
         }
     )
 
-    def __init__(self, ledfx, config):
-        self._ledfx = ledfx
+    def __init__(self, wls, config):
+        self._wls = wls
         self._config = {}
         self.update_config(config)
 
@@ -363,8 +363,8 @@ class Effect(BaseRegistry):
 class Effects(RegistryLoader):
     """Thin wrapper around the effect registry that manages effects"""
 
-    PACKAGE_NAME = "ledfx.effects"
+    PACKAGE_NAME = "wls.effects"
 
-    def __init__(self, ledfx):
-        super().__init__(ledfx=ledfx, cls=Effect, package=self.PACKAGE_NAME)
-        self._ledfx.audio = None
+    def __init__(self, wls):
+        super().__init__(wls=wls, cls=Effect, package=self.PACKAGE_NAME)
+        self._wls.audio = None

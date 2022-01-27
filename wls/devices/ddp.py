@@ -4,7 +4,7 @@ import struct
 import numpy as np
 import voluptuous as vol
 
-from ledfx.devices import UDPDevice
+from wls.devices import UDPDevice
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -12,7 +12,7 @@ _LOGGER = logging.getLogger(__name__)
 class DDPDevice(UDPDevice):
     """DDP device support"""
 
-    # PORT = 4048
+    # PORT = 7979
     HEADER_LEN = 0x0A
     # DDP_ID_VIRTUAL     = 1
     # DDP_ID_CONFIG      = 250
@@ -42,13 +42,13 @@ class DDPDevice(UDPDevice):
             vol.Required(
                 "port",
                 description="Port for the UDP device",
-                default=4048,
+                default=7979,
             ): vol.All(int, vol.Range(min=1, max=65535)),
         }
     )
 
-    def __init__(self, ledfx, config):
-        super().__init__(ledfx, config)
+    def __init__(self, wls, config):
+        super().__init__(wls, config)
         self._device_type = "DDP"
         self.frame_count = 0
 

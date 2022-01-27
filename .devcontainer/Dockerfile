@@ -10,10 +10,10 @@ RUN echo "hi6"
 ARG INSTALL_NODE="true"
 ARG NODE_VERSION="lts/*"
 RUN if [ "${INSTALL_NODE}" = "true" ]; then su vscode -c "source /usr/local/share/nvm/nvm.sh && nvm install ${NODE_VERSION} 2>&1"; fi
-RUN python -m venv /ledfx/venv
-ENV PATH="/ledfx/venv/bin:$PATH"
+RUN python -m venv /wls/venv
+ENV PATH="/wls/venv/bin:$PATH"
 
-# Install dependencies and ledfx, remove unneeded packages
+# Install dependencies and wls, remove unneeded packages
 COPY .devcontainer/dev-apt-install.sh .
 RUN chmod +x dev-apt-install.sh && ./dev-apt-install.sh \
     && rm -rf dev-apt-install.sh
@@ -22,14 +22,14 @@ RUN chmod +x dev-apt-install.sh && ./dev-apt-install.sh \
 ### Create docker image from venv-image to install pip dependencies
 #
 FROM venv-image AS build-image
-COPY --from=venv-image /ledfx/venv /ledfx/venv
-ENV PATH="/ledfx/venv/bin:$PATH"
+COPY --from=venv-image /wls/venv /wls/venv
+ENV PATH="/wls/venv/bin:$PATH"
 
 RUN python -m pip install -U pip setuptools wheel \
-    && git clone --depth 1 https://github.com/LedFx/LedFx -b dev /ledfx-git
-    # && cd /ledfx-git/frontend \
+    && git clone --depth 1 https://github.com/Wls/Wls -b dev /wls-git
+    # && cd /wls-git/frontend \
     # && npm install -g yarn
-# WORKDIR /ledfx-git
+# WORKDIR /wls-git
 # RUN python -m pip install -r requirements.txt \
 #        -r requirements-dev.txt \
 #        -r docs/requirements-docs.txt \
@@ -37,7 +37,7 @@ RUN python -m pip install -U pip setuptools wheel \
 
 EXPOSE 8888/tcp
 EXPOSE 5353/udp
-ENTRYPOINT [ "ledfx"]
+ENTRYPOINT [ "wls"]
 
 # RUN frontend/npm install && npm start
 

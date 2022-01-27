@@ -5,8 +5,8 @@ from json import JSONDecodeError
 import voluptuous as vol
 from aiohttp import web
 
-from ledfx.api import RestEndpoint
-from ledfx.config import save_config
+from wls.api import RestEndpoint
+from wls.config import save_config
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ class EffectsEndpoint(RestEndpoint):
         """
         Get active effect configuration for a virtual
         """
-        virtual = self._ledfx.virtuals.get(virtual_id)
+        virtual = self._wls.virtuals.get(virtual_id)
         if virtual is None:
             response = {
                 "status": "failed",
@@ -42,7 +42,7 @@ class EffectsEndpoint(RestEndpoint):
         """
         Update the config of the active effect of a virtual
         """
-        virtual = self._ledfx.virtuals.get(virtual_id)
+        virtual = self._wls.virtuals.get(virtual_id)
         if virtual is None:
             response = {
                 "status": "failed",
@@ -75,7 +75,7 @@ class EffectsEndpoint(RestEndpoint):
             ignore_settings = ["brightness"]
             effect_config = {}
             effect_type = virtual.active_effect.type
-            effect = self._ledfx.effects.get_class(effect_type)
+            effect = self._wls.effects.get_class(effect_type)
             schema = effect.schema().schema
             for setting in schema.keys():
                 if setting in ignore_settings:
@@ -125,8 +125,8 @@ class EffectsEndpoint(RestEndpoint):
                     ),
                     None,
                 ):
-                    effect = self._ledfx.effects.create(
-                        ledfx=self._ledfx,
+                    effect = self._wls.effects.create(
+                        wls=self._wls,
                         type=effect_type,
                         config={
                             **virtual.active_effect.config,
@@ -140,8 +140,8 @@ class EffectsEndpoint(RestEndpoint):
 
             # handling a new effect
             else:
-                effect = self._ledfx.effects.create(
-                    ledfx=self._ledfx, type=effect_type, config=effect_config
+                effect = self._wls.effects.create(
+                    wls=self._wls, type=effect_type, config=effect_config
                 )
                 virtual.set_effect(effect)
 
@@ -153,7 +153,7 @@ class EffectsEndpoint(RestEndpoint):
             return web.json_response(data=response, status=202)
 
         # Update and save the configuration
-        for virtual in self._ledfx.config["virtuals"]:
+        for virtual in self._wls.config["virtuals"]:
             if virtual["id"] == virtual_id:
                 if not ("effect" in virtual):
                     virtual["effect"] = {}
@@ -162,8 +162,8 @@ class EffectsEndpoint(RestEndpoint):
                     break
 
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
         effect_response = {}
@@ -178,7 +178,7 @@ class EffectsEndpoint(RestEndpoint):
         """
         Set the active effect of a virtual
         """
-        virtual = self._ledfx.virtuals.get(virtual_id)
+        virtual = self._wls.virtuals.get(virtual_id)
         if virtual is None:
             response = {
                 "status": "failed",
@@ -215,7 +215,7 @@ class EffectsEndpoint(RestEndpoint):
             ]
             effect_config = {}
             effect_type = virtual.active_effect.type
-            effect = self._ledfx.effects.get_class(effect_type)
+            effect = self._wls.effects.get_class(effect_type)
             schema = effect.schema().schema
             for setting in schema.keys():
                 if setting in ignore_settings:
@@ -245,8 +245,8 @@ class EffectsEndpoint(RestEndpoint):
                 effect_config[setting.schema] = val
 
         # Create the effect and add it to the virtual
-        effect = self._ledfx.effects.create(
-            ledfx=self._ledfx, type=effect_type, config=effect_config
+        effect = self._wls.effects.create(
+            wls=self._wls, type=effect_type, config=effect_config
         )
         try:
             virtual.set_effect(effect)
@@ -258,7 +258,7 @@ class EffectsEndpoint(RestEndpoint):
             return web.json_response(data=response, status=202)
 
         # Update and save the configuration
-        for virtual in self._ledfx.config["virtuals"]:
+        for virtual in self._wls.config["virtuals"]:
             if virtual["id"] == virtual_id:
                 # if not ('effect' in virtual):
                 virtual["effect"] = {}
@@ -266,8 +266,8 @@ class EffectsEndpoint(RestEndpoint):
                 virtual["effect"]["config"] = effect_config
                 break
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
         effect_response = {}
@@ -279,7 +279,7 @@ class EffectsEndpoint(RestEndpoint):
         return web.json_response(data=response, status=200)
 
     async def delete(self, virtual_id) -> web.Response:
-        virtual = self._ledfx.virtuals.get(virtual_id)
+        virtual = self._wls.virtuals.get(virtual_id)
         if virtual is None:
             response = {
                 "status": "failed",
@@ -290,14 +290,14 @@ class EffectsEndpoint(RestEndpoint):
         # Clear the effect
         virtual.clear_effect()
 
-        for virtual in self._ledfx.config["virtuals"]:
+        for virtual in self._wls.config["virtuals"]:
             if virtual["id"] == virtual_id:
                 if "effect" in virtual:
                     del virtual["effect"]
                     break
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
         response = {"status": "success", "effect": {}}

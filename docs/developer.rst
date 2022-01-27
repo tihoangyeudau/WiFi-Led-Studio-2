@@ -17,12 +17,12 @@ You will see ``pip install -e .`` frequently in the documentation. Please see th
 Linux
 -------
 
-**1.** Clone the dev branch from the LedFx Github repository:
+**1.** Clone the dev branch from the Wls Github repository:
 
 .. code:: console
 
-    $ git clone https://github.com/LedFx/LedFx.git -b dev
-    $ cd LedFx
+    $ git clone https://github.com/Wls/Wls.git -b dev
+    $ cd Wls
 
 **2.** Install system dependencies via ``apt install``:
 
@@ -33,51 +33,51 @@ Linux
           portaudio19-dev \
           pulseaudio
 
-**3.** Install LedFx and its requirements using pip:
+**3.** Install Wls and its requirements using pip:
 
 .. code:: console
 
     $ pip install -r requirements-dev.txt
     $ pip install -e .
 
-**4.** This will let you run LedFx directly from your Git repository via:
+**4.** This will let you run Wls directly from your Git repository via:
 
 .. code:: console
 
-    $ ledfx --open-ui
+    $ wls --open-ui
 
 .. _macos-dev:
 
 macOS
 -------
 
-**1.** Clone the dev branch from the LedFx Github repository:
+**1.** Clone the dev branch from the Wls Github repository:
 
 .. code:: console
 
-    $ git clone https://github.com/LedFx/LedFx.git -b dev
-    $ cd ./LedFx
+    $ git clone https://github.com/Wls/Wls.git -b dev
+    $ cd ./Wls
 
-**2.** Create a python venv for LedFx with python>=3.7 and install dependencies:
+**2.** Create a python venv for Wls with python>=3.7 and install dependencies:
 
 .. code:: console
 
-    $ python3 -m venv ~/ledfx-venv
-    $ source ~/ledfx-venv/bin/activate
+    $ python3 -m venv ~/wls-venv
+    $ source ~/wls-venv/bin/activate
     $ brew install portaudio pulseaudio
 
-**3.** Install LedFx and its requirements using pip:
+**3.** Install Wls and its requirements using pip:
 
 .. code:: console
 
     $ pip install -r requirements-dev.txt
     $ pip install -e .
 
-**4.** This will let you run LedFx directly from your Git repository via:
+**4.** This will let you run Wls directly from your Git repository via:
 
 .. code:: console
 
-    $ ledfx --open-ui
+    $ wls --open-ui
 
 ------------------------------
 
@@ -85,22 +85,22 @@ macOS
    Frontend Development
 --------------------------
 
-Building the LedFx frontend is different from how the core backend is built. The frontend is based on React.js and thus
+Building the Wls frontend is different from how the core backend is built. The frontend is based on React.js and thus
 uses NPM as the core package management.
 
-.. note:: LedFx will need to be running in development mode for everything to work. To enable development mode,
-          open the ``config.json`` file in the ``.ledfx`` folder and set ``dev_mode: true``)
+.. note:: Wls will need to be running in development mode for everything to work. To enable development mode,
+          open the ``config.json`` file in the ``.wls`` folder and set ``dev_mode: true``)
 
 .. _linux-frontend:
 
 Linux
 -------
 
-.. note:: The following instructions assume you have already followed the steps above to :ref:`install the LedFx dev environment <linux-dev>`
+.. note:: The following instructions assume you have already followed the steps above to :ref:`install the Wls dev environment <linux-dev>`
 
 To get started, first install npm and all the requirements:
 
-**1.** Start in the LedFx repo directory:
+**1.** Start in the Wls repo directory:
 
 .. code:: console
 
@@ -109,16 +109,16 @@ To get started, first install npm and all the requirements:
     $ yarn
 
 The easiest way to test and validate your changes is to run a watcher that will automatically rebuild as you save and then
-just leave LedFx running in a separate command window.
+just leave Wls running in a separate command window.
 
-**2.** Start LedFx in development mode and start the watcher:
+**2.** Start Wls in development mode and start the watcher:
 
 .. code:: console
 
-    $ python3 ledfx
+    $ python3 wls
     $ yarn start
 
-At that point any change you make to the frontend will be recompiled and after a browser refresh LedFx will pick up the
+At that point any change you make to the frontend will be recompiled and after a browser refresh Wls will pick up the
 new files. After development and testing you will need to run a full build to generate the appropriate distribution files
 prior to submitting any changes.
 
@@ -133,7 +133,7 @@ prior to submitting any changes.
 macOS
 -------
 
-.. note:: The following instructions assume you have already followed the steps above to :ref:`install the LedFx dev environment <macos-dev>`
+.. note:: The following instructions assume you have already followed the steps above to :ref:`install the Wls dev environment <macos-dev>`
 
 **1.** Install nodejs and NPM requirements using `homebrew`_:
 
@@ -144,11 +144,11 @@ macOS
     $ cd ~/frontend
     $ yarn
 
-**2.** Start LedFx in developer mode and start the NPM watcher:
+**2.** Start Wls in developer mode and start the NPM watcher:
 
 .. code:: console
 
-    $ python3 ledfx
+    $ python3 wls
     $ yarn start
 
 **3.** When you are finished with your changes, build the frontend:

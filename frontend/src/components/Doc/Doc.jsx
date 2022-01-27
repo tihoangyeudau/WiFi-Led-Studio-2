@@ -33,7 +33,7 @@ function FrameWrapper() {
       ref={ref}
       onLoad={onLoad}
       id="myFrame"
-      src="https://yeonv.github.io/LedFx-Frontend-v2/docs/"
+      src="https://yeonv.github.io/Wls-Frontend-v2/docs/"
       width="100%"
       height={height}
       scrolling="no"
@@ -124,11 +124,11 @@ export default function Doc({
           </Toolbar>
         </AppBar>
         {FrameWrapper()}
-        {/* <API apiDescriptionUrl={"https://raw.githubusercontent.com/LedFx/ledfx_rewrite/main/api/openapi.yml"} /> */}
+        {/* <API apiDescriptionUrl={"https://raw.githubusercontent.com/Wls/wls_rewrite/main/api/openapi.yml"} /> */}
         {/* <API
           apiDescriptionDocument={configApiYaml}
-          basePath="LedFx-Frontend-v2/docs"
-          logo="https://github.com/LedFx/LedFx/raw/master/icons/discord.png"
+          basePath="Wls-Frontend-v2/docs"
+          logo="https://github.com/Wls/Wls/raw/master/icons/discord.png"
           router='memory'
         /> */}
       </Dialog>

@@ -134,12 +134,12 @@ const UICard = () => {
                 <SettingsSwitch checked={viewMode !== 'user'} onChange={(e) => viewMode === 'user' ? setViewMode("expert") : setViewMode("user")} />
             </div>
             {showFeatures['cloud'] && <div className={`${classes.settingsRow} step-settings-x `}>
-                <label>LedFx Cloud</label>
+                <label>Wls Cloud</label>
                 <SettingsSwitch checked={features['cloud']} onChange={(e) => setFeatures('cloud', !features['cloud'])} />
             </div>}
-            {showFeatures['wled'] && <div className={`${classes.settingsRow} step-settings-x `}>
-                <label>WLED Integration</label>
-                <SettingsSwitch checked={features['wled']} onChange={(e) => setFeatures('wled', !features['wled'])} />
+            {showFeatures['rml'] && <div className={`${classes.settingsRow} step-settings-x `}>
+                <label>RML Integration</label>
+                <SettingsSwitch checked={features['rml']} onChange={(e) => setFeatures('rml', !features['rml'])} />
             </div>}
             {showFeatures['integrations'] && <div className={`${classes.settingsRow} step-settings-x `}>
                 <label>Integrations</label>
@@ -191,10 +191,10 @@ const UICard = () => {
                     }}
                     margin="dense"
                     onBlur={(e) => {
-                        if (e.target.value === 'clear') { setViewMode('user'); setShowFeatures('streamto', false); setShowFeatures('dev', false); setShowFeatures('go', false); setShowFeatures('waves', false);setShowFeatures('effectfilter', false); setShowFeatures('cloud', false); setShowFeatures('wled', false); setShowFeatures('integrations', false); setShowFeatures('spotify', false); setShowFeatures('webaudio', false); setFeatures('streamto', false); setFeatures('waves', false); setFeatures('go', false); setFeatures('cloud', false);setFeatures('effectfilter', false); setFeatures('wled', false); setFeatures('dev', false); setFeatures('integrations', false); setFeatures('spotify', false); setFeatures('webaudio', false); window.localStorage.removeItem('ledfx-theme'); window.localStorage.setItem('BladeMod', 0); window.location.reload() }
-                        if (e.target.value === 'BladeIsYeon') { setViewMode('expert'); setShowFeatures('dev', true); setShowFeatures('go', true); setShowFeatures('streamto', true); setShowFeatures('cloud', true);setShowFeatures('effectfilter', true); setShowFeatures('waves', true); setShowFeatures('wled', true); setShowFeatures('integrations', true); setShowFeatures('spotify', true); setShowFeatures('webaudio', true); setFeatures('streamto', true); setFeatures('go', true); setFeatures('waves', true); setFeatures('cloud', true); setFeatures('wled', true); setFeatures('integrations', true);setFeatures('effectfilter', true); setFeatures('spotify', true); setFeatures('webaudio', true); window.localStorage.setItem('ledfx-theme', "DarkRed"); window.location.reload() }
+                        if (e.target.value === 'clear') { setViewMode('user'); setShowFeatures('streamto', false); setShowFeatures('dev', false); setShowFeatures('go', false); setShowFeatures('waves', false);setShowFeatures('effectfilter', false); setShowFeatures('cloud', false); setShowFeatures('rml', false); setShowFeatures('integrations', false); setShowFeatures('spotify', false); setShowFeatures('webaudio', false); setFeatures('streamto', false); setFeatures('waves', false); setFeatures('go', false); setFeatures('cloud', false);setFeatures('effectfilter', false); setFeatures('rml', false); setFeatures('dev', false); setFeatures('integrations', false); setFeatures('spotify', false); setFeatures('webaudio', false); window.localStorage.removeItem('wls-theme'); window.localStorage.setItem('BladeMod', 0); window.location.reload() }
+                        if (e.target.value === 'BladeIsYeon') { setViewMode('expert'); setShowFeatures('dev', true); setShowFeatures('go', true); setShowFeatures('streamto', true); setShowFeatures('cloud', true);setShowFeatures('effectfilter', true); setShowFeatures('waves', true); setShowFeatures('rml', true); setShowFeatures('integrations', true); setShowFeatures('spotify', true); setShowFeatures('webaudio', true); setFeatures('streamto', true); setFeatures('go', true); setFeatures('waves', true); setFeatures('cloud', true); setFeatures('rml', true); setFeatures('integrations', true);setFeatures('effectfilter', true); setFeatures('spotify', true); setFeatures('webaudio', true); window.localStorage.setItem('wls-theme', "DarkRed"); window.location.reload() }
                         if (e.target.value === 'BladeCloud') { setShowFeatures('cloud', true) }
-                        if (e.target.value === 'BladeWled') { setShowFeatures('wled', true) }
+                        if (e.target.value === 'BladeRml') { setShowFeatures('rml', true) }
                         if (e.target.value === 'BladeIntegrations') { setShowFeatures('integrations', true) }
                         if (e.target.value === 'BladeSpotify') { setShowFeatures('spotify', true) }
                         if (e.target.value === 'BladeWebaudio') { setShowFeatures('webaudio', true) }
@@ -202,7 +202,7 @@ const UICard = () => {
                         if (e.target.value === 'BladeStreamTo') { setShowFeatures('streamto', true) }
                         if (e.target.value === 'BladeEffectFilter') { setShowFeatures('effectfilter', true) }
                         if (e.target.value === 'BladeGo') { setShowFeatures('go', true) }
-                        if (e.target.value.startsWith('theme:')) { window.localStorage.setItem('ledfx-theme', e.target.value.replace('theme:', '')); window.location.reload() }
+                        if (e.target.value.startsWith('theme:')) { window.localStorage.setItem('wls-theme', e.target.value.replace('theme:', '')); window.location.reload() }
                     }}
                 />
             </div>}

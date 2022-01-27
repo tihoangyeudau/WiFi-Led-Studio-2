@@ -48,7 +48,7 @@ const steps = [
     content: (
       <div>
         <h2>Scan on startup</h2>
-        Scan for WLEDs on startup
+        Scan for RMLs on startup
       </div>
     ),
     style: {
@@ -105,8 +105,8 @@ const steps = [
     selector: '.step-settings-five',
     content: (
       <div>
-        <h2>WLED Integration</h2>
-        Finetune how LedFx should handle your WLEDs
+        <h2>RML Integration</h2>
+        Finetune how Wls should handle your RMLs
       </div>
     ),
     style: {
@@ -118,7 +118,7 @@ const steps = [
     content: (
       <div>
         <h2>Transitions</h2>
-          <p>Finetune how LedFx change from one effect to another</p>
+          <p>Finetune how Wls change from one effect to another</p>
         <div style={{ display: 'flex'}}>
         <img src={gif} />
         </div>
@@ -160,7 +160,7 @@ const TourSettings = ({ cally }) => {
         Tour
       </MenuItem>
       <Tour
-        steps={features["wled"] ? steps : steps.filter(s=>s.selector !== '.step-settings-five')}
+        steps={features["rml"] ? steps : steps.filter(s=>s.selector !== '.step-settings-five')}
         accentColor="#800000"
         isOpen={isTourOpen}
         onRequestClose={() => {

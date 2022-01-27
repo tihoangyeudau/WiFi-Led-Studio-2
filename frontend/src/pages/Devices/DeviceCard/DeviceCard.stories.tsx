@@ -26,8 +26,8 @@ const Template: ComponentStory<typeof DeviceCard> = (args) => (
 
 export const Default = Template.bind({});
 Default.args = {
-  deviceName: 'My Wled',
-  iconName: 'wled',
+  deviceName: 'Đèn của tôi',
+  iconName: 'rml',
   effectName: 'Super Effect',
   isEffectSet: true,
   isPlaying: true,

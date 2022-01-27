@@ -23,7 +23,7 @@ import numpy as np
 import requests
 import voluptuous as vol
 
-from ledfx.config import save_config
+from wls.config import save_config
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -224,22 +224,22 @@ def git_version():
     return GIT_REVISION
 
 
-class WLED:
+class RML:
     """
-    A collection of WLED helper functions
+    A collection of RML helper functions
     """
 
-    SYNC_MODES = {"DDP": 4048, "E131": 5568, "ARTNET": 6454}
+    SYNC_MODES = {"DDP": 7979, "E131": 6868, "ARTNET": 3939}
 
     def __init__(self, ip_address):
         self.ip_address = ip_address
         self.reboot_flag = False
 
     async def get_sync_settings(self):
-        self.sync_settings = await WLED._get_sync_settings(self.ip_address)
+        self.sync_settings = await RML._get_sync_settings(self.ip_address)
 
     @staticmethod
-    async def _wled_request(
+    async def _rml_request(
         method, ip_address, endpoint, timeout=0.5, **kwargs
     ):
         url = f"http://{ip_address}/{endpoint}"
@@ -248,12 +248,12 @@ class WLED:
             response = method(url, timeout=timeout, **kwargs)
 
         except requests.exceptions.RequestException:
-            msg = f"WLED {ip_address}: Failed to connect"
+            msg = f"RML {ip_address}: Failed to connect"
             self._online = False
             raise ValueError(msg)
 
         if not response.ok:
-            msg = f"WLED {ip_address}: API Error - {response.status_code}"
+            msg = f"RML {ip_address}: API Error - {response.status_code}"
             raise ValueError(msg)
 
         return response
@@ -261,19 +261,19 @@ class WLED:
     @staticmethod
     async def _get_sync_settings(ip_address):
 
-        response = await WLED._wled_request(
+        response = await RML._rml_request(
             requests.get, ip_address, "json/cfg"
         )
         return response.json()
 
     async def flush_sync_settings(self):
         """
-        JSON API call to flush wled sync settings to the device. Will reboot if required.
+        JSON API call to flush rml sync settings to the device. Will reboot if required.
         """
         # {'rb': True} must be sent to the '/state' endpoint
         # if self.reboot_flag:
         #     self.sync_settings["rb"] = True
-        await WLED._wled_request(
+        await RML._rml_request(
             requests.post,
             self.ip_address,
             "json/cfg",
@@ -283,38 +283,38 @@ class WLED:
 
     async def get_config(self):
         """
-            Uses a JSON API call to determine if the device is WLED or WLED compatible
+            Uses a JSON API call to determine if the device is RML or RML compatible
             and return its config.
-            Specifically searches for "WLED" in the brand json - currently all major
-            branches/forks of WLED contain WLED in the branch data.
+            Specifically searches for "RML" in the brand json - currently all major
+            branches/forks of RML contain RML in the branch data.
         Returns:
-            config: dict, with all wled configuration info
+            config: dict, with all rml configuration info
         """
         _LOGGER.info(
-            f"WLED {self.ip_address}: Attempting to contact device..."
+            f"RML {self.ip_address}: Attempting to contact device..."
         )
-        response = await WLED._wled_request(
+        response = await RML._rml_request(
             requests.get, self.ip_address, "json/info"
         )
 
-        wled_config = response.json()
+        rml_config = response.json()
 
-        if not wled_config["brand"] in "WLED":
-            msg = f"WLED {self.ip_address}: Not a compatible WLED brand '{wled_config['brand']}'"
+        if not rml_config["brand"] in "RML":
+            msg = f"RML {self.ip_address}: Not a compatible RML brand '{rml_config['brand']}'"
             raise ValueError(msg)
 
-        _LOGGER.info(f"WLED {self.ip_address}: Received config")
+        _LOGGER.info(f"RML {self.ip_address}: Received config")
 
-        return wled_config
+        return rml_config
 
     async def get_state(self):
         """
-            Uses a JSON API call to determine the full WLED device state
+            Uses a JSON API call to determine the full RML device state
 
         Returns:
             state, dict. Full device state
         """
-        response = await WLED._wled_request(
+        response = await RML._rml_request(
             requests.get, self.ip_address, "json/state"
         )
 
@@ -322,7 +322,7 @@ class WLED:
 
     async def get_power_state(self):
         """
-            Uses a JSON API call to determine the WLED device power state (on/off)
+            Uses a JSON API call to determine the RML device power state (on/off)
 
         Args:
             ip_address (string): The device IP to be queried
@@ -333,7 +333,7 @@ class WLED:
 
     async def get_segments(self):
         """
-            Uses a JSON API call to determine the WLED segment setup
+            Uses a JSON API call to determine the RML segment setup
 
         Args:
             ip_address (string): The device IP to be queried
@@ -344,23 +344,23 @@ class WLED:
 
     async def set_power_state(self, state):
         """
-            Uses a JSON API post call to set the power of a WLED compatible device on/off
+            Uses a JSON API post call to set the power of a RML compatible device on/off
 
         Args:
             state (bool): on/off
         """
         power = {"on": True if state else False}
-        await WLED._wled_request(
+        await RML._rml_request(
             requests.post, self.ip_address, "/json/state", data=power
         )
 
         _LOGGER.info(
-            f"WLED {self.ip_address}: Turned {'on' if state else 'off'}."
+            f"RML {self.ip_address}: Turned {'on' if state else 'off'}."
         )
 
     async def set_brightness(self, brightness):
         """
-            Uses a JSON API post call to adjust a WLED compatible device's
+            Uses a JSON API post call to adjust a RML compatible device's
             brightness
 
         Args:
@@ -370,12 +370,12 @@ class WLED:
         brightness = max(0, max(int(brightness), 255))
         bri = {"bri": brightness}
 
-        await WLED._wled_request(
+        await RML._rml_request(
             requests.post, self.ip_address, "/json/state", data=bri
         )
 
         _LOGGER.info(
-            f"WLED {self.ip_address}: Set brightness to {brightness}."
+            f"RML {self.ip_address}: Set brightness to {brightness}."
         )
 
     def enable_realtime_gamma(self):
@@ -388,7 +388,7 @@ class WLED:
         self.sync_settings["if"]["live"]["no-gc"] = False
 
         _LOGGER.info(
-            f"WLED {self.ip_address}: Enabled realtime gamma correction"
+            f"RML {self.ip_address}: Enabled realtime gamma correction"
         )
 
     def force_max_brightness(self):
@@ -399,7 +399,7 @@ class WLED:
         """
         self.sync_settings["if"]["live"]["maxbri"] = True
 
-        _LOGGER.info(f"WLED {self.ip_address}: Enabled force max brightness")
+        _LOGGER.info(f"RML {self.ip_address}: Enabled force max brightness")
 
     def multirgb_dmx_mode(self):
         """
@@ -409,7 +409,7 @@ class WLED:
         """
         self.sync_settings["if"]["live"]["dmx"]["mode"] = 4
 
-        _LOGGER.info(f"WLED {self.ip_address}: Enabled Multi RGB")
+        _LOGGER.info(f"RML {self.ip_address}: Enabled Multi RGB")
 
     def first_universe(self):
         """
@@ -419,7 +419,7 @@ class WLED:
         """
         self.sync_settings["if"]["live"]["dmx"]["uni"] = 1
 
-        _LOGGER.info(f"WLED {self.ip_address}: Set first Universe = 1")
+        _LOGGER.info(f"RML {self.ip_address}: Set first Universe = 1")
 
     def first_dmx_address(self):
         """
@@ -429,7 +429,7 @@ class WLED:
         """
         self.sync_settings["if"]["live"]["dmx"]["addr"] = 1
 
-        _LOGGER.info(f"WLED {self.ip_address}: Set first DMX address = 1")
+        _LOGGER.info(f"RML {self.ip_address}: Set first DMX address = 1")
 
     def get_inactivity_timeout(self):
         """
@@ -441,7 +441,7 @@ class WLED:
 
     def set_inactivity_timeout(self, timeout=2.5):
         """
-        Updates internal sync settings to set timeout for wled effect virtual after ledfx streaming finishes
+        Updates internal sync settings to set timeout for rml effect virtual after wls streaming finishes
 
         Args:
             timeout: int/float, seconds
@@ -453,7 +453,7 @@ class WLED:
         self.sync_settings["if"]["live"]["timeout"] = timeout * 10
 
         _LOGGER.info(
-            f"Set WLED device at {self.ip_address} timeout to {timeout}s"
+            f"Set RML device at {self.ip_address} timeout to {timeout}s"
         )
 
     def set_sync_mode(self, mode):
@@ -465,7 +465,7 @@ class WLED:
         """
         mode = mode.upper()
 
-        assert mode in WLED.SYNC_MODES.keys()
+        assert mode in RML.SYNC_MODES.keys()
 
         if mode == "udp":
             # if realtime udp is already enabled, we're good to go
@@ -479,33 +479,33 @@ class WLED:
             # for clarity, this is a reverse dict lookup
             if mode == self.get_sync_mode():
                 return
-            port = WLED.SYNC_MODES[mode]
+            port = RML.SYNC_MODES[mode]
             self.sync_settings["if"]["live"]["port"] = port
 
         self.reboot_flag = True
 
         _LOGGER.info(
-            f"Set WLED device at {self.ip_address} to sync mode '{mode}'"
+            f"Set RML device at {self.ip_address} to sync mode '{mode}'"
         )
 
     def get_sync_mode(self):
         """
         Reverse dict lookup of current sync mode by port
 
-        {"if": {"live": {"port": 5568|6454|4048}}}
+        {"if": {"live": {"port": 6868|3939|7979}}}
         """
         sync_port = self.sync_settings["if"]["live"]["port"]
 
         return next(
-            key for key, value in WLED.SYNC_MODES.items() if value == sync_port
+            key for key, value in RML.SYNC_MODES.items() if value == sync_port
         )
 
     async def reboot(self):
         """
-        JSON API Post to reboot wled device
+        JSON API Post to reboot rml device
         """
         reboot = {"rb": True}
-        await WLED._wled_request(
+        await RML._rml_request(
             requests.post,
             self.ip_address,
             "/json/state",
@@ -531,8 +531,8 @@ async def resolve_destination(
     """Uses asyncio's non blocking DNS funcs to attempt domain lookup
 
     Args:
-        loop: ledfx event loop (ledfx.loop)
-        executor: ledfx executor (ledfx.thread_executor)
+        loop: wls event loop (wls.loop)
+        executor: wls executor (wls.thread_executor)
         destination (string): The domain name to be resolved.
         timeout, optional (int/float): timeout for the operation
 
@@ -611,15 +611,15 @@ def getattr_explicit(cls, attr, *default):
 class UserDefaultCollection(MutableMapping):
     """
     A collection of default values and user defined values.
-    User defined values are saved automatically in LedFx config.
+    User defined values are saved automatically in Wls config.
     Items can be retrieved by name as if user and default values are a single dictionary.
     Validator is a callable that returns sanitised value or raises ValueError if there's a problem
-    Parser is a callable that translates config values into a valid form for ledfx to use
+    Parser is a callable that translates config values into a valid form for wls to use
     """
 
     def __init__(
         self,
-        ledfx,
+        wls,
         collection_name: str,
         defaults: dict,
         user: str,
@@ -629,12 +629,12 @@ class UserDefaultCollection(MutableMapping):
         """
         collection_name: friendly description of the collection
         defaults: dict of default values
-        user: ledfx config key for user values
+        user: wls config key for user values
         """
-        self._ledfx = ledfx
+        self._wls = wls
         self._collection_name = collection_name
         self._default_vals = defaults
-        self._user_vals = self._ledfx.config[user]
+        self._user_vals = self._wls.config[user]
         self._validator = validator
         self._parser = parser
 
@@ -654,7 +654,7 @@ class UserDefaultCollection(MutableMapping):
     def __delitem__(self, key):
         if key in self._default_vals:
             _LOGGER.error(
-                f"Cannot delete LedFx {self._collection_name}: {key}"
+                f"Cannot delete Wls {self._collection_name}: {key}"
             )
             return
         if key in self._user_vals:
@@ -663,14 +663,14 @@ class UserDefaultCollection(MutableMapping):
             f"Deleted {self._collection_name.lower().rstrip('s')}: {key}"
         )
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
     def __setitem__(self, key, value):
         if key in self._default_vals:
             _LOGGER.error(
-                f"Cannot overwrite LedFx {self._collection_name}: {key}"
+                f"Cannot overwrite Wls {self._collection_name}: {key}"
             )
             return
         self._user_vals[key] = self._validator(value)
@@ -678,8 +678,8 @@ class UserDefaultCollection(MutableMapping):
             f"Saved {self._collection_name.lower().rstrip('s')}: {key}"
         )
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
     def __iter__(self):
@@ -789,20 +789,20 @@ class BaseRegistry(ABC):
 class RegistryLoader:
     """Manages loading of components for a given registry"""
 
-    def __init__(self, ledfx, cls, package):
+    def __init__(self, wls, cls, package):
         self._package = package
         self._cls = cls
         self._objects = {}
         self._object_id = 1
 
-        self._ledfx = ledfx
+        self._wls = wls
         self.import_registry(package)
 
         # If running in developer mode autoreload the registry when any file
         # within the package changes.
-        # Check ledfx is not running as a single exe built using pyinstaller
+        # Check wls is not running as a single exe built using pyinstaller
         # (sys frozen flag).
-        if ledfx.dev_enabled() and not currently_frozen():
+        if wls.dev_enabled() and not currently_frozen():
             import_or_install("watchdog")
             watchdog_events = import_or_install("watchdog.events")
             watchdog_observers = import_or_install("watchdog.observers")

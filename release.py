@@ -5,11 +5,11 @@ import re
 import shutil
 import subprocess
 
-from ledfx.consts import MAJOR_VERSION, MICRO_VERSION, MINOR_VERSION
+from wls.consts import MAJOR_VERSION, MICRO_VERSION, MINOR_VERSION
 
 
 def write_version(major, minor, micro):
-    with open("ledfx/consts.py") as fil:
+    with open("wls/consts.py") as fil:
         content = fil.read()
 
     content = re.sub(
@@ -22,7 +22,7 @@ def write_version(major, minor, micro):
         "MICRO_VERSION = .*\n", f"MICRO_VERSION = {micro}\n", content
     )
 
-    with open("ledfx/consts.py", "wt") as fil:
+    with open("wls/consts.py", "wt") as fil:
         content = fil.write(content)
 
 
@@ -32,7 +32,7 @@ def execute_command(command):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Release a new version of LedFx"
+        description="Release a new version of Wls"
     )
     parser.add_argument(
         "type", help="The type of release", choices=["major", "minor", "micro"]

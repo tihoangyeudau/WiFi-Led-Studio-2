@@ -1,7 +1,7 @@
 import isElectron from 'is-electron';
 import create from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { Ledfx } from './apiProxy';
+import { Wls } from './apiProxy';
 
 const useStore = create(
   persist(
@@ -9,7 +9,7 @@ const useStore = create(
 
       host: isElectron() ? 'http://localhost:8888' : window.location.href.split('#')[0],
       setHost: (host) => {
-        window.localStorage.setItem('ledfx-host', host.title ? host.title : host);
+        window.localStorage.setItem('wls-host', host.title ? host.title : host);
         return set((state) => ({
           host,
         }));
@@ -20,7 +20,7 @@ const useStore = create(
       features: {
         dev: false,
         cloud: false,
-        wled: false,
+        rml: false,
         integrations: false,
         spotify: false,
         webaudio: false,
@@ -40,7 +40,7 @@ const useStore = create(
       showFeatures: {
         dev: false,
         cloud: false,
-        wled: false,
+        rml: false,
         integrations: false,
         spotify: false,
         webaudio: false,
@@ -242,13 +242,13 @@ const useStore = create(
       // API
       devices: {},
       getDevices: async () => {
-        const resp = await Ledfx('/api/devices', set);
+        const resp = await Wls('/api/devices', set);
         if (resp && resp.devices) {
           set({ devices: resp.devices });
         }
       },
       getDevice: async (deviceId) => {
-        const resp = await Ledfx(`/api/devices/${deviceId}`, set);
+        const resp = await Wls(`/api/devices/${deviceId}`, set);
         if (resp && resp.data) {
           return {
             key: deviceId,
@@ -260,14 +260,14 @@ const useStore = create(
           };
         }
       },
-      addDevice: async (config) => await Ledfx(
+      addDevice: async (config) => await Wls(
         `/api/devices`,
         set,
         'POST',
         config,
       ),
       activateDevice: async (deviceId) => {
-        const resp = await Ledfx(
+        const resp = await Wls(
           `/api/devices/${deviceId}`,
           set,
           'POST',
@@ -280,7 +280,7 @@ const useStore = create(
           }
         }
     },
-      updateDevice: async (deviceId, config) => await Ledfx(
+      updateDevice: async (deviceId, config) => await Wls(
         `/api/devices/${deviceId}`,
         set,
         'PUT',
@@ -289,7 +289,7 @@ const useStore = create(
 
       virtuals: {},
       getVirtuals: async () => {
-        const resp = await Ledfx('/api/virtuals', set);
+        const resp = await Wls('/api/virtuals', set);
         if (resp) {
           set({ paused: resp.paused });
           if (resp && resp.virtuals) {
@@ -297,13 +297,13 @@ const useStore = create(
           }
         }
       },
-      addVirtual: async (config) => await Ledfx(
+      addVirtual: async (config) => await Wls(
         `/api/virtuals`,
         set,
         'POST',
         config,
       ),
-      updateVirtual: async (virtId, { active }) => await Ledfx(
+      updateVirtual: async (virtId, { active }) => await Wls(
         `/api/virtuals/${virtId}`,
         set,
         'PUT',
@@ -311,18 +311,18 @@ const useStore = create(
           active: active
         },
       ),
-      deleteVirtual: async (virtId) => await Ledfx(
+      deleteVirtual: async (virtId) => await Wls(
         `/api/virtuals/${virtId}`,
         set,
         'DELETE',
       ),
-      clearVirtualEffect: async (virtId) => await Ledfx(
+      clearVirtualEffect: async (virtId) => await Wls(
         `/api/virtuals/${virtId}/effects`,
         set,
         'DELETE',
       ),
       setVirtualEffect: async (virtId, { type, config, active }) => {
-        const resp = await Ledfx(
+        const resp = await Wls(
           `/api/virtuals/${virtId}/effects`,
           set,
           'POST',
@@ -350,7 +350,7 @@ const useStore = create(
         }
       },
       updateVirtualEffect: async (virtId, { type, config, active }) => {
-        const resp = await Ledfx(
+        const resp = await Wls(
           `/api/virtuals/${virtId}/effects`,
           set,
           'PUT',
@@ -379,7 +379,7 @@ const useStore = create(
         }
       },
       updateVirtualSegments: async ({ virtId, segments }) => {
-        const resp = await Ledfx(
+        const resp = await Wls(
           `/api/virtuals/${virtId}`,
           set,
           'POST',
@@ -408,18 +408,18 @@ const useStore = create(
 
       presets: {},
       getPresets: async (effectId) => {
-        const resp = await Ledfx(`/api/effects/${effectId}/presets`, set);
+        const resp = await Wls(`/api/effects/${effectId}/presets`, set);
         if (resp && resp.status === 'success') {
           set({ presets: resp });
         }
       },
-      addPreset: async (effectId, name) => await Ledfx(
+      addPreset: async (effectId, name) => await Wls(
         `/api/virtuals/${effectId}/presets`,
         set,
         'POST',
         { name }
       ),
-      activatePreset: async (virtId, category, effectType, presetId) => await Ledfx(
+      activatePreset: async (virtId, category, effectType, presetId) => await Wls(
         `/api/virtuals/${virtId}/presets`,
         set,
         'PUT',
@@ -429,7 +429,7 @@ const useStore = create(
           preset_id: presetId,
         },
       ),
-      deletePreset: async (effectId, presetId) => await Ledfx(
+      deletePreset: async (effectId, presetId) => await Wls(
         `/api/effects/${effectId}/presets`,
         set,
         'DELETE',
@@ -442,19 +442,19 @@ const useStore = create(
       ),
       colors: {},
       getColors: async () => {
-        const resp = await Ledfx(`/api/colors`, set);
+        const resp = await Wls(`/api/colors`, set);
         if (resp ) {
           set({ colors: resp });
         }
       },
       // HERE API DOC
-      addColor: async (config) => await Ledfx(
+      addColor: async (config) => await Wls(
         `/api/colors`,
         set,
         'POST',
         { ...config } // { 'name': 'string' }
       ),
-      deleteColors: async (colorkey) => await Ledfx(
+      deleteColors: async (colorkey) => await Wls(
         `/api/colors`,
         set,
         'DELETE',
@@ -465,18 +465,18 @@ const useStore = create(
       
       scenes: {},
       getScenes: async () => {
-        const resp = await Ledfx('/api/scenes', set);
+        const resp = await Wls('/api/scenes', set);
         if (resp && resp.scenes) {
           set({ scenes: resp.scenes });
         }
       },
-      addScene: async ({ name, scene_image }) => await Ledfx(
+      addScene: async ({ name, scene_image }) => await Wls(
         '/api/scenes',
         set,
         'POST',
         { name, scene_image },
       ),
-      activateScene: async ({ id }) => await Ledfx(
+      activateScene: async ({ id }) => await Wls(
         '/api/scenes',
         set,
         'PUT',
@@ -486,7 +486,7 @@ const useStore = create(
         },
 
       ),
-      deleteScene: async (name) => await Ledfx(
+      deleteScene: async (name) => await Wls(
         '/api/scenes',
         set,
         'DELETE',
@@ -495,30 +495,30 @@ const useStore = create(
 
       integrations: {},
       getIntegrations: async () => {
-        const resp = await Ledfx('/api/integrations', set);
+        const resp = await Wls('/api/integrations', set);
         if (resp && resp.integrations) {
           set({ integrations: resp.integrations });
         }
       },
-      addIntegration: async (config) => await Ledfx(
+      addIntegration: async (config) => await Wls(
         `/api/integrations`,
         set,
         'POST',
         config,
       ),
-      updateIntegration: async (config) => await Ledfx(
+      updateIntegration: async (config) => await Wls(
         `/api/integrations`,
         set,
         'POST',
         config,
       ),
-      toggleIntegration: async (config) => await Ledfx(
+      toggleIntegration: async (config) => await Wls(
         `/api/integrations`,
         set,
         'PUT',
         config,
       ),
-      deleteIntegration: async (config) => await Ledfx(
+      deleteIntegration: async (config) => await Wls(
         `/api/integrations`,
         set,
         'DELETE',
@@ -527,7 +527,7 @@ const useStore = create(
 
       schemas: {},
       getSchemas: async () => {
-        const resp = await Ledfx('/api/schema', set);
+        const resp = await Wls('/api/schema', set);
         if (resp) {
           set({ schemas: resp });
         }
@@ -535,27 +535,27 @@ const useStore = create(
 
       config: {},
       getSystemConfig: async () => {
-        const resp = await Ledfx('/api/config', set);
+        const resp = await Wls('/api/config', set);
         if (resp && resp.host) {
-          set({ config: { ...resp, ...{ ledfx_presets: undefined, devices: undefined, virtuals: undefined, virtuals: undefined, integrations: undefined, scenes: undefined } } });
+          set({ config: { ...resp, ...{ wls_presets: undefined, devices: undefined, virtuals: undefined, virtuals: undefined, integrations: undefined, scenes: undefined } } });
         } else {
           set({ dialogs: { nohost: { open: true } } });
         }
       },
       getFullConfig: async () => {
-        const resp = await Ledfx('/api/config', set);
+        const resp = await Wls('/api/config', set);
         if (resp && resp.host) {
-          return { ...resp, ...{ ledfx_presets: undefined } };
+          return { ...resp, ...{ wls_presets: undefined } };
         } else {
           set({ dialogs: { nohost: { open: true } } });
         }
       },
-      setSystemConfig: async ({ config }) => await Ledfx('/api/config', set, 'PUT', config),
-      deleteSystemConfig: async () => await Ledfx('/api/config', set, 'DELETE'),
-      importSystemConfig: async (config) => await Ledfx('/api/config', set, 'POST', config),
+      setSystemConfig: async ({ config }) => await Wls('/api/config', set, 'PUT', config),
+      deleteSystemConfig: async () => await Wls('/api/config', set, 'DELETE'),
+      importSystemConfig: async (config) => await Wls('/api/config', set, 'POST', config),
 
       scanForDevices: async () => {
-        const resp = await Ledfx('/api/find_devices', set, 'POST', {});
+        const resp = await Wls('/api/find_devices', set, 'POST', {});
         if (resp && resp.status === 'success') {
 
         } else {
@@ -565,22 +565,22 @@ const useStore = create(
 
       paused: false,
       togglePause: async () => {
-        const resp = await Ledfx('/api/virtuals', set, 'PUT', {});
+        const resp = await Wls('/api/virtuals', set, 'PUT', {});
         if (resp && resp.paused) {
           set({ paused: resp.paused })
         }
       },     
 
-      shutdown: async () => await Ledfx('/api/power', set, 'POST', {
+      shutdown: async () => await Wls('/api/power', set, 'POST', {
         timeout: 0,
         action: 'shutdown',
       }),
-      restart: async () => await Ledfx('/api/power', set, 'POST', {
+      restart: async () => await Wls('/api/power', set, 'POST', {
         timeout: 0,
         action: 'restart',
       }),
-      getInfo: async () => await Ledfx('/api/info', set),
-      getPing: async (virtId) => await Ledfx(`/api/ping/${virtId}`, set),
+      getInfo: async () => await Wls('/api/info', set),
+      getPing: async (virtId) => await Wls(`/api/ping/${virtId}`, set),
      
     
     })),

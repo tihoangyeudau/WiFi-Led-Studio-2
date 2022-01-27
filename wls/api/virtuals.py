@@ -3,9 +3,9 @@ from json import JSONDecodeError
 
 from aiohttp import web
 
-from ledfx.api import RestEndpoint
-from ledfx.config import save_config
-from ledfx.utils import generate_id
+from wls.api import RestEndpoint
+from wls.config import save_config
+from wls.utils import generate_id
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -20,8 +20,8 @@ class VirtualsEndpoint(RestEndpoint):
         Get info of all virtuals
         """
         response = {"status": "success", "virtuals": {}}
-        response["paused"] = self._ledfx.virtuals._paused
-        for virtual in self._ledfx.virtuals.values():
+        response["paused"] = self._wls.virtuals._paused
+        for virtual in self._wls.virtuals.values():
             response["virtuals"][virtual.id] = {
                 "config": virtual.config,
                 "id": virtual.id,
@@ -44,11 +44,11 @@ class VirtualsEndpoint(RestEndpoint):
         """
         Toggle "paused" state of all virtuals
         """
-        self._ledfx.virtuals.pause_all()
+        self._wls.virtuals.pause_all()
 
         response = {
             "status": "success",
-            "paused": self._ledfx.virtuals._paused,
+            "paused": self._wls.virtuals._paused,
         }
 
         return web.json_response(data=response, status=200)
@@ -78,7 +78,7 @@ class VirtualsEndpoint(RestEndpoint):
 
         # Update virtual config if id exists
         if virtual_id is not None:
-            virtual = self._ledfx.virtuals.get(virtual_id)
+            virtual = self._wls.virtuals.get(virtual_id)
             if virtual is None:
                 response = {
                     "status": "failed",
@@ -90,11 +90,11 @@ class VirtualsEndpoint(RestEndpoint):
             _LOGGER.info(
                 f"Updated virtual {virtual.id} config to {virtual_config}"
             )
-            # Update ledfx's config
-            for idx, item in enumerate(self._ledfx.config["virtuals"]):
+            # Update wls's config
+            for idx, item in enumerate(self._wls.config["virtuals"]):
                 if item["id"] == virtual.id:
                     item["config"] = virtual.config
-                    self._ledfx.config["virtuals"][idx] = item
+                    self._wls.config["virtuals"][idx] = item
                     break
         # Or, create new virtual if id does not exist
         else:
@@ -103,15 +103,15 @@ class VirtualsEndpoint(RestEndpoint):
             # Create the virtual
             _LOGGER.info(f"Creating virtual with config {virtual_config}")
 
-            virtual = self._ledfx.virtuals.create(
+            virtual = self._wls.virtuals.create(
                 id=virtual_id,
                 is_device=False,
                 config=virtual_config,
-                ledfx=self._ledfx,
+                wls=self._wls,
             )
 
             # Update the configuration
-            self._ledfx.config["virtuals"].append(
+            self._wls.config["virtuals"].append(
                 {
                     "id": virtual.id,
                     "config": virtual.config,
@@ -121,8 +121,8 @@ class VirtualsEndpoint(RestEndpoint):
 
         # Save config
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
         response = {

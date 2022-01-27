@@ -16,7 +16,7 @@
 
 .. toctree::
    :maxdepth: 2
-   :caption: LedFx API
+   :caption: Wls API
 
    api
 
@@ -29,4 +29,4 @@
 License
 -------
 
-LedFx is licensed under the MIT license.
+Wls is licensed under the MIT license.

@@ -3,10 +3,10 @@ from json import JSONDecodeError
 
 from aiohttp import web
 
-from ledfx.api import RestEndpoint
-from ledfx.config import save_config
-from ledfx.events import SceneActivatedEvent
-from ledfx.utils import generate_id
+from wls.api import RestEndpoint
+from wls.config import save_config
+from wls.events import SceneActivatedEvent
+from wls.utils import generate_id
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ class ScenesEndpoint(RestEndpoint):
         """Get all scenes"""
         response = {
             "status": "success",
-            "scenes": self._ledfx.config["scenes"],
+            "scenes": self._wls.config["scenes"],
         }
         return web.json_response(data=response, status=200)
 
@@ -43,7 +43,7 @@ class ScenesEndpoint(RestEndpoint):
             }
             return web.json_response(data=response, status=400)
 
-        if scene_id not in self._ledfx.config["scenes"].keys():
+        if scene_id not in self._wls.config["scenes"].keys():
             response = {
                 "status": "failed",
                 "reason": f"Scene {scene_id} does not exist",
@@ -51,12 +51,12 @@ class ScenesEndpoint(RestEndpoint):
             return web.json_response(data=response, status=400)
 
         # Delete the scene from configuration
-        del self._ledfx.config["scenes"][scene_id]
+        del self._wls.config["scenes"][scene_id]
 
         # Save the config
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
         response = {"status": "success"}
@@ -96,17 +96,17 @@ class ScenesEndpoint(RestEndpoint):
             }
             return web.json_response(data=response, status=400)
 
-        if scene_id not in self._ledfx.config["scenes"].keys():
+        if scene_id not in self._wls.config["scenes"].keys():
             response = {
                 "status": "failed",
                 "reason": f'Scene "{scene_id}" does not exist',
             }
             return web.json_response(data=response, status=400)
 
-        scene = self._ledfx.config["scenes"][scene_id]
+        scene = self._wls.config["scenes"][scene_id]
 
         if action == "activate":
-            for virtual in self._ledfx.virtuals.values():
+            for virtual in self._wls.virtuals.values():
                 # Check virtual is in scene, make no changes if it isn't
                 if virtual.id not in scene["virtuals"].keys():
                     # _LOGGER.info(
@@ -120,8 +120,8 @@ class ScenesEndpoint(RestEndpoint):
                 # clear active effect of virtual if no effect in scene
                 if scene["virtuals"][virtual.id]:
                     # Create the effect and add it to the virtual
-                    effect = self._ledfx.effects.create(
-                        ledfx=self._ledfx,
+                    effect = self._wls.effects.create(
+                        wls=self._wls,
                         type=scene["virtuals"][virtual.id]["type"],
                         config=scene["virtuals"][virtual.id]["config"],
                     )
@@ -129,7 +129,7 @@ class ScenesEndpoint(RestEndpoint):
                 else:
                     virtual.clear_effect()
 
-            self._ledfx.events.fire_event(SceneActivatedEvent(scene_id))
+            self._wls.events.fire_event(SceneActivatedEvent(scene_id))
             response = {
                 "status": "success",
                 "payload": {
@@ -139,7 +139,7 @@ class ScenesEndpoint(RestEndpoint):
             }
 
         elif action == "deactivate":
-            for virtual in self._ledfx.virtuals.values():
+            for virtual in self._wls.virtuals.values():
                 # Check virtual is in scene, make no changes if it isn't
                 if virtual.id not in scene["virtuals"].keys():
                     _LOGGER.info(
@@ -171,10 +171,10 @@ class ScenesEndpoint(RestEndpoint):
                 return web.json_response(data=response, status=400)
 
             # Update and save config
-            self._ledfx.config["scenes"][scene_id]["name"] = name
+            self._wls.config["scenes"][scene_id]["name"] = name
             save_config(
-                config=self._ledfx.config,
-                config_dir=self._ledfx.config_dir,
+                config=self._wls.config,
+                config_dir=self._wls.config_dir,
             )
 
             response = {
@@ -214,7 +214,7 @@ class ScenesEndpoint(RestEndpoint):
         scene_config["name"] = scene_name
         scene_config["virtuals"] = {}
         scene_config["scene_image"] = scene_image
-        for virtual in self._ledfx.virtuals.values():
+        for virtual in self._wls.virtuals.values():
             effect = {}
             if virtual.active_effect:
                 effect["type"] = virtual.active_effect.type
@@ -223,11 +223,11 @@ class ScenesEndpoint(RestEndpoint):
             scene_config["virtuals"][virtual.id] = effect
 
         # Update the scene if it already exists, else create it
-        self._ledfx.config["scenes"][scene_id] = scene_config
+        self._wls.config["scenes"][scene_id] = scene_config
 
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
         response = {

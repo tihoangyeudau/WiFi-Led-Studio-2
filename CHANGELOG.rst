@@ -31,9 +31,9 @@ What's new?
   - *EQ-Like Effects:* Blocks, Equalizer
   - *Other Effects:* Power, Magnitude
 
-- **Adalight Compatability**
+- **AmbilightUSB Compatability**
 
-  - *Adalight Device:* Use a COM port to communicate with your adalight-compatible device.
+  - *AmbilightUSB Device:* Use a COM port to communicate with your ambilightusb-compatible device.
 
 - **Scenes & Presets**
 
@@ -46,7 +46,7 @@ What's new?
   - New colour scheme.
   - More icons.
 
-- **Device Auto Discovery:** WLED devices on the network are automatically found at launch if no devices are present. Scan for WLED devices in Device Management.
+- **Device Auto Discovery:** RML devices on the network are automatically found at launch if no devices are present. Scan for RML devices in Device Management.
 
 - **Improved Documentation:** Better guides for installation across Win, Mac, and Linux
 
@@ -56,12 +56,12 @@ What's new?
 
 - **Dark Mode:** Choose from a few different themes for the web interface.
 
-- **Logging:** View LedFx logs live from the web interface. Access full logs at  ``~/.ledfx/LedFx.log`` (Linux/ Mac) or ``%APPDATA%/.ledfx/LedFx.log`` (Windows)
+- **Logging:** View Wls logs live from the web interface. Access full logs at  ``~/.wls/Wls.log`` (Linux/ Mac) or ``%APPDATA%/.wls/Wls.log`` (Windows)
 
 - **Bugfixes:** Chewing through them, slow and steady!
 
   - IP address resolution fixed for mDNS names.
-  - Broken Browser Installs (should) no longer break LedFx.
+  - Broken Browser Installs (should) no longer break Wls.
   - Some rare race conditions captured.
   - Devices can now be renamed - 2021, what a year!
   - Various libraries updated for new hotness and fix underlying issues.
@@ -71,7 +71,7 @@ Known Issues
 
 - **Audio Input Handling**
 
-  - LedFx might explode if you don't have a valid audio input stream. Sorry and whoops.
+  - Wls might explode if you don't have a valid audio input stream. Sorry and whoops.
 
 - **sACN Display Rate**
 
@@ -101,17 +101,17 @@ Coming up...
 Other News
 ----------
 
-.. _LedFx Website: https://ledfx.app
-.. |LedFx Website| replace:: **LedFx Website**
+.. _Wls Website: https://wls.app
+.. |Wls Website| replace:: **Wls Website**
 
-- |LedFx Website|_: We now have a website! Not much going on here save for hosting the Windows installer downloads.
+- |Wls Website|_: We now have a website! Not much going on here save for hosting the Windows installer downloads.
 
-- **Easy Windows Installation.** Windows users can download an installer that automatically updates LedFx with the latest features for you. `Windows installer download <https://ledfx.app/download/>`_
+- **Easy Windows Installation.** Windows users can download an installer that automatically updates Wls with the latest features for you. `Windows installer download <https://wls.app/download/>`_
 
 - **Automatic crash reporting with Sentry:** If something breaks, we'll know about it! Any errors will be automatically transmitted to the developers
   so we can fix them - in the unlikely event any sensitive personal data is transmitted with a crash report the developers will remove it as soon as possible.
-  The crash reporter we use is Sentry - you can see their `privacy policy <https://sentry.io/privacy/>`_ that developers are held to. The LedFx privacy policy
-  is pretty simple - we will use the logs to fix LedFx. We don't use any user analytics, user tracking or any of that.
+  The crash reporter we use is Sentry - you can see their `privacy policy <https://sentry.io/privacy/>`_ that developers are held to. The Wls privacy policy
+  is pretty simple - we will use the logs to fix Wls. We don't use any user analytics, user tracking or any of that.
 
 
 ----------------------------------------------
@@ -120,7 +120,7 @@ Other News
 Version 0.11.0
 =============
 
-- If device is WLED & active effect, than display WLED info
+- If device is RML & active effect, than display RML info
 
 Version 0.9.2
 =============
@@ -152,7 +152,7 @@ Version 0.8.0
     - More polished interface.
     - New colour scheme.
     - More icons.
-- **Device Auto Discovery.** WLED devices on the network are automatically found at launch if no devices are present. Scan for WLED devices in Device Management.
+- **Device Auto Discovery.** RML devices on the network are automatically found at launch if no devices are present. Scan for RML devices in Device Management.
 - **Improved Documentation.** better guides for installation across Win, Mac, and Linux
 
 Version 0.7.0

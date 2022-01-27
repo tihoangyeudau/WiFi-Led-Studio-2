@@ -7,10 +7,10 @@ venv_root = os.path.abspath(os.path.join(SPECPATH, '..'))
 block_cipher = None
 print(venv_root)
 
-a = Analysis([f'{spec_root}\\ledfx\\__main__.py'],
-             pathex=[f'{spec_root}', f'{spec_root}\\ledfx'],
+a = Analysis([f'{spec_root}\\wls\\__main__.py'],
+             pathex=[f'{spec_root}', f'{spec_root}\\wls'],
              binaries=[],
-             datas=[(f'{spec_root}/ledfx_frontend', 'ledfx_frontend/'), (f'{spec_root}/ledfx/', 'ledfx/'), (f'{spec_root}/icons', 'icons/'), (f'{spec_root}/icons/tray.png','.')],
+             datas=[(f'{spec_root}/wls_frontend', 'wls_frontend/'), (f'{spec_root}/wls/', 'wls/'), (f'{spec_root}/icons', 'icons/'), (f'{spec_root}/icons/tray.png','.')],
              hiddenimports=['sacn', 'sounddevice', 'aubio', 'numpy', 'math', 'voluptuous', 'numpy', 'aiohttp', 'aiohttp_jinja2',
              'sentry_sdk', 'sentry_sdk.integrations.django','sentry_sdk.integrations.flask','sentry_sdk.integrations.bottle','sentry_sdk.integrations.falcon','sentry_sdk.integrations.sanic',
              'sentry_sdk.integrations.celery','sentry_sdk.integrations.aiohttp','sentry_sdk.integrations.rq','sentry_sdk.integrations.tornado','sentry_sdk.integrations.sqlalchemy',
@@ -28,7 +28,7 @@ exe = EXE(pyz,
           a.scripts,
           [],
           exclude_binaries=True,
-          name='LedFx-BladeMOD',
+          name='Wls-BladeMOD',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
@@ -41,4 +41,4 @@ coll = COLLECT(exe,
                strip=False,
                upx=True,
                upx_exclude=[],
-               name='LedFx-BladeMOD')
+               name='Wls-BladeMOD')

@@ -2,7 +2,7 @@
 const IFrame = (args:any) => <iframe {...args} />
 
 export default {
-  title: 'API/LedFx API',
+  title: 'API/Wls API',
   component: IFrame,
   parameters: {
     options: {

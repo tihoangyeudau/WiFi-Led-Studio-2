@@ -8,12 +8,12 @@ import numpy as np
 import sounddevice as sd
 import voluptuous as vol
 
-import ledfx.api.websocket
-from ledfx.api.websocket import WEB_AUDIO_CLIENTS, WebAudioStream
-from ledfx.effects import Effect
-from ledfx.effects.math import ExpFilter
-from ledfx.effects.melbank import FFT_SIZE, MIC_RATE, Melbanks
-from ledfx.events import AudioDeviceChangeEvent, Event
+import wls.api.websocket
+from wls.api.websocket import WEB_AUDIO_CLIENTS, WebAudioStream
+from wls.effects import Effect
+from wls.effects.math import ExpFilter
+from wls.effects.melbank import FFT_SIZE, MIC_RATE, Melbanks
+from wls.events import AudioDeviceChangeEvent, Event
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -104,14 +104,14 @@ class AudioInputSource:
             extra=vol.ALLOW_EXTRA,
         )
 
-    def __init__(self, ledfx, config):
-        self._ledfx = ledfx
+    def __init__(self, wls, config):
+        self._wls = wls
         self.update_config(config)
 
         def deactivate(e):
             self.deactivate()
 
-        self._ledfx.events.add_listener(deactivate, Event.LEDFX_SHUTDOWN)
+        self._wls.events.add_listener(deactivate, Event.WLS_SHUTDOWN)
 
     def update_config(self, config):
         """Deactivate the audio, update the config, the reactivate"""
@@ -128,7 +128,7 @@ class AudioInputSource:
             old_input_device
             and self._config["audio_device"] is not old_input_device
         ):
-            self._ledfx.events.fire_event(
+            self._wls.events.fire_event(
                 AudioDeviceChangeEvent(
                     self.input_devices()[self._config["audio_device"]]
                 )
@@ -141,7 +141,7 @@ class AudioInputSource:
                 self._audio = sd
             except OSError as Error:
                 _LOGGER.critical(f"Error: {Error}. Shutting down.")
-                self._ledfx.stop()
+                self._wls.stop()
 
         # Enumerate all of the input devices and find the one matching the
         # configured host api and device name
@@ -230,7 +230,7 @@ class AudioInputSource:
         def open_audio_stream(device_idx):
             device = input_devices[device_idx]
             if hostapis[device["hostapi"]]["name"] == "WEB AUDIO":
-                ledfx.api.websocket.ACTIVE_AUDIO_STREAM = (
+                wls.api.websocket.ACTIVE_AUDIO_STREAM = (
                     self._stream
                 ) = WebAudioStream(
                     device["client"], self._audio_sample_callback
@@ -384,9 +384,9 @@ class AudioAnalysisSource(AudioInputSource):
         10000,
     ]
 
-    def __init__(self, ledfx, config):
+    def __init__(self, wls, config):
         config = self.CONFIG_SCHEMA(config)
-        super().__init__(ledfx, config)
+        super().__init__(wls, config)
         self.initialise_analysis()
 
         # Subscribe functions to be run on every frame of audio
@@ -401,7 +401,7 @@ class AudioAnalysisSource(AudioInputSource):
         # melbanks
         if not hasattr(self, "melbanks"):
             self.melbanks = Melbanks(
-                self._ledfx, self, self._ledfx.config.get("melbanks", {})
+                self._wls, self, self._wls.config.get("melbanks", {})
             )
 
         fft_params = (
@@ -674,15 +674,15 @@ class AudioReactiveEffect(Effect):
         _LOGGER.info("Activating AudioReactiveEffect.")
         super().activate(channel)
 
-        if not self._ledfx.audio or id(AudioAnalysisSource) != id(
-            self._ledfx.audio.__class__
+        if not self._wls.audio or id(AudioAnalysisSource) != id(
+            self._wls.audio.__class__
         ):
-            self._ledfx.audio = AudioAnalysisSource(
-                self._ledfx, self._ledfx.config.get("audio", {})
+            self._wls.audio = AudioAnalysisSource(
+                self._wls, self._wls.config.get("audio", {})
             )
 
-        self.audio = self._ledfx.audio
-        self._ledfx.audio.subscribe(self._audio_data_updated)
+        self.audio = self._wls.audio
+        self._wls.audio.subscribe(self._audio_data_updated)
 
     def deactivate(self):
         _LOGGER.info("Deactivating AudioReactiveEffect.")

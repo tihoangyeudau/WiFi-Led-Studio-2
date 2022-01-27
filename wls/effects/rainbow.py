@@ -1,7 +1,7 @@
 import voluptuous as vol
 
-from ledfx.effects import fill_rainbow
-from ledfx.effects.temporal import TemporalEffect
+from wls.effects import fill_rainbow
+from wls.effects.temporal import TemporalEffect
 
 
 class RainbowEffect(TemporalEffect):

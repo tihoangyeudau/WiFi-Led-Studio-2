@@ -494,7 +494,7 @@ def add_region():
         region.LED_STATE_MAPPINGS = []
 
         print(
-            f"LedFx has {len(INPUT_VISUAL_STATES)} visual states for each input:"
+            f"Wls has {len(INPUT_VISUAL_STATES)} visual states for each input:"
         )
         for i, x in enumerate(INPUT_VISUAL_STATES):
             print(f"{i}. {x}")
@@ -547,7 +547,7 @@ def configure_leds():
     )
     if led_on_msg_type != "note_on":
         print(
-            "This program is too dumb to configure LEDs that don't use 'note_on'. Please get in touch with LedFx developers on Discord for help."
+            "This program is too dumb to configure LEDs that don't use 'note_on'. Please get in touch with Wls developers on Discord for help."
         )
         mapping["led_config"] = False
         return False
@@ -591,7 +591,7 @@ def save_zip():
     with zipfile.ZipFile(json_path, "w", zipfile.ZIP_DEFLATED) as zip_file:
         zip_file.write(zip_path)
         print(f"Your mapping has also been saved as a zip file to {zip_path}")
-        print(f"You can upload this via GitHub to share with the community - https://github.com/LedFx/LedFx/issues/new?assignees=&labels=&template=midi_upload.md&title={uri_safe_midi_name}")
+        print(f"You can upload this via GitHub to share with the community - https://github.com/Wls/Wls/issues/new?assignees=&labels=&template=midi_upload.md&title={uri_safe_midi_name}")
 
 
 ########
@@ -644,7 +644,7 @@ except rtmidi._rtmidi.SystemError:
 ########
 
 mapping = Mapping()
-json_name = f"LedFxMidiMap {device_name}.json"
+json_name = f"WlsMidiMap {device_name}.json"
 zip_name = f"{json_name}.zip"
 zip_path = os.path.join(os.path.expanduser("~"), zip_name)
 json_path = os.path.join(os.path.expanduser("~"), json_name)
@@ -667,7 +667,7 @@ print(
     "You will define REGIONS of your midi device, eg. A ROW of SLIDERS, a MATRIX of BUTTONS (note - regions must have homogenous input types)"
 )
 print(
-    "You will also define an LED PROTOCOL for each region (so LedFx can turn your device lights on and off)"
+    "You will also define an LED PROTOCOL for each region (so Wls can turn your device lights on and off)"
 )
 print(
     "Finally, you will create an image of the midi device, showing the regions you created."

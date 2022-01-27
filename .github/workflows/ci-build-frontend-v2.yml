@@ -1,4 +1,4 @@
-name: CI Build LedFx Frontend v2
+name: CI Build Wls Frontend v2
 
 on:
   push:
@@ -9,8 +9,8 @@ on:
       - frontend_beta
 
 jobs:
-  build-ledfx-frontend-v2:
-    name: Build LedFx Frontend
+  build-wls-frontend-v2:
+    name: Build Wls Frontend
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -19,9 +19,9 @@ jobs:
       - name: Check out code from GitHub
         uses: actions/checkout@v2
         with:
-          repository: YeonV/LedFx-Frontend-v2
+          repository: YeonV/Wls-Frontend-v2
           ref: main
-          # path: ledfx-frontend-v2
+          # path: wls-frontend-v2
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:

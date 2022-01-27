@@ -3,9 +3,9 @@ from json import JSONDecodeError
 
 from aiohttp import web
 
-from ledfx.api import RestEndpoint
-from ledfx.config import save_config
-from ledfx.events import Event
+from wls.api import RestEndpoint
+from wls.config import save_config
+from wls.events import Event
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ class QLCEndpoint(RestEndpoint):
 
     async def get(self, integration_id) -> web.Response:
         """Get info from QLC+ integration"""
-        integration = self._ledfx.integrations.get(integration_id)
+        integration = self._wls.integrations.get(integration_id)
         if (integration is None) or (integration.type != "qlc"):
             response = {"not found": 404}
             return web.json_response(data=response, status=404)
@@ -26,12 +26,12 @@ class QLCEndpoint(RestEndpoint):
 
         # generate dict of {effect_id: effect_name}
         effect_names = []
-        for effect_type, effect in self._ledfx.effects.classes().items():
+        for effect_type, effect in self._wls.effects.classes().items():
             effect_names.append(effect.NAME)
 
         scene_names = []
-        for scene in self._ledfx.config["scenes"]:
-            scene_names.append(self._ledfx.config["scenes"][scene]["name"])
+        for scene in self._wls.config["scenes"]:
+            scene_names.append(self._wls.config["scenes"][scene]["name"])
 
         response["event_types"] = {
             Event.EFFECT_SET: {
@@ -56,7 +56,7 @@ class QLCEndpoint(RestEndpoint):
 
     async def put(self, integration_id, request) -> web.Response:
         """Toggle a QLC event listener"""
-        integration = self._ledfx.integrations.get(integration_id)
+        integration = self._wls.integrations.get(integration_id)
         if (integration is None) or (integration.type != "qlc"):
             response = {"not found": 404}
             return web.json_response(data=response, status=404)
@@ -102,13 +102,13 @@ class QLCEndpoint(RestEndpoint):
             return web.json_response(data=response, status=400)
 
         # Save the configuration (integration will handle modifying "data")
-        for _integration in self._ledfx.config["integrations"]:
+        for _integration in self._wls.config["integrations"]:
             if _integration["id"] == integration_id:
                 _integration["data"] = integration.data
                 break
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
         response = {"status": "success"}
@@ -116,7 +116,7 @@ class QLCEndpoint(RestEndpoint):
 
     async def post(self, integration_id, request) -> web.Response:
         """Add a new QLC event listener or update an existing one"""
-        integration = self._ledfx.integrations.get(integration_id)
+        integration = self._wls.integrations.get(integration_id)
         if (integration is None) or (integration.type != "qlc"):
             response = {"not found": 404}
             return web.json_response(data=response, status=404)
@@ -161,17 +161,17 @@ class QLCEndpoint(RestEndpoint):
             }
             return web.json_response(data=response, status=400)
 
-        # Create a link between ledfx event and sending the payload
+        # Create a link between wls event and sending the payload
         integration.create_event(event_type, event_filter, True, qlc_payload)
 
         # Update and save the configuration
-        for _integration in self._ledfx.config["integrations"]:
+        for _integration in self._wls.config["integrations"]:
             if _integration["id"] == integration_id:
                 _integration["data"] = integration.data
                 break
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
         response = {"status": "success"}
@@ -179,7 +179,7 @@ class QLCEndpoint(RestEndpoint):
 
     async def delete(self, integration_id, request) -> web.Response:
         """Delete a QLC event listener"""
-        integration = self._ledfx.integrations.get(integration_id)
+        integration = self._wls.integrations.get(integration_id)
         if (integration is None) or (integration.type != "qlc"):
             response = {"not found": 404}
             return web.json_response(data=response, status=404)
@@ -220,13 +220,13 @@ class QLCEndpoint(RestEndpoint):
         integration.delete_event(event_type, event_filter)
 
         # Save the configuration (integration will handle modifying "data")
-        for _integration in self._ledfx.config["integrations"]:
+        for _integration in self._wls.config["integrations"]:
             if _integration["id"] == integration_id:
                 _integration["data"] = integration.data
                 break
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
         response = {"status": "success"}

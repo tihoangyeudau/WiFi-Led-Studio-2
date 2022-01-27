@@ -3,9 +3,9 @@ from json import JSONDecodeError
 
 from aiohttp import web
 
-from ledfx.api import RestEndpoint
-from ledfx.config import save_config
-from ledfx.effects.audio import AudioInputSource
+from wls.api import RestEndpoint
+from wls.config import save_config
+from wls.effects.audio import AudioInputSource
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ class AudioDevicesEndpoint(RestEndpoint):
         """Get list of audio devices using sound device"""
 
         audio_config = AudioInputSource.AUDIO_CONFIG_SCHEMA.fget()(
-            self._ledfx.config.get("audio", {})
+            self._wls.config.get("audio", {})
         )
 
         response = {}
@@ -62,17 +62,17 @@ class AudioDevicesEndpoint(RestEndpoint):
             return web.json_response(data=response, status=400)
 
         # Update and save config
-        new_config = self._ledfx.config.get("audio", {})
+        new_config = self._wls.config.get("audio", {})
         new_config["device_index"] = int(index)
-        self._ledfx.config["audio"] = new_config
+        self._wls.config["audio"] = new_config
 
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
-        if self._ledfx.audio:
-            self._ledfx.audio.update_config(new_config)
+        if self._wls.audio:
+            self._wls.audio.update_config(new_config)
 
         response = {"status": "success"}
         return web.json_response(data=response, status=200)

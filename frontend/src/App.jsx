@@ -73,25 +73,25 @@ export default function App() {
 
   const { height, width } = useWindowDimensions();
 
-  let newBase = !!window.localStorage.getItem('ledfx-newbase');
+  let newBase = !!window.localStorage.getItem('wls-newbase');
 
   if (window.location.hash.indexOf('newCore=1') > -1) {
-    window.localStorage.setItem('ledfx-newbase', 1);
-    window.localStorage.setItem('ledfx-host', 'http://localhost:8080');
+    window.localStorage.setItem('wls-newbase', 1);
+    window.localStorage.setItem('wls-host', 'http://localhost:8080');
     newBase = 1;
   }
 
-  const ledfxTheme = !!window.localStorage.getItem('ledfx-theme')
-    ? window.localStorage.getItem('ledfx-theme')
+  const wlsTheme = !!window.localStorage.getItem('wls-theme')
+    ? window.localStorage.getItem('wls-theme')
     : !!window.localStorage.getItem('hassTokens')
     ? 'DarkBlue'
-    : window.location.origin === 'https://my.ledfx.app'
+    : window.location.origin === 'https://my.wls.app'
     ? 'DarkGreen'
     : isElectron()
     ? 'DarkOrange'
     : 'DarkRed';
 
-  const ledfxThemes = {
+  const wlsThemes = {
     Dark: BladeDarkTheme,
     DarkRed: BladeDarkTheme,
     DarkOrange: BladeDarkOrangeTheme,
@@ -109,20 +109,20 @@ export default function App() {
 
   useEffect(() => {
     if (features['go'] || window.location.hash.indexOf('newCore=1') > -1) {
-      window.localStorage.setItem('ledfx-newbase', 1);
+      window.localStorage.setItem('wls-newbase', 1);
       window.localStorage.removeItem('undefined');
-      window.localStorage.removeItem('ledfx-hosts');
+      window.localStorage.removeItem('wls-hosts');
       setShowFeatures('go', true);
       setFeatures('go', true);
       if (
-        window.localStorage.getItem('ledfx-host') !== 'http://localhost:8080'
+        window.localStorage.getItem('wls-host') !== 'http://localhost:8080'
       ) {
-        window.localStorage.setItem('ledfx-host', 'http://localhost:8080');
+        window.localStorage.setItem('wls-host', 'http://localhost:8080');
       }
       setHost('http://localhost:8080');
       newBase = true;
     } else {
-      window.localStorage.removeItem('ledfx-newbase');
+      window.localStorage.removeItem('wls-newbase');
       newBase = false;
     }
   }, []);
@@ -130,15 +130,15 @@ export default function App() {
   useEffect(() => {
     initFrontendConfig();
     console.info(
-      '%c Ledfx ' + '%c\n ReactApp by Blade ',
-      'padding: 10px 40px; color: #ffffff; border-radius: 5px 5px 0 0; background-image:url(https://my.ledfx.app/favicon/favicon-32x32.png); background-color: #800000; background-repeat: no-repeat; background-position: 10% 50%;',
+      '%c Wls ' + '%c\n ReactApp by Blade ',
+      'padding: 10px 40px; color: #ffffff; border-radius: 5px 5px 0 0; background-image:url(https://my.wls.app/favicon/favicon-32x32.png); background-color: #800000; background-repeat: no-repeat; background-position: 10% 50%;',
       'background: #fff; color: #800000; border-radius: 0 0 5px 5px;padding: 5px 0;'
     );
     // log("successSUCCESS", { id: 'test' })
     // log("warningWARNING", { id: 'test' })
     // log("infoINFO", { id: 'test' })
     if (features['go'] || window.location.hash.indexOf('newCore=1') > -1) {
-      window.localStorage.setItem('ledfx-host', 'http://localhost:8080');
+      window.localStorage.setItem('wls-host', 'http://localhost:8080');
     }
   }, []);
 
@@ -166,7 +166,7 @@ export default function App() {
 
   return (
     <ThemeProvider theme={BladeDarkGreyTheme5}>
-      <MuiThemeProvider theme={ledfxThemes[ledfxTheme || 'DarkRed']}>
+      <MuiThemeProvider theme={wlsThemes[wlsTheme || 'DarkRed']}>
         <SnackbarProvider maxSnack={5}>
           <WsContextNew.Provider value={wsNew}>
             <WsContext.Provider value={ws}>
@@ -209,10 +209,10 @@ export default function App() {
                 {features['waves'] && (
                   <WaveLines
                     startColor={
-                      ledfxThemes[ledfxTheme || 'DarkRed'].palette.primary.main
+                      wlsThemes[wlsTheme || 'DarkRed'].palette.primary.main
                     }
                     stopColor={
-                      ledfxThemes[ledfxTheme || 'DarkRed'].palette.accent
+                      wlsThemes[wlsTheme || 'DarkRed'].palette.accent
                         .main || '#ffdc0f'
                     }
                     width={width - 8}
@@ -226,13 +226,13 @@ export default function App() {
             // debug={true}
             // activateLogging={true}
             startAutomatically={false}
-            appId="Add LedFx-to-Homescreen React Live Demo"
+            appId="Add Wls-to-Homescreen React Live Demo"
             skipFirstVisit={false}
             displayPace={0}
             lifespan={60}
             // maxDisplayCount={5}
             customPromptContent={{
-              title: 'Do you want to add LedFx to your homescreen?',
+              title: 'Do you want to add Wls to your homescreen?',
               cancelMsg: 'X',
               installMsg: 'Add',
               guidanceCancelMsg: 'X',

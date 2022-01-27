@@ -18,7 +18,7 @@ const MessageBar = () => {
   }
 
   useEffect(() => {
-    if (isOpen && message !== 'NO MESSAGE' && window.localStorage.getItem('ledfx-newbase') === '1') {
+    if (isOpen && message !== 'NO MESSAGE' && window.localStorage.getItem('wls-newbase') === '1') {
       enqueueSnackbar(message, {
         variant: messageType,
         action: key => <Button onClick={() => { closeSnackbar(key) }}><Close /></Button>
@@ -26,7 +26,7 @@ const MessageBar = () => {
     }
   }, [isOpen, message])
 
-  return window.localStorage.getItem('ledfx-newbase') !== '1'
+  return window.localStorage.getItem('wls-newbase') !== '1'
     ? <Snackbar
       anchorOrigin={{
         vertical: 'bottom',

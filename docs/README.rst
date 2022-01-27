@@ -3,7 +3,7 @@
 --------------------------
 
 The documentation is written in reStructuredText. Once you are finished
-making changes, you must build the documentation. To build the LedFx
+making changes, you must build the documentation. To build the Wls
 documentation follow the steps outlined below:
 
 .. note:: Alternatively, you may run ``make livehtml`` in place of ``make html`` to open a browser and view your changes in
@@ -15,7 +15,7 @@ Linux
 
 .. code:: console
 
-    $ cd ~/ledfx/docs
+    $ cd ~/wls/docs
     $ pip install -r requirements-docs.txt
     $ make html
 
@@ -24,8 +24,8 @@ macOS
 
 .. code:: console
 
-    $ source ~/ledfx-venv/bin/activate
-    $ cd ~/ledfx/docs
+    $ source ~/wls-venv/bin/activate
+    $ cd ~/wls/docs
     $ pip install -r requirements-docs.txt
     $ make html
 

@@ -3,8 +3,8 @@ from json import JSONDecodeError
 
 from aiohttp import web
 
-from ledfx.api import RestEndpoint
-from ledfx.config import save_config
+from wls.api import RestEndpoint
+from wls.config import save_config
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ class PresetsEndpoint(RestEndpoint):
         """Get all presets for an effect"""
 
         try:
-            self._ledfx.effects.get_class(effect_id)
+            self._wls.effects.get_class(effect_id)
         except BaseException:
             response = {
                 "status": "failed",
@@ -26,13 +26,13 @@ class PresetsEndpoint(RestEndpoint):
             }
             return web.json_response(data=response, status=400)
 
-        if effect_id in self._ledfx.config["ledfx_presets"].keys():
-            default = self._ledfx.config["ledfx_presets"][effect_id]
+        if effect_id in self._wls.config["wls_presets"].keys():
+            default = self._wls.config["wls_presets"][effect_id]
         else:
             default = {}
 
-        if effect_id in self._ledfx.config["user_presets"].keys():
-            custom = self._ledfx.config["user_presets"][effect_id]
+        if effect_id in self._wls.config["user_presets"].keys():
+            custom = self._wls.config["user_presets"][effect_id]
         else:
             custom = {}
 
@@ -66,10 +66,10 @@ class PresetsEndpoint(RestEndpoint):
             }
             return web.json_response(data=response, status=400)
 
-        if category not in ["ledfx_presets", "user_presets"]:
+        if category not in ["wls_presets", "user_presets"]:
             response = {
                 "status": "failed",
-                "reason": 'Category {} is not "ledfx_presets" or "user_presets"'.format(
+                "reason": 'Category {} is not "wls_presets" or "user_presets"'.format(
                     category
                 ),
             }
@@ -82,7 +82,7 @@ class PresetsEndpoint(RestEndpoint):
             }
             return web.json_response(data=response, status=400)
 
-        if effect_id not in self._ledfx.config[category].keys():
+        if effect_id not in self._wls.config[category].keys():
             response = {
                 "status": "failed",
                 "reason": "Effect {} does not exist in category {}".format(
@@ -92,7 +92,7 @@ class PresetsEndpoint(RestEndpoint):
             return web.json_response(data=response, status=400)
 
         try:
-            self._ledfx.effects.get_class(effect_id)
+            self._wls.effects.get_class(effect_id)
         except BaseException:
             response = {
                 "status": "failed",
@@ -107,7 +107,7 @@ class PresetsEndpoint(RestEndpoint):
             }
             return web.json_response(data=response, status=400)
 
-        if preset_id not in self._ledfx.config[category][effect_id].keys():
+        if preset_id not in self._wls.config[category][effect_id].keys():
             response = {
                 "status": "failed",
                 "reason": "Preset {} does not exist for effect {} in category {}".format(
@@ -124,10 +124,10 @@ class PresetsEndpoint(RestEndpoint):
             return web.json_response(data=response, status=400)
 
         # Update and save config
-        self._ledfx.config[category][effect_id][preset_id]["name"] = name
+        self._wls.config[category][effect_id][preset_id]["name"] = name
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
         response = {"status": "success"}
@@ -153,10 +153,10 @@ class PresetsEndpoint(RestEndpoint):
             }
             return web.json_response(data=response, status=400)
 
-        if category not in ["ledfx_presets", "user_presets"]:
+        if category not in ["wls_presets", "user_presets"]:
             response = {
                 "status": "failed",
-                "reason": 'Category {} is not "ledfx_presets" or "user_presets"'.format(
+                "reason": 'Category {} is not "wls_presets" or "user_presets"'.format(
                     category
                 ),
             }
@@ -170,7 +170,7 @@ class PresetsEndpoint(RestEndpoint):
             return web.json_response(data=response, status=400)
 
         try:
-            self._ledfx.effects.get_class(effect_id)
+            self._wls.effects.get_class(effect_id)
         except BaseException:
             response = {
                 "status": "failed",
@@ -178,7 +178,7 @@ class PresetsEndpoint(RestEndpoint):
             }
             return web.json_response(data=response, status=400)
 
-        if effect_id not in self._ledfx.config[category].keys():
+        if effect_id not in self._wls.config[category].keys():
             response = {
                 "status": "failed",
                 "reason": "Effect {} does not exist in category {}".format(
@@ -194,7 +194,7 @@ class PresetsEndpoint(RestEndpoint):
             }
             return web.json_response(data=response, status=400)
 
-        if preset_id not in self._ledfx.config[category][effect_id].keys():
+        if preset_id not in self._wls.config[category][effect_id].keys():
             response = {
                 "status": "failed",
                 "reason": "Preset {} does not exist for effect {} in category {}".format(
@@ -204,12 +204,12 @@ class PresetsEndpoint(RestEndpoint):
             return web.json_response(data=response, status=400)
 
         # Delete the preset from configuration
-        del self._ledfx.config[category][effect_id][preset_id]
+        del self._wls.config[category][effect_id][preset_id]
 
         # Save the config
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
         response = {"status": "success"}

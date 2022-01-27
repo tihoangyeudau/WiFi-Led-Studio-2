@@ -4,7 +4,7 @@ import time
 import numpy as np
 import voluptuous as vol
 
-from ledfx.devices import UDPDevice, packets
+from wls.devices import UDPDevice, packets
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ class UDPRealtimeDevice(UDPDevice):
             vol.Required(
                 "port",
                 description="Port for the UDP device",
-                default=21324,
+                default=7778,
             ): vol.All(int, vol.Range(min=1, max=65535)),
             vol.Required(
                 "udp_packet_type",
@@ -44,8 +44,8 @@ class UDPRealtimeDevice(UDPDevice):
         }
     )
 
-    def __init__(self, ledfx, config):
-        super().__init__(ledfx, config)
+    def __init__(self, wls, config):
+        super().__init__(wls, config)
         self._device_type = "UDP Realtime"
         self.last_frame = np.full((config["pixel_count"], 3), -1)
         self.last_frame_sent_time = 0
@@ -114,7 +114,7 @@ class UDPRealtimeDevice(UDPDevice):
 
         else:  # fallback
             _LOGGER.warning(
-                f"UDP packet is configured incorrectly (please choose a packet that supports {self._config['pixel_count']} LEDs): https://kno.wled.ge/interfaces/udp-realtime/#udp-realtime \n Falling back to supported udp packet."
+                f"UDP packet is configured incorrectly (please choose a packet that supports {self._config['pixel_count']} LEDs): https://kno.rml.ge/interfaces/udp-realtime/#udp-realtime \n Falling back to supported udp packet."
             )
             if frame_size <= 490:  # DRGB
                 udpData = packets.build_drgb_packet(data, timeout)

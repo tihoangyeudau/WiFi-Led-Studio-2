@@ -3,7 +3,7 @@ from json import JSONDecodeError
 
 from aiohttp import web
 
-from ledfx.api import RestEndpoint
+from wls.api import RestEndpoint
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -14,7 +14,7 @@ class EffectsEndpoint(RestEndpoint):
 
     async def get(self) -> web.Response:
         response = {"status": "success", "effects": {}}
-        for virtual in self._ledfx.virtuals.values():
+        for virtual in self._wls.virtuals.values():
             if virtual.active_effect:
                 response["effects"][virtual.id] = {
                     "effect_type": virtual.active_effect.type,
@@ -49,7 +49,7 @@ class EffectsEndpoint(RestEndpoint):
 
         # Clear all effects on all devices
         if action == "clear_all_effects":
-            self._ledfx.virtuals.clear_all_effects()
+            self._wls.virtuals.clear_all_effects()
             response = {
                 "status": "success",
                 "payload": {

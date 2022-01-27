@@ -1,15 +1,15 @@
 import axios from 'axios';
 import isElectron from 'is-electron';
 
-const baseURL = isElectron() ? 'http://localhost:8888' : !!window.localStorage.getItem('ledfx-newbase') ? 'http://localhost:8080' : window.location.href.split('/#')[0] || 'http://localhost:8888';
-const storedURL = window.localStorage.getItem('ledfx-host');
+const baseURL = isElectron() ? 'http://localhost:8888' : !!window.localStorage.getItem('wls-newbase') ? 'http://localhost:8080' : window.location.href.split('/#')[0] || 'http://localhost:8888';
+const storedURL = window.localStorage.getItem('wls-host');
 
 const api = axios.create({
   baseURL: storedURL || baseURL,
 });
 
-export const Ledfx = async (path, set, method = 'GET', body) => {
-  const newBase = !!window.localStorage.getItem('ledfx-newbase')
+export const Wls = async (path, set, method = 'GET', body) => {
+  const newBase = !!window.localStorage.getItem('wls-newbase')
   // if (!newBase) {
     try {
       let response = null;

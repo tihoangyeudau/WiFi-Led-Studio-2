@@ -4,8 +4,8 @@ from json import JSONDecodeError
 import voluptuous as vol
 from aiohttp import web
 
-from ledfx.api import RestEndpoint
-from ledfx.config import save_config
+from wls.api import RestEndpoint
+from wls.config import save_config
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ class VirtualEndpoint(RestEndpoint):
         """
         Get a virtual's full config
         """
-        virtual = self._ledfx.virtuals.get(virtual_id)
+        virtual = self._wls.virtuals.get(virtual_id)
         if virtual is None:
             response = {
                 "status": "failed",
@@ -50,7 +50,7 @@ class VirtualEndpoint(RestEndpoint):
         """
         Set a virtual to active or inactive
         """
-        virtual = self._ledfx.virtuals.get(virtual_id)
+        virtual = self._wls.virtuals.get(virtual_id)
         if virtual is None:
             response = {
                 "status": "failed",
@@ -84,16 +84,16 @@ class VirtualEndpoint(RestEndpoint):
             }
             return web.json_response(data=response, status=202)
 
-        # Update ledfx's config
-        for idx, item in enumerate(self._ledfx.config["virtuals"]):
+        # Update wls's config
+        for idx, item in enumerate(self._wls.config["virtuals"]):
             if item["id"] == virtual.id:
                 item["active"] = virtual.active
-                self._ledfx.config["virtuals"][idx] = item
+                self._wls.config["virtuals"][idx] = item
                 break
 
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
         response = {"status": "success", "active": virtual.active}
@@ -103,7 +103,7 @@ class VirtualEndpoint(RestEndpoint):
         """
         Update a virtual's segments configuration
         """
-        virtual = self._ledfx.virtuals.get(virtual_id)
+        virtual = self._wls.virtuals.get(virtual_id)
         if virtual is None:
             response = {
                 "status": "failed",
@@ -139,16 +139,16 @@ class VirtualEndpoint(RestEndpoint):
             virtual.update_segments(old_segments)
             return web.json_response(data=response, status=202)
 
-        # Update ledfx's config
-        for idx, item in enumerate(self._ledfx.config["virtuals"]):
+        # Update wls's config
+        for idx, item in enumerate(self._wls.config["virtuals"]):
             if item["id"] == virtual.id:
                 item["segments"] = virtual.segments
-                self._ledfx.config["virtuals"][idx] = item
+                self._wls.config["virtuals"][idx] = item
                 break
 
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
         response = {"status": "success", "segments": virtual.segments}
@@ -160,7 +160,7 @@ class VirtualEndpoint(RestEndpoint):
         Handles deleting the device if the virtual is dedicated to a device
         Removes references to this virtual in any scenes
         """
-        virtual = self._ledfx.virtuals.get(virtual_id)
+        virtual = self._wls.virtuals.get(virtual_id)
         if virtual is None:
             response = {
                 "status": "failed",
@@ -170,38 +170,38 @@ class VirtualEndpoint(RestEndpoint):
 
         virtual.clear_effect()
         device_id = virtual.is_device
-        device = self._ledfx.devices.get(device_id)
+        device = self._wls.devices.get(device_id)
         if device is not None:
             device.remove_from_virtuals()
-            self._ledfx.devices.destroy(device_id)
+            self._wls.devices.destroy(device_id)
 
             # Update and save the configuration
-            self._ledfx.config["devices"] = [
+            self._wls.config["devices"] = [
                 _device
-                for _device in self._ledfx.config["devices"]
+                for _device in self._wls.config["devices"]
                 if _device["id"] != device_id
             ]
 
         # cleanup this virtual from any scenes
-        ledfx_scenes = self._ledfx.config["scenes"].copy()
-        for scene_id, scene_config in ledfx_scenes.items():
-            self._ledfx.config["scenes"][scene_id]["virtuals"] = {
+        wls_scenes = self._wls.config["scenes"].copy()
+        for scene_id, scene_config in wls_scenes.items():
+            self._wls.config["scenes"][scene_id]["virtuals"] = {
                 _virtual_id: effect
                 for _virtual_id, effect in scene_config["virtuals"].items()
                 if _virtual_id != virtual_id
             }
 
-        self._ledfx.virtuals.destroy(virtual_id)
+        self._wls.virtuals.destroy(virtual_id)
 
         # Update and save the configuration
-        self._ledfx.config["virtuals"] = [
+        self._wls.config["virtuals"] = [
             virtual
-            for virtual in self._ledfx.config["virtuals"]
+            for virtual in self._wls.config["virtuals"]
             if virtual["id"] != virtual_id
         ]
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
         response = {"status": "success"}

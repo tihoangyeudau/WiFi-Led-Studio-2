@@ -23,7 +23,7 @@ const ButtonBar = () => {
       <IconButton
         aria-label="Website"
         color="inherit"
-        href="https://ledfx.app/"
+        href="https://wls.app/"
         target="_blank"
         title="Website"
       >
@@ -32,7 +32,7 @@ const ButtonBar = () => {
       <IconButton
         aria-label="Github"
         color="inherit"
-        href="https://git.ledfx.app/"
+        href="https://git.wls.app/"
         target="_blank"
         title="Github"
       >

@@ -5,8 +5,8 @@ from concurrent import futures
 
 from aiohttp import web
 
-from ledfx.api import RestEndpoint
-from ledfx.events import Event
+from wls.api import RestEndpoint
+from wls.events import Event
 
 _LOGGER = logging.getLogger(__name__)
 LOG_HISTORY_MAXLEN = 30
@@ -16,16 +16,16 @@ class LogEndpoint(RestEndpoint):
 
     ENDPOINT_PATH = "/api/log"
 
-    def __init__(self, ledfx):
-        self.logwebsocket = LogWebsocket(ledfx, ledfx.logqueue)
+    def __init__(self, wls):
+        self.logwebsocket = LogWebsocket(wls, wls.logqueue)
 
     async def get(self, request) -> web.Response:
         return await self.logwebsocket.handle(request)
 
 
 class LogWebsocket:
-    def __init__(self, ledfx, queue):
-        self._ledfx = ledfx
+    def __init__(self, wls, queue):
+        self._wls = wls
         self._sender_queue = queue
         self._socket = None
         self._receiver_task = None
@@ -89,14 +89,14 @@ class LogWebsocket:
         await socket.prepare(request)
         _LOGGER.info("Logging websocket opened")
 
-        self._receiver_task = asyncio.current_task(loop=self._ledfx.loop)
-        self._sender_task = self._ledfx.loop.create_task(self._sender())
+        self._receiver_task = asyncio.current_task(loop=self._wls.loop)
+        self._sender_task = self._wls.loop.create_task(self._sender())
 
         def shutdown_handler(e):
             self.close()
 
-        remove_listeners = self._ledfx.events.add_listener(
-            shutdown_handler, Event.LEDFX_SHUTDOWN
+        remove_listeners = self._wls.events.add_listener(
+            shutdown_handler, Event.WLS_SHUTDOWN
         )
 
         try:

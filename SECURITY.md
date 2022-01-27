@@ -14,5 +14,5 @@ Our pip package will be rebuilt automatically when new releases are pushed - we 
 
 ## Reporting a Vulnerability
 
-Please contact us at ledfx.app@gmail.com with any security issues.
+Please contact us at wls.app@gmail.com with any security issues.
 Alternatively join our discord and tag @Developer - we will respond promptly.

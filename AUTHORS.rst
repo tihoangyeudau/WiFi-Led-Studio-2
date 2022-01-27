@@ -18,4 +18,4 @@ Developers:
 
 * `Chris Reese <https://github.com/THATDONFC>`_
 
-Special thanks to our `community developers! <https://github.com/LedFx/LedFx/graphs/contributors>`_
+Special thanks to our `community developers! <https://github.com/Wls/Wls/graphs/contributors>`_

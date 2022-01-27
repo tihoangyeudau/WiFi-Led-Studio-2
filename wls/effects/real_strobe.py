@@ -4,10 +4,10 @@ import time
 import numpy as np
 import voluptuous as vol
 
-from ledfx.color import parse_color, validate_color, validate_gradient
-from ledfx.effects.audio import AudioReactiveEffect
-from ledfx.effects.gradient import GradientEffect
-from ledfx.utils import empty_queue
+from wls.color import parse_color, validate_color, validate_gradient
+from wls.effects.audio import AudioReactiveEffect
+from wls.effects.gradient import GradientEffect
+from wls.utils import empty_queue
 
 
 class Strobe(AudioReactiveEffect, GradientEffect):

@@ -4,11 +4,11 @@ from json import JSONDecodeError
 
 from aiohttp import web
 
-from ledfx.api import RestEndpoint
-from ledfx.config import save_config
+from wls.api import RestEndpoint
+from wls.config import save_config
 
-# from ledfx.api.websocket import WebsocketConnection
-from ledfx.utils import generate_id
+# from wls.api.websocket import WebsocketConnection
+from wls.utils import generate_id
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ class IntegrationsEndpoint(RestEndpoint):
     async def get(self, request=None) -> web.Response:
         """Get info of all integrations"""
         response = {"status": "success", "integrations": {}}
-        for integration in self._ledfx.integrations.values():
+        for integration in self._wls.integrations.values():
             response["integrations"][integration.id] = {
                 "id": integration.id,
                 "type": integration.type,
@@ -41,7 +41,7 @@ class IntegrationsEndpoint(RestEndpoint):
                 }
                 return web.json_response(data=response, status=400)
             info = data.get("info")
-            for integration in self._ledfx.integrations.values():
+            for integration in self._wls.integrations.values():
                 if info not in response["integrations"][integration.id].keys():
                     response = {
                         "status": "failed",
@@ -72,7 +72,7 @@ class IntegrationsEndpoint(RestEndpoint):
             }
             return web.json_response(data=response, status=400)
 
-        integration = self._ledfx.integrations.get(integration_id)
+        integration = self._wls.integrations.get(integration_id)
         if integration is None:
             response = {"not found": 404}
             return web.Response(text=json.dumps(response), status=404)
@@ -86,13 +86,13 @@ class IntegrationsEndpoint(RestEndpoint):
             await integration.deactivate()
 
         # Update and save the configuration
-        for _integration in self._ledfx.config["integrations"]:
+        for _integration in self._wls.config["integrations"]:
             if _integration["id"] == integration.id:
                 _integration["active"] = not active
                 break
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
         response = {"status": "success"}
@@ -118,7 +118,7 @@ class IntegrationsEndpoint(RestEndpoint):
             }
             return web.json_response(data=response, status=400)
 
-        integration = self._ledfx.integrations.get(integration_id)
+        integration = self._wls.integrations.get(integration_id)
         if integration is None:
             response = {"not found": 404}
             return web.Response(text=json.dumps(response), status=404)
@@ -126,17 +126,17 @@ class IntegrationsEndpoint(RestEndpoint):
         if hasattr(integration, "on_delete"):
             await integration.on_delete()
 
-        self._ledfx.integrations.destroy(integration_id)
+        self._wls.integrations.destroy(integration_id)
 
-        self._ledfx.config["integrations"] = [
+        self._wls.config["integrations"] = [
             integration
-            for integration in self._ledfx.config["integrations"]
+            for integration in self._wls.config["integrations"]
             if integration["id"] != integration_id
         ]
 
         # Save the config
         save_config(
-            config=self._ledfx.config, config_dir=self._ledfx.config_dir
+            config=self._wls.config, config_dir=self._wls.config_dir
         )
 
         response = {"status": "success"}
@@ -181,7 +181,7 @@ class IntegrationsEndpoint(RestEndpoint):
             )
         else:
             # Update existing integration if valid id is given
-            existing_integration = self._ledfx.integrations.get(integration_id)
+            existing_integration = self._wls.integrations.get(integration_id)
 
             if existing_integration is None:
                 response = {
@@ -196,20 +196,20 @@ class IntegrationsEndpoint(RestEndpoint):
                 )
             )
 
-            self._ledfx.integrations.destroy(integration_id)
+            self._wls.integrations.destroy(integration_id)
 
-        integration = self._ledfx.integrations.create(
+        integration = self._wls.integrations.create(
             id=integration_id,
             type=integration_type,
             active=False,
             config=integration_config,
             data=None,
-            ledfx=self._ledfx,
+            wls=self._wls,
         )
 
         # Update and save the configuration
         if new:
-            self._ledfx.config["integrations"].append(
+            self._wls.config["integrations"].append(
                 {
                     "id": integration.id,
                     "type": integration.type,
@@ -219,15 +219,15 @@ class IntegrationsEndpoint(RestEndpoint):
                 }
             )
         else:
-            for integration in self._ledfx.config["integrations"]:
+            for integration in self._wls.config["integrations"]:
                 if integration["id"] == integration_id:
                     integration["config"] = integration_config
                     break
                     # Update and save the configuration
 
         save_config(
-            config=self._ledfx.config,
-            config_dir=self._ledfx.config_dir,
+            config=self._wls.config,
+            config_dir=self._wls.config_dir,
         )
 
         response = {"status": "success"}

@@ -109,8 +109,8 @@ const TopBar = () => {
     e.preventDefault();
     localStorage.removeItem('jwt');
     localStorage.removeItem('username');
-    localStorage.removeItem('ledfx-cloud-userid');
-    localStorage.removeItem('ledfx-cloud-role');
+    localStorage.removeItem('wls-cloud-userid');
+    localStorage.removeItem('wls-cloud-role');
     setIsLogged(false);
   };
 
@@ -121,7 +121,7 @@ const TopBar = () => {
   useEffect(() => {
     const handleDisconnect = (e) => {
       if (e.detail) {
-        if (window.localStorage.getItem('ledfx-newbase') !== '1') {
+        if (window.localStorage.getItem('wls-newbase') !== '1') {
           setDisconnected(e.detail.isDisconnected)
         }
         if (e.detail.isDisconnected === false) {
@@ -133,7 +133,7 @@ const TopBar = () => {
           }
         }
       }
-      if (window.localStorage.getItem('ledfx-newbase') === '1') {
+      if (window.localStorage.getItem('wls-newbase') === '1') {
         setDialogOpen(false, true)
       }
     }
@@ -170,7 +170,7 @@ const TopBar = () => {
         </div>
 
         <Typography variant="h6" noWrap>
-          {pathname === '/' ? `LedFx`
+          {pathname === '/' ? `Wls`
             : (pathname.split('/').length === 3 && pathname.split('/')[1] === 'device') ? virtuals[pathname.split('/')[2]]?.config.name
               : pathname.split('/').pop()}
         </Typography>
@@ -227,7 +227,7 @@ const TopBar = () => {
         >
           {features['cloud'] && isLogged && <MenuItem disabled divider>
             <ListItemIcon style={{ marginTop: -13 }}>
-              <StyledBadge badgeContent={localStorage.getItem('ledfx-cloud-role') === 'authenticated' ? 'logged in' : localStorage.getItem('ledfx-cloud-role')} color="secondary">
+              <StyledBadge badgeContent={localStorage.getItem('wls-cloud-role') === 'authenticated' ? 'logged in' : localStorage.getItem('wls-cloud-role')} color="secondary">
                 <GitHub />
               </StyledBadge>
             </ListItemIcon>

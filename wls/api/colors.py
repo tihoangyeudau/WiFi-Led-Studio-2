@@ -2,8 +2,8 @@ import logging
 
 from aiohttp import web
 
-from ledfx.api import RestEndpoint
-from ledfx.color import validate_color
+from wls.api import RestEndpoint
+from wls.color import validate_color
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -14,14 +14,14 @@ class ColorEndpoint(RestEndpoint):
 
     async def get(self) -> web.Response:
         """
-        Get LedFx colors and gradients
+        Get Wls colors and gradients
         """
         response = {
             "colors": dict(
-                zip(("builtin", "user"), self._ledfx.colors.get_all())
+                zip(("builtin", "user"), self._wls.colors.get_all())
             ),
             "gradients": dict(
-                zip(("builtin", "user"), self._ledfx.gradients.get_all())
+                zip(("builtin", "user"), self._wls.gradients.get_all())
             ),
         }
 
@@ -37,8 +37,8 @@ class ColorEndpoint(RestEndpoint):
         data = await request.json()
 
         for key in data:
-            del self._ledfx.colors[key]
-            del self._ledfx.gradients[key]
+            del self._wls.colors[key]
+            del self._wls.gradients[key]
 
         response = {
             "status": "success",
@@ -65,9 +65,9 @@ class ColorEndpoint(RestEndpoint):
             except ValueError:
                 is_color = False
             if is_color:
-                self._ledfx.colors[key] = val
+                self._wls.colors[key] = val
             else:
-                self._ledfx.gradients[key] = val
+                self._wls.gradients[key] = val
 
         response = {
             "status": "success",

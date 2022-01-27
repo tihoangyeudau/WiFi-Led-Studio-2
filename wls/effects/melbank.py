@@ -10,13 +10,13 @@ import numpy as np
 # import sounddevice as sd
 import voluptuous as vol
 
-import ledfx.effects.mel as mel
-from ledfx.effects import fast_blur_array
-from ledfx.effects.math import ExpFilter
-from ledfx.events import GraphUpdateEvent
+import wls.effects.mel as mel
+from wls.effects import fast_blur_array
+from wls.effects.math import ExpFilter
+from wls.events import GraphUpdateEvent
 
 # Since fft size and mic rate are tightly linked to melbank resolution,
-# they're defined here and imported into ledfx.audio
+# they're defined here and imported into wls.audio
 # good to have it all in one place (and avoids circular imports)
 # I've forced fft to use mic rate of 30000Hz even if mic is actually ~40000Hz.
 # This increases frequency resolution a lot and reduces latency a bit,
@@ -443,8 +443,8 @@ class Melbanks:
     DEFAULT_MELBANK_CONFIG = Melbank.MELBANK_CONFIG_SCHEMA({})
     # MELBANK_PRE_EMPHASIS = (0.0, 0.0, 0.0)  # 1.2, 2.0)
 
-    def __init__(self, ledfx, audio, config):
-        self._ledfx = ledfx
+    def __init__(self, wls, audio, config):
+        self._wls = wls
         self._audio = audio
         self.update_config(config)
 
@@ -499,8 +499,8 @@ class Melbanks:
                 self.melbanks[i][:] = 0
                 self.melbanks_filtered[i][:] = 0
 
-            if self._ledfx.dev_enabled():
-                self._ledfx.events.fire_event(
+            if self._wls.dev_enabled():
+                self._wls.events.fire_event(
                     GraphUpdateEvent(
                         f"melbank_{i}",
                         self.melbanks_filtered[i],
