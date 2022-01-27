@@ -24,7 +24,6 @@ from logging.handlers import RotatingFileHandler
 
 import psutil
 import yappi
-from pyupdater.client import Client
 
 import wls.config as config_helpers
 from wls.consts import (
@@ -35,9 +34,6 @@ from wls.consts import (
 )
 from wls.core import WlsCore
 from wls.utils import currently_frozen
-
-# Logger Variables
-PYUPDATERLOGLEVEL = 35
 
 
 def validate_python() -> None:
@@ -112,12 +108,9 @@ def setup_logging(loglevel, config_dir):
     root_logger.addHandler(console_handler)
     root_logger.addHandler(file_handler)
 
-    logging.addLevelName(PYUPDATERLOGLEVEL, "Updater")
-
     # Suppress some of the overly verbose logs
     logging.getLogger("sacn").setLevel(logging.WARNING)
     logging.getLogger("aiohttp.access").setLevel(logging.WARNING)
-    logging.getLogger("pyupdater").setLevel(logging.WARNING)
     logging.getLogger("zeroconf").setLevel(logging.WARNING)
 
     global _LOGGER
@@ -230,62 +223,6 @@ def installed_via_pip():
         return True
     else:
         return False
-
-
-def update_wls(icon=None):
-    # initialize & refresh in one update, check client
-
-    def notify(msg):
-        if icon and icon.HAS_NOTIFICATION:
-            icon.remove_notification()
-            icon.notify(msg)
-        _LOGGER.log(PYUPDATERLOGLEVEL, msg)
-
-    def log_status_info(info):
-        total = info.get("total")
-        downloaded = info.get("downloaded")
-        percent_complete = info.get("percent_complete")
-        time = info.get("time")
-        _LOGGER.log(
-            PYUPDATERLOGLEVEL,
-            f"{downloaded} of {total} [{percent_complete} complete, {time} remaining]",
-        )
-
-    class ClientConfig:
-        PUBLIC_KEY = "Txce3TE9BUixsBtqzDba6V5vBYltt/0pw5oKL8ueCDg"
-        APP_NAME = PROJECT_NAME
-        COMPANY_NAME = "Wls Developers"
-        HTTP_TIMEOUT = 5
-        MAX_DOWNLOAD_RETRIES = 2
-        UPDATE_URLS = ["https://wls.app/downloads/"]
-
-    client = Client(ClientConfig(), refresh=True)
-    _LOGGER.log(PYUPDATERLOGLEVEL, "Checking for updates...")
-    # First we check for updates.
-    # If an update is found, an update object will be returned
-    # If no updates are available, None will be returned
-    wls_update = client.update_check(PROJECT_NAME, PROJECT_VERSION)
-
-    # Download the update
-    if wls_update is not None:
-        client.add_progress_hook(log_status_info)
-        _LOGGER.log(PYUPDATERLOGLEVEL, "Update found!")
-        notify(
-            "Downloading update, please wait... Wls will restart when complete."
-        )
-        wls_update.download()
-        # Install and restart
-        if wls_update.is_downloaded():
-            notify("Download complete. Restarting Wls...")
-            wls_update.extract_restart()
-        else:
-            notify("Unable to download update.")
-    else:
-        # No Updates, into main we go
-        _LOGGER.log(
-            PYUPDATERLOGLEVEL,
-            "You're all up to date, enjoy the light show!",
-        )
 
 
 def main():
