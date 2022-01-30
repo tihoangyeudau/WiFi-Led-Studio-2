@@ -7,24 +7,24 @@ from wls.effects.hsv_effect import HSVEffect
 
 class Lavalamp(AudioReactiveEffect, HSVEffect):
 
-    NAME = "Lava lamp"
-    CATEGORY = "Atmospheric"
+    NAME = "Đèn Lava"
+    CATEGORY = "Khí quyển"
 
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
                 "speed",
-                description="Effect Speed modifier",
+                description="Tốc độ",
                 default=7,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.1, max=15.0)),
             vol.Optional(
                 "contrast",
-                description="Difference between lighter and darker spots",
+                description="Độ tương phản",
                 default=0.6,
             ): vol.All(vol.Coerce(float), vol.Range(min=0, max=1)),
             vol.Optional(
                 "reactivity",
-                description="Audio Reactive modifier",
+                description="Độ nhậy",
                 default=0.3,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=0.9)),
         }

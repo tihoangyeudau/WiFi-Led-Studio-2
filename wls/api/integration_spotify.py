@@ -34,7 +34,7 @@ class QLCEndpoint(RestEndpoint):
             return web.json_response(data=response, status=404)
 
         response = {
-            "Ok": "This endpoint does nothing yet",
+            "Ok": "Điểm cuối này chưa làm gì cả",
         }
 
         return web.json_response(data=response, status=200)
@@ -51,7 +51,7 @@ class QLCEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
         scene_id = data.get("scene_id")
@@ -62,21 +62,21 @@ class QLCEndpoint(RestEndpoint):
         if scene_id is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "scene_id" was not provided',
+                "reason": 'Thuộc tính bắt buộc "scene_id" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
         if scene_id not in self._wls.config["scenes"].keys():
             response = {
                 "status": "failed",
-                "reason": f"Scene {scene_id} does not exist",
+                "reason": f"Cảnh {scene_id} không tồn tại",
             }
             return web.json_response(data=response, status=400)
 
         if song_id is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "song_id" was not provided',
+                "reason": 'Thuộc tính bắt buộc "song_id" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
@@ -101,7 +101,7 @@ class QLCEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
         trigger_id = data.get("trigger_id")
@@ -109,7 +109,7 @@ class QLCEndpoint(RestEndpoint):
         if trigger_id is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "trigger_id" was not provided',
+                "reason": 'Thuộc tính bắt buộc "trigger_id" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 

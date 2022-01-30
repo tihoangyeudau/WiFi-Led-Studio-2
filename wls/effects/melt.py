@@ -9,19 +9,19 @@ from wls.effects.hsv_effect import HSVEffect
 
 class Melt(AudioReactiveEffect, HSVEffect):
 
-    NAME = "Melt"
-    CATEGORY = "Atmospheric"
+    NAME = "Tan chảy"
+    CATEGORY = "Khí quyển"
 
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
                 "speed",
-                description="Effect Speed modifier",
+                description="Tốc độ",
                 default=0.5,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.001, max=1)),
             vol.Optional(
                 "reactivity",
-                description="Audio Reactive modifier",
+                description="Độ nhậy",
                 default=0.5,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.0001, max=1)),
         }

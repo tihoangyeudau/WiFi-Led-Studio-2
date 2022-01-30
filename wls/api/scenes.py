@@ -31,7 +31,7 @@ class ScenesEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
 
@@ -39,14 +39,14 @@ class ScenesEndpoint(RestEndpoint):
         if scene_id is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "scene_id" was not provided',
+                "reason": 'Thuộc tính bắt buộc "scene_id" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
         if scene_id not in self._wls.config["scenes"].keys():
             response = {
                 "status": "failed",
-                "reason": f"Scene {scene_id} does not exist",
+                "reason": f"Cảnh {scene_id} không tồn tại",
             }
             return web.json_response(data=response, status=400)
 
@@ -69,7 +69,7 @@ class ScenesEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
 
@@ -77,14 +77,14 @@ class ScenesEndpoint(RestEndpoint):
         if action is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "action" was not provided',
+                "reason": 'Thuộc tính bắt buộc "action" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
         if action not in ["activate", "deactivate", "rename"]:
             response = {
                 "status": "failed",
-                "reason": f'Invalid action "{action}"',
+                "reason": f'Hành động không hợp lệ "{action}"',
             }
             return web.json_response(data=response, status=400)
 
@@ -92,14 +92,14 @@ class ScenesEndpoint(RestEndpoint):
         if scene_id is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "scene_id" was not provided',
+                "reason": 'Thuộc tính bắt buộc "scene_id" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
         if scene_id not in self._wls.config["scenes"].keys():
             response = {
                 "status": "failed",
-                "reason": f'Scene "{scene_id}" does not exist',
+                "reason": f'Cảnh "{scene_id}" không tồn tại',
             }
             return web.json_response(data=response, status=400)
 
@@ -134,7 +134,7 @@ class ScenesEndpoint(RestEndpoint):
                 "status": "success",
                 "payload": {
                     "type": "info",
-                    "message": f"Activated scene {scene['name']}",
+                    "message": f"Đã kích hoạt cảnh {scene['name']}",
                 },
             }
 
@@ -143,7 +143,7 @@ class ScenesEndpoint(RestEndpoint):
                 # Check virtual is in scene, make no changes if it isn't
                 if virtual.id not in scene["virtuals"].keys():
                     _LOGGER.info(
-                        ("virtual with id {} has no data in scene {}").format(
+                        ("Đèn ảo với id {} không có dữ liệu trong cảnh {}").format(
                             virtual.id, scene_id
                         )
                     )
@@ -157,7 +157,7 @@ class ScenesEndpoint(RestEndpoint):
                 "status": "success",
                 "payload": {
                     "type": "info",
-                    "message": f"Deactivated scene {scene['name']}",
+                    "message": f"Bỏ kích hoạt cảnh {scene['name']}",
                 },
             }
 
@@ -166,7 +166,7 @@ class ScenesEndpoint(RestEndpoint):
             if name is None:
                 response = {
                     "status": "failed",
-                    "reason": 'Required attribute "name" was not provided',
+                    "reason": 'Thuộc tính bắt buộc "name" không được cung cấp',
                 }
                 return web.json_response(data=response, status=400)
 
@@ -181,7 +181,7 @@ class ScenesEndpoint(RestEndpoint):
                 "status": "success",
                 "payload": {
                     "type": "info",
-                    "message": f"Renamed scene to {name}",
+                    "message": f"Đã đổi tên cảnh thành {name}",
                 },
             }
         return web.json_response(data=response, status=200)
@@ -193,7 +193,7 @@ class ScenesEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
 
@@ -204,7 +204,7 @@ class ScenesEndpoint(RestEndpoint):
         if scene_name is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "scene_name" was not provided',
+                "reason": 'Thuộc tính bắt buộc "scene_name" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 

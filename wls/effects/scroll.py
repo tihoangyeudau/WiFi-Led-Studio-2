@@ -7,47 +7,47 @@ from wls.effects.audio import AudioReactiveEffect
 
 class ScrollAudioEffect(AudioReactiveEffect):
 
-    NAME = "Scroll"
-    CATEGORY = "Classic"
+    NAME = "Cuộn"
+    CATEGORY = "Cổ điển"
 
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
                 "blur",
-                description="Amount to blur the effect",
+                description="Làm mờ",
                 default=3.0,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=10)),
             vol.Optional(
                 "mirror",
-                description="Mirror the effect",
+                description="Phản chiếu",
                 default=True,
             ): bool,
             vol.Optional(
-                "speed", description="Speed of the effect", default=3
+                "speed", description="Tốc độ", default=3
             ): vol.All(vol.Coerce(int), vol.Range(min=1, max=10)),
             vol.Optional(
                 "decay",
-                description="Decay rate of the scroll",
+                description="Tỷ lệ phân rã của cuộn",
                 default=0.97,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.8, max=1.0)),
             vol.Optional(
                 "threshold",
-                description="Cutoff for quiet sounds. Higher -> only loud sounds are detected",
+                description="Lọc ồn. Càng cao -> chỉ phát hiện âm thanh lớn",
                 default=0.0,
             ): vol.All(vol.Coerce(float), vol.Range(min=0, max=1)),
             vol.Optional(
                 "color_lows",
-                description="Color of low, bassy sounds",
+                description="Màu âm trầm",
                 default="#FF0000",
             ): validate_color,
             vol.Optional(
                 "color_mids",
-                description="Color of midrange sounds",
+                description="Mầu âm trung",
                 default="#00FF00",
             ): validate_color,
             vol.Optional(
                 "color_high",
-                description="Color of high sounds",
+                description="Mầu âm cao",
                 default="#0000FF",
             ): validate_color,
         }

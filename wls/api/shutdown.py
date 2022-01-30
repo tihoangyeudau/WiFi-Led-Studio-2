@@ -21,7 +21,7 @@ class InfoEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
 
@@ -36,14 +36,14 @@ class InfoEndpoint(RestEndpoint):
         if action not in self.exit_codes.keys():
             response = {
                 "status": "failed",
-                "reason": f"Action {action} not in {list(self.exit_codes.keys())}",
+                "reason": f"Hoạt động {action} không có trong {list(self.exit_codes.keys())}",
             }
             return web.json_response(data=response, status=400)
 
         if timeout < 0:
             response = {
                 "status": "failed",
-                "reason": f"Invalid timeout: {timeout}. Timeout is integer?",
+                "reason": f"Thời gian chờ không hợp lệ: {timeout}. Thời gian chờ có là số nguyên không?",
             }
             return web.json_response(data=response, status=400)
 

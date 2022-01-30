@@ -16,27 +16,27 @@ class E131Device(NetworkedDevice):
         {
             vol.Required(
                 "pixel_count",
-                description="Number of individual pixels",
+                description="Số lượng LED",
                 default=1,
             ): vol.All(int, vol.Range(min=1)),
             vol.Optional(
                 "universe",
-                description="DMX universe for the device",
+                description="DMX universe cho đèn",
                 default=1,
             ): vol.All(int, vol.Range(min=1)),
             vol.Optional(
                 "universe_size",
-                description="Size of each DMX universe",
+                description="Kích thước mỗi DMX universe",
                 default=510,
             ): vol.All(int, vol.Range(min=1)),
             vol.Optional(
                 "channel_offset",
-                description="Channel offset within the DMX universe",
+                description="Kênh bù đắp trong DMX universe",
                 default=0,
             ): vol.All(int, vol.Range(min=0)),
             vol.Optional(
                 "packet_priority",
-                description="Priority given to the sACN packets for this device",
+                description="Ưu tiên các gói sACN cho đèn này",
                 default=100,
             ): vol.All(int, vol.Range(min=0, max=200)),
         }
@@ -77,7 +77,7 @@ class E131Device(NetworkedDevice):
 
         if self._sacn:
             _LOGGER.warning(
-                f"sACN sender already started for device {self.id}"
+                f"sACN đã bắt đầu gửi cho đèn {self.id}"
             )
 
         # Configure sACN and start the dedicated thread to flush the buffer
@@ -87,7 +87,7 @@ class E131Device(NetworkedDevice):
         for universe in range(
             self._config["universe"], self._config["universe_end"] + 1
         ):
-            _LOGGER.info(f"sACN activating universe {universe}")
+            _LOGGER.info(f"sACN đang kích hoạt universe {universe}")
             self._sacn.activate_output(universe)
             self._sacn[universe].priority = self._config["packet_priority"]
             self._sacn[universe].multicast = multicast
@@ -97,7 +97,7 @@ class E131Device(NetworkedDevice):
         self._sacn.start()
         self._sacn.manual_flush = True
 
-        _LOGGER.info(f"sACN sender for {self.config['name']} started.")
+        _LOGGER.info(f"sACN cho {self.config['name']} đã bắt đầu.")
         super().activate()
 
     def deactivate(self):
@@ -112,7 +112,7 @@ class E131Device(NetworkedDevice):
 
         self._sacn.stop()
         self._sacn = None
-        _LOGGER.info(f"sACN sender for {self.config['name']} stopped.")
+        _LOGGER.info(f"sACN cho {self.config['name']} đã dừng.")
 
     def flush(self, data):
         """Flush the data to all the E1.31 channels account for spanning universes"""
@@ -121,7 +121,7 @@ class E131Device(NetworkedDevice):
             self.activate()
         if data.size != self._config["channel_count"]:
             raise Exception(
-                f"Invalid buffer size. {data.size} != {self._config['channel_count']}"
+                f"Kích thước bộ đệm không hợp lệ. {data.size} != {self._config['channel_count']}"
             )
 
         data = data.flatten()
@@ -171,7 +171,7 @@ class E131Device(NetworkedDevice):
             self._sacn.flush()
         except AttributeError:
             _LOGGER.info(
-                "Attempted to start sACN thread prior to sACN activating. Restarting sACN thread."
+                "Đã cố gắng bắt đầu chuỗi sCAN trước khi kích hoạt sCAN. Khởi động lại chuỗi sCAN."
             )
             self.activate()
 

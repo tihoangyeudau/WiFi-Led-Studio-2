@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders Start Tour Button', () => {
+test('renders Hướng dẫn Button', () => {
   render(<App />);
-  const linkElement = screen.getByText(/Start Tour/i);
+  const linkElement = screen.getByText(/Hướng dẫn/i);
   expect(linkElement).toBeInTheDocument();
 });

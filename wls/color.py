@@ -71,7 +71,7 @@ def parse_color(color: (str, list, tuple)) -> RGB:
         # Failing that, try to parse it using ImageColor
         return RGB(*ImageColor.getrgb(color))
     except (ValueError, AssertionError):
-        msg = f"Invalid color: {color}"
+        msg = f"Màu không hợp lệ: {color}"
         # _LOGGER.error(msg)
         raise ValueError(msg)
 
@@ -84,7 +84,7 @@ def parse_gradient(gradient: str):
         except Exception:
             continue
     else:
-        msg = f"Invalid gradient: {gradient}"
+        msg = f"Dải màu không hợp lệ: {gradient}"
         _LOGGER.error(msg)
         raise ValueError(msg)
 

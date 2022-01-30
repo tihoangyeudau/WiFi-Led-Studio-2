@@ -7,24 +7,24 @@ from wls.effects.gradient import GradientEffect
 
 class MultiBarAudioEffect(AudioReactiveEffect, GradientEffect):
 
-    NAME = "Multicolor Bar"
+    NAME = "Thanh mầu"
     CATEGORY = "BPM"
 
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
                 "mode",
-                description="Choose from different animations",
+                description="Hoạt ảnh",
                 default="wipe",
             ): vol.In(list(["cascade", "wipe"])),
             vol.Optional(
                 "ease_method",
-                description="Acceleration profile of bar",
+                description="Gia tốc",
                 default="linear",
             ): vol.In(list(["ease_in_out", "ease_in", "ease_out", "linear"])),
             vol.Optional(
                 "color_step",
-                description="Amount of color change per beat",
+                description="Số lượng màu thay đổi trên mỗi nhịp",
                 default=0.125,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.0625, max=0.5)),
         }

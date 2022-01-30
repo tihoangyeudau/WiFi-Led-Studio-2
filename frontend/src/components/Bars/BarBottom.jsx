@@ -41,13 +41,13 @@ export default function LabelBottomNavigation() {
       <BottomNavigationAction
         component={Link}
         className={'step-one'}
-        label="Home"
+        label="Trang chủ"
         value="/"
         to="/"
         icon={<Home />}
       />
       <BottomNavigationAction
-        label="Devices"
+        label="Quản lý đèn"
         value="/Devices"
         component={Link}
         to="/Devices"
@@ -56,20 +56,20 @@ export default function LabelBottomNavigation() {
       <BottomNavigationAction
         component={Link}
         to="/Scenes"
-        label="Scenes"
+        label="Quản lý cảnh"
         value="/Scenes"
         icon={<Wallpaper />}
       />
       {features['integrations']
         ? (<BottomNavigationAction
-          label="Integrations"
+          label="Tích hợp"
           value="/Integrations"
           component={Link}
           to={"/Integrations"}
           icon={<SettingsInputSvideo />}
         />)
         : (<BottomNavigationAction
-          label="Settings"
+          label="Cài đặt"
           value="/Settings"
           icon={<Settings />}
           component={Link}

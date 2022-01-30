@@ -23,7 +23,7 @@ class VirtualEndpoint(RestEndpoint):
         if virtual is None:
             response = {
                 "status": "failed",
-                "reason": f"Virtual with ID {virtual_id} not found",
+                "reason": f"Đèn ảo có ID {virtual_id} không được tìm thấy",
             }
             return web.json_response(data=response, status=404)
 
@@ -54,7 +54,7 @@ class VirtualEndpoint(RestEndpoint):
         if virtual is None:
             response = {
                 "status": "failed",
-                "reason": f"Virtual with ID {virtual_id} not found",
+                "reason": f"Đèn ảo có ID {virtual_id} không được tìm thấy",
             }
             return web.json_response(data=response, status=404)
 
@@ -63,14 +63,14 @@ class VirtualEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
         active = data.get("active")
         if active is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "active" was not provided',
+                "reason": 'Thuộc tính bắt buộc "active" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
@@ -107,7 +107,7 @@ class VirtualEndpoint(RestEndpoint):
         if virtual is None:
             response = {
                 "status": "failed",
-                "reason": f"Virtual with ID {virtual_id} not found",
+                "reason": f"Đèn ảo có ID {virtual_id} không được tìm thấy",
             }
             return web.json_response(data=response, status=404)
 
@@ -116,14 +116,14 @@ class VirtualEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
         virtual_segments = data.get("segments")
         if virtual_segments is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "segments" was not provided',
+                "reason": 'Thuộc tính bắt buộc "segments" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
@@ -164,7 +164,7 @@ class VirtualEndpoint(RestEndpoint):
         if virtual is None:
             response = {
                 "status": "failed",
-                "reason": f"Virtual with ID {virtual_id} not found",
+                "reason": f"Đèn ảo có ID {virtual_id} không được tìm thấy",
             }
             return web.json_response(data=response, status=404)
 

@@ -22,8 +22,8 @@ class SceneConfigTable extends React.Component {
         <Table className = { classes.table }>
           <TableHead>
             <TableRow>
-              <TableCell>Device</TableCell>
-              <TableCell>Effect</TableCell>
+              <TableCell>Đèn</TableCell>
+              <TableCell>Hiệu ứng</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

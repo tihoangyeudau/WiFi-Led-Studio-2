@@ -40,7 +40,7 @@ class AudioDevicesEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
 
@@ -48,7 +48,7 @@ class AudioDevicesEndpoint(RestEndpoint):
         if index is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "index" was not provided',
+                "reason": 'Thuộc tính bắt buộc "chỉ mục" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
@@ -57,7 +57,7 @@ class AudioDevicesEndpoint(RestEndpoint):
         if index not in valid_indexes:
             response = {
                 "status": "failed",
-                "reason": f"Invalid device index [{index}]",
+                "reason": f"Chỉ mục thiết bị không hợp lệ [{index}]",
             }
             return web.json_response(data=response, status=400)
 

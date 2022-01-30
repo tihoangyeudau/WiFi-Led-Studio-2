@@ -49,7 +49,7 @@ class LogWebsocket:
     async def _sender(self):
         """Async write loop to pull from the queue and send"""
 
-        _LOGGER.info("Starting log sender")
+        _LOGGER.info("Bắt đầu gửi nhật ký")
         try:
             # send log history on socket open
             for msg in self._log_history:
@@ -63,20 +63,20 @@ class LogWebsocket:
 
         except TypeError as e:
             if self._socket.closed:
-                _LOGGER.info("Logging connection closed by client.")
+                _LOGGER.info("Máy khách đã đóng kết nối ghi nhật ký.")
             else:
-                _LOGGER.exception(f"Unexpected TypeError: {e}")
+                _LOGGER.exception(f"Loại lỗi không mong muốn: {e}")
 
         except (asyncio.CancelledError, futures.CancelledError):
-            _LOGGER.info("Logging connection cancelled")
+            _LOGGER.info("Kết nối ghi nhật ký bị hủy")
         # Hopefully get rid of the aiohttp connection reset errors
         except ConnectionResetError:
-            _LOGGER.info("Logging connection reset")
+            _LOGGER.info("Đặt lại kết nối ghi nhật ký")
 
         except Exception as err:
-            _LOGGER.exception("Unexpected Exception: %s", err)
+            _LOGGER.exception("Ngoại lệ bất ngờ: %s", err)
 
-        _LOGGER.info("Stopping log sender")
+        _LOGGER.info("Đang dừng người gửi nhật ký")
 
     async def handle(self, request):
         """Handle the websocket connection"""
@@ -87,7 +87,7 @@ class LogWebsocket:
 
         socket = self._socket = web.WebSocketResponse()
         await socket.prepare(request)
-        _LOGGER.info("Logging websocket opened")
+        _LOGGER.info("Đã mở websocket ghi nhật ký")
 
         self._receiver_task = asyncio.current_task(loop=self._wls.loop)
         self._sender_task = self._wls.loop.create_task(self._sender())
@@ -106,18 +106,18 @@ class LogWebsocket:
 
         except TypeError as e:
             if socket.closed:
-                _LOGGER.info("Logging connection closed by client.")
+                _LOGGER.info("Máy khách đã đóng kết nối ghi nhật ký.")
             else:
-                _LOGGER.exception(f"Unexpected TypeError: {e}")
+                _LOGGER.exception(f"Loại không mong muốnError: {e}")
 
         except (asyncio.CancelledError, futures.CancelledError):
-            _LOGGER.info("Logging connection cancelled")
+            _LOGGER.info("Kết nối ghi nhật ký bị hủy")
         # Hopefully get rid of the aiohttp connection reset errors
         except ConnectionResetError:
-            _LOGGER.info("Logging connection reset")
+            _LOGGER.info("Đặt lại kết nối ghi nhật ký")
 
         except Exception as err:
-            _LOGGER.exception("Unexpected Exception: %s", err)
+            _LOGGER.exception("Ngoại lệ bất ngờ: %s", err)
 
         finally:
             remove_listeners()
@@ -126,6 +126,6 @@ class LogWebsocket:
             await socket.close()
             await self._sender_task
 
-            _LOGGER.info("Logging websocket closed")
+            _LOGGER.info("Websocket ghi nhật ký đã đóng")
 
         return socket

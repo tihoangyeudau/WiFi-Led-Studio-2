@@ -101,7 +101,7 @@ class WlsCore:
             )
 
         _LOGGER.error(
-            "Exception in core event loop: {}".format(context["message"]),
+            "Ngoại lệ trong vòng lặp sự kiện cốt lõi: {}".format(context["message"]),
             **kwargs,
         )
 
@@ -116,15 +116,15 @@ class WlsCore:
             webbrowser.get().open(url)
         except webbrowser.Error:
             _LOGGER.warning(
-                f"Failed to open default web browser. To access Wls's web ui, open {url} in your browser. To prevent this error in future, configure a default browser for your system."
+                f"Không mở được trình duyệt web mặc định. Để truy cập giao diện web của WiFi Led Studio, hãy mở {url} trong trình duyệt. Để tránh lỗi này trong tương lai, hãy cài mặc định trình duyệt cho hệ thống của bạn."
             )
 
     def setup_icon_menu(self):
         import pystray
 
         self.icon.menu = pystray.Menu(
-            pystray.MenuItem("Open", self.open_ui, default=True),
-            pystray.MenuItem("Quit Wls", self.stop),
+            pystray.MenuItem("Mở", self.open_ui, default=True),
+            pystray.MenuItem("Thoát", self.stop),
         )
 
     def setup_visualisation_events(self):
@@ -219,11 +219,11 @@ class WlsCore:
         return self.exit_code
 
     async def async_start(self, open_ui=False):
-        _LOGGER.info("Starting Wls")
+        _LOGGER.info("Khởi động WiFi Led Studio")
         await self.http.start(get_ssl_certs(config_dir=self.config_dir))
         if self.icon is not None and self.icon.HAS_NOTIFICATION:
             self.icon.notify(
-                "Started in background.\nUse the tray icon to open."
+                "Đã khởi động WiFi Led Studio.\nSử dụng biểu tượng trái tim ở Taskbar để mở."
             )
         self.devices = Devices(self)
         self.effects = Effects(self)
@@ -279,7 +279,7 @@ class WlsCore:
         if not self.loop:
             return
 
-        print("Stopping Wls.")
+        print("Dừng WiFi Led Studio.")
 
         # 1 = Error
         # 2 = Direct User Input
@@ -287,23 +287,23 @@ class WlsCore:
         # 4 = Restart (stop then restart wls core)
 
         if exit_code == 1:
-            _LOGGER.info("Wls encountered an error. Shutting Down.")
+            _LOGGER.info("Đã gặp lỗi. Đang Tắt.")
         if exit_code == 2:
-            _LOGGER.info("Wls Keyboard Interrupt. Shutting Down.")
+            _LOGGER.info("Bàn phím WiFi Led Studio bị gián đoạn. Đang Tắt.")
         if exit_code == 3:
-            _LOGGER.info("Wls Shutdown Request via API. Shutting Down.")
+            _LOGGER.info("Yêu cầu tắt WiFi Led Studio thông qua API. Đang Tắt.")
         if exit_code == 4:
-            _LOGGER.info("Wls is restarting.")
+            _LOGGER.info("WiFi Led Studio đang khởi động lại.")
 
         # Fire a shutdown event and flush the loop
         self.events.fire_event(WlsShutdownEvent())
         await asyncio.sleep(0)
 
-        _LOGGER.info("Stopping HttpServer...")
+        _LOGGER.info("Dừng HttpServer...")
         await self.http.stop()
 
         # Cancel all the remaining task and wait
-        _LOGGER.info("Killing remaining tasks...")
+        _LOGGER.info("Buộc tắt các nhiệm vụ còn lại...")
         tasks = [
             task
             for task in asyncio.all_tasks()

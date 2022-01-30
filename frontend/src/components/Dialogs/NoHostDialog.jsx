@@ -78,12 +78,12 @@ export default function NoHostDialog() {
         aria-labelledby="form-dialog-title"
       >
         <DialogTitle id="form-dialog-title">
-          {edit ? 'Wls-Core Host' : window.process?.argv.indexOf("integratedCore") === -1 ? 'No Wls-Core found' : 'Wls-Core not ready'}
+          {edit ? 'Wls-Core Host' : window.process?.argv.indexOf("integratedCore") === -1 ? 'Không tìm thấy WiFi Led Studio Core' : 'WiFi Led Studio Core chưa sẵn sàng'}
         </DialogTitle>
         <DialogContent>
           {!edit && (
             <DialogContentText>
-              You can change the host if you want:
+              Bạn có thể thay đổi máy chủ lưu trữ nếu bạn muốn:
             </DialogContentText>
           )}
           <Autocomplete
@@ -125,7 +125,7 @@ export default function NoHostDialog() {
             }}
             renderOption={(option) => <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>{option.title}<Delete onClick={(e) => handleDelete(e, option.title)} /></div>}
             style={{ width: 300 }}
-            renderInput={(params) => <TextField {...params} label="IP:Port" variant="outlined" />}
+            renderInput={(params) => <TextField {...params} label="IP:Cổng" variant="outlined" />}
             selectOnFocus
             clearOnBlur
             handleHomeEndKeys
@@ -141,10 +141,10 @@ export default function NoHostDialog() {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="primary">
-            Cancel
+            Huỷ
           </Button>
           <Button onClick={handleSave} color="primary">
-            Set Host
+            Chấp nhận
           </Button>
         </DialogActions>
       </Dialog>

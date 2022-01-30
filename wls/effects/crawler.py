@@ -9,35 +9,35 @@ from wls.effects.hsv_effect import HSVEffect
 
 class Crawler(AudioReactiveEffect, HSVEffect):
 
-    NAME = "Crawler"
-    CATEGORY = "Atmospheric"
+    NAME = "Đu đưa"
+    CATEGORY = "Khí quyển"
 
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
                 "speed",
-                description="Effect Speed modifier",
+                description="Tốc độ",
                 default=0.5,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=1.0)),
             vol.Optional(
                 "reactivity",
-                description="Audio Reactive modifier",
+                description="Độ nhậy",
                 default=0.25,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=1.0)),
             vol.Optional(
                 "sway",
-                description="Sway modifier",
+                description="Độ lắc lư",
                 default=20,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=50)),
             vol.Optional(
                 "chop",
-                description="Chop modifier",
+                description="Độ dao động",
                 default=30,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=100)),
             vol.Optional(
                 "stretch",
-                description="Stretch modifier",
-                default=2.5,
+                description="Độ giãn nở",
+                default=0.00001,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=10)),
         }
     )

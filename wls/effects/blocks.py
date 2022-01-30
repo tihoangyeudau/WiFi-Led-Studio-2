@@ -7,14 +7,14 @@ from wls.effects.gradient import GradientEffect
 
 class BlocksAudioEffect(AudioReactiveEffect, GradientEffect):
 
-    NAME = "Blocks"
+    NAME = "Khối"
     CATEGORY = "2D"
 
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
                 "block_count",
-                description="Number of color blocks",
+                description="Số màu khối",
                 default=4,
             ): vol.All(vol.Coerce(int), vol.Range(min=1, max=10))
         }

@@ -27,11 +27,11 @@ class AmbilightUSBDevice(SerialDevice):
             {
                 vol.Required(
                     "pixel_count",
-                    description="Number of individual pixels",
+                    description="Số lượng LED",
                     default=1,
                 ): vol.All(int, vol.Range(min=1)),
                 vol.Required(
-                    "color_order", description="Color order", default="RGB"
+                    "color_order", description="Thứ tự mầu", default="RGB"
                 ): vol.In(list(COLOR_ORDERS)),
             }
         )
@@ -49,6 +49,6 @@ class AmbilightUSBDevice(SerialDevice):
 
         except serial.SerialException:
             _LOGGER.critical(
-                "Serial Connection Interrupted. Please check connections and ensure your device is functioning correctly."
+                "Kết nối nối tiếp bị gián đoạn. Vui lòng kiểm tra kết nối và đảm bảo thiết bị của bạn hoạt động bình thường."
             )
             self.deactivate()

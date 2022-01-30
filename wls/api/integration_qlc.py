@@ -66,7 +66,7 @@ class QLCEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
         event_type = data.get("event_type")
@@ -75,21 +75,21 @@ class QLCEndpoint(RestEndpoint):
         if event_type is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "event_type" was not provided',
+                "reason": 'Thuộc tính bắt buộc "event_type" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
         if event_filter is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "event_filter" was not provided',
+                "reason": 'Thuộc tính bắt buộc "event_filter" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
         if type(event_filter) is not dict:
             response = {
                 "status": "failed",
-                "reason": f'Invalid filter "{event_filter}", should be dictionary eg. {{ "scene_name" : "my scene" }} ',
+                "reason": f'Bộ lọc không hợp lệ "{event_filter}", nên được từ điển vd. {{ "scene_name" : "my scene" }} ',
             }
             return web.json_response(data=response, status=400)
 
@@ -97,7 +97,7 @@ class QLCEndpoint(RestEndpoint):
         if not integration.toggle_event(event_type, event_filter):
             response = {
                 "status": "failed",
-                "reason": f"Could not find event with type {event_type} and filter {event_filter}",
+                "reason": f"Không thể tìm thấy sự kiện có loại {event_type} và bộ lọc {event_filter}",
             }
             return web.json_response(data=response, status=400)
 
@@ -126,7 +126,7 @@ class QLCEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
         event_type = data.get("event_type")
@@ -136,28 +136,28 @@ class QLCEndpoint(RestEndpoint):
         if event_type is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "event_type" was not provided',
+                "reason": 'Thuộc tính bắt buộc "event_type" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
         if event_filter is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "event_filter" was not provided',
+                "reason": 'Thuộc tính bắt buộc "event_filter" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
         if type(event_filter) is not dict:
             response = {
                 "status": "failed",
-                "reason": f'Invalid filter "{event_filter}", should be dictionary eg. {{ "scene_name" : "my scene" }} ',
+                "reason": f'Bộ lọc không hợp lệ "{event_filter}", nên được từ điển vd. {{ "scene_name" : "my scene" }} ',
             }
             return web.json_response(data=response, status=400)
 
         if qlc_payload is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "qlc_payload" was not provided',
+                "reason": 'Thuộc tính bắt buộc "qlc_payload" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
@@ -189,7 +189,7 @@ class QLCEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
         event_type = data.get("event_type")
@@ -198,21 +198,21 @@ class QLCEndpoint(RestEndpoint):
         if event_type is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "event_type" was not provided',
+                "reason": 'Thuộc tính bắt buộc "event_type" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
         if event_filter is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "event_filter" was not provided',
+                "reason": 'Thuộc tính bắt buộc "event_filter" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
         if type(event_filter) is not dict:
             response = {
                 "status": "failed",
-                "reason": f'Invalid filter "{event_filter}", should be dictionary eg. {{ "scene_name" : "my scene" }} ',
+                "reason": f'Bộ lọc không hợp lệ "{event_filter}", nên được từ điển vd. {{ "scene_name" : "my scene" }} ',
             }
             return web.json_response(data=response, status=400)
 

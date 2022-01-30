@@ -126,15 +126,15 @@ const UICard = () => {
 
             </>)}
             <div className={`${classes.settingsRow} step-settings-x `}>
-                <label>Show Graphs (eats performance)</label>
+                <label>Hiển thị biểu đồ (ăn CPU)</label>
                 <SettingsSwitch checked={graphs} onChange={(e) => toggleGraphs()} />
             </div>
             <div className={`${classes.settingsRow} step-settings-x `}>
-                <label {...longPress}>Expert Mode</label>
+                <label {...longPress}>Chế độ nâng cao</label>
                 <SettingsSwitch checked={viewMode !== 'user'} onChange={(e) => viewMode === 'user' ? setViewMode("expert") : setViewMode("user")} />
             </div>
             {showFeatures['cloud'] && <div className={`${classes.settingsRow} step-settings-x `}>
-                <label>Wls Cloud</label>
+                <label>Đám mây</label>
                 <SettingsSwitch checked={features['cloud']} onChange={(e) => setFeatures('cloud', !features['cloud'])} />
             </div>}
             {showFeatures['rml'] && <div className={`${classes.settingsRow} step-settings-x `}>

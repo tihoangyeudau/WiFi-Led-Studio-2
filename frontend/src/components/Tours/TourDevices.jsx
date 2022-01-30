@@ -9,8 +9,8 @@ const steps = [
     selector: '.step-devices-one',
     content: (
       <div>
-        <h2>Devices</h2>
-        Add at least one device using the red button to get specific tour.
+        <h2>Quản lý đèn</h2>
+        Thêm ít nhất một đèn bằng cách sử dụng nút màu đỏ để xem hướng dẫn cụ thể.
       </div>
     ),
     style: {

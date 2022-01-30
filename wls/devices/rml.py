@@ -23,12 +23,12 @@ class RMLDevice(NetworkedDevice):
         {
             vol.Optional(
                 "sync_mode",
-                description="Streaming protocol to RML device. Recommended: UDP<480px, DDP>480px",
+                description="Giao thức truyền trực tuyến tới thiết bị RML. Khuyến nghị: UDP <480 LED, DDP> 480 LED",
                 default="UDP",
             ): vol.In(["UDP", "DDP", "E131"]),
             vol.Optional(
                 "timeout",
-                description="Time between Wls effect off and RML effect activate",
+                description="Thời gian giữa hiệu ứng WiFi Led Studio tắt và hiệu ứng đèn Rainbow Music Led kích hoạt",
                 default=1,
             ): vol.All(int, vol.Range(0, 255)),
         }
@@ -132,7 +132,7 @@ class RMLDevice(NetworkedDevice):
         # https://github.com/Aircoookie/RML/pull/1944
         if parse_version(rml_version) >= parse_version("0.13.0"):
             _LOGGER.info(
-                f"RML Version Supports Sync Setting API: {rml_version}"
+                f"Phiên bản Rainbow Music Led hỗ trợ cài đặt API đồng bộ hóa: {rml_version}"
             )
             rml_sync_settings = await self.rml.get_sync_settings()
         # self.rml.enable_realtime_gamma()

@@ -413,7 +413,7 @@ class MIDI(Integration):
 
         if not os.path.exists(mapping_path):
             _LOGGER.error(
-                f"MIDI mapping file {self._config['midi_mapping']} does not exist in config directory"
+                f"MIDI mapping file {self._config['midi_mapping']} không tồn tại in config directory"
             )
             return
 

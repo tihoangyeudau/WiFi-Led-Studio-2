@@ -7,49 +7,49 @@ from wls.effects.audio import AudioReactiveEffect
 
 class EnergyAudioEffect(AudioReactiveEffect):
 
-    NAME = "Energy"
+    NAME = "Năng lượng"
     CATEGORY = "Classic"
 
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
                 "blur",
-                description="Amount to blur the effect",
+                description="Làm mờ",
                 default=4.0,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=10)),
             vol.Optional(
                 "mirror",
-                description="Mirror the effect",
+                description="Phản chiếu",
                 default=True,
             ): bool,
             vol.Optional(
                 "color_cycler",
-                description="Change colors in time with the beat",
+                description="Thay đổi màu sắc kịp thời theo nhịp",
                 default=False,
             ): bool,
             vol.Optional(
                 "color_lows",
-                description="Color of low, bassy sounds",
+                description="Màu sắc của âm trầm",
                 default="#FF0000",
             ): validate_color,
             vol.Optional(
                 "color_mids",
-                description="Color of midrange sounds",
+                description="Màu sắc của âm trung",
                 default="#00FF00",
             ): validate_color,
             vol.Optional(
                 "color_high",
-                description="Color of high sounds",
+                description="Màu sắc của âm cao",
                 default="#0000FF",
             ): validate_color,
             vol.Optional(
                 "sensitivity",
-                description="Responsiveness to changes in sound",
+                description="Độ nhậy",
                 default=0.6,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.3, max=0.99)),
             vol.Optional(
                 "mixing_mode",
-                description="Mode of combining each frequencies' colors",
+                description="Chế độ kết hợp màu của từng tần số",
                 default="additive",
             ): vol.In(["additive", "overlap"]),
         }

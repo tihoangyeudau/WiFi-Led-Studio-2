@@ -1,11 +1,11 @@
 # Couldn't get this to work. Will revisit.
 # from packaging.version import Version
 
-__author__ = "Austin Hodges"
-__copyright__ = "Austin Hodges"
-__license__ = "mit"
+__author__ = "Rainbow Music Led"
+__copyright__ = "Rainbow Music Led"
+__license__ = "Rainbow Music Led"
 
-PROJECT_NAME = "Wls"
+PROJECT_NAME = "WiFi Led Studio"
 
 REQUIRED_PYTHON_VERSION = (3, 8, 0)
 REQUIRED_PYTHON_STRING = ">={}.{}.{}".format(

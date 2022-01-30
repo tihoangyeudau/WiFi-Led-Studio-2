@@ -23,12 +23,12 @@ class GradientEffect(Effect):
         {
             vol.Optional(
                 "gradient",
-                description="Color gradient to display",
+                description="Dải mầu",
                 default="linear-gradient(90deg, rgb(255, 0, 0) 0%, rgb(255, 120, 0) 14%, rgb(255, 200, 0) 28%, rgb(0, 255, 0) 42%, rgb(0, 199, 140) 56%, rgb(0, 0, 255) 70%, rgb(128, 0, 128) 84%, rgb(255, 0, 178) 98%)",
             ): validate_gradient,
             vol.Optional(
                 "gradient_roll",
-                description="Amount to shift the gradient",
+                description="Số lượng thay đổi dải mầu",
                 default=0,
             ): vol.All(vol.Coerce(float), vol.Range(min=0, max=10)),
         }
@@ -66,7 +66,7 @@ class GradientEffect(Effect):
         return diff * pow_x / (pow_x + np.power(1 - x, slope)) + start_val
 
     def _generate_gradient_curve(self, gradient, gradient_length):
-        _LOGGER.debug(f"Generating new gradient curve: {gradient}")
+        _LOGGER.debug(f"Tạo đường cong dải mầu mới: {gradient}")
 
         try:
             gradient = parse_gradient(gradient)

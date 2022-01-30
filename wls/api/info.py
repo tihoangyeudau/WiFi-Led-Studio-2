@@ -17,7 +17,7 @@ class InfoEndpoint(RestEndpoint):
         GIT_COMMIT_ID = git_version()
         response = {
             "url": self._wls.http.base_url,
-            "name": "Wls Controller",
+            "name": "WiFi Led Studio",
             "version": PROJECT_VERSION,
             "git_build_commit": GIT_COMMIT_ID,
             "developer_mode": self._wls.config["dev_mode"],

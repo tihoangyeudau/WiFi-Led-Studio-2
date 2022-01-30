@@ -15,24 +15,24 @@ class Strobe(AudioReactiveEffect, GradientEffect):
         "1/32 (⊙▃⊙ )": 32,
     }
 
-    NAME = "BPM Strobe"
+    NAME = "Nhấp nháy BPM"
     CATEGORY = "BPM"
 
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
                 "strobe_frequency",
-                description="How many strobes per beat",
+                description="Tần xuất nhấp nháy",
                 default=list(MAPPINGS.keys())[1],
             ): vol.In(list(MAPPINGS.keys())),
             vol.Optional(
                 "strobe_decay",
-                description="How rapidly a single strobe hit fades. Higher -> faster fade",
+                description="Phân rã nhấp nháy. Càng cao -> phân rã càng nhanh",
                 default=1.5,
             ): vol.All(vol.Coerce(float), vol.Range(min=1, max=10)),
             vol.Optional(
                 "beat_decay",
-                description="How much the strobes fade across the beat. Higher -> less bright strobes towards end of beat",
+                description="Phân rã nhịp. Càng cao -> nhấp nháy ít sáng hơn về cuối nhịp",
                 default=2,
             ): vol.All(vol.Coerce(float), vol.Range(min=0, max=10)),
         }

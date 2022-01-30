@@ -8,24 +8,24 @@ from wls.effects.gradient import GradientEffect
 
 class PowerAudioEffect(AudioReactiveEffect, GradientEffect):
 
-    NAME = "Power"
-    CATEGORY = "Classic"
+    NAME = "Sức mạnh"
+    CATEGORY = "Cổ điển"
 
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
                 "mirror",
-                description="Mirror the effect",
+                description="Phản chiếu",
                 default=True,
             ): bool,
             vol.Optional(
                 "blur",
-                description="Amount to blur the effect",
+                description="Làm mờ",
                 default=0.0,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=10)),
             vol.Optional(
                 "sparks_color",
-                description="Flash on percussive hits",
+                description="Nháy khi đánh trống",
                 default="#ffffff",
             ): validate_color,
         }

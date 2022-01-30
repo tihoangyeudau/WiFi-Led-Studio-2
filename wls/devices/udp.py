@@ -18,27 +18,27 @@ class UDPRealtimeDevice(UDPDevice):
         {
             vol.Required(
                 "pixel_count",
-                description="Number of individual pixels",
+                description="Số lượng LED",
                 default=1,
             ): vol.All(int, vol.Range(min=1)),
             vol.Required(
                 "port",
-                description="Port for the UDP device",
+                description="cổng UDP của đèn",
                 default=7778,
             ): vol.All(int, vol.Range(min=1, max=65535)),
             vol.Required(
                 "udp_packet_type",
-                description="RGB packet encoding",
+                description="Mã hóa gói RGB",
                 default="DRGB",
             ): vol.In(list(SUPPORTED_PACKETS)),
             vol.Optional(
                 "timeout",
-                description="Seconds to wait after the last received packet to yield device control",
+                description="Vài giây để đợi sau khi gói nhận được cuối cùng để nhường quyền kiểm soát đèn",
                 default=1,
             ): vol.All(int, vol.Range(min=1, max=255)),
             vol.Optional(
                 "minimise_traffic",
-                description="Won't send updates if nothing has changed on the LED device",
+                description="Sẽ không gửi cập nhật nếu không có gì thay đổi trên đèn LED",
                 default=True,
             ): bool,
         }
@@ -114,7 +114,7 @@ class UDPRealtimeDevice(UDPDevice):
 
         else:  # fallback
             _LOGGER.warning(
-                f"UDP packet is configured incorrectly (please choose a packet that supports {self._config['pixel_count']} LEDs): https://kno.rml.ge/interfaces/udp-realtime/#udp-realtime \n Falling back to supported udp packet."
+                f"Gói UDP được định cấu hình không chính xác (vui lòng chọn gói hỗ trợ {self._config['pixel_count']} LED): https://facebook.com/rainbowmusicled \n Quay lại gói udp được hỗ trợ."
             )
             if frame_size <= 490:  # DRGB
                 udpData = packets.build_drgb_packet(data, timeout)

@@ -38,15 +38,15 @@ class RPI_WS281X(Device):
             {
                 vol.Required(
                     "pixel_count",
-                    description="Number of individual pixels",
+                    description="Số lượng LED",
                     default=1,
                 ): vol.All(int, vol.Range(min=1)),
                 vol.Required(
                     "gpio_pin",
-                    description="Raspberry Pi GPIO pin your LEDs are connected to",
+                    description="Chân GPIO của Raspberry Pi mà đèn LED của bạn được kết nối với",
                 ): vol.In(list([21, 31])),
                 vol.Required(
-                    "color_order", description="Color order", default="RGB"
+                    "color_order", description="Thứ tự mầu", default="RGB"
                 ): vol.In(list(COLOR_ORDERS.keys())),
             }
         )
@@ -66,7 +66,7 @@ class RPI_WS281X(Device):
             from rpi_ws281x import PixelStrip
         except ImportError:
             _LOGGER.critical(
-                "Unable to load ws281x module - are you on a Raspberry Pi?"
+                "Không thể tải mô-đun ws281x - bạn đang sử dụng Raspberry Pi?"
             )
             self.deactivate()
 

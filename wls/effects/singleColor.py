@@ -8,13 +8,13 @@ from wls.effects.temporal import TemporalEffect
 
 class SingleColorEffect(TemporalEffect, ModulateEffect):
 
-    NAME = "Single Color"
-    CATEGORY = "Non-Reactive"
+    NAME = "Màu đơn"
+    CATEGORY = "Không nháy theo nhạc"
 
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
-                "color", description="Color of strip", default="#FF0000"
+                "color", description="Màu", default="#FF0000"
             ): validate_color,
         },
     )

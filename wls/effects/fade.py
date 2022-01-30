@@ -10,15 +10,15 @@ class FadeEffect(TemporalEffect, GradientEffect):
     Fades through the colors of a gradient
     """
 
-    NAME = "Fade"
-    CATEGORY = "Non-Reactive"
+    NAME = "Phai màu"
+    CATEGORY = "Không nháy theo nhạc"
 
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
                 "speed",
                 default=0.5,
-                description="Rate of change of color",
+                description="Tốc độ đổi mầu",
             ): vol.All(vol.Coerce(float), vol.Range(min=0.1, max=10)),
         }
     )

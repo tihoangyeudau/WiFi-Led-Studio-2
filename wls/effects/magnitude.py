@@ -6,23 +6,23 @@ from wls.effects.gradient import GradientEffect
 
 class MagnitudeAudioEffect(AudioReactiveEffect, GradientEffect):
 
-    NAME = "Magnitude"
-    CATEGORY = "Classic"
+    NAME = "Kích cỡ"
+    CATEGORY = "Cổ điển"
 
     _power_funcs = {
-        "Beat": "beat_power",
-        "Bass": "bass_power",
-        "Lows (beat+bass)": "lows_power",
-        "Mids": "mids_power",
-        "High": "high_power",
+        "Nhịp": "beat_power",
+        "Trầm": "bass_power",
+        "Thấp (Nhịp+Trầm)": "lows_power",
+        "Trung": "mids_power",
+        "Cao": "high_power",
     }
 
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
                 "frequency_range",
-                description="Frequency range for the beat detection",
-                default="Lows (beat+bass)",
+                description="Dải tần số để phát hiện nhịp",
+                default="Thấp (Nhịp+Trầm)",
             ): vol.In(list(_power_funcs.keys())),
         }
     )

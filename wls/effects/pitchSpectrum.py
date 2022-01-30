@@ -8,29 +8,29 @@ from wls.effects.gradient import GradientEffect
 
 class PitchSpectrumAudioEffect(AudioReactiveEffect, GradientEffect):
 
-    NAME = "Pitch Spectrum"
-    CATEGORY = "Classic"
+    NAME = "Tần số quang phổ"
+    CATEGORY = "Cổ điển"
 
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
                 "blur",
-                description="Amount to blur the effect",
+                description="Làm mờ",
                 default=1.0,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=10)),
             vol.Optional(
                 "mirror",
-                description="Mirror the effect",
+                description="Phản chiếu",
                 default=True,
             ): bool,
             vol.Optional(
                 "fade_rate",
-                description="Rate at which notes fade",
+                description="Tỷ lệ phai mầu các nốt",
                 default=0.15,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=1.0)),
             vol.Optional(
                 "responsiveness",
-                description="Responsiveness to note changes",
+                description="Khả năng phản ứng với sự thay đổi của các nốt",
                 default=0.15,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=1.0)),
         }

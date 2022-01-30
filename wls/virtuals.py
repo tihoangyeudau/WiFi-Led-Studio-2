@@ -37,36 +37,36 @@ class Virtual:
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Required(
-                "name", description="Friendly name for the device"
+                "name", description="Tên đèn"
             ): str,
             vol.Required(
                 "mapping",
-                description="Span: Effect spans all segments. Copy: Effect copied on each segment",
+                description="Span: Hiệu ứng kéo dài tất cả các phân đoạn. Sao chép: Hiệu ứng được sao chép trên mỗi phân đoạn",
                 default="span",
             ): vol.In(["span", "copy"]),
             vol.Optional(
                 "icon_name",
-                description="Icon for the device*",
+                description="Biểu tượng của đèn*",
                 default="mdi:led-strip-variant",
             ): str,
             vol.Optional(
                 "max_brightness",
-                description="Max brightness for the device",
+                description="Độ sáng tối đa cho đèn",
                 default=1.0,
             ): vol.All(vol.Coerce(float), vol.Range(min=0, max=1)),
             vol.Optional(
                 "center_offset",
-                description="Number of pixels from the perceived center of the device",
+                description="Số lượng pixel từ trung tâm của đèn",
                 default=0,
             ): int,
             vol.Optional(
                 "preview_only",
-                description="Preview the pixels without updating the devices",
+                description="Xem trước các pixel mà không cần cập nhật đèn",
                 default=False,
             ): bool,
             vol.Optional(
                 "transition_time",
-                description="Length of transition between effects",
+                description="Thời gian chuyển đổi giữa các hiệu ứng",
                 default=0.4,
             ): vol.All(
                 vol.Coerce(float),
@@ -74,12 +74,12 @@ class Virtual:
             ),
             vol.Optional(
                 "transition_mode",
-                description="Type of transition between effects",
+                description="Kiểu chuyển đổi giữa các hiệu ứng",
                 default="Add",
             ): vol.In([mode for mode in Transitions]),
             vol.Optional(
                 "frequency_min",
-                description="Lowest frequency for this virtual's audio reactive effects",
+                description="Tần số thấp nhất cho các hiệu ứng phản ứng âm thanh của đèn ảo này",
                 default=MIN_FREQ,  # GET THIS FROM CORE AUDIO
             ): vol.All(
                 vol.Coerce(int),
@@ -90,7 +90,7 @@ class Virtual:
             ),  # AND HERE TOO,
             vol.Optional(
                 "frequency_max",
-                description="Highest frequency for this virtual's audio reactive effects",
+                description="Tần số cao nhất cho các hiệu ứng nháy theo nhạc của đèn ảo này",
                 default=MAX_FREQ,  # GET THIS FROM CORE AUDIO
             ): vol.All(
                 vol.Coerce(int),
@@ -149,7 +149,7 @@ class Virtual:
         if device is not None:
             return id
         else:
-            msg = f"Invalid device id: {id}"
+            msg = f"Đèn {id} không hợp lệ"
             _LOGGER.warning(msg)
             raise ValueError(msg)
 
@@ -169,7 +169,7 @@ class Virtual:
         msg = None
 
         if len(segment) != 4:
-            msg = f"Invalid segment format: {segment}, should be [device_id, start, end, invert]"
+            msg = f"Định dạng phân đoạn {segment} không hợp lệ, phải là [device_id, start, end, invert]"
             valid = False
 
         device_id, start_pixel, end_pixel, invert = segment
@@ -177,7 +177,7 @@ class Virtual:
         device = self._wls.devices.get(device_id)
 
         if device is None:
-            msg = f"Invalid device id: {device_id}"
+            msg = f"Đèn {device_id} không hợp lệ"
             valid = False
 
         if (
@@ -186,7 +186,7 @@ class Virtual:
             or (start_pixel > end_pixel)
             or (end_pixel >= device.pixel_count)
         ):
-            msg = f"Invalid segment pixels: ({start_pixel}, {end_pixel}). Device '{self.name}' valid pixels between (0, {self.pixel_count-1})"
+            msg = f"Pixel phân đoạn ({start_pixel} không hợp lệ, {end_pixel}). Đèn '{self.name}' có pixel hợp lệ giữa (0, {self.pixel_count-1})"
             valid = False
 
         if not valid:
@@ -229,7 +229,7 @@ class Virtual:
             self.invalidate_cached_props()
 
             _LOGGER.debug(
-                f"Virtual {self.id}: updated with {len(self._segments)} segments, totalling {self.pixel_count} pixels"
+                f"Đèn ảo {self.id}: đã cập nhật với {len(self._segments)} phân đoạn, tộng cộng có {self.pixel_count} pixel"
             )
 
             # Restart active effect if total pixel count has changed
@@ -254,7 +254,7 @@ class Virtual:
                 "config"
             ]
         except KeyError:
-            _LOGGER.error(f"Cannot find preset: {preset_info}")
+            _LOGGER.error(f"Không thể tìm thấy cài trước: {preset_info}")
             return
         effect = self._wls.effects.create(
             wls=self._wls, type=effect_id, config=effect_config
@@ -263,7 +263,7 @@ class Virtual:
 
     def set_effect(self, effect):
         if not self._devices:
-            error = f"Virtual {self.id}: Cannot activate, no configured device segments"
+            error = f"Đèn ảo {self.id}: Không thể kích hoạt, không có phân đoạn thiết bị được định cấu hình"
             _LOGGER.warning(error)
             raise ValueError(error)
 
@@ -431,11 +431,11 @@ class Virtual:
 
     def activate(self):
         if not self._devices:
-            error = f"Virtual {self.id}: Cannot activate, no configured device segments"
+            error = f"Đèn ảo {self.id}: Không thể kích hoạt, không có phân đoạn thiết bị được định cấu hình"
             _LOGGER.warning(error)
             raise RuntimeError(error)
         if not self._active_effect:
-            error = f"Virtual {self.id}: Cannot activate, no configured effect"
+            error = f"Đèn ảo {self.id}: Không thể kích hoạt, không có hiệu ứng được định cấu hình"
             _LOGGER.warning(error)
             raise RuntimeError(error)
 
@@ -443,7 +443,7 @@ class Virtual:
             self._thread.join()
 
         _LOGGER.debug(
-            f"Virtual {self.id}: Activating with segments {self._segments}"
+            f"Đèn ảo {self.id}: Kích hoạt với các phân đoạn {self._segments}"
         )
         if not self._active:
             try:
@@ -519,7 +519,7 @@ class Virtual:
             device = self._wls.devices.get(device_id)
             if device is None:
                 _LOGGER.warning(
-                    f"Virtual {self.id}: No active devices - Deactivating."
+                    f"Đèn ảo {self.id}: Không có thiết bị nào đang hoạt động - Đang hủy kích hoạt."
                 )
                 self.deactivate()
             elif device.is_active():
@@ -736,7 +736,7 @@ class Virtuals:
 
     def create_from_config(self, config):
         for virtual in config:
-            _LOGGER.debug(f"Loading virtual from config: {virtual}")
+            _LOGGER.debug(f"Đang tải ảo từ cấu hình: {virtual}")
             self._wls.virtuals.create(
                 id=virtual["id"],
                 config=virtual["config"],
@@ -757,7 +757,7 @@ class Virtuals:
                     self._wls.virtuals.get(virtual["id"]).set_effect(effect)
                 except vol.MultipleInvalid:
                     _LOGGER.warning(
-                        "Effect schema changed. Not restoring effect"
+                        "Lược đồ hiệu ứng đã thay đổi. Không khôi phục hiệu ứng"
                     )
                 except RuntimeError:
                     pass
@@ -798,7 +798,7 @@ class Virtuals:
     def destroy(self, id):
         if id not in self._virtuals:
             raise AttributeError(
-                ("Object with id '{}' does not exist.").format(id)
+                ("Đối tượng có id '{}' không tồn tại.").format(id)
             )
         del self._virtuals[id]
 

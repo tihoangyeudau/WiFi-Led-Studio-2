@@ -7,19 +7,19 @@ from wls.effects.hsv_effect import HSVEffect
 
 class BlockReflections(AudioReactiveEffect, HSVEffect):
 
-    NAME = "Block Reflections"
-    CATEGORY = "Atmospheric"
+    NAME = "Khối phản xạ"
+    CATEGORY = "Khí quyển"
 
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
                 "speed",
-                description="Effect Speed modifier",
+                description="Tốc độ",
                 default=0.5,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=1.0)),
             vol.Optional(
                 "reactivity",
-                description="Audio Reactive modifier",
+                description="Độ nhậy",
                 default=0.5,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=1.0)),
         }

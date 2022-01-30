@@ -6,14 +6,14 @@ from wls.effects.temporal import TemporalEffect
 
 class RainbowEffect(TemporalEffect):
 
-    NAME = "Rainbow"
-    CATEGORY = "Non-Reactive"
+    NAME = "Cầu vồng"
+    CATEGORY = "Không nháy theo nhạc"
 
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
                 "frequency",
-                description="Frequency of the effect curve",
+                description="Tần suất của đường cong hiệu ứng",
                 default=1.0,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.1, max=10)),
         }

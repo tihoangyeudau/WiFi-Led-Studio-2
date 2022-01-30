@@ -22,14 +22,14 @@ class VirtualPresetsEndpoint(RestEndpoint):
         if virtual is None:
             response = {
                 "status": "failed",
-                "reason": f"Virtual with ID {virtual_id} not found",
+                "reason": f"Đèn ảo có ID {virtual_id} không được tìm thấy",
             }
             return web.json_response(data=response, status=404)
 
         if not virtual.active_effect:
             response = {
                 "status": "failed",
-                "reason": f"Virtual {virtual_id} has no active effect",
+                "reason": f"Đèn ảo {virtual_id} không kích hoạt hiệu ứng nào",
             }
             return web.json_response(data=response, status=400)
 
@@ -61,7 +61,7 @@ class VirtualPresetsEndpoint(RestEndpoint):
         if virtual is None:
             response = {
                 "status": "failed",
-                "reason": f"Virtual with ID {virtual_id} not found",
+                "reason": f"Đèn ảo có ID {virtual_id} không được tìm thấy",
             }
             return web.json_response(data=response, status=404)
 
@@ -70,7 +70,7 @@ class VirtualPresetsEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
         category = data.get("category")
@@ -80,14 +80,14 @@ class VirtualPresetsEndpoint(RestEndpoint):
         if category is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "category" was not provided',
+                "reason": 'Thuộc tính bắt buộc "category" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
         if category not in ["default_presets", "custom_presets"]:
             response = {
                 "status": "failed",
-                "reason": f'Category {category} is not "wls_presets" or "user_presets"',
+                "reason": f'Loại {category} không là "wls_presets" hoặc "user_presets"',
             }
             return web.json_response(data=response, status=400)
 
@@ -99,28 +99,28 @@ class VirtualPresetsEndpoint(RestEndpoint):
         if effect_id is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "effect_id" was not provided',
+                "reason": 'Thuộc tính bắt buộc "effect_id" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
         if effect_id not in self._wls.config[category].keys():
             response = {
                 "status": "failed",
-                "reason": f"Effect {effect_id} does not exist in category {category}",
+                "reason": f"Hiệu ứng {effect_id} không tồn tại trong loại {category}",
             }
             return web.json_response(data=response, status=400)
 
         if preset_id is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "preset_id" was not provided',
+                "reason": 'Thuộc tính bắt buộc "preset_id" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
         if preset_id not in self._wls.config[category][effect_id].keys():
             response = {
                 "status": "failed",
-                "reason": "Preset {} does not exist for effect {} in category {}".format(
+                "reason": "Cài trước {} không tồn tại cho hiệu ứng {} trong loại {}".format(
                     preset_id, effect_id, category
                 ),
             }
@@ -169,14 +169,14 @@ class VirtualPresetsEndpoint(RestEndpoint):
         if virtual is None:
             response = {
                 "status": "failed",
-                "reason": f"Virtual with ID {virtual_id} not found",
+                "reason": f"Đèn ảo có ID {virtual_id} không được tìm thấy",
             }
             return web.json_response(data=response, status=404)
 
         if not virtual.active_effect:
             response = {
                 "status": "failed",
-                "reason": f"Virtual {virtual_id} has no active effect",
+                "reason": f"Đèn ảo {virtual_id} không kích hoạt hiệu ứng nào",
             }
             return web.json_response(data=response, status=404)
 
@@ -185,14 +185,14 @@ class VirtualPresetsEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
         preset_name = data.get("name")
         if preset_name is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "preset_name" was not provided',
+                "reason": 'Thuộc tính bắt buộc "preset_name" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
@@ -233,7 +233,7 @@ class VirtualPresetsEndpoint(RestEndpoint):
         if virtual is None:
             response = {
                 "status": "failed",
-                "reason": f"Virtual with ID {virtual_id} not found",
+                "reason": f"Đèn ảo có ID {virtual_id} không được tìm thấy",
             }
             return web.json_response(data=response, status=404)
 

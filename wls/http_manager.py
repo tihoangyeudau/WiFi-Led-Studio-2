@@ -87,21 +87,21 @@ class HttpServer:
             self.base_url = ("http{}://localhost:{}").format(
                 "s" if ssl_context else "", port
             )
-        print(("Started webinterface at {}").format(self.base_url))
+        print(("Bắt đầu giao diện web tại {}").format(self.base_url))
 
     def handle_start_error(self, error):
         _LOGGER.error(
-            "Shutting down - Failed to create HTTP server at port %d: %s.",
+            "Đang tắt - Không tạo được máy chủ HTTP tại cổng %d: %s.",
             self.port,
             error,
         )
         _LOGGER.error(
-            "Is Wls Already Running? If not, try a different port."
+            "WiFi Led Studio đã chạy chưa? Nếu không, hãy thử một cổng khác."
         )
         if self._wls.icon is not None:
             if self._wls.icon.HAS_NOTIFICATION:
                 self._wls.icon.notify(
-                    f"Failed to start: something is running on port {self.port}\nIs Wls already running?"
+                    f"Không thể bắt đầu: một cái gì đó đang chạy trên cổng {self.port}\nWiFi Led Studio đã chạy chưa?"
                 )
         time.sleep(2)
         self._wls.stop(1)

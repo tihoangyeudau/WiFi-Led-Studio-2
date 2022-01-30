@@ -33,7 +33,7 @@ class DevicesEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
 
@@ -41,7 +41,7 @@ class DevicesEndpoint(RestEndpoint):
         if device_config is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "config" was not provided',
+                "reason": 'Thuộc tính bắt buộc "config" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
@@ -49,7 +49,7 @@ class DevicesEndpoint(RestEndpoint):
         if device_type is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "type" was not provided',
+                "reason": 'Thuộc tính bắt buộc "type" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
@@ -68,7 +68,7 @@ class DevicesEndpoint(RestEndpoint):
             "status": "success",
             "payload": {
                 "type": "success",
-                "reason": f"Created device {device.name}",
+                "reason": f"Đã tạo đèn {device.name}",
             },
             "device": {
                 "type": device.type,

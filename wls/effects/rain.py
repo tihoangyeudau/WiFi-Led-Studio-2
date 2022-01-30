@@ -10,14 +10,14 @@ from wls.effects.droplets import DROPLET_NAMES, load_droplet
 
 class RainAudioEffect(AudioReactiveEffect):
 
-    NAME = "Rain"
-    CATEGORY = "Classic"
+    NAME = "Mưa"
+    CATEGORY = "Cổ điển"
 
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
                 "mirror",
-                description="Mirror the effect",
+                description="Phản chiếU",
                 default=True,
             ): bool,
             # TODO drops should be controlled by some sort of effectlet class,
@@ -25,37 +25,37 @@ class RainAudioEffect(AudioReactiveEffect):
             # this static range
             vol.Optional(
                 "lows_color",
-                description="color for low sounds, ie beats",
+                description="Màu âm trầm",
                 default="white",
             ): validate_color,
             vol.Optional(
                 "mids_color",
-                description="color for mid sounds, ie vocals",
+                description="Màu của âm trung",
                 default="red",
             ): validate_color,
             vol.Optional(
                 "high_color",
-                description="color for high sounds, ie hi hat",
+                description="Màu của âm cao",
                 default="blue",
             ): validate_color,
             vol.Optional(
                 "lows_sensitivity",
-                description="Sensitivity to low sounds",
+                description="Độ nhậy âm trầm",
                 default=0.1,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.03, max=0.3)),
             vol.Optional(
                 "mids_sensitivity",
-                description="Sensitivity to mid sounds",
+                description="Độ nhậy âm trung",
                 default=0.05,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.03, max=0.3)),
             vol.Optional(
                 "high_sensitivity",
-                description="Sensitivity to high sounds",
+                description="Độ nhậy âm cao",
                 default=0.1,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.03, max=0.3)),
             vol.Optional(
                 "raindrop_animation",
-                description="Droplet animation style",
+                description="Kiểu hoạt ảnh giọt nước",
                 default=DROPLET_NAMES[0],
             ): vol.In(DROPLET_NAMES),
         }

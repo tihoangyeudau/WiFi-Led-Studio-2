@@ -36,19 +36,19 @@ class DeviceEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
         device_config = data.get("config")
         if device_config is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "config" was not provided',
+                "reason": 'Thuộc tính bắt buộc "config" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
         _LOGGER.debug(
-            ("Updating device {} with config {}").format(
+            ("Đang cập nhật thiết bị {} với cấu hình {}").format(
                 device_id, device_config
             )
         )

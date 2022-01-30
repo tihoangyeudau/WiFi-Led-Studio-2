@@ -27,15 +27,15 @@ class Scenes:
 
         self.SCENE_SCHEMA = vol.Schema(
             {
-                vol.Required("name", description="Name of the scene"): str,
+                vol.Required("name", description="Tên của cảnh"): str,
                 vol.Optional(
                     "scene_image",
-                    description="Image or icon to display",
+                    description="Hình ảnh hoặc biểu tượng để hiển thị",
                     default="Wallpaper",
                 ): str,
                 vol.Required(
                     "virtuals",
-                    description="The effects of these virtuals will be saved",
+                    description="Hiệu ứng của đèn ảo này sẽ được lưu lại",
                 ): virtuals_validator,
             }
         )
@@ -77,7 +77,7 @@ class Scenes:
         """Activate a scene"""
         scene = self.get(scene_id)
         if not scene:
-            _LOGGER.error(f"No scene found with id: {scene_id}")
+            _LOGGER.error(f"Không tìm thấy cảnh có tên: {scene_id}")
             return
 
         for virtual_id in scene["virtuals"]:
@@ -104,7 +104,7 @@ class Scenes:
         """Deletes a scene"""
 
         if not self._scenes.pop(scene_id, None):
-            _LOGGER.error("Cannot delete non-existent scene id: {scene_id}")
+            _LOGGER.error("Không thể xóa cảnh: {scene_id}, nó không tồn tại")
         self._wls.events.fire_event(SceneDeletedEvent(scene_id))
         self.save_to_config()
 

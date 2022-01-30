@@ -19,20 +19,20 @@ class OpenRGB(NetworkedDevice):
         return vol.Schema(
             {
                 vol.Required(
-                    "name", description="Friendly name for the device"
+                    "name", description="Tên đèn"
                 ): str,
                 vol.Required(
                     "openrgb_name",
-                    description="Exact name of openRGB device (within openRGB).",
+                    description="Tên chính xác của thiết bị openRGB (trong openRGB).",
                 ): str,
                 vol.Required(
                     "pixel_count",
-                    description="Number of individual pixels",
+                    description="Số lượng LED",
                     default=1,
                 ): vol.All(int, vol.Range(min=1)),
                 vol.Required(
                     "port",
-                    description="Port for the UDP device",
+                    description="Cổng cho thiết bị UDP",
                     default=6742,
                 ): vol.All(int, vol.Range(min=1, max=65535)),
             }
@@ -57,7 +57,7 @@ class OpenRGB(NetworkedDevice):
                 self._online = True
             except (ConnectionRefusedError, TimeoutError):
                 _LOGGER.warning(
-                    f"{self.openrgb_device_name} not reachable. Is the api server running?"
+                    f"{self.openrgb_device_name} không liên lạc được. Máy chủ api có đang chạy không?"
                 )
                 self._online = False
                 return
@@ -70,17 +70,17 @@ class OpenRGB(NetworkedDevice):
             if not device_supports_direct:
                 raise ValueError()
         except ImportError:
-            _LOGGER.critical("Unable to load openrgb library")
+            _LOGGER.critical("Không thể tải thư viện openrgb")
             self.deactivate()
         except IndexError:
             _LOGGER.critical(
-                f"Couldn't find openRGB device named: {self.openrgb_device_name}"
+                f"Không thể tìm thấy thiết bị openRGB có tên: {self.openrgb_device_name}"
             )
             self._online = False
             self.deactivate()
         except ValueError:
             _LOGGER.critical(
-                f"{self.openrgb_device_name} doesn't support direct mode, and isn't suitable for streamed effects from Wls"
+                f"{self.openrgb_device_name} không hỗ trợ chế độ trực tiếp và không phù hợp với các hiệu ứng phát trực tiếp từ Wls"
             )
             self.deactivate()
         else:
@@ -101,7 +101,7 @@ class OpenRGB(NetworkedDevice):
         except AttributeError:
             self.activate()
         except ConnectionAbortedError:
-            _LOGGER.warning(f"Device disconnected: {self.openrgb_device_name}")
+            _LOGGER.warning(f"Thiết bị ngắt kết nối: {self.openrgb_device_name}")
             self._wls.events.fire_event(DevicesUpdatedEvent(self.id))
             self._online = False
             self.deactivate()

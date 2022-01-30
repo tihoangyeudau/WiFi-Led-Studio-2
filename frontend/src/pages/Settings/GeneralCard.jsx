@@ -51,11 +51,11 @@ const GeneralCard = () => {
             <div className={'step-settings-four'} style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <div style={{ flex: '0 0 49%' }}>
                     <SettingsButton startIcon={<CloudUpload />} onClick={()=>configDownload()}>
-                        Export Config
+                        Xuất cấu hình
                     </SettingsButton>
                     <PopoverSure
                         startIcon={<Delete />}
-                        label="Reset Config"
+                        label="Đặt lại cấu hình"
                         variant="outlined"
                         color="inherit"
                         className={classes.actionButton}
@@ -76,38 +76,38 @@ const GeneralCard = () => {
                     />
                     <label htmlFor="contained-button-file" style={{ width: '100%', flexBasis: '49%' }}>
                         <SettingsButton component="span" startIcon={<CloudDownload />}>
-                            Import Config
+                            Nhập cấu hình
                         </SettingsButton>
                     </label>
                     {isElectron() && window.process?.argv.indexOf("integratedCore") !== -1 &&
                         <SettingsButton startIcon={<CloudUpload />} onClick={() => window.api.send('toMain', "open-config")}>
-                            Config Location
+                            Định cấu hình vị trí
                         </SettingsButton>}
                 </div>
                 <div style={{ flex: '0 0 49%' }}>
                     <AboutDialog startIcon={<Info />} className={classes.actionButton}>
-                        About
+                        Giới thiệu
                     </AboutDialog>
                     <SettingsButton disabled={disconnected} startIcon={<Refresh />} onClick={restart}>
-                        {isElectron() && window.process?.argv.indexOf("integratedCore") !== -1 ? "Restart Core" : "Restart"}
+                        {isElectron() && window.process?.argv.indexOf("integratedCore") !== -1 ? "Khởi động lại" : "Restart"}
                     </SettingsButton>
 
                     <SettingsButton disabled={disconnected} startIcon={<PowerSettingsNew />} onClick={shutdown}>
-                        {isElectron() && window.process?.argv.indexOf("integratedCore") !== -1 ? "Shutdown Core" : "Shutdown"}
+                        {isElectron() && window.process?.argv.indexOf("integratedCore") !== -1 ? "Tắt" : "Shutdown"}
                     </SettingsButton>
                     {isElectron() && window.process?.argv.indexOf("integratedCore") !== -1 &&
                         <SettingsButton startIcon={<PowerSettingsNew />} onClick={() => { window.api.send('toMain', "start-core") }}>
-                            Start Core
+                            Khởi động
                         </SettingsButton>}
                 </div>
             </div>
             <Divider style={{ margin: "20px 0 10px"}} />
             <div className={`${classes.settingsRow} step-settings-six `} style={{ flexBasis: '100%'}}>
-                <label>Global Transitions</label>
+                <label>Chuyển tiếp tổng thể</label>
                 <SettingsSwitch checked={settings.global_transitions} onChange={(e) => onSystemSettingsChange("global_transitions", !settings.global_transitions)} />
             </div>
             <div className={`${classes.settingsRow} step-settings-seven `} style={{ flexBasis: '100%'}}>
-                <label>Scan on startup</label>
+                <label>Tìm đèn khi khởi động</label>
                 <SettingsSwitch checked={settings.scan_on_startup} onChange={(e) => onSystemSettingsChange("scan_on_startup", !settings.scan_on_startup)} />
             </div>
         </div>

@@ -6,8 +6,8 @@ from wls.effects.audio import AudioReactiveEffect
 
 class SpectrumAudioEffect(AudioReactiveEffect):
 
-    NAME = "Spectrum"
-    CATEGORY = "Classic"
+    NAME = "Quang phổ"
+    CATEGORY = "Cổ điển"
 
     CONFIG_SCHEMA = vol.Schema({})
 

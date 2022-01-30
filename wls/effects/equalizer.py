@@ -7,24 +7,24 @@ from wls.effects.gradient import GradientEffect
 
 class EQAudioEffect(AudioReactiveEffect, GradientEffect):
 
-    NAME = "Equalizer"
+    NAME = "Bộ chỉnh âm"
     CATEGORY = "2D"
 
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
                 "align",
-                description="Alignment of bands",
+                description="Căn chỉnh các băng tần",
                 default="left",
             ): vol.In(list(["left", "right", "invert", "center"])),
             vol.Optional(
                 "gradient_repeat",
-                description="Repeat the gradient into segments",
+                description="Lặp lại Dải màu thành các phân đoạn",
                 default=6,
             ): vol.All(vol.Coerce(int), vol.Range(min=1, max=16)),
             vol.Optional(
                 "mirror",
-                description="Mirror the effect",
+                description="Phản chiếu",
                 default=False,
             ): bool,
         }

@@ -178,4 +178,4 @@ def convertToJsonSchema(schema):
     if schema in TYPES_MAP:
         return {"type": TYPES_MAP[schema]}
 
-    raise ValueError(f"Unable to convert schema: {schema}")
+    raise ValueError(f"Không thể chuyển đổi giản đồ: {schema}")

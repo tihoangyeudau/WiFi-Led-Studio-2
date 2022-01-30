@@ -24,19 +24,19 @@ class Spotify(Integration):
     """Spotify Integration"""
 
     NAME = "Spotify"
-    DESCRIPTION = "Activate scenes with Spotify Connect [BETA]. Requires Spotify Premium."
+    DESCRIPTION = "Kích hoạt các cảnh với Spotify Connect [BETA]. Yêu cầu Spotify Premium."
 
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Required(
                 "name",
-                description="Name of this integration instance and associated settings",
+                description="Tên của phiên bản tích hợp này và các cài đặt liên quan",
                 default="Spotify",
             ): str,
             vol.Required(
                 "description",
-                description="Description of this integration",
-                default="Activate scenes with Spotify",
+                description="Mô tả về sự tích hợp này",
+                default="Kích hoạt các cảnh với Spotify",
             ): str,
         }
     )

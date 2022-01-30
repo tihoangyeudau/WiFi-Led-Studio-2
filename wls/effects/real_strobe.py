@@ -12,39 +12,39 @@ from wls.utils import empty_queue
 
 class Strobe(AudioReactiveEffect, GradientEffect):
 
-    NAME = "Strobe"
-    CATEGORY = "Classic"
+    NAME = "Nhấp nháy"
+    CATEGORY = "Cổ điển"
 
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
                 "gradient",
-                description="Color scheme for bass strobe to cycle through",
+                description="Dải mầu",
                 default="Dancefloor",
             ): validate_gradient,
             vol.Optional(
                 "color_step",
-                description="Amount of color change per bass strobe",
+                description="Màu nháy thay đổi trên mỗi âm trầm",
                 default=0.0625,
             ): vol.All(vol.Coerce(float), vol.Range(min=0, max=0.25)),
             vol.Optional(
                 "bass_strobe_decay_rate",
-                description="Bass strobe decay rate. Higher -> decays faster.",
+                description="Tốc độ phân rã âm trầm. Càng cao -> phân rã càng nhanh.",
                 default=0.5,
             ): vol.All(vol.Coerce(float), vol.Range(min=0, max=1)),
             vol.Optional(
                 "strobe_color",
-                description="color for percussive strobes",
+                description="Màu sắc cho bộ gõ",
                 default="#FFFFFF",
             ): validate_color,
             vol.Optional(
                 "strobe_width",
-                description="Percussive strobe width, in pixels",
+                description="Chiều rộng nhấp nháy bộ gõ, tính bằng pixel",
                 default=10,
             ): vol.All(vol.Coerce(int), vol.Range(min=0, max=1000)),
             vol.Optional(
                 "strobe_decay_rate",
-                description="Percussive strobe decay rate. Higher -> decays faster.",
+                description="Tỷ lệ phân rã nhấp nháy bộ gõ. Càng cao -> phân rã càng nhanh.",
                 default=0.5,
             ): vol.All(vol.Coerce(float), vol.Range(min=0, max=1)),
         }

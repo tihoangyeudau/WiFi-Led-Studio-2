@@ -156,7 +156,7 @@ const TopBar = () => {
         <div>
           <IconButton
             color="inherit"
-            aria-label="open drawer"
+            aria-label="mở ngăn kéo"
             onClick={handleLeftBarOpen}
             edge="start"
             className={clsx(classes.menuButton, "step-three", open && classes.hide)}
@@ -165,7 +165,7 @@ const TopBar = () => {
           </IconButton>
           {((pathname.split('/').length === 3 && pathname.split('/')[1] === 'device') || pathname === '/Settings') &&
             <Button variant="text" color="inherit" className={classes.backButton} startIcon={<ChevronLeft />} onClick={() => history.goBack()} >
-              Back
+              Trở lại
             </Button>}
         </div>
 
@@ -178,7 +178,7 @@ const TopBar = () => {
           {disconnected &&
             <Box>
               <IconButton
-                aria-label="display more actions"
+                aria-label="hiển thị nhiều hành động hơn"
                 edge="end"
                 color="inherit"
                 onClick={changeHost}
@@ -205,7 +205,7 @@ const TopBar = () => {
             </Box>
           }
           <IconButton
-            aria-label="display more actions"
+            aria-label="hiển thị nhiều hành động hơn"
             edge="end"
             color="inherit"
             onClick={handleClick}
@@ -239,19 +239,19 @@ const TopBar = () => {
             <ListItemIcon>
               <Language />
             </ListItemIcon>
-            Change Host
+            Đổi máy chủ
           </MenuItem>
           <MenuItem onClick={changePause}>
             <ListItemIcon>
               {paused ? <PlayCircleOutline /> : <Pause />}
             </ListItemIcon>
-            {paused ? 'Play' : 'Pause'}
+            {paused ? 'Chạy' : 'Tạm dừng'}
           </MenuItem>
           <MenuItem onClick={changeGraphs}>
             <ListItemIcon >
               <BarChart color={graphs ? "inherit" : "secondary"} />
             </ListItemIcon>
-            {!graphs ? 'Enable Graphs' : 'Disable Graphs'}
+            {!graphs ? 'Bật biểu đồ' : 'Tắt biểu đồ'}
           </MenuItem>
           {pathname.split('/')[1] === 'device' ? <TourDevice cally={() => setAnchorEl(null)} />
             : pathname.split('/')[1] === 'Scenes' ? <TourScenes cally={() => setAnchorEl(null)} />
@@ -264,14 +264,14 @@ const TopBar = () => {
             <ListItemIcon>
               <Settings />
             </ListItemIcon>
-            Settings
+            Cài đặt
           </MenuItem>
           {features['cloud'] &&
-            <MenuItem onClick={(e) => isLogged ? logout(e) : window.location.href = `https://strapi.yeonv.com/connect/github?callback=${window.location.origin}`} >
+            <MenuItem onClick={(e) => isLogged ? logout(e) : window.location.href = `https://rainbowmusicled.com=${window.location.origin}`} >
               <ListItemIcon>
                 {isLogged ? <Logout /> : <Login />}
               </ListItemIcon>
-              {isLogged ? 'Logout' : 'Login with Gihub'}
+              {isLogged ? 'Đăng xuất' : 'Đăng nhập'}
             </MenuItem>}
         </Menu>
       </Toolbar>

@@ -36,7 +36,7 @@ const TourIntegrations = ({ cally }) => {
             <InfoRounded />
           </Badge>
         </ListItemIcon>
-        Tour
+        Hướng dẫn
       </MenuItem>
       <Tour
         steps={steps}

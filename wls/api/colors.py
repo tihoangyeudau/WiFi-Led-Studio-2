@@ -44,7 +44,7 @@ class ColorEndpoint(RestEndpoint):
             "status": "success",
             "payload": {
                 "type": "success",
-                "reason": "Deleted",
+                "reason": "Đã xoá",
             },
         }
 
@@ -73,7 +73,7 @@ class ColorEndpoint(RestEndpoint):
             "status": "success",
             "payload": {
                 "type": "success",
-                "reason": "Saved",
+                "reason": "Đã lưu",
             },
         }
 

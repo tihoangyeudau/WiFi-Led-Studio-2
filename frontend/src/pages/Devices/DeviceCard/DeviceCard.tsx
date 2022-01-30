@@ -314,7 +314,7 @@ const DeviceCard = ({
                     handleEditVirtual(virtId);
                   }}
                 >
-                  Settings
+                  Cài đặt
                 </Button>
               </div>
             </div>

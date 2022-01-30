@@ -38,7 +38,7 @@ const Settings = () => {
             aria-controls="panel3a-content"
             id="panel3a-header"
           >
-            <Typography>General</Typography>
+            <Typography>Tổng quan</Typography>
           </AccordionSummary>
           <AccordionDetails>
             <GeneralCard />
@@ -51,7 +51,7 @@ const Settings = () => {
             aria-controls="panel1a-content"
             id="panel1a-header"
           >
-            <Typography>Audio Settings</Typography>
+            <Typography>Cài đặt âm thanh</Typography>
           </AccordionSummary>
           <AccordionDetails>
             <div>
@@ -70,7 +70,7 @@ const Settings = () => {
             aria-controls="panel2a-content"
             id="panel2a-header"
           >
-            <Typography>UI Settings</Typography>
+            <Typography>Cài đặt giao diện</Typography>
           </AccordionSummary>
           <AccordionDetails>
             <UICard />
@@ -84,7 +84,7 @@ const Settings = () => {
               aria-controls="panel4a-content"
               id="panel4a-header"
             >
-              <Typography>RML Settings</Typography>
+              <Typography>Cài đặt đèn</Typography>
             </AccordionSummary>
             <AccordionDetails>
               <div>

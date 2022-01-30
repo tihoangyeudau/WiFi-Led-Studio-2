@@ -28,7 +28,7 @@ class EffectsEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
 
@@ -36,14 +36,14 @@ class EffectsEndpoint(RestEndpoint):
         if action is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "action" was not provided',
+                "reason": 'Thuộc tính bắt buộc "action" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
         if action not in ["clear_all_effects"]:
             response = {
                 "status": "failed",
-                "reason": f'Invalid action "{action}"',
+                "reason": f'Hành động không hợp lệ "{action}"',
             }
             return web.json_response(data=response, status=400)
 
@@ -54,7 +54,7 @@ class EffectsEndpoint(RestEndpoint):
                 "status": "success",
                 "payload": {
                     "type": "info",
-                    "message": "Cleared all effects on all devices",
+                    "message": "Đã xóa tất cả các hiệu ứng trên tất cả các đèn",
                 },
             }
             return web.json_response(data=response, status=200)

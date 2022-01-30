@@ -7,22 +7,22 @@ from wls.effects.gradient import GradientEffect
 
 class BandsMatrixAudioEffect(AudioReactiveEffect, GradientEffect):
 
-    NAME = "Bands Matrix"
+    NAME = "Ma trận Băng tần"
     CATEGORY = "2D"
 
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
-                "band_count", description="Number of bands", default=6
+                "band_count", description="Số lượng băng tần", default=6
             ): vol.All(vol.Coerce(int), vol.Range(min=1, max=16)),
             vol.Optional(
                 "mirror",
-                description="Mirror the effect",
+                description="Phản chiếu",
                 default=False,
             ): bool,
             vol.Optional(
                 "flip_gradient",
-                description="Flip Gradient",
+                description="Lật dải mầu",
                 default=False,
             ): bool,
         }

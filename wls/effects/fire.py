@@ -9,24 +9,24 @@ from wls.effects.hsv_effect import HSVEffect
 
 class Fire(AudioReactiveEffect, HSVEffect):
 
-    NAME = "Fire"
-    CATEGORY = "Atmospheric"
+    NAME = "Lửa"
+    CATEGORY = "Khí quyển"
 
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
                 "speed",
-                description="Effect Speed modifier",
+                description="Tốc độ",
                 default=0.04,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=0.5)),
             vol.Optional(
                 "color_shift",
-                description="Fire color",
+                description="Màu lửa",
                 default=0.15,
             ): vol.All(vol.Coerce(float), vol.Range(min=0, max=1)),
             vol.Optional(
                 "intensity",
-                description="Fire intensity",
+                description="Cường độ cháy",
                 default=8,
             ): vol.All(vol.Coerce(int), vol.Range(min=1, max=30)),
         }

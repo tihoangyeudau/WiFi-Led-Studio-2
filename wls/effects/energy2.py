@@ -7,19 +7,19 @@ from wls.effects.hsv_effect import HSVEffect
 
 class Energy2(AudioReactiveEffect, HSVEffect):
 
-    NAME = "Energy 2"
-    CATEGORY = "Atmospheric"
+    NAME = "Năng lượng 2"
+    CATEGORY = "Khí quyển"
 
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
                 "speed",
-                description="Effect Speed modifier",
+                description="Tốc độ",
                 default=0.1,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=1.0)),
             vol.Optional(
                 "reactivity",
-                description="Audio Reactive modifier",
+                description="Độ nhậy",
                 default=0.2,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=1.0)),
         }

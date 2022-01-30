@@ -34,14 +34,14 @@ MEL_MAX_FREQS = [350, 2000, MAX_FREQ]
 FrequencyRange = namedtuple("FrequencyRange", "min,max")
 
 FREQUENCY_RANGES = {
-    "Ultra Low (1-20Hz)": FrequencyRange(1, 20),
-    "Sub Bass (20-60Hz)": FrequencyRange(20, 60),
-    "Bass (60-250Hz)": FrequencyRange(60, 250),
-    "Low Midrange (250-500Hz)": FrequencyRange(250, 500),
-    "Midrange (500Hz-2kHz)": FrequencyRange(500, 2000),
-    "Upper Midrange (2Khz-4kHz)": FrequencyRange(2000, 4000),
-    "High Midrange (4kHz-6kHz)": FrequencyRange(4000, 6000),
-    "High Frequency (6kHz-24kHz)": FrequencyRange(6000, 24000),
+    "Siêu trầm (1-20Hz)": FrequencyRange(1, 20),
+    "Trầm phụ (20-60Hz)": FrequencyRange(20, 60),
+    "Trầm (60-250Hz)": FrequencyRange(60, 250),
+    "Trung thấp (250-500Hz)": FrequencyRange(250, 500),
+    "Trung (500Hz-2kHz)": FrequencyRange(500, 2000),
+    "Trung trên (2Khz-4kHz)": FrequencyRange(2000, 4000),
+    "Trung cao (4kHz-6kHz)": FrequencyRange(4000, 6000),
+    "Tần số cao (6kHz-24kHz)": FrequencyRange(6000, 24000),
 }
 
 LOWS_RANGE = f"Low ({MIN_FREQ}Hz-{MEL_MAX_FREQS[0]}Hz)"

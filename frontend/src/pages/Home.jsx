@@ -59,15 +59,14 @@ export default function Home(props) {
           margin: '0.5rem auto 2rem auto',
         }}
       >
-        <CardHeader title="Welcome to Wls" />
+        <CardHeader title="Chào mừng bạn sử dụng WiFi Led Studio" />
         <CardContent>
-          Complete Frontend Rewrite... from scratch
+          Trước khi bắt đầu, bạn hãy hoàn thành các bước sau:
           <ul>
-            <li>Modern React</li>
-            <li>Zustand as State-Management</li>
-            <li>Typescript supported</li>
-            <li>Mobile First</li>
-            <li>by Blade</li>
+            <li>Cắm điện cho LED</li>
+            <li>Cài WiFi cho LED (bản WiFi)</li>
+            <li>Cắm 2 dây USB cho LED vào PC (bản USB)</li>
+            <li>Kiểm tra đèn tín hiệu báo hoạt động</li>
           </ul>
         </CardContent>
         <CardActions>
@@ -94,12 +93,12 @@ export default function Home(props) {
                   (scanning / 30) * 100,
                 )}%`}</Typography>
               </Box>
-            </> : 'RML-scan'}
+            </> : 'Tìm kiếm đèn'}
           </Button>
           <Button variant="outlined" onClick={()=>{
             deleteFrontendConfig()
             }}>
-            Clear Data
+            Xoá dữ liệu
           </Button>
         </CardActions>
       </Card>

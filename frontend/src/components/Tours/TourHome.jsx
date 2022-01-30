@@ -8,9 +8,9 @@ const steps = [
     selector: '.step-zero',
     content: (
       <div>
-        <h2>Wls Tour</h2>
-        Welcome to Wls! Feel free to follow this tour and we&apos;ll show you
-        around 😊
+        <h2>Hướng dẫn</h2>
+        Chào mừng đến với WiFi Led Studio! Vui lòng theo dõi quá trình hướng dẫn này và chúng tôi sẽ chỉ cho bạn
+         cách sử dụng phần mềm nhé 😊
       </div>
     ),
     style: {
@@ -21,8 +21,8 @@ const steps = [
     selector: '.step-one',
     content: (
       <div>
-        <h2>Navigation</h2>
-        Go to different pages from here
+        <h2>Dẫn đường</h2>
+        Đi đến các trang khác nhau từ đây
       </div>
     ),
     style: {
@@ -34,12 +34,12 @@ const steps = [
     content: (
       <div>
         <h2>Menu</h2>
-        Wls actions and settings can be found up here
+        Các hành động và cài đặt của WiFi Led Studio có thể được tìm thấy tại đây
         <ul style={{ paddingLeft: '1rem' }}>
-          <li>👨‍🏫 You can access a tour for other pages in this menu</li>
+          <li>👨‍🏫 Bạn có thể truy cập một hướng dẫn cho các trang khác trong menu này</li>
           <li>
-            👀 &apos;Enable Graphs&apos; to see a preview of the device LEDs.
-            Leave it off if your browser struggles with too many pixels!
+            👀 &apos;Bật biểu đồ&apos; để xem trước các đèn LED của thiết bị.
+             Hãy tắt nó đi nếu trình duyệt của bạn gặp khó khăn với quá nhiều led!
           </li>
         </ul>
       </div>
@@ -52,8 +52,8 @@ const steps = [
     selector: '.step-three',
     content: (
       <div>
-        <h2>Devices Quick-Access</h2>
-        Directly jump to a device
+        <h2>Truy cập đèn nhanh</h2>
+        Trực tiếp chuyển đến một đèn
       </div>
     ),
     style: {
@@ -64,20 +64,20 @@ const steps = [
     selector: '.step-four',
     content: (
       <div>
-        <h2>The Big Red Button</h2>
-        This is where it all begins!
+        <h2>Nút tròn lớn</h2>
+        Đây là nơi mà tất cả bắt đầu!
         <ul style={{ paddingLeft: '1rem' }}>
-          <li>Add Device: Add a networked LED strip</li>
+          <li>Thêm thiết bị: Thêm dải đèn LED đã kết nối WiFi</li>
           <li>
-            Add Virtual: Divide or merge your devices into one virtual strip
+            Thêm đèn ảo: Chia hoặc hợp nhất các đèn của bạn thành một đèn ảo
           </li>
-          <li>Add Scene: Save the active effects of all devices</li>
+          <li>Thêm cảnh: Lưu các hiệu ứng hoạt động của tất cả các đèn</li>
           <li>
-            Add Integration: Connect Wls to other software (upcoming...)
+            Thêm tích hợp: Kết nối WiFi Led Studio với phần mềm khác (sắp có ...)
           </li>
         </ul>
-        I&apos;d recommend you now close this tour and add your first devices to
-        Wls 🎉
+        Bây giờ bạn nên kết thúc hướng dẫn này và thêm đèn đầu tiên của bạn vào
+         WiFi Led Studio nhé 🎉
       </div>
     ),
     style: {
@@ -99,7 +99,7 @@ const TourHome = () => {
           setIsTourOpen(true);
         }}
       >
-        Start Tour
+        Hướng dẫn
       </Button>
       <Tour
         steps={steps}

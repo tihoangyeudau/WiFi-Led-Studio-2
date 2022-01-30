@@ -37,7 +37,7 @@ class IntegrationsEndpoint(RestEndpoint):
             except JSONDecodeError:
                 response = {
                     "status": "failed",
-                    "reason": "JSON Decoding failed",
+                    "reason": "Không giải mã được JSON",
                 }
                 return web.json_response(data=response, status=400)
             info = data.get("info")
@@ -61,14 +61,14 @@ class IntegrationsEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
         integration_id = data.get("id")
         if integration_id is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "id" was not provided',
+                "reason": 'Thuộc tính bắt buộc "id" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
@@ -107,14 +107,14 @@ class IntegrationsEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
         integration_id = data.get("id")
         if integration_id is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "id" was not provided',
+                "reason": 'Thuộc tính bắt buộc "id" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
@@ -149,7 +149,7 @@ class IntegrationsEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
 
@@ -157,7 +157,7 @@ class IntegrationsEndpoint(RestEndpoint):
         if integration_config is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "config" was not provided',
+                "reason": 'Thuộc tính bắt buộc "config" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
@@ -165,7 +165,7 @@ class IntegrationsEndpoint(RestEndpoint):
         if integration_type is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "type" was not provided',
+                "reason": 'Thuộc tính bắt buộc "type" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 

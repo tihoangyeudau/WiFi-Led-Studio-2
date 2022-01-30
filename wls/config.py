@@ -11,8 +11,8 @@ from pkg_resources import parse_version
 from wls.consts import CONFIGURATION_VERSION
 
 CONFIG_DIRECTORY = ".wls"
-CONFIG_FILE_NAME = "config.json"
-PRESETS_FILE_NAME = "presets.json"
+CONFIG_FILE_NAME = "caidat.json"
+PRESETS_FILE_NAME = "caitruoc.json"
 
 PRIVATE_KEY_FILE = "privkey.pem"
 CHAIN_KEY_FILE = "fullchain.pem"
@@ -85,7 +85,7 @@ CORE_CONFIG_SCHEMA = vol.Schema(
         ),
         vol.Optional(
             "global_transitions",
-            description="Changes to any virtual's transitions apply to all other virtuals",
+            description="Các thay đổi đối với bất kỳ kiểu chuyển tiếp nào của đèn ảo đều áp dụng cho tất cả các đèn ảo khác",
             default=True,
         ): bool,
         vol.Optional("user_colors", default={}): dict,
@@ -173,7 +173,7 @@ def create_default_config(config_dir: str) -> str:
         return config_path
 
     except OSError:
-        print(f"Unable to create default configuration file {config_path}.")
+        print(f"Không thể tạo tệp cấu hình mặc định {config_path}.")
 
         return None
 
@@ -210,7 +210,7 @@ def ensure_config_directory(config_dir: str) -> None:
             os.mkdir(config_dir)
         except OSError:
             print(
-                ("Error: Unable to create configuration directory {}").format(
+                ("Lỗi: Không thể tạo thư mục cấu hình {}").format(
                     config_dir
                 )
             )
@@ -222,7 +222,7 @@ def load_config(config_dir: str) -> dict:
 
     config_file = ensure_config_file(config_dir)
     print(
-        f"Loading configuration file: {os.path.join(os.path.abspath(config_dir), CONFIG_FILE_NAME)}"
+        f"Đang tải tệp cấu hình: {os.path.join(os.path.abspath(config_dir), CONFIG_FILE_NAME)}"
     )
     try:
 
@@ -232,7 +232,7 @@ def load_config(config_dir: str) -> dict:
                 # If there's no config version in the config, it's pre-1.0.0 and won't work
                 # Probably scope to iterate through it and create a virtual for every device, but that's beyond me
                 _LOGGER.info(
-                    f"Wls Configuration Version: {config_json['configuration_version']}"
+                    f"Phiên bản cấu hình WiFi Led Studio: {config_json['configuration_version']}"
                 )
                 assert parse_version(
                     config_json["configuration_version"]
@@ -241,14 +241,14 @@ def load_config(config_dir: str) -> dict:
             except (KeyError, AssertionError):
                 create_backup(config_dir, config_file, "VERSION")
                 _LOGGER.warning(
-                    f"Wls config version: {CONFIGURATION_VERSION}, your config version: {config_json.get('configuration_version', 'UNDEFINED (old!)')}"
+                    f"Phiên bản cấu hình WiFi Led Studio: {CONFIGURATION_VERSION}, phiên bản cấu hình của bạn: {config_json.get('configuration_version', 'UNDEFINED (old!)')}"
                 )
                 try:
                     config = migrate_config(config_json)
                     save_config(config, config_dir)
                 except Exception as e:
                     _LOGGER.exception(
-                        f"Failed to migrate your config to the new standard :( Your old config is backed up safely. Please let a developer know what happened: {e}"
+                        f"Không thể di chuyển cấu hình của bạn sang tiêu chuẩn mới :( Cấu hình cũ của bạn được sao lưu an toàn. Vui lòng cho Rainbow Music Led biết điều gì đã xảy ra: {e}"
                     )
                     config = {}
                 return CORE_CONFIG_SCHEMA(config)
@@ -264,19 +264,19 @@ def migrate_config(old_config):
     """
     attempts to update an old config to a working state
     """
-    _LOGGER.warning("Attempting to migrate old config to new version...")
+    _LOGGER.warning("Đang cố chuyển cấu hình cũ sang phiên bản mới ...")
 
     # most invalid keys were from invalid frequency ranges.
     # this replacement dict should fix that
     replacement_frequency_ranges = {
-        "Ultra Low (1-20Hz)": "Beat",
-        "Sub Bass (20-60Hz)": "Lows (beat+bass)",
-        "Bass (60-250Hz)": "Lows (beat+bass)",
-        "Low Midrange (250-500Hz)": "Lows (beat+bass)",
-        "Midrange (500Hz-2kHz)": "Mids",
-        "Upper Midrange (2Khz-4kHz)": "Mids",
-        "High Midrange (4kHz-6kHz)": "High",
-        "High Frequency (6kHz-24kHz)": "High",
+        "Siêu trầm (1-20Hz)": "Beat",
+        "Trầm phụ (20-60Hz)": "Lows (beat+bass)",
+        "Trầm (60-250Hz)": "Lows (beat+bass)",
+        "Trung thấp (250-500Hz)": "Lows (beat+bass)",
+        "Trung (500Hz-2kHz)": "Mids",
+        "Trung trên (2Khz-4kHz)": "Mids",
+        "Trung cao (4kHz-6kHz)": "High",
+        "Tần số cao (6kHz-24kHz)": "High",
     }
 
     class DummyWls:
@@ -323,12 +323,12 @@ def migrate_config(old_config):
                     new_config[new_key] = old_config[old_key]
                 except (vol.MultipleInvalid, vol.InInvalid, Exception):
                     _LOGGER.warning(
-                        f"Preset for {effect_type} with config item {old_key} : {old_config[old_key]} is invalid. Discarding."
+                        f"Cài trước cho {effect_type} với cấu hình {old_key} : {old_config[old_key]} không có hiệu lực. Loại bỏ."
                     )
                     continue
             else:
                 _LOGGER.warning(
-                    f"Preset for {effect_type} cannot match config item {old_key}. Discarding item from preset."
+                    f"Cài trước cho {effect_type} không thể khớp với cấu hình {old_key}. Loại bỏ khỏi cài trước."
                 )
                 continue
         return new_config
@@ -348,7 +348,7 @@ def migrate_config(old_config):
     for device in old_config.get("devices", ()):
         if device["type"].lower() == "fxmatrix":
             _LOGGER.warning(
-                "FXMatrix devices are no longer supported. Add it as plain UDP or RML."
+                "Thiết bị FXMatrix không còn được hỗ trợ. Thêm nó dưới dạng UDP hoặc RML thuần túy."
             )
             continue
         device.pop("effect", None)
@@ -371,7 +371,7 @@ def migrate_config(old_config):
                     new_effect_id = get_matching_effect_id(effect_id)
                     if not new_effect_id:
                         _LOGGER.warning(
-                            f"Could not match effect id {effect_id} to any current effects. Discarding this effect from virtual {virtual['id']}."
+                            f"Không thể khớp hiệu ứng {effect_id} với bất kỳ hiệu ứng hiện tại nào. Bỏ hiệu ứng này khỏi đèn ảo {virtual['id']}."
                         )
                         continue
                     new_effect_config = sanitise_effect_config(
@@ -389,7 +389,7 @@ def migrate_config(old_config):
         for device in new_config["devices"]:
             # Generate virtual configuration for the device
             name = device["config"]["name"]
-            _LOGGER.info(f"Creating a virtual for device {name}")
+            _LOGGER.info(f"Tạo ảo cho thiết bị {name}")
 
             virtual_config = {
                 "name": name,
@@ -417,7 +417,7 @@ def migrate_config(old_config):
         new_effect_id = get_matching_effect_id(effect_id)
         if not new_effect_id:
             _LOGGER.warning(
-                f"Could not match effect id {effect_id} to any current effects. Discarding presets for this effect."
+                f"Không thể khớp hiệu ứng {effect_id} với bất kỳ hiệu ứng hiện tại nào. Loại bỏ các cài trước cho hiệu ứng này."
             )
             continue
         new_config["user_presets"][new_effect_id] = {}
@@ -455,7 +455,7 @@ def migrate_config(old_config):
                 )
                 if not corresponding_virtual:
                     _LOGGER.warning(
-                        f"Could not match device id {device} to any virtuals. Discarding this device from scene {scene_id}."
+                        f"Không thể khớp đèn {device} với bất kỳ đèn ảo nào. Loại bỏ đèn này khỏi cảnh {scene_id}."
                     )
                     continue
                 actual_virtual = corresponding_virtual
@@ -471,7 +471,7 @@ def migrate_config(old_config):
                 new_effect_id = get_matching_effect_id(effect_id)
                 if not new_effect_id:
                     _LOGGER.warning(
-                        f"Could not match effect id {effect_id} to any current effects. Discarding this effect from scene {scene_id}."
+                        f"Không thể khớp hiệu ứng {effect_id} với bất kỳ hiệu ứng hiện tại nào. Loại bỏ hiệU ứng này khỏi cảnh {scene_id}."
                     )
                     continue
                 new_effect_config = sanitise_effect_config(
@@ -489,7 +489,7 @@ def migrate_config(old_config):
             "name": scenes[scene_id]["name"],
         }
 
-    _LOGGER.warning("Finished migrating config.")
+    _LOGGER.warning("Đã hoàn tất quá trình di chuyển cấu hình.")
     return new_config
 
 
@@ -511,25 +511,25 @@ def create_backup(config_dir, config_file, errortype):
 
     if errortype == "DECODE":
         _LOGGER.warning(
-            "Error loading configuration. Backup created, empty configuration used."
+            "Lỗi khi tải cấu hình. Đã tạo bản sao lưu, cấu hình trống được sử dụng."
         )
 
     if errortype == "VERSION":
-        _LOGGER.warning("Incompatible Configuration Detected. Backup Created.")
+        _LOGGER.warning("Đã phát hiện cấu hình không tương thích. Đã tạo bản sao lưu.")
 
     if errortype == "OSERROR":
         _LOGGER.warning(
-            "Unable to Open Configuration. Backup Created, empty configuration used."
+            "Không thể mở cấu hình. Sao lưu Đã tạo, cấu hình trống được sử dụng."
         )
 
-    _LOGGER.warning(f"Backup Located at: {backup_location}")
+    _LOGGER.warning(f"Sao lưu đặt tại: {backup_location}")
 
 
 def save_config(config: dict, config_dir: str) -> None:
     """Saves the configuration to the provided directory"""
 
     config_file = ensure_config_file(config_dir)
-    _LOGGER.info(("Saving configuration file to {}").format(config_dir))
+    _LOGGER.info(("Đang lưu tệp cấu hình vào {}").format(config_dir))
     config["configuration_version"] = CONFIGURATION_VERSION
     config_view = dict(config)
     unneeded_keys = ["wls_presets"]
@@ -546,7 +546,7 @@ def save_presets(config: dict, config_dir: str) -> None:
     """Saves the configuration to the provided directory"""
 
     presets_file = check_preset_file(config_dir)
-    _LOGGER.info(("Saving user presets to {}").format(config_dir))
+    _LOGGER.info(("Đang lưu các cài trước của người dùng vào {}").format(config_dir))
 
     config_view = dict(config)
     for key in [key for key in config_view if key != "user_presets"]:

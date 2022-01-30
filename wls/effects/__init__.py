@@ -93,9 +93,9 @@ def _gaussian_kernel1d(sigma, order, array_len):
     radius = max(radius, 1)
 
     if order < 0:
-        raise ValueError("Order must non-negative")
+        raise ValueError("Thứ tự không được âm")
     if not (isinstance(radius, int) or radius.is_integer()) or radius <= 0:
-        raise ValueError("Radius must a positive integer")
+        raise ValueError("Bán kính phải là một số nguyên dương")
 
     p = np.polynomial.Polynomial([0, 0, -0.5 / (sigma * sigma)])
     x = np.arange(-radius, radius + 1)
@@ -117,7 +117,7 @@ def _gaussian_kernel1d(sigma, order, array_len):
 
 def fast_blur_pixels(pixels, sigma):
     if len(pixels) == 0:
-        raise ValueError("Cannot smooth an empty array")
+        raise ValueError("Không thể làm mịn một mảng trống")
     kernel = _gaussian_kernel1d(sigma, 0, len(pixels))
     pixels[:, 0] = np.convolve(pixels[:, 0], kernel, mode="same")
     pixels[:, 1] = np.convolve(pixels[:, 1], kernel, mode="same")
@@ -127,7 +127,7 @@ def fast_blur_pixels(pixels, sigma):
 
 def fast_blur_array(array, sigma):
     if len(array) == 0:
-        raise ValueError("Cannot smooth an empty array")
+        raise ValueError("Không thể làm mịn một mảng trống")
     kernel = _gaussian_kernel1d(sigma, 0, len(array))
     return np.convolve(array, kernel, mode="same")
 
@@ -145,7 +145,7 @@ def smooth(x, sigma):
     """
 
     if len(x) == 0:
-        raise ValueError("Cannot smooth an empty array")
+        raise ValueError("Không thể làm mịn một mảng trống")
 
     # Choose a radius for the filter kernel large enough to include all significant elements. Using
     # a radius of 4 standard deviations (rounded to int) will only truncate tail values that are of
@@ -202,30 +202,30 @@ class Effect(BaseRegistry):
         {
             vol.Optional(
                 "blur",
-                description="Amount to blur the effect",
+                description="Làm mờ",
                 default=0.0,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=10)),
             vol.Optional(
-                "flip", description="Flip the effect", default=False
+                "flip", description="Lật lại", default=False
             ): bool,
             vol.Optional(
                 "mirror",
-                description="Mirror the effect",
+                description="Phản chiếu",
                 default=False,
             ): bool,
             vol.Optional(
                 "brightness",
-                description="Brightness of strip",
+                description="Độ sáng của dải",
                 default=1.0,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=1.0)),
             vol.Optional(
                 "background_color",
-                description="Apply a background color",
+                description="Màu nền",
                 default="#000000",
             ): validate_color,
             vol.Optional(
                 "background_brightness",
-                description="Brightness of the background color",
+                description="Độ sáng của màu nền",
                 default=1.0,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=1.0)),
         }
@@ -253,14 +253,14 @@ class Effect(BaseRegistry):
                 base.on_activate(self, virtual.pixel_count)
 
         self._active = True
-        _LOGGER.info(f"Effect {self.NAME} activated.")
+        _LOGGER.info(f"Hiệu ứng {self.NAME} đã kích hoạt.")
 
     def deactivate(self):
         """Detaches an output channel from the effect"""
         self.pixels = None
         self._active = False
 
-        _LOGGER.info(f"Effect {self.NAME} deactivated.")
+        _LOGGER.info(f"Hiệu ứng {self.NAME} hủy kích hoạt.")
 
     def update_config(self, config):
         # TODO: Sync locks to ensure everything is thread safe
@@ -294,7 +294,7 @@ class Effect(BaseRegistry):
                 base.config_updated(self, self._config)
 
         _LOGGER.debug(
-            f"Effect {self.NAME} config updated to {validated_config}."
+            f"Hiệu ứng {self.NAME} đã cập nhật cấu hình thành {validated_config}."
         )
 
         self.configured_blur = self._config["blur"]

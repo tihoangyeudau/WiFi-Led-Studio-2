@@ -36,12 +36,12 @@ class DDPDevice(UDPDevice):
         {
             vol.Required(
                 "pixel_count",
-                description="Number of individual pixels",
+                description="Số lượng LED",
                 default=1,
             ): vol.All(int, vol.Range(min=1)),
             vol.Required(
                 "port",
-                description="Port for the UDP device",
+                description="Cổng cho thiết bị UDP",
                 default=7979,
             ): vol.All(int, vol.Range(min=1, max=65535)),
         }

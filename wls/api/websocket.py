@@ -50,7 +50,7 @@ class WebsocketEndpoint(RestEndpoint):
             return await WebsocketConnection(self._wls).handle(request)
         except ConnectionResetError:
             _LOGGER.debug(
-                "Connection Reset Error on Websocket Connection - retrying."
+                "Lỗi thiết lập lại kết nối trên kết nối Websocket - đang thử lại."
             )
 
 
@@ -85,7 +85,7 @@ class WebsocketConnection:
             self._sender_queue.put_nowait(message)
         except asyncio.QueueFull:
             _LOGGER.error(
-                "Client sender queue size exceeded {}".format(
+                "Đã vượt quá kích thước hàng đợi của người gửi khách hàng {}".format(
                     MAX_PENDING_MESSAGES
                 )
             )
@@ -110,7 +110,7 @@ class WebsocketConnection:
     async def _sender(self):
         """Async write loop to pull from the queue and send"""
 
-        _LOGGER.info("Starting sender")
+        _LOGGER.info("Bắt đầu gửi")
         while not self._socket.closed:
             message = await self._sender_queue.get()
             if message is None:
@@ -121,12 +121,12 @@ class WebsocketConnection:
                 await self._socket.send_json(message, dumps=json.dumps)
             except TypeError as err:
                 _LOGGER.error(
-                    "Unable to serialize to JSON: %s\n%s",
+                    "Không thể tuần tự hóa thành JSON: %s\n%s",
                     err,
                     message,
                 )
 
-        _LOGGER.info("Stopping sender")
+        _LOGGER.info("Dừng gửi")
 
     async def handle(self, request):
         """Handle the websocket connection"""
@@ -167,7 +167,7 @@ class WebsocketConnection:
 
         await socket.prepare(request)
 
-        _LOGGER.info("Websocket connected.")
+        _LOGGER.info("Websocket đã kết nối.")
 
         self._receiver_task = asyncio.current_task(loop=self._wls.loop)
         self._sender_task = self._wls.loop.create_task(self._sender())
@@ -188,30 +188,30 @@ class WebsocketConnection:
                     websocket_handlers[message["type"]](self, message)
                 else:
                     _LOGGER.error(
-                        ("Received unknown command {}").format(message["type"])
+                        ("Đã nhận lệnh không xác định {}").format(message["type"])
                     )
-                    self.send_error(message["id"], "Unknown command type.")
+                    self.send_error(message["id"], "Loại lệnh không xác định.")
 
                 message = await socket.receive_json()
 
         except (vol.Invalid, ValueError):
-            _LOGGER.info("Invalid message format.")
-            self.send_error(message["id"], "Invalid message format.")
+            _LOGGER.info("Định dạng tin nhắn không hợp lệ.")
+            self.send_error(message["id"], "Định dạng tin nhắn không hợp lệ.")
 
         except TypeError as e:
             if socket.closed:
-                _LOGGER.info("Connection closed by client.")
+                _LOGGER.info("Máy khách đã đóng kết nối.")
             else:
-                _LOGGER.exception(f"Unexpected TypeError: {e}")
+                _LOGGER.exception(f"Loại lỗi không mong muốn: {e}")
 
         except (asyncio.CancelledError, futures.CancelledError):
-            _LOGGER.info("Connection cancelled")
+            _LOGGER.info("Đã huỷ bỏ kết nối")
         # Hopefully get rid of the aiohttp connection reset errors
         except ConnectionResetError:
-            _LOGGER.info("Connection reset")
+            _LOGGER.info("Đặt lại kết nối")
 
         except Exception as err:
-            _LOGGER.exception("Unexpected Exception: %s", err)
+            _LOGGER.exception("Ngoại lệ bất ngờ: %s", err)
 
         finally:
             remove_listeners()
@@ -223,7 +223,7 @@ class WebsocketConnection:
 
             # Close the connection
             await socket.close()
-            _LOGGER.info("Closed connection")
+            _LOGGER.info("Đã đóng kết nối")
 
         return socket
 
@@ -248,7 +248,7 @@ class WebsocketConnection:
 
         subscription_id = message["id"]
 
-        _LOGGER.debug(f"Websocket unsubscribing event id {subscription_id}")
+        _LOGGER.debug(f"Websocket huỷ đăng ký sự kiện có id {subscription_id}")
         if subscription_id in self._listeners:
             self._listeners.pop(subscription_id)()
 
@@ -257,22 +257,22 @@ class WebsocketConnection:
         client = message.get("client")
 
         if client in WEB_AUDIO_CLIENTS:
-            _LOGGER.warning(f"Web audio client {client} already exists")
+            _LOGGER.warning(f"Máy khách âm thanh web {client} đã tồn tại")
             return
 
-        _LOGGER.info(f"Web audio stream opened by client {client}")
+        _LOGGER.info(f"Luồng âm thanh web được mở bới máy khách {client}")
         WEB_AUDIO_CLIENTS.add(client)
 
     @websocket_handler("audio_stream_stop")
     def audio_stream_stop_handler(self, message):
         client = message.get("client")
-        _LOGGER.info(f"Web audio stream closed by client {client}")
+        _LOGGER.info(f"Luồng âm thanh web được đóng bởi máy khách {client}")
         WEB_AUDIO_CLIENTS.discard(client)
 
     @websocket_handler("audio_stream_config")
     def audio_stream_config_handler(self, message):
         _LOGGER.info(
-            "WebAudioConfig from {}: {}".format(
+            "Cấu hình âm thanh web từ{}: {}".format(
                 message.get("client"),
                 message.get("data"),
             )

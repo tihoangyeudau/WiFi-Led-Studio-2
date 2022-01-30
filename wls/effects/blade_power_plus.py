@@ -16,52 +16,52 @@ _LOGGER = logging.getLogger(__name__)
 
 class BladePowerPlus(AudioReactiveEffect, HSVEffect):
 
-    NAME = "Blade Power+"
+    NAME = "RML pro"
     CATEGORY = "Classic"
 
     _power_funcs = {
-        "Beat": "beat_power",
-        "Bass": "bass_power",
-        "Lows (beat+bass)": "lows_power",
-        "Mids": "mids_power",
-        "High": "high_power",
+        "Nhịp": "beat_power",
+        "Trầm": "bass_power",
+        "Thấp (Nhịp+trầm)": "lows_power",
+        "Trung": "mids_power",
+        "Cao": "high_power",
     }
 
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
                 "mirror",
-                description="Mirror the effect",
+                description="Phản chiếu",
                 default=False,
             ): bool,
             vol.Optional(
                 "blur",
-                description="Amount to blur the effect",
+                description="Làm mờ",
                 default=2,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=10)),
             vol.Optional(
                 "decay",
-                description="Rate of color decay",
+                description="Tỷ lệ phân rã màu sắc",
                 default=0.7,
             ): vol.All(vol.Coerce(float), vol.Range(0, 1)),
             vol.Optional(
                 "multiplier",
-                description="Make the reactive bar bigger/smaller",
+                description="Làm cho thanh phản ứng lớn hơn/nhỏ hơn",
                 default=0.5,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=1.0)),
             vol.Optional(
                 "background_color",
-                description="Color of Background",
+                description="Màu nền",
                 default="#000000",
             ): validate_color,
             vol.Optional(
                 "frequency_range",
-                description="Frequency range for the beat detection",
+                description="Dải tần số để phát hiện nhịp",
                 default="Lows (beat+bass)",
             ): vol.In(list(_power_funcs.keys())),
             vol.Optional(
                 "invert_roll",
-                description="Invert the direction of the gradient roll",
+                description="Đảo ngược hướng của cuộn gradient",
                 default=False,
             ): bool,
         }

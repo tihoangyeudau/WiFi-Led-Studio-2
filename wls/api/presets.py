@@ -22,7 +22,7 @@ class PresetsEndpoint(RestEndpoint):
         except BaseException:
             response = {
                 "status": "failed",
-                "reason": f"effect {effect_id} does not exist",
+                "reason": f"Hiệu ứng {effect_id} không tồn tại",
             }
             return web.json_response(data=response, status=400)
 
@@ -51,7 +51,7 @@ class PresetsEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
 
@@ -62,14 +62,14 @@ class PresetsEndpoint(RestEndpoint):
         if category is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "category" was not provided',
+                "reason": 'Thuộc tính bắt buộc "category" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
         if category not in ["wls_presets", "user_presets"]:
             response = {
                 "status": "failed",
-                "reason": 'Category {} is not "wls_presets" or "user_presets"'.format(
+                "reason": 'Loại {} không phải là "wls_presets" hoặc "user_presets"'.format(
                     category
                 ),
             }
@@ -78,14 +78,14 @@ class PresetsEndpoint(RestEndpoint):
         if effect_id is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "effect_id" was not provided',
+                "reason": 'Thuộc tính bắt buộc "effect_id" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
         if effect_id not in self._wls.config[category].keys():
             response = {
                 "status": "failed",
-                "reason": "Effect {} does not exist in category {}".format(
+                "reason": "Hiệu ứng {} không tồn tại in category {}".format(
                     effect_id, category
                 ),
             }
@@ -96,21 +96,21 @@ class PresetsEndpoint(RestEndpoint):
         except BaseException:
             response = {
                 "status": "failed",
-                "reason": f"effect {effect_id} does not exist",
+                "reason": f"Hiệu ứng {effect_id} không tồn tại",
             }
             return web.json_response(data=response, status=400)
 
         if preset_id is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "preset_id" was not provided',
+                "reason": 'Thuộc tính bắt buộc "preset_id" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
         if preset_id not in self._wls.config[category][effect_id].keys():
             response = {
                 "status": "failed",
-                "reason": "Preset {} does not exist for effect {} in category {}".format(
+                "reason": "Cài trước {} không tồn tại cho hiệu ứng {} trong loại {}".format(
                     preset_id, effect_id, category
                 ),
             }
@@ -119,7 +119,7 @@ class PresetsEndpoint(RestEndpoint):
         if name is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "name" was not provided',
+                "reason": 'Thuộc tính bắt buộc "name" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
@@ -140,7 +140,7 @@ class PresetsEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
         preset_id = data.get("preset_id")
@@ -149,14 +149,14 @@ class PresetsEndpoint(RestEndpoint):
         if category is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "category" was not provided',
+                "reason": 'Thuộc tính bắt buộc "category" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
         if category not in ["wls_presets", "user_presets"]:
             response = {
                 "status": "failed",
-                "reason": 'Category {} is not "wls_presets" or "user_presets"'.format(
+                "reason": 'Loại {} không phải là "wls_presets" hoặc "user_presets"'.format(
                     category
                 ),
             }
@@ -165,7 +165,7 @@ class PresetsEndpoint(RestEndpoint):
         if effect_id is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "effect_id" was not provided',
+                "reason": 'Thuộc tính bắt buộc "effect_id" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
@@ -174,14 +174,14 @@ class PresetsEndpoint(RestEndpoint):
         except BaseException:
             response = {
                 "status": "failed",
-                "reason": f"effect {effect_id} does not exist",
+                "reason": f"Hiệu ứng {effect_id} không tồn tại",
             }
             return web.json_response(data=response, status=400)
 
         if effect_id not in self._wls.config[category].keys():
             response = {
                 "status": "failed",
-                "reason": "Effect {} does not exist in category {}".format(
+                "reason": "Hiệu ứng {} không tồn tại trong loại {}".format(
                     effect_id, category
                 ),
             }
@@ -190,14 +190,14 @@ class PresetsEndpoint(RestEndpoint):
         if preset_id is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "preset_id" was not provided',
+                "reason": 'Thuộc tính bắt buộc "preset_id" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
         if preset_id not in self._wls.config[category][effect_id].keys():
             response = {
                 "status": "failed",
-                "reason": "Preset {} does not exist for effect {} in category {}".format(
+                "reason": "Cài trước {} không tồn tại cho hiệu ứng {} trong loại {}".format(
                     preset_id, effect_id, category
                 ),
             }

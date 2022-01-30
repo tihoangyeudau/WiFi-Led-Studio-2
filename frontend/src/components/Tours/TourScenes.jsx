@@ -9,11 +9,11 @@ const steps = [
     selector: '.step-scenes-one',
     content: (
       <div>
-        <h2>Scenes</h2>
-        You can save the current state of Wls as a scene,
-        while giving it a name and optionally an image or an icon.
+        <h2>Cảnh</h2>
+        Bạn có thể lưu trạng thái hiện tại của WiFi Led Studio dưới dạng một cảnh,
+        trong khi đặt tên cho nó và tùy chọn một hình ảnh hoặc một biểu tượng.
         <p>
-          Note: This includes all active effects for all devices and their effect-settings.
+        Lưu ý: Điều này bao gồm tất cả các hiệu ứng đang hoạt động cho tất cả các thiết bị và cài đặt hiệu ứng của chúng.
         </p>
       </div>
     ),
@@ -40,7 +40,7 @@ const TourScenes = ({ cally }) => {
             <InfoRounded />
           </Badge>
         </ListItemIcon>
-        Tour
+        Hướng dẫn
       </MenuItem>
       <Tour
         steps={steps}

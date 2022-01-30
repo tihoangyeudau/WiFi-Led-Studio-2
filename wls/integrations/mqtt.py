@@ -86,14 +86,14 @@ class MQTT(Integration):
             if scene_id is None:
                 response = {
                     "status": "failed",
-                    "reason": 'Required attribute "scene_id" was not provided',
+                    "reason": 'Thuộc tính bắt buộc "scene_id" không được cung cấp',
                 }
                 return _LOGGER.warning(response)
             _LOGGER.warning(str(self._wls.config["scenes"].keys()))
             if scene_id not in self._wls.config["scenes"].keys():
                 response = {
                     "status": "failed",
-                    "reason": f'Scene "{scene_id}" does not exist',
+                    "reason": f'Scene "{scene_id}" không tồn tại',
                 }
                 return _LOGGER.warning(response)
 

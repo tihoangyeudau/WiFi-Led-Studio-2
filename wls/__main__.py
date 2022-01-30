@@ -119,7 +119,7 @@ def setup_logging(loglevel, config_dir):
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="A Networked LED Effect Controller"
+        description="Bộ điều khiển hiệu ứng đèn LED nối mạng"
     )
 
     parser.add_argument(
@@ -131,7 +131,7 @@ def parse_args():
         "-c",
         "--config",
         dest="config",
-        help="Directory that contains the configuration files",
+        help="Thư mục chứa các tệp cấu hình",
         default=config_helpers.get_default_config_directory(),
         type=str,
     )
@@ -139,13 +139,13 @@ def parse_args():
         "--open-ui",
         dest="open_ui",
         action="store_true",
-        help="Automatically open the webinterface",
+        help="Tự động mở giao diện web",
     )
     parser.add_argument(
         "-v",
         "--verbose",
         dest="loglevel",
-        help="set loglevel to INFO",
+        help="đặt loglevel thành INFO",
         action="store_const",
         const=logging.INFO,
     )
@@ -153,7 +153,7 @@ def parse_args():
         "-vv",
         "--very-verbose",
         dest="loglevel",
-        help="set loglevel to DEBUG",
+        help="đặt loglevel thành DEBUG",
         action="store_const",
         const=logging.DEBUG,
     )
@@ -161,7 +161,7 @@ def parse_args():
         "-p",
         "--port",
         dest="port",
-        help="Web interface port (HTTP)",
+        help="Cổng giao diện web (HTTP)",
         default=None,
         type=int,
     )
@@ -169,14 +169,14 @@ def parse_args():
         "-p_s",
         "--port_secure",
         dest="port_s",
-        help="Web interface port (HTTPS)",
+        help="Cổng giao diện web (HTTPS)",
         default=None,
         type=int,
     )
     parser.add_argument(
         "--host",
         dest="host",
-        help="The address to host Wls web interface",
+        help="Địa chỉ lưu trữ giao diện web WiFi Led Studio",
         default=None,
         type=str,
     )
@@ -184,25 +184,25 @@ def parse_args():
         "--tray",
         dest="tray",
         action="store_true",
-        help="Hide Wls console to the system tray",
+        help="Ẩn bảng điều khiển WiFi Led Studio vào khay hệ thống",
     )
     parser.add_argument(
         "--performance",
         dest="performance",
         action="store_true",
-        help="Profile Wls's performance. A developer can use this to diagnose performance issues.",
+        help="Hồ sơ hiệu suất của WiFi Led Studio. Nhà phát triển có thể sử dụng điều này để chẩn đoán các vấn đề về hiệu suất.",
     )
     parser.add_argument(
         "--offline",
         dest="offline_mode",
         action="store_true",
-        help="Disable automated updates and sentry crash logger",
+        help="Tắt cập nhật tự động và trình ghi sự cố sentry",
     )
     parser.add_argument(
         "--sentry-crash-test",
         dest="sentry_test",
         action="store_true",
-        help="This crashes Wls to test the sentry crash logger",
+        help="Điều này xảy ra sự cố. Hãy kiểm tra trình ghi sự cố sentry",
     )
     return parser.parse_args()
 
@@ -240,7 +240,7 @@ def main():
             p.nice(psutil.HIGH_PRIORITY_CLASS)
         except psutil.Error:
             _LOGGER.info(
-                "Unable to set priority, please run as Administrator if you are experiencing frame rate issues"
+                "Không thể đặt mức độ ưu tiên, vui lòng chạy với tư cách Quản trị viên nếu bạn đang gặp sự cố về tốc độ khung hình"
             )
         # p.ionice(psutil.IOPRIO_HIGH)
     elif psutil.LINUX:
@@ -249,7 +249,7 @@ def main():
             p.ionice(psutil.IOPRIO_CLASS_RT, value=7)
         except psutil.Error:
             _LOGGER.info(
-                "Unable to set priority, please run as root or sudo if you are experiencing frame rate issues",
+                "Không thể đặt mức độ ưu tiên, vui lòng chạy dưới quyền root hoặc sudo nếu bạn đang gặp sự cố về tốc độ khung hình",
             )
     else:
         p.nice(15)
@@ -257,14 +257,14 @@ def main():
     if not (currently_frozen() or installed_via_pip()):
         if args.offline_mode:
             _LOGGER.warning(
-                "Offline Mode Enabled - Please check for updates regularly."
+                "Chế độ Ngoại tuyến được Bật - Vui lòng kiểm tra các bản cập nhật thường xuyên."
             )
         else:
             import wls.sentry_config  # noqa: F401
 
     if args.sentry_test:
         """This will crash Wls and submit a Sentry error if Sentry is configured"""
-        _LOGGER.warning("Steering Wls into a brick wall")
+        _LOGGER.warning("Chỉ đạo WiFi Led Studio vào một bức tường gạch")
         div_by_zero = 1 / 0
 
     if args.tray or currently_frozen():
@@ -272,7 +272,7 @@ def main():
         try:
             import pystray
         except Exception as Error:
-            msg = f"Error: Unable to virtual tray icon. Shutting down. Error: {Error}"
+            msg = f"Lỗi: Không thể biểu tượng khay. Đang Tắt. Lỗi: {Error}"
             _LOGGER.critical(msg)
             raise Exception(msg)
             sys.exit(0)
@@ -288,7 +288,7 @@ def main():
                 current_directory, "..", "icons/" "tray.png"
             )
         icon = pystray.Icon(
-            "Wls", icon=Image.open(icon_location), title="Wls"
+            "Wls", icon=Image.open(icon_location), title="WiFi Led Studio @ Rainbow Music Led"
         )
         icon.visible = True
     else:
@@ -309,10 +309,10 @@ def entry_point(icon=None):
 
     exit_code = 4
     while exit_code == 4:
-        _LOGGER.info("Wls Core is initializing")
+        _LOGGER.info("Lõi WiFi Led Studio đang khởi tạo")
 
         if args.performance:
-            print("Collecting performance data...")
+            print("Thu thập dữ liệu hiệu suất...")
             yappi.start()
 
         wls = WlsCore(
@@ -326,7 +326,7 @@ def entry_point(icon=None):
         exit_code = wls.start(open_ui=args.open_ui)
 
         if args.performance:
-            print("Finished collecting performance data")
+            print("Đã thu thập xong dữ liệu hiệu suất")
             filename = config_helpers.get_profile_dump_location(
                 config_dir=args.config
             )
@@ -335,10 +335,10 @@ def entry_point(icon=None):
             yappi.get_thread_stats().print_all()
             stats.save(filename, type="pstat")
             print(
-                f"Saved performance data to config directory      : {filename}"
+                f"Đã lưu dữ liệu hiệu suất vào thư mục cấu hình      : {filename}"
             )
             print(
-                "Please send the performance data to a developer : https://wls.app/contact/"
+                "Vui lòng gửi dữ liệu hiệu suất cho Rainbow Music Led : https://facebook.com/rainbowmusicled"
             )
 
     if icon:

@@ -7,19 +7,19 @@ from wls.effects.hsv_effect import HSVEffect
 
 class Marching(AudioReactiveEffect, HSVEffect):
 
-    NAME = "Marching"
-    CATEGORY = "Atmospheric"
+    NAME = "Diễu hành"
+    CATEGORY = "Khí quyển"
 
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
                 "speed",
-                description="Effect Speed modifier",
+                description="Tốc độ",
                 default=0.1,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=1.0)),
             vol.Optional(
                 "reactivity",
-                description="Audio Reactive modifier",
+                description="Độ nhậy",
                 default=0.2,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=1.0)),
         }

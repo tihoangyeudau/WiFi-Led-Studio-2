@@ -63,7 +63,7 @@ def fps_to_sleep_interval(fps):
 
 
 def install_package(package):
-    _LOGGER.debug(f"Installed package: {package}")
+    _LOGGER.debug(f"Gói đã cài đặt: {package}")
     env = os.environ.copy()
     args = [
         sys.executable,
@@ -77,7 +77,7 @@ def install_package(package):
     _, stderr = process.communicate()
     if process.returncode != 0:
         _LOGGER.error(
-            "Failed to install package %s: %s",
+            "Không cài đặt được gói %s: %s",
             package,
             stderr.decode("utf-8").lstrip().strip(),
         )
@@ -87,7 +87,7 @@ def install_package(package):
 
 def import_or_install(package):
     try:
-        _LOGGER.debug(f"Imported package: {package}")
+        _LOGGER.debug(f"Gói đã nhập: {package}")
         return importlib.import_module(package)
 
     except ImportError:
@@ -103,7 +103,7 @@ def async_fire_and_forget(coro, loop, exc_handler=None):
     """Run some code in the core event loop without a result"""
 
     if not asyncio.coroutines.iscoroutine(coro):
-        raise TypeError(("A coroutine object is required: {}").format(coro))
+        raise TypeError(("Một đối tượng coroutine là bắt buộc: {}").format(coro))
 
     def callback():
         """Handle the firing of a coroutine."""
@@ -141,14 +141,14 @@ def async_fire_and_return(coro, callback, timeout=10):
     """Run some async code in the core event loop with a callback to handle result"""
 
     if not asyncio.coroutines.iscoroutine(coro):
-        raise TypeError(("A coroutine object is required: {}").format(coro))
+        raise TypeError(("Một đối tượng coroutine là bắt buộc: {}").format(coro))
 
     def _callback(future):
         exc = future.exception()
         if exc:
             # Handle wonderful empty TimeoutError exception
             if type(exc) == TimeoutError:
-                _LOGGER.warning(f"Coroutine {future} timed out.")
+                _LOGGER.warning(f"Coroutine {future} hết hạn.")
             else:
                 _LOGGER.error(exc)
         else:
@@ -171,7 +171,7 @@ def async_callback(loop, callback, *args):
             if future.set_running_or_notify_cancel():
                 future.set_exception(e)
             else:
-                _LOGGER.warning("Exception on lost future: ", exc_info=True)
+                _LOGGER.warning("Ngoại lệ tương lai đã mất: ", exc_info=True)
 
     loop.call_soon(run_callback)
     return future
@@ -248,12 +248,12 @@ class RML:
             response = method(url, timeout=timeout, **kwargs)
 
         except requests.exceptions.RequestException:
-            msg = f"RML {ip_address}: Failed to connect"
+            msg = f"RML {ip_address}: Kết nối thất bại"
             self._online = False
             raise ValueError(msg)
 
         if not response.ok:
-            msg = f"RML {ip_address}: API Error - {response.status_code}"
+            msg = f"Đèn có IP {ip_address}: Lỗi API - {response.status_code}"
             raise ValueError(msg)
 
         return response
@@ -291,7 +291,7 @@ class RML:
             config: dict, with all rml configuration info
         """
         _LOGGER.info(
-            f"RML {self.ip_address}: Attempting to contact device..."
+            f"Đèn có IP {self.ip_address}: Đang cố gắng kết nối với đèn..."
         )
         response = await RML._rml_request(
             requests.get, self.ip_address, "json/info"
@@ -299,11 +299,11 @@ class RML:
 
         rml_config = response.json()
 
-        if not rml_config["brand"] in "RML":
-            msg = f"RML {self.ip_address}: Not a compatible RML brand '{rml_config['brand']}'"
+        if not rml_config["brand"] in "RAINBOW MUSIC LED":
+            msg = f"Đèn có IP {self.ip_address}: Không phải đèn của RAINBOW MUSIC LED'{rml_config['brand']}'"
             raise ValueError(msg)
 
-        _LOGGER.info(f"RML {self.ip_address}: Received config")
+        _LOGGER.info(f"Đèn có IP {self.ip_address}: Đã nhận cấu hình")
 
         return rml_config
 
@@ -355,7 +355,7 @@ class RML:
         )
 
         _LOGGER.info(
-            f"RML {self.ip_address}: Turned {'on' if state else 'off'}."
+            f"Đèn có IP {self.ip_address}: Đã {'bật' if state else 'tắt'}."
         )
 
     async def set_brightness(self, brightness):
@@ -375,7 +375,7 @@ class RML:
         )
 
         _LOGGER.info(
-            f"RML {self.ip_address}: Set brightness to {brightness}."
+            f"Đèn có IP {self.ip_address}: Đã cài độ sáng {brightness}."
         )
 
     def enable_realtime_gamma(self):
@@ -388,7 +388,7 @@ class RML:
         self.sync_settings["if"]["live"]["no-gc"] = False
 
         _LOGGER.info(
-            f"RML {self.ip_address}: Enabled realtime gamma correction"
+            f"Đèn có IP {self.ip_address}: Đã bật sửa gamma thời gian thực"
         )
 
     def force_max_brightness(self):
@@ -399,7 +399,7 @@ class RML:
         """
         self.sync_settings["if"]["live"]["maxbri"] = True
 
-        _LOGGER.info(f"RML {self.ip_address}: Enabled force max brightness")
+        _LOGGER.info(f"Đèn có IP {self.ip_address}: Đã bật độ sáng tối đa")
 
     def multirgb_dmx_mode(self):
         """
@@ -409,7 +409,7 @@ class RML:
         """
         self.sync_settings["if"]["live"]["dmx"]["mode"] = 4
 
-        _LOGGER.info(f"RML {self.ip_address}: Enabled Multi RGB")
+        _LOGGER.info(f"Đèn có IP {self.ip_address}: Đã bật Multi RGB")
 
     def first_universe(self):
         """
@@ -419,7 +419,7 @@ class RML:
         """
         self.sync_settings["if"]["live"]["dmx"]["uni"] = 1
 
-        _LOGGER.info(f"RML {self.ip_address}: Set first Universe = 1")
+        _LOGGER.info(f"Đèn có IP {self.ip_address}: Đã cài Universe đầu tiên = 1")
 
     def first_dmx_address(self):
         """
@@ -429,7 +429,7 @@ class RML:
         """
         self.sync_settings["if"]["live"]["dmx"]["addr"] = 1
 
-        _LOGGER.info(f"RML {self.ip_address}: Set first DMX address = 1")
+        _LOGGER.info(f"Đèn có IP {self.ip_address}: Đã cài địa chỉ DMX đầu tiên = 1")
 
     def get_inactivity_timeout(self):
         """
@@ -453,7 +453,7 @@ class RML:
         self.sync_settings["if"]["live"]["timeout"] = timeout * 10
 
         _LOGGER.info(
-            f"Set RML device at {self.ip_address} timeout to {timeout}s"
+            f"Đã cài đèn có IP {self.ip_address} hết hạn trong {timeout}s"
         )
 
     def set_sync_mode(self, mode):
@@ -485,7 +485,7 @@ class RML:
         self.reboot_flag = True
 
         _LOGGER.info(
-            f"Set RML device at {self.ip_address} to sync mode '{mode}'"
+            f"Đã cài đèn có IP {self.ip_address} sang chế độ đồng bộ '{mode}'"
         )
 
     def get_sync_mode(self):
@@ -550,12 +550,12 @@ async def resolve_destination(
             dest = await loop.run_in_executor(
                 executor, socket.gethostbyname, cleaned_dest
             )
-            _LOGGER.debug(f"Resolved {cleaned_dest} to {dest}")
+            _LOGGER.debug(f"Đã giải quyết {cleaned_dest} sang {dest}")
             return dest
             # dest = await loop.getaddrinfo(cleaned_dest, port)
             # return dest[0][4][0]
         except socket.gaierror as e:
-            raise ValueError(f"Failed to resolve destination {cleaned_dest}")
+            raise ValueError(f"Không giải quyết được điểm đến {cleaned_dest}")
 
 
 def currently_frozen():
@@ -593,7 +593,7 @@ def getattr_explicit(cls, attr, *default):
 
     if len(default) > 1:
         raise TypeError(
-            "getattr_explicit expected at most 3 arguments, got {}".format(
+            "getattr_explicit dự kiến có nhiều nhất 3 đối số, có {}".format(
                 len(default) + 2
             )
         )
@@ -604,7 +604,7 @@ def getattr_explicit(cls, attr, *default):
         return default[0]
 
     raise AttributeError(
-        f"type object '{cls.__name__}' has no attribute '{attr}'."
+        f"Đối tượng gõ '{cls.__name__}' không có thuộc tính '{attr}'."
     )
 
 
@@ -648,19 +648,19 @@ class UserDefaultCollection(MutableMapping):
         val = self._default_vals.get(key) or self._user_vals.get(key)
         if val:
             return self._parser(val)
-        raise KeyError(f"Unknown {self._collection_name}: {key}")
+        raise KeyError(f"không xác định {self._collection_name}: {key}")
         # _LOGGER.error(f"Unknown {self._collection_name}: {name}")
 
     def __delitem__(self, key):
         if key in self._default_vals:
             _LOGGER.error(
-                f"Cannot delete Wls {self._collection_name}: {key}"
+                f"Không thể xoá WiFi Led Studio {self._collection_name}: {key}"
             )
             return
         if key in self._user_vals:
             del self._user_vals[key]
         _LOGGER.info(
-            f"Deleted {self._collection_name.lower().rstrip('s')}: {key}"
+            f"Đã xoá {self._collection_name.lower().rstrip('s')}: {key}"
         )
         save_config(
             config=self._wls.config,
@@ -670,12 +670,12 @@ class UserDefaultCollection(MutableMapping):
     def __setitem__(self, key, value):
         if key in self._default_vals:
             _LOGGER.error(
-                f"Cannot overwrite Wls {self._collection_name}: {key}"
+                f"Không thể ghi đè WiFi Led Studio {self._collection_name}: {key}"
             )
             return
         self._user_vals[key] = self._validator(value)
         _LOGGER.info(
-            f"Saved {self._collection_name.lower().rstrip('s')}: {key}"
+            f"Đã lưu {self._collection_name.lower().rstrip('s')}: {key}"
         )
         save_config(
             config=self._wls.config,
@@ -877,14 +877,14 @@ class RegistryLoader:
                 module = importlib.import_module(name, path)
                 sys.modules[name] = module
             except SyntaxError as e:
-                _LOGGER.error(f"Failed to reload {name}: {e}")
+                _LOGGER.error(f"Không tải lại được {name}: {e}")
         else:
             pass
 
     def reload(self, force=False):
         """Reloads the registry"""
         found = self.discover_modules(self._package)
-        _LOGGER.debug(f"Reloading {found} from {self._package}")
+        _LOGGER.debug(f"Đang tải lại {found} từ {self._package}")
         for name in found:
             self.reload_module(name)
 
@@ -893,7 +893,7 @@ class RegistryLoader:
 
         if type not in self._cls.registry():
             raise AttributeError(
-                ("Couldn't find '{}' in the {} registry").format(
+                ("Không thể tìm thấy '{}' bên trong {} đăng ký").format(
                     type, self._cls.__name__.lower()
                 )
             )
@@ -929,7 +929,7 @@ class RegistryLoader:
 
         if id not in self._objects:
             raise AttributeError(
-                ("Object with id '{}' does not exist.").format(id)
+                ("Đối tượng có id '{}' không tồn tại.").format(id)
             )
         del self._objects[id]
 

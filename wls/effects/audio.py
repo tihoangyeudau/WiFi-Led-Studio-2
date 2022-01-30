@@ -140,7 +140,7 @@ class AudioInputSource:
             try:
                 self._audio = sd
             except OSError as Error:
-                _LOGGER.critical(f"Error: {Error}. Shutting down.")
+                _LOGGER.critical(f"Lỗi: {Error}. Đang Tắt.")
                 self._wls.stop()
 
         # Enumerate all of the input devices and find the one matching the
@@ -153,13 +153,13 @@ class AudioInputSource:
 
         if device_idx > max(valid_device_indexes):
             _LOGGER.warning(
-                f"Invalid audio device index: {device_idx}. Reverting to default input device."
+                f"Chỉ mục thiết bị âm thanh không hợp lệ: {device_idx}. Hoàn nguyên về thiết bị đầu vào mặc định."
             )
             device_idx = default_device
 
         elif device_idx not in valid_device_indexes:
             _LOGGER.warning(
-                f"Audio device {input_devices[device_idx]['name']} has no input channels. Reverting to default input device."
+                f"Thiết bị âm thanh {input_devices[device_idx]['name']} không có kênh đầu vào. Hoàn nguyên về thiết bị đầu vào mặc định."
             )
             device_idx = default_device
 
@@ -248,7 +248,7 @@ class AudioInputSource:
                 )
 
             _LOGGER.info(
-                f"Audio source opened: {hostapis[device['hostapi']]['name']}: {device.get('name', device.get('client'))}"
+                f"Nguồn âm thanh đã mở: {hostapis[device['hostapi']]['name']}: {device.get('name', device.get('client'))}"
             )
 
             self._stream.start()
@@ -258,11 +258,11 @@ class AudioInputSource:
             self._is_activated = True
         except OSError as e:
             _LOGGER.critical(
-                f"Unable to open Audio Device: {e} - please retry."
+                f"Không thể mở Thiết bị Âm thanh: {e} - xin hãy thử lại."
             )
             self.deactivate()
         except sd.PortAudioError as e:
-            _LOGGER.error(f"{e}, Reverting to default input device")
+            _LOGGER.error(f"{e}, Đang hoàn nguyên về thiết bị đầu vào mặc định")
             open_audio_stream(default_device)
 
     def deactivate(self):
@@ -271,7 +271,7 @@ class AudioInputSource:
             self._stream.close()
             self._stream = None
         self._is_activated = False
-        _LOGGER.info("Audio source closed.")
+        _LOGGER.info("Đã đóng nguồn âm thanh.")
 
     def subscribe(self, callback):
         """Registers a callback with the input source"""
@@ -671,7 +671,7 @@ class AudioReactiveEffect(Effect):
     """
 
     def activate(self, channel):
-        _LOGGER.info("Activating AudioReactiveEffect.")
+        _LOGGER.info("Đang kích hoạt AudioReactiveEffect.")
         super().activate(channel)
 
         if not self._wls.audio or id(AudioAnalysisSource) != id(
@@ -685,7 +685,7 @@ class AudioReactiveEffect(Effect):
         self._wls.audio.subscribe(self._audio_data_updated)
 
     def deactivate(self):
-        _LOGGER.info("Deactivating AudioReactiveEffect.")
+        _LOGGER.info("Đang vô hiệu AudioReactiveEffect.")
         if self.audio:
             self.audio.unsubscribe(self._audio_data_updated)
         super().deactivate()

@@ -16,12 +16,12 @@ class OpenPixelControl(NetworkedDevice):
         {
             vol.Required(
                 "pixel_count",
-                description="Number of individual pixels",
+                description="Số lượng LED",
                 default=1,
             ): vol.All(int, vol.Range(min=1)),
             vol.Required(
                 "channel",
-                description="Channel to send pixel data",
+                description="Kênh gửi dữ liệu pixel",
                 default=0,
             ): vol.All(int, vol.Range(min=0, max=255)),
         }
@@ -30,14 +30,14 @@ class OpenPixelControl(NetworkedDevice):
     def activate(self):
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         _LOGGER.info(
-            f"Open Pixel Control sender for {self.config['name']} started."
+            f"Open Pixel Control cho {self.config['name']} đã bắt đầu."
         )
         super().activate()
 
     def deactivate(self):
         super().deactivate()
         _LOGGER.info(
-            f"Open Pixel Control sender for {self.config['name']} stopped."
+            f"Open Pixel Control cho {self.config['name']} đã dừng."
         )
         self._sock = None
 

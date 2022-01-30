@@ -7,34 +7,34 @@ from wls.effects.gradient import GradientEffect
 
 class BarAudioEffect(AudioReactiveEffect, GradientEffect):
 
-    NAME = "Bar"
+    NAME = "Thanh"
     CATEGORY = "BPM"
 
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
                 "mode",
-                description="Choose from different animations",
+                description="Chọn từ các hoạt ảnh khác nhau",
                 default="wipe",
             ): vol.In(list(["bounce", "wipe", "in-out"])),
             vol.Optional(
                 "ease_method",
-                description="Acceleration profile of bar",
+                description="Hồ sơ gia tốc của thanh",
                 default="ease_out",
             ): vol.In(list(["ease_in_out", "ease_in", "ease_out", "linear"])),
             vol.Optional(
                 "color_step",
-                description="Amount of color change per beat",
+                description="Số lượng màu thay đổi trên mỗi nhịp",
                 default=0.125,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.0625, max=0.5)),
             vol.Optional(
                 "beat_skip",
-                description="Skips odd or even beats",
+                description="Bỏ qua nhịp chẵn hoặc lẻ",
                 default="none",
             ): vol.In(list(["none", "odds", "even"])),
             vol.Optional(
                 "skip_every",
-                description="If skipping beats, skip every",
+                description="Nếu bỏ qua nhịp, hãy bỏ qua từng nhịp",
                 default=1,
             ): vol.In(
                 list([1, 2])

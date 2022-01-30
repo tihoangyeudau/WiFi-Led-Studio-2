@@ -35,7 +35,7 @@ class Integration(BaseRegistry):
 
     async def activate(self):
         _LOGGER.info(
-            ("Activating {} integration").format(self._config["name"])
+            ("Đang kích hoạt {} tích hợp").format(self._config["name"])
         )
         self._active = True
         self._status = 3
@@ -43,7 +43,7 @@ class Integration(BaseRegistry):
 
     async def deactivate(self):
         _LOGGER.info(
-            ("Deactivating {} integration").format(self._config["name"])
+            ("Đang vô hiệu {} tích hợp").format(self._config["name"])
         )
         self._active = False
         self._status = 2
@@ -51,7 +51,7 @@ class Integration(BaseRegistry):
 
     async def reconnect(self):
         _LOGGER.info(
-            ("Reconnecting {} integration").format(self._config["name"])
+            ("Đang kết nối {} tích hợp").format(self._config["name"])
         )
         self._status = 2
         await self.disconnect()
@@ -126,7 +126,7 @@ class Integrations(RegistryLoader):
 
     def create_from_config(self, config):
         for integration in config:
-            _LOGGER.info(f"Loading integration from config: {integration}")
+            _LOGGER.info(f"Đang tải tích hợp từ cấu hình: {integration}")
             try:
                 self._wls.integrations.create(
                     id=integration["id"],
@@ -137,7 +137,7 @@ class Integrations(RegistryLoader):
                     wls=self._wls,
                 )
             except Exception as e:
-                _LOGGER.warning(f"Failed to load MIDI integration: {e}")
+                _LOGGER.warning(f"Không tải được tích hợp MIDI: {e}")
 
     async def close_all_connections(self):
         for integration in self.values():

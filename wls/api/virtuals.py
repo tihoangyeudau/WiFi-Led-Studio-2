@@ -62,7 +62,7 @@ class VirtualsEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
 
@@ -70,7 +70,7 @@ class VirtualsEndpoint(RestEndpoint):
         if virtual_config is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "config" was not provided',
+                "reason": 'Thuộc tính bắt buộc "config" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
@@ -82,13 +82,13 @@ class VirtualsEndpoint(RestEndpoint):
             if virtual is None:
                 response = {
                     "status": "failed",
-                    "reason": f"Virtual with ID {virtual_id} not found",
+                    "reason": f"Đèn ảo có ID {virtual_id} không được tìm thấy",
                 }
                 return web.json_response(data=response, status=404)
             # Update the virtual's configuration
             virtual.config = virtual_config
             _LOGGER.info(
-                f"Updated virtual {virtual.id} config to {virtual_config}"
+                f"Đã cập nhật đèn ảo {virtual.id} sang cấu hình {virtual_config}"
             )
             # Update wls's config
             for idx, item in enumerate(self._wls.config["virtuals"]):
@@ -96,12 +96,12 @@ class VirtualsEndpoint(RestEndpoint):
                     item["config"] = virtual.config
                     self._wls.config["virtuals"][idx] = item
                     break
-        # Or, create new virtual if id does not exist
+        # Or, create new virtual if id không tồn tại
         else:
             virtual_id = generate_id(virtual_config.get("name"))
 
             # Create the virtual
-            _LOGGER.info(f"Creating virtual with config {virtual_config}")
+            _LOGGER.info(f"Đang tạo đèn ảo với cấu hình {virtual_config}")
 
             virtual = self._wls.virtuals.create(
                 id=virtual_id,

@@ -23,7 +23,7 @@ class Transitions(metaclass=IterClass):
         return getattr(cls, "NAMED_FUNCTIONS")[mode]
 
     def __setitem__(cls, mode):
-        raise Exception("Don't you be setting these values cheeky ;)")
+        raise Exception("Bạn đừng thiết lập những giá trị này một cách liều lĩnh ;)")
 
     def _validate(x1, x2, weight):
         assert np.shape(x1) == np.shape(x2)

@@ -23,7 +23,7 @@ class EffectsEndpoint(RestEndpoint):
         if virtual is None:
             response = {
                 "status": "failed",
-                "reason": f"Virtual with ID {virtual_id} not found",
+                "reason": f"Đèn ảo có ID {virtual_id} không được tìm thấy",
             }
             return web.json_response(data=response, status=404)
 
@@ -46,14 +46,14 @@ class EffectsEndpoint(RestEndpoint):
         if virtual is None:
             response = {
                 "status": "failed",
-                "reason": f"Virtual with ID {virtual_id} not found",
+                "reason": f"Đèn ảo có ID {virtual_id} không được tìm thấy",
             }
             return web.json_response(data=response, status=404)
 
         if not virtual.active_effect:
             response = {
                 "status": "failed",
-                "reason": f"Virtual {virtual_id} has no active effect",
+                "reason": f"Đèn ảo {virtual_id} không kích hoạt hiệu ứng nào",
             }
             return web.json_response(data=response, status=400)
 
@@ -62,7 +62,7 @@ class EffectsEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
         effect_config = data.get("config")
@@ -182,7 +182,7 @@ class EffectsEndpoint(RestEndpoint):
         if virtual is None:
             response = {
                 "status": "failed",
-                "reason": f"Virtual with ID {virtual_id} not found",
+                "reason": f"Đèn ảo có ID {virtual_id} không được tìm thấy",
             }
             return web.json_response(data=response, status=404)
 
@@ -191,14 +191,14 @@ class EffectsEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
         effect_type = data.get("type")
         if effect_type is None:
             response = {
                 "status": "failed",
-                "reason": 'Required attribute "type" was not provided',
+                "reason": 'Thuộc tính bắt buộc "type" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
@@ -283,7 +283,7 @@ class EffectsEndpoint(RestEndpoint):
         if virtual is None:
             response = {
                 "status": "failed",
-                "reason": f"Virtual with ID {virtual_id} not found",
+                "reason": f"Đèn ảo có ID {virtual_id} không được tìm thấy",
             }
             return web.json_response(data=response, status=404)
 

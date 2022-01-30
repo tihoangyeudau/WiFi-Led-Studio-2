@@ -24,18 +24,18 @@ class ModulateEffect(Effect):
         {
             vol.Optional(
                 "modulate",
-                description="Brightness modulation",
+                description="Độ sáng",
                 default=False,
             ): bool,
             vol.Optional(
                 "modulation_effect",
                 default="sine",
-                description="Choose an animation",
+                description="Chọn hoạt ảnh",
             ): vol.In(list(["sine", "breath"])),
             vol.Optional(
                 "modulation_speed",
                 default=0.5,
-                description="Animation speed",
+                description="Tốc độ hoạt ảnh",
             ): vol.All(vol.Coerce(float), vol.Range(min=0.01, max=1)),
         }
     )

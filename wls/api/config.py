@@ -18,7 +18,7 @@ CORE_CONFIG_KEYS = set(map(str, CORE_CONFIG_SCHEMA.schema.keys()))
 def validate_and_trim_config(config, schema, node):
     for key in config.keys():
         if key not in PERMITTED_KEYS[node]:
-            raise KeyError(f"Unknown/forbidden {node} config key: '{key}'")
+            raise KeyError(f"Không xác định/bị cấm {node} khóa cấu hình: '{key}'")
 
     validated_config = schema(config)
     return {key: validated_config[key] for key in config.keys()}
@@ -43,7 +43,7 @@ class ConfigEndpoint(RestEndpoint):
             except JSONDecodeError:
                 response = {
                     "status": "failed",
-                    "reason": "JSON Decoding failed",
+                    "reason": "Không giải mã được JSON",
                 }
                 return web.json_response(data=response, status=400)
 
@@ -88,7 +88,7 @@ class ConfigEndpoint(RestEndpoint):
             "status": "success",
             "payload": {
                 "type": "success",
-                "reason": "Config reset to default values",
+                "reason": "Đặt lại cấu hình về giá trị mặc định",
             },
         }
 
@@ -132,7 +132,7 @@ class ConfigEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
         except vol.MultipleInvalid as msg:
@@ -209,7 +209,7 @@ class ConfigEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "JSON Decoding failed",
+                "reason": "Không giải mã được JSON",
             }
             return web.json_response(data=response, status=400)
 
