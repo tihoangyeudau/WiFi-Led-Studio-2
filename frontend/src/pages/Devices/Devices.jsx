@@ -76,7 +76,7 @@ const Devices = () => {
           <DeviceCard virtual={virtual} key={i} index={i} />
         ))
       ) : (
-        <NoYet type="Device" />
+        <NoYet type="Đèn" />
       )}
     </div>
   );

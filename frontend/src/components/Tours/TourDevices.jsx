@@ -21,8 +21,8 @@ const steps = [
     selector: '.step-devices-two-0',
     content: (
       <div>
-        <h2>Expand</h2>
-        Click the down arrow to toggle options.
+        <h2>Mở rộng</h2>
+        Nhấp vào mũi tên xuống để chuyển đổi các tùy chọn.
       </div>
     ),
     style: {
@@ -33,8 +33,8 @@ const steps = [
     selector: '.step-devices-three-0',
     content: (
       <div>
-        <h2>Delete</h2>
-        A device can be deleted using trashcan icon.
+        <h2>Xoá</h2>
+        Có thể xóa đèn bằng biểu tượng thùng rác.
       </div>
     ),
     style: {
@@ -45,9 +45,9 @@ const steps = [
     selector: '.step-devices-four-0',
     content: (
       <div>
-        <h2>Device-Settings</h2>
-        The wrench will allow you to modify logical device settings including streaming mode
-        , pixel count, and IP address.
+        <h2>Cài đặt đèn</h2>
+        Cờ lê sẽ cho phép bạn sửa đổi cài đặt đèn hợp lý bao gồm cả chế độ phát trực tuyến
+        , số lượng Led và địa chỉ IP.
       </div>
     ),
     style: {
@@ -58,8 +58,8 @@ const steps = [
     selector: '.step-devices-five-0',
     content: (
       <div>
-        <h2>Virtual-Settings</h2>
-        The Cogwheel will allow you to change various virtual device settings.
+        <h2>Cài đặt đèn ảo</h2>
+        Bánh răng sẽ cho phép bạn thay đổi các cài đặt của đèn ảo khác nhau.
       </div>
     ),
     style: {
@@ -70,8 +70,8 @@ const steps = [
     selector: '.step-devices-six',
     content: (
       <div>
-        <h2>Segment-Settings</h2>
-        The slider bar icon will allow you to modify virtual device segments.
+        <h2>Cài đặt phân đoạn</h2>
+        Biểu tượng thanh trượt sẽ cho phép bạn sửa đổi các phân đoạn của đèn ảo.
       </div>
     ),
     style: {
@@ -82,12 +82,12 @@ const steps = [
     selector: '.step-devices-seven',
     content: (
       <div>
-        <h2>Pixelgraph</h2>
-        When actively streaming with an active sound source selected you will find
-        the graph display here.
+        <h2>Đồ thị điểm ảnh</h2>
+        Khi chủ động phát trực tuyến với nguồn âm thanh đang hoạt động được chọn, bạn sẽ thấy
+        biểu đồ hiển thị ở đây.
         <p>
-          Note: Graphs are disabled by default to keep low-end devices safe.
-          For high-end clients they can be enabled using the top-right-menu
+          Lưu ý: Đồ thị bị tắt theo mặc định để giữ an toàn cho các máy cấu hình yếu.
+          Đối với các máy khách cấu hình cao, chúng có thể được bật bằng cách sử dụng menu trên cùng bên phải
         </p>
       </div>
     ),

@@ -27,7 +27,7 @@ const Integrations = () => {
     <div className={classes.cardWrapper}>
     {integrations && Object.keys(integrations).length ? Object.keys(integrations).map((integration, i) => (
       <IntegrationCard integration={integration} key={i} />
-    )) : (<NoYet type="Integration" />)}
+    )) : (<NoYet type="Tích hợp" />)}
   </div>
   );
 };

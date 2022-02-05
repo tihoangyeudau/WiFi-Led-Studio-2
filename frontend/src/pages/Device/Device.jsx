@@ -83,10 +83,10 @@ const Device = ({
                 align={'right'}
               >
                 {' '}
-                activate more advanced features with{' '}
+                kích hoạt các tính năng nâng cao hơn với{' '}
                 <Link style={{ color: 'inherit' }} to={'/Settings?ui'}>
                   {' '}
-                  Expert-Mode
+                  Chế độ chuyên gia
                 </Link>
               </Typography>
             )}

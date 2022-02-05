@@ -1,7 +1,7 @@
 import { IconButton } from '@material-ui/core';
-import GitHubIcon from '@material-ui/icons/GitHub';
-import LanguageIcon from '@material-ui/icons/Language';
-import ForumIcon from '@material-ui/icons/Forum';
+import YouTubeIcon from '@material-ui/icons/YouTube';
+import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
+import FacebookIcon from '@material-ui/icons/Facebook';
 
 const ButtonBar = () => {
   return (
@@ -21,13 +21,13 @@ const ButtonBar = () => {
       }}
     >
       <IconButton
-        aria-label="Trang web"
+        aria-label="Shopee"
         color="inherit"
-        href="https://rainbowmusicled.com/"
+        href="https://shopee.vn/rainbow_music_led/"
         target="_blank"
-        title="Trang web"
+        title="Shopee"
       >
-        <LanguageIcon />
+        <ShoppingCartIcon />
       </IconButton>
       <IconButton
         aria-label="Youtube"
@@ -36,7 +36,7 @@ const ButtonBar = () => {
         target="_blank"
         title="Youtube"
       >
-        <GitHubIcon />
+        <YouTubeIcon />
       </IconButton>
       <IconButton
         aria-label="Fanpage"
@@ -45,7 +45,7 @@ const ButtonBar = () => {
         target="_blank"
         title="Fanpage"
       >
-        <ForumIcon />
+        <FacebookIcon />
       </IconButton>
     </div>
   );

@@ -97,7 +97,7 @@ const GeneralCard = () => {
                     </SettingsButton>
                     {isElectron() && window.process?.argv.indexOf("integratedCore") !== -1 &&
                         <SettingsButton startIcon={<PowerSettingsNew />} onClick={() => { window.api.send('toMain', "start-core") }}>
-                            Khởi động
+                            Bật
                         </SettingsButton>}
                 </div>
             </div>

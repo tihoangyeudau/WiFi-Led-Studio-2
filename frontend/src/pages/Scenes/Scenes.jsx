@@ -82,12 +82,12 @@ const Scenes = () => {
     fullWidth={true}
     maxWidth={"xs"}
   >
-    <DialogTitle id="alert-dialog-title">Scene: {scenes[scene].name || scene}</DialogTitle>
+    <DialogTitle id="alert-dialog-title">Cảnh: {scenes[scene].name || scene}</DialogTitle>
     <DialogContent>
       <DialogContentText id="alert-dialog-description">
         <div style={{ display: 'flex', justifyContent: 'space-between', fontVariant: 'all-small-caps' }}>
-          <span>Device</span>
-          <span>Effect</span>
+          <span>Đèn</span>
+          <span>Hiệu ứng</span>
         </div>
         <Divider />
         {Object.keys(scenes[scene].virtuals).filter(d => !!scenes[scene].virtuals[d].type).map((dev, i) => (
@@ -100,7 +100,7 @@ const Scenes = () => {
     </DialogContent>
     <DialogActions>
       <Button onClick={handleInfoClose} color="primary" autoFocus>
-        Close
+        Đóng
       </Button>
     </DialogActions>
   </Dialog> : <></>
@@ -131,7 +131,7 @@ const Scenes = () => {
           </Card>
           <SceneDialog />
         </Grid>
-      )) : (<NoYet type="Scene" />)}
+      )) : (<NoYet type="Cảnh" />)}
     </Grid>
   );
 };

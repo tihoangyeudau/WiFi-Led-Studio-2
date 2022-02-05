@@ -117,7 +117,7 @@ const SchemaForm = ({
                   <BladeFrame
                     key={i}
                     style={{ order: -1 }}
-                    title="Audio Device"
+                    title="Thiết bị âm thanh"
                     full
                   >
                     <Select

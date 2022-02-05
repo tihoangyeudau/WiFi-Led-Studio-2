@@ -33,11 +33,11 @@ const AddSceneDialog = () => {
         Hình ảnh là tùy chọn và có thể là một trong số:
         <ul style={{ paddingLeft: '1rem' }}>
         <li>iconName <Link href="https://material-ui.com/components/material-icons/">Tìm biểu tượng MUI tại đây</Link>        
-        <Typography color="textSecondary" variant="subtitle1"><em>ví dụ. bùng phát, báo động</em></Typography></li>
+        <Typography color="textSecondary" variant="subtitle1"><em>ví dụ: bùng phát, báo động</em></Typography></li>
         <li>mdi:icon-name <Link href="https://materialdesignicons.com">Tìm các biểu tượng Material Design tại đây</Link>
-        <Typography color="textSecondary" variant="subtitle1"><em>eg. mdi:balloon, mdi:led-strip-variant</em></Typography></li>
+        <Typography color="textSecondary" variant="subtitle1"><em>ví dụ: mdi:balloon, mdi:led-strip-variant</em></Typography></li>
         <li>image:custom-url
-        <Typography color="textSecondary" variant="subtitle1" style={{ wordBreak: 'break-all'}}><em>eg. image:https://i.ytimg.com/vi/4G2unzNoOnY/maxresdefault.jpg</em></Typography></li>
+        <Typography color="textSecondary" variant="subtitle1" style={{ wordBreak: 'break-all'}}><em>ví dụ: image:https://i.ytimg.com/vi/4G2unzNoOnY/maxresdefault.jpg</em></Typography></li>
         </ul>
       
       <TextField

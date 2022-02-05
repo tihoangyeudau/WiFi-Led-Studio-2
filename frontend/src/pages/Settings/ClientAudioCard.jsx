@@ -18,7 +18,7 @@ const ClientAudioCard = ({ style }) => {
     const setClientDevice = useStore((state) => state.setClientDevice)
     const webAudName = useStore((state) => state.webAudName)
 
-    return clientDevices && <BladeFrame style={{ order: 0, ...style }} full={true} title={`${webAudName}: Audio Device`} className={classes.select}>
+    return clientDevices && <BladeFrame style={{ order: 0, ...style }} full={true} title={`${webAudName}: Thiết bị âm thanh`} className={classes.select}>
         <Select
             variant="standard"
             disableUnderline
