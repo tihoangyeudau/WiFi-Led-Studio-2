@@ -158,7 +158,7 @@ const Webaudio = ({style}) => {
         <div style={{ display: 'flex', margin: 20 }}>
           <TextField
             id="client-name"
-            label="Client Name"
+            label="Tên máy khách"
             value={webAudName}
             onChange={(e) => setWebAudName(e.target.value)}
             variant="outlined"

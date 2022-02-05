@@ -89,11 +89,11 @@ const GeneralCard = () => {
                         Giới thiệu
                     </AboutDialog>
                     <SettingsButton disabled={disconnected} startIcon={<Refresh />} onClick={restart}>
-                        {isElectron() && window.process?.argv.indexOf("integratedCore") !== -1 ? "Khởi động lại" : "Restart"}
+                        {isElectron() && window.process?.argv.indexOf("integratedCore") !== -1 ? "Khởi động lại" : "Khởi động lại"}
                     </SettingsButton>
 
                     <SettingsButton disabled={disconnected} startIcon={<PowerSettingsNew />} onClick={shutdown}>
-                        {isElectron() && window.process?.argv.indexOf("integratedCore") !== -1 ? "Tắt" : "Shutdown"}
+                        {isElectron() && window.process?.argv.indexOf("integratedCore") !== -1 ? "Tắt" : "Tắt"}
                     </SettingsButton>
                     {isElectron() && window.process?.argv.indexOf("integratedCore") !== -1 &&
                         <SettingsButton startIcon={<PowerSettingsNew />} onClick={() => { window.api.send('toMain', "start-core") }}>

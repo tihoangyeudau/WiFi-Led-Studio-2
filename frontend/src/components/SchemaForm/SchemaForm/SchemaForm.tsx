@@ -312,7 +312,7 @@ const SchemaForm = ({
                   marginBottom: 0,
                 }}
               >
-                Field-Descriptions
+                Mô tả trường
                 <Info style={{ marginLeft: '0.5rem' }} />
               </DialogContentText>
             }

@@ -84,12 +84,12 @@ export default function App() {
   const wlsTheme = !!window.localStorage.getItem('wls-theme')
     ? window.localStorage.getItem('wls-theme')
     : !!window.localStorage.getItem('hassTokens')
-    ? 'DarkBlue'
-    : window.location.origin === 'https://my.wls.app'
+    ? 'DarkRed'
+    : window.location.origin === 'https://rainbowmusicled.com'
     ? 'DarkGreen'
     : isElectron()
     ? 'DarkOrange'
-    : 'DarkRed';
+    : 'DarkBlue';
 
   const wlsThemes = {
     Dark: BladeDarkTheme,
@@ -130,7 +130,7 @@ export default function App() {
   useEffect(() => {
     initFrontendConfig();
     console.info(
-      '%c Wls ' + '%c\n ReactApp by Blade ',
+      '%c WiFi Led Studio ' + '%c\n @ Rainbow Music Led ',
       'padding: 10px 40px; color: #ffffff; border-radius: 5px 5px 0 0; background-image:url(https://my.wls.app/favicon/favicon-32x32.png); background-color: #800000; background-repeat: no-repeat; background-position: 10% 50%;',
       'background: #fff; color: #800000; border-radius: 0 0 5px 5px;padding: 5px 0;'
     );
@@ -166,7 +166,7 @@ export default function App() {
 
   return (
     <ThemeProvider theme={BladeDarkGreyTheme5}>
-      <MuiThemeProvider theme={wlsThemes[wlsTheme || 'DarkRed']}>
+      <MuiThemeProvider theme={wlsThemes[wlsTheme || 'DarkBlue']}>
         <SnackbarProvider maxSnack={5}>
           <WsContextNew.Provider value={wsNew}>
             <WsContext.Provider value={ws}>
@@ -209,10 +209,10 @@ export default function App() {
                 {features['waves'] && (
                   <WaveLines
                     startColor={
-                      wlsThemes[wlsTheme || 'DarkRed'].palette.primary.main
+                      wlsThemes[wlsTheme || 'DarkBlue'].palette.primary.main
                     }
                     stopColor={
-                      wlsThemes[wlsTheme || 'DarkRed'].palette.accent
+                      wlsThemes[wlsTheme || 'DarkBlue'].palette.accent
                         .main || '#ffdc0f'
                     }
                     width={width - 8}
@@ -226,13 +226,13 @@ export default function App() {
             // debug={true}
             // activateLogging={true}
             startAutomatically={false}
-            appId="Add Wls-to-Homescreen React Live Demo"
+            appId="Thêm bản trình diễn trực tiếp nháy theo nhạc vào màn hình chính"
             skipFirstVisit={false}
             displayPace={0}
             lifespan={60}
             // maxDisplayCount={5}
             customPromptContent={{
-              title: 'Do you want to add Wls to your homescreen?',
+              title: 'Bạn có muốn thêm WiFi Led Studio vào màn hình chính của mình không?',
               cancelMsg: 'X',
               installMsg: 'Add',
               guidanceCancelMsg: 'X',

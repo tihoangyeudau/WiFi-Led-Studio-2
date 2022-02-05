@@ -200,7 +200,7 @@ const EffectsCard = ({ virtId }) => {
                   id="panel1a-header"
                   style={{ padding: 0 }}
                 >
-                  <Typography variant={"h5"}>Effect Configuration</Typography>
+                  <Typography variant={"h5"}>Cấu hình hiệu ứng</Typography>
                 </AccordionSummary>
                 <AccordionDetails style={{ padding: '0 0 8px 0' }}>
                   <div>

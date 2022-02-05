@@ -15,7 +15,7 @@ class Strobe(AudioReactiveEffect, GradientEffect):
         "1/32 (⊙▃⊙ )": 32,
     }
 
-    NAME = "Nhấp nháy BPM"
+    NAME = "Nhấp nháy"
     CATEGORY = "BPM"
 
     CONFIG_SCHEMA = vol.Schema(

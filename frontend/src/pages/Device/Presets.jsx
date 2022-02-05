@@ -190,7 +190,7 @@ const PresetsCard = ({ virtual, effectType, presets, style }) => {
 
   return (
     <Card variant="outlined" className={`${classes.deviceCard} step-device-three`} style={style}>
-      <CardHeader style={{ margin: '0' }} title="Presets" subheader="Explore different effect configurations or create your own." />
+      <CardHeader style={{ margin: '0' }} title="Cài trước" subheader="Khám phá các cấu hình hiệu ứng khác nhau hoặc tạo hiệu ứng của riêng bạn." />
       <CardContent className={classes.content}>
         <Grid spacing={2} container className={classes.buttonGrid}>
           {renderPresetsButton(presets?.default_presets, 'default_presets')}
@@ -215,10 +215,10 @@ const PresetsCard = ({ virtual, effectType, presets, style }) => {
                 label={
                   presets["default_presets"] &&
                     (Object.keys(presets["default_presets"]).indexOf(name) > -1 || Object.values(presets["default_presets"]).filter(p => p.name === name).length > 0)
-                    ? "Default presets are readonly"
+                    ? "Các cài trước mặc định chỉ đọc"
                     : presets["custom_presets"] && (Object.keys(presets["custom_presets"]).indexOf(name) > -1 || Object.values(presets["custom_presets"]).filter(p => p.name === name).length > 0)
-                      ? "Preset already exsisting"
-                      : "Add Custom Preset"}
+                      ? "Đã có cài trước"
+                      : "Thêm cài trước tuỳ chỉnh"}
                 style={{ marginRight: '1rem', flex: 1 }}
                 value={name}
                 onChange={(e) => {
@@ -230,7 +230,7 @@ const PresetsCard = ({ virtual, effectType, presets, style }) => {
               />}
               footer={<div style={{ margin: '0 0 0.5rem 1rem' }}>
                 <Typography variant="body2" className={classes.hint}>
-                  Save the current effect configuration as a new preset.
+                  Lưu cấu hình hiệu ứng hiện tại dưới dạng cài trước mới.
                 </Typography>
               </div>}
               confirmDisabled={name.length === 0 || presets["default_presets"] && (Object.keys(presets["default_presets"]).indexOf(name) > -1 || Object.values(presets["default_presets"]).filter(p => p.name === name).length > 0) || !valid}
@@ -246,10 +246,10 @@ const PresetsCard = ({ virtual, effectType, presets, style }) => {
         <div style={{ flexDirection: 'column', flex: 1 }}>
           <div style={{ marginLeft: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
             <Typography variant="body2" className={classes.hint}>
-              Long-Press or right-click to open context-menu
+              Nhấn và nhấp chuột phải để mở menu ngữ cảnh
             </Typography>
             {features['cloud'] && !!localStorage.getItem('jwt') && isLogged &&
-              <CloudScreen virtId={virtual.id} effectType={effectType} variant="outlined" label="get more online" startIcon={<Cloud />} />
+              <CloudScreen virtId={virtual.id} effectType={effectType} variant="outlined" label="Lấy thêm trực tuyến" startIcon={<Cloud />} />
             }
           </div>
         </div>

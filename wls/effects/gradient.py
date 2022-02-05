@@ -166,8 +166,8 @@ class TemporalGradientEffect(TemporalEffect, GradientEffect, ModulateEffect):
     is essentually just the temporal exposure of gradients.
     """
 
-    NAME = "Gradient"
-    CATEGORY = "Non-Reactive"
+    NAME = "Dải mầu"
+    CATEGORY = "Không nháy theo nhạc"
 
     def effect_loop(self):
         # TODO: Could add some cool effects like twinkle or sin modulation

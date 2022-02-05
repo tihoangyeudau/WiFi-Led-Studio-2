@@ -52,7 +52,7 @@ function ConfirmationDialogRaw(props) {
             </DialogContent>
             <DialogActions>
                 <Button autoFocus onClick={handleCancel} color="primary">
-                    Cancel
+                    HUỶ
                 </Button>
                 <Button onClick={handleOk} color="primary">
                     Ok
@@ -114,13 +114,13 @@ export default function ConfirmationDialog({ virtual, config }) {
                     <Button
                         variant="contained"
                         color="primary"
-                        aria-label="Add"
+                        aria-label="Thêm"
                         className={classes.button}
                         endIcon={<AddCircleIcon />}
                         onClick={handleClickListItem}
                         role="listitem"
                     >
-                        ADD SEGMENT
+                        THÊM ĐOẠN
                     </Button>
 
                     <ConfirmationDialogRaw

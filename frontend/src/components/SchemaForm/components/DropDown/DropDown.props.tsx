@@ -9,7 +9,7 @@ export interface EffectDropDownProps {
 export const EffectDropDownDefaultProps = {
   value: '',
   onChange: undefined,
-  title: 'Effect Type',
+  title: 'Loại hiệu ứng',
   groups: {
     'Group 1': [
       {

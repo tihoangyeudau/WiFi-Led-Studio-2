@@ -119,13 +119,13 @@ const AddVirtualDialog = () => {
         {initial.config &&
         Object.keys(initial.config).length === 0 &&
         initial.config.constructor === Object
-          ? 'Add Virtual Device'
-          : 'Settings'}
+          ? 'Thêm đèn ảo'
+          : 'Cài đặt'}
       </DialogTitle>
       <DialogContent>
         <DialogContentText>
-          With Virtuals, you can split devices into segments and merge several
-          segments over several devices into one Virtual-Device.
+          Với đèn ảo, bạn có thể chia đèn thành các phân đoạn và hợp nhất một số
+          phân đoạn trên một số đèn thành một đèn ảo.
         </DialogContentText>
 
         <BladeSchemaForm
@@ -136,14 +136,14 @@ const AddVirtualDialog = () => {
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} color="primary">
-          Cancel
+          Huỷ
         </Button>
         <Button onClick={handleAddVirtual} color="primary">
           {initial.config &&
           Object.keys(initial.config).length === 0 &&
           initial.config.constructor === Object
-            ? 'Add'
-            : 'Save'}
+            ? 'Thêm'
+            : 'Lưu'}
         </Button>
       </DialogActions>
     </Dialog>

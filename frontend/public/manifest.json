@@ -1,11 +1,11 @@
 {
   "short_name": "Wls",
-  "name": "Wls Client by Blade",
-  "description": "Connect to any Wls-Instance",
-  "author": "Yeon (Blade)",
+  "name": "WiFi Led Studio",
+  "description": "Kết nối mọi đèn của Rainbow Music Led",
+  "author": "Rainbow Music Led",
   "developer": {
-    "name": "Yeon",
-    "url": "https://github.com/YeonV"
+    "name": "Rainbow Music Led",
+    "url": "https://rainbowmusicled.com"
   },
   "icons": [
     {

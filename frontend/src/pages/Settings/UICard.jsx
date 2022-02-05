@@ -51,7 +51,7 @@ const UICard = () => {
         <div style={{ width: '100%' }}>
             {config.visualisation_fps && (<>
                 <div className={`${classes.settingsRow} slider step-settings-two`}>
-                    <label>Frontend FPS</label>
+                    <label>FPS giao diện</label>
                     <div style={{ flexGrow: 1 }}>
                         <SettingsSlider
                             value={fps}
@@ -90,7 +90,7 @@ const UICard = () => {
                 </div>
 
                 <div className={`${classes.settingsRow} slider step-settings-three `}>
-                    <label>Frontend Pixels</label>
+                    <label>Điểm ảnh giao diện</label>
                     <div style={{ flexGrow: 1 }}>
                         <SettingsSlider
                             value={pixelLength}
@@ -126,7 +126,7 @@ const UICard = () => {
 
             </>)}
             <div className={`${classes.settingsRow} step-settings-x `}>
-                <label>Hiển thị biểu đồ (ăn CPU)</label>
+                <label>Hiển thị biểu đồ (ngốn CPU)</label>
                 <SettingsSwitch checked={graphs} onChange={(e) => toggleGraphs()} />
             </div>
             <div className={`${classes.settingsRow} step-settings-x `}>
@@ -138,47 +138,47 @@ const UICard = () => {
                 <SettingsSwitch checked={features['cloud']} onChange={(e) => setFeatures('cloud', !features['cloud'])} />
             </div>}
             {showFeatures['rml'] && <div className={`${classes.settingsRow} step-settings-x `}>
-                <label>RML Integration</label>
+                <label>Tích hợp Rainbow Music Led</label>
                 <SettingsSwitch checked={features['rml']} onChange={(e) => setFeatures('rml', !features['rml'])} />
             </div>}
             {showFeatures['integrations'] && <div className={`${classes.settingsRow} step-settings-x `}>
-                <label>Integrations</label>
+                <label>Tích hợp</label>
                 <SettingsSwitch checked={features['integrations']} onChange={(e) => setFeatures('integrations', !features['integrations'])} />
             </div>}            
             {showFeatures['webaudio'] && <div className={`${classes.settingsRow} step-settings-x `}>
-                <label>WebAudio</label>
+                <label>Âm thanh Web</label>
                 <SettingsSwitch checked={features['webaudio']} onChange={(e) => setFeatures('webaudio', !features['webaudio'])} />
             </div>}            
             {showFeatures['go'] && <div className={`${classes.settingsRow} step-settings-x `}>
-                <label>New Base (Go)</label>
+                <label>Nền tảng mới (Go)</label>
                 <SettingsSwitch checked={features['go']} onChange={(e) => setFeatures('go', !features['go'])} />
             </div>}            
             {viewMode !== 'user' && <div className={`${classes.settingsRow} step-settings-x `}>
-                <label>Copy To</label>
+                <label>Sao chép sang</label>
                 <SettingsSwitch checked={features['streamto']} onChange={(e) => setFeatures('streamto', !features['streamto'])} />
             </div>}
             {showFeatures['effectfilter'] && <div className={`${classes.settingsRow} step-settings-x `}>
-                <label>Effect Filter</label>
+                <label>lọc hiệu ứng</label>
                 <SettingsSwitch checked={features['effectfilter']} onChange={(e) => setFeatures('effectfilter', !features['effectfilter'])} />
             </div>}
             {viewMode !== 'user' && <div className={`${classes.settingsRow} step-settings-eight `}>
-                <label>Transitions</label>
+                <label>Chuyển tiếp</label>
                 <SettingsSwitch checked={features['transitions']} onChange={(e) => setFeatures('transitions', !features['transitions'])} />
             </div>}
             {viewMode !== 'user' && <div className={`${classes.settingsRow} step-settings-x `}>
-                <label>Frequencies</label>
+                <label>Tần số</label>
                 <SettingsSwitch checked={features['frequencies']} onChange={(e) => setFeatures('frequencies', !features['frequencies'])} />
             </div>}
             {viewMode !== 'user' && <div className={`${classes.settingsRow} step-settings-x `}>
-                <label>Spotify Embedded Player</label>
+                <label>Trình phát nhúng Spotify</label>
                 <SettingsSwitch checked={features['spotify']} onChange={(e) => setFeatures('spotify', !features['spotify'])} />
             </div>}
             {viewMode !== 'user' && <div className={`${classes.settingsRow} step-settings-x `}>
-                <label>BG Waves (eats performance)</label>
+                <label>Sóng nền (ngốn CPU)</label>
                 <SettingsSwitch checked={features['waves']} onChange={(e) => setFeatures('waves', !features['waves'])} />
             </div>}
             {showFeatures['dev'] && <div className={`${classes.settingsRow} step-settings-x `}>
-                <label>Dev Mode</label>
+                <label>Chế độ phát triển</label>
                 <Input
                     disableUnderline
                     style={{
@@ -192,7 +192,7 @@ const UICard = () => {
                     margin="dense"
                     onBlur={(e) => {
                         if (e.target.value === 'clear') { setViewMode('user'); setShowFeatures('streamto', false); setShowFeatures('dev', false); setShowFeatures('go', false); setShowFeatures('waves', false);setShowFeatures('effectfilter', false); setShowFeatures('cloud', false); setShowFeatures('rml', false); setShowFeatures('integrations', false); setShowFeatures('spotify', false); setShowFeatures('webaudio', false); setFeatures('streamto', false); setFeatures('waves', false); setFeatures('go', false); setFeatures('cloud', false);setFeatures('effectfilter', false); setFeatures('rml', false); setFeatures('dev', false); setFeatures('integrations', false); setFeatures('spotify', false); setFeatures('webaudio', false); window.localStorage.removeItem('wls-theme'); window.localStorage.setItem('BladeMod', 0); window.location.reload() }
-                        if (e.target.value === 'BladeIsYeon') { setViewMode('expert'); setShowFeatures('dev', true); setShowFeatures('go', true); setShowFeatures('streamto', true); setShowFeatures('cloud', true);setShowFeatures('effectfilter', true); setShowFeatures('waves', true); setShowFeatures('rml', true); setShowFeatures('integrations', true); setShowFeatures('spotify', true); setShowFeatures('webaudio', true); setFeatures('streamto', true); setFeatures('go', true); setFeatures('waves', true); setFeatures('cloud', true); setFeatures('rml', true); setFeatures('integrations', true);setFeatures('effectfilter', true); setFeatures('spotify', true); setFeatures('webaudio', true); window.localStorage.setItem('wls-theme', "DarkRed"); window.location.reload() }
+                        if (e.target.value === 'BladeIsYeon') { setViewMode('expert'); setShowFeatures('dev', true); setShowFeatures('go', true); setShowFeatures('streamto', true); setShowFeatures('cloud', true);setShowFeatures('effectfilter', true); setShowFeatures('waves', true); setShowFeatures('rml', true); setShowFeatures('integrations', true); setShowFeatures('spotify', true); setShowFeatures('webaudio', true); setFeatures('streamto', true); setFeatures('go', true); setFeatures('waves', true); setFeatures('cloud', true); setFeatures('rml', true); setFeatures('integrations', true);setFeatures('effectfilter', true); setFeatures('spotify', true); setFeatures('webaudio', true); window.localStorage.setItem('wls-theme', "DarkBlue"); window.location.reload() }
                         if (e.target.value === 'BladeCloud') { setShowFeatures('cloud', true) }
                         if (e.target.value === 'BladeRml') { setShowFeatures('rml', true) }
                         if (e.target.value === 'BladeIntegrations') { setShowFeatures('integrations', true) }

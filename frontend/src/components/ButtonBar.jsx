@@ -21,29 +21,29 @@ const ButtonBar = () => {
       }}
     >
       <IconButton
-        aria-label="Website"
+        aria-label="Trang web"
         color="inherit"
-        href="https://wls.app/"
+        href="https://rainbowmusicled.com/"
         target="_blank"
-        title="Website"
+        title="Trang web"
       >
         <LanguageIcon />
       </IconButton>
       <IconButton
-        aria-label="Github"
+        aria-label="Youtube"
         color="inherit"
-        href="https://git.wls.app/"
+        href="https://www.youtube.com/channel/UCATBTjpcc1HHLexbgE5ZCdw"
         target="_blank"
-        title="Github"
+        title="Youtube"
       >
         <GitHubIcon />
       </IconButton>
       <IconButton
-        aria-label="Discord"
+        aria-label="Fanpage"
         color="inherit"
-        href="https://discord.gg/tFSKgTzRcj"
+        href="https://www.facebook.com/rainbowmusicled/"
         target="_blank"
-        title="Discord"
+        title="Fanpage"
       >
         <ForumIcon />
       </IconButton>

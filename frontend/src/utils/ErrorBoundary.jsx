@@ -28,12 +28,12 @@ class ErrorBoundary extends React.Component {
                 margin: '0 auto',
                 paddingTop: '3rem'
             }}>
-                <h1>Something went wrong</h1>
+                <h1>Đã xảy ra sự cố</h1>
                 <p>
-                    Deleting the browser's frontend-data might help,<br />
-                    if there is old config data left.
+                    Xóa dữ liệu giao diện người dùng của trình duyệt có thể hữu ích,<br />
+                    nếu còn lại dữ liệu cấu hình cũ.
                 </p>
-                <p> Refresh page after cleaing data... </p>
+                <p> Làm mới trang sau khi xóa dữ liệu... </p>
                 <button style={{ height: 40, borderRadius: 10, border: '1px solid #999', color: '#fff', backgroundColor: '#600000', cursor: 'pointer'}} onClick={() => {
                     window.localStorage.removeItem('undefined')
                     window.localStorage.removeItem('wls-host')
@@ -46,7 +46,7 @@ class ErrorBoundary extends React.Component {
                     window.localStorage.removeItem('username')
                     window.localStorage.removeItem('BladeMod')
                     window.location.reload()
-                }}>Clear Browser-Data</button><br />            
+                }}>Xóa dữ liệu trình duyệt</button><br />            
             </div>;
         }
 

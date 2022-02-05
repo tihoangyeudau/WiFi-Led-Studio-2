@@ -76,7 +76,7 @@ const DeviceCard = ({
       to={linkTo}
       className={`${classes.virtualCardPortraitW} ${
         isEffectSet ? 'active' : ''
-      } ${online ? 'online' : 'offline'}`}
+      } ${online ? 'trực tuyến' : 'ngoại tuyến'}`}
       style={{ ...additionalStyle, width: '100%' }}
     >
       <Card className={classes.virtualCardPortrait}>
@@ -123,7 +123,7 @@ const DeviceCard = ({
                     opacity: online ? 1 : 0.3,
                   }}
                 >
-                  offline
+                  ngoại tuyến
                 </Typography>
                 <Button
                   size="small"
@@ -150,7 +150,7 @@ const DeviceCard = ({
                 color="textSecondary"
                 style={{ height: 25, display: 'flex', alignItems: 'center' }}
               >
-                Effect: {effectName}
+                Hiệu ứng: {effectName}
                 <Button
                   size="small"
                   onClick={(e) => {
@@ -186,14 +186,14 @@ const DeviceCard = ({
                 color="textSecondary"
                 style={{ height: 25 }}
               >
-                Streaming...
+                Đang truyền...
               </Typography>
             ) : (
               <Typography
                 variant="body1"
                 style={{ color: theme.palette.text.disabled, height: 25 }}
               >
-                off
+                tắt
               </Typography>
             )}
           </div>
@@ -215,7 +215,7 @@ const DeviceCard = ({
               handleExpandClick();
             }}
             aria-expanded={expanded}
-            aria-label="show more"
+            aria-label="hiển thị thêm"
             style={{ zIndex: 3, color: '#999' }}
           >
             <ExpandMoreIcon className={`step-devices-two-${index}`} />
@@ -269,7 +269,7 @@ const DeviceCard = ({
                 <Popover
                   variant="text"
                   startIcon={<Delete />}
-                  label="delete"
+                  label="xoá"
                   color={color}
                   onConfirm={() => handleDeleteDevice(virtId)}
                   className={`step-devices-three-${index}`}
@@ -288,11 +288,11 @@ const DeviceCard = ({
                       handleEditDevice(isDevice);
                     }}
                   >
-                    Edit Device
+                    Sửa đèn
                   </Button>
                 ) : (
                   <EditVirtuals
-                    label="Edit Virtual"
+                    label="Sửa đèn ảo"
                     variant="text"
                     color={color}
                     virtId={virtId}

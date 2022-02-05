@@ -56,18 +56,18 @@ const AddButton = ({ className, style, setBackdrop }) => {
     };
 
     const menuitems = [
-        { icon: <SettingsInputComponent />, name: 'Add Device', action: () => { setDialogOpenAddDevice(true); handleClose(); } },
-        { icon: <Icon><span className={'mdi mdi-led-strip-variant'} style={{ position: 'relative', display: 'flex' }} /></Icon>, name: 'Add Virtual', action: () => { setDialogOpenAddVirtual(true); handleClose(); } },
-        { icon: <Wallpaper />, name: 'Add Scene', action: () => { setDialogOpenAddScene(true); handleClose(); } },
+        { icon: <SettingsInputComponent />, name: 'Thêm đèn', action: () => { setDialogOpenAddDevice(true); handleClose(); } },
+        { icon: <Icon><span className={'mdi mdi-led-strip-variant'} style={{ position: 'relative', display: 'flex' }} /></Icon>, name: 'Thêm đèn ảo', action: () => { setDialogOpenAddVirtual(true); handleClose(); } },
+        { icon: <Wallpaper />, name: 'Thêm cảnh', action: () => { setDialogOpenAddScene(true); handleClose(); } },
     ];
 
     if (features['integrations']) {
-        menuitems.push({ icon: <SettingsInputSvideo />, name: 'Add Integration', action: () => { setDialogOpenAddIntegration(true); handleClose(); } })
+        menuitems.push({ icon: <SettingsInputSvideo />, name: 'Thêm tích hợp', action: () => { setDialogOpenAddIntegration(true); handleClose(); } })
     }
 
     return (
         <div className={className} style={{zIndex: 5, ...style}}>
-            <Fab color="primary" aria-label="add" onClick={handleClick}>
+            <Fab color="primary" aria-label="thêm" onClick={handleClick}>
                 <Add />
             </Fab>
             <StyledMenu

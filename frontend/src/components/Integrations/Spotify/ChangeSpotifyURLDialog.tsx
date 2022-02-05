@@ -48,7 +48,7 @@ export default function ChangeSpotifyURLDialog({
             autoFocus
             margin="dense"
             id="url"
-            label="URL"
+            label="Đường dẫn"
             type="text"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
@@ -57,10 +57,10 @@ export default function ChangeSpotifyURLDialog({
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="primary">
-            Cancel
+            Huỷ
           </Button>
           <Button onClick={handleSave} color="primary">
-            Change
+            Thay đổi
           </Button>
         </DialogActions>
       </Dialog>

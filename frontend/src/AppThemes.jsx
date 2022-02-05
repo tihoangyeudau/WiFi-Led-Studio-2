@@ -32,7 +32,7 @@ export const BladeDarkBlueTheme = createTheme({
       main: '#0dbedc',
     },
     secondary: {
-      main: '#0dbedc',
+      main: '#065f6e',
     },
     accent: {
       main: '#20173c',
@@ -108,10 +108,10 @@ export const BladeDarkOrangeTheme = createTheme({
   palette: {
     type: 'dark',
     primary: {
-      main: '#FFBF47',
+      main: '#f53d2d',
     },
     secondary: {
-      main: '#edad2d',
+      main: '#ff6633',
     },
     accent: {
       main: '#542581',

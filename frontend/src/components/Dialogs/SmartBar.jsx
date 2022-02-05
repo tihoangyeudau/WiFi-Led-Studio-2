@@ -68,9 +68,9 @@ const SmartBar = ({ open, setOpen }) => {
               if (value === 'BladeStreamTo') { setShowFeatures('streamto', true) }
               if (value === 'BladeEffectFilter') { setShowFeatures('effectfilter', true) }
               if (value === 'BladeGo') { setShowFeatures('go', true) }
-              if (value.startsWith('theme:') && ["DarkRed", "DarkOrange", "Light", "DarkGreen", "DarkBlue", "DarkGrey"].indexOf(value.replace('theme:', '')) > -1) { window.localStorage.setItem('wls-theme', value.replace('theme:', '')); window.location.reload() }
+              if (value.startsWith('theme:') && ["DarkBlue", "DarkGrey", "Light", "DarkGreen", "DarkRed", "DarkOrange"].indexOf(value.replace('theme:', '')) > -1) { window.localStorage.setItem('wls-theme', value.replace('theme:', '')); window.location.reload() }
             }
-            if (value === 'BladeIsYeon') { setViewMode('expert'); setShowFeatures('dev', true); setShowFeatures('go', true); setShowFeatures('streamto', true); setShowFeatures('cloud', true);setShowFeatures('effectfilter', true); setShowFeatures('waves', true); setShowFeatures('rml', true); setShowFeatures('integrations', true); setShowFeatures('spotify', true); setShowFeatures('webaudio', true); setFeatures('streamto', true); setFeatures('go', true); setFeatures('waves', true); setFeatures('cloud', true); setFeatures('rml', true); setFeatures('integrations', true);setFeatures('effectfilter', true); setFeatures('spotify', true); setFeatures('webaudio', true); window.localStorage.setItem('wls-theme', "DarkRed"); window.location.reload() }
+            if (value === 'BladeIsYeon') { setViewMode('expert'); setShowFeatures('dev', true); setShowFeatures('go', true); setShowFeatures('streamto', true); setShowFeatures('cloud', true);setShowFeatures('effectfilter', true); setShowFeatures('waves', true); setShowFeatures('rml', true); setShowFeatures('integrations', true); setShowFeatures('spotify', true); setShowFeatures('webaudio', true); setFeatures('streamto', true); setFeatures('go', true); setFeatures('waves', true); setFeatures('cloud', true); setFeatures('rml', true); setFeatures('integrations', true);setFeatures('effectfilter', true); setFeatures('spotify', true); setFeatures('webaudio', true); window.localStorage.setItem('wls-theme', "DarkBlue"); window.location.reload() }
 
           }}
           renderOption={(props, option) => (
@@ -91,7 +91,7 @@ const SmartBar = ({ open, setOpen }) => {
               autoFocus
               variant={"outlined"}
               color={"primary"}
-              label="Jump to device / Activate scene"
+              label="Chuyển đến thiết bị / Kích hoạt cảnh"
               inputProps={{
                 ...params.inputProps,
                 autoComplete: "off", // disable autocomplete and autofill

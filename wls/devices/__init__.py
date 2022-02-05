@@ -42,7 +42,7 @@ class Device(BaseRegistry):
         return vol.Schema(
             {
                 vol.Required(
-                    "name", description="Friendly name for the device"
+                    "name", description="Tên đèn"
                 ): str,
                 vol.Optional(
                     "icon_name",
@@ -51,12 +51,12 @@ class Device(BaseRegistry):
                 ): str,
                 vol.Optional(
                     "center_offset",
-                    description="Number of pixels from the perceived center of the device",
+                    description="Số lượng LED bù vào trung tâm của đèn",
                     default=0,
                 ): int,
                 vol.Optional(
                     "refresh_rate",
-                    description="Target rate that pixels are sent to the device",
+                    description="Tần số phát mầu mục tiêu được gửi đến đèn",
                     default=next(
                         (f for f in AVAILABLE_FPS if f >= 60),
                         list(AVAILABLE_FPS)[-1],
@@ -317,7 +317,7 @@ class NetworkedDevice(Device):
         {
             vol.Required(
                 "ip_address",
-                description="Hostname or IP address of the device",
+                description="Tên máy chủ hoặc địa chỉ IP của đèn",
             ): str,
         }
     )
@@ -415,7 +415,7 @@ class SerialDevice(Device):
                 default="",
             ): vol.In(list(AvailableCOMPorts.available_ports)),
             vol.Required(
-                "baudrate", description="baudrate", default=500000
+                "baudrate", description="tốc độ truyền", default=500000
             ): vol.All(int, vol.Range(min=115200)),
         }
     )

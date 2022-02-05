@@ -11,7 +11,7 @@ const NoYet: React.FC<NoYetProps> = ({ type }): JSX.Element => (
     <CardHeader
       avatar={<Info />}
       title={`Không có ${type}s nào`}
-      subheader={`Bạn có thể thêm ${type} đầu tiên băng cách bấm vào nút Tròn cộng`}
+      subheader={`Bạn có thể thêm ${type} đầu tiên bằng cách bấm vào nút Tròn cộng`}
     />
   </Card>
 );

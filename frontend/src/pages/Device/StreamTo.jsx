@@ -84,17 +84,17 @@ const StreamToCard = ({ virtual, virtuals, style }) => {
 
   return (
     <Card variant="outlined" className={`${classes.card} step-device-two`} style={style}>
-      <CardHeader title="Copy To" subheader="Copy current effect configurations other Devices" style={{ paddingBottom: 11 }} />
+      <CardHeader title="Sao chép sang" subheader="Sao chép cấu hình hiệu ứng hiện tại sang các đèn khác" style={{ paddingBottom: 11 }} />
       <CardContent className={classes.content}>
         <FormControl style={{ margin: 10, width: "100%" }}>
-          <InputLabel id="demo-multiple-chip-label" style={{ margin: '-7px 0 0 14px' }}>Select device(s) to copy to</InputLabel>
+          <InputLabel id="demo-multiple-chip-label" style={{ margin: '-7px 0 0 14px' }}>Chọn (các) đèn để sao chép sang</InputLabel>
           <Select
             labelId="demo-multiple-chip-label"
             id="demo-multiple-chip"
             multiple
             value={streamingTo}
             onChange={(e, b) => handleToggle(b.props.value)}
-            input={<OutlinedInput id="select-multiple-chip" label="Select device(s) to copy to" />}
+            input={<OutlinedInput id="select-multiple-chip" label="Chọn (các) đèn để sao chép sang" />}
             renderValue={(selected) => (
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                 {selected.map((value) => (
@@ -146,7 +146,7 @@ const StreamToCard = ({ virtual, virtuals, style }) => {
           alignSelf: "flex-start",
           margin: "10px 0"
         }}>
-          Copy
+          Sao chép
         </Button>
       </CardContent>
 

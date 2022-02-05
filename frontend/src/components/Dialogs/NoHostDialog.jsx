@@ -78,7 +78,7 @@ export default function NoHostDialog() {
         aria-labelledby="form-dialog-title"
       >
         <DialogTitle id="form-dialog-title">
-          {edit ? 'Wls-Core Host' : window.process?.argv.indexOf("integratedCore") === -1 ? 'Không tìm thấy WiFi Led Studio Core' : 'WiFi Led Studio Core chưa sẵn sàng'}
+          {edit ? 'Máy chủ WiFi Led Studio-Core' : window.process?.argv.indexOf("integratedCore") === -1 ? 'Không tìm thấy WiFi Led Studio Core' : 'WiFi Led Studio Core chưa sẵn sàng'}
         </DialogTitle>
         <DialogContent>
           {!edit && (

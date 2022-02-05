@@ -202,7 +202,7 @@ const RmlCard = ({ className }) => {
                                 />
                                 <TextField
                                     type="number"
-                                    label="Start universe"
+                                    label="Universe đầu tiên"
                                     id="rml-universe-select"
                                     value={settings.rml_preferences.start_universe_setting.setting}
                                     onChange={(e) => onChangeSetting("start_universe_setting", e.target.value)}
@@ -220,7 +220,7 @@ const RmlCard = ({ className }) => {
                                 />
                                 <TextField
                                     type="number"
-                                    label="DMX start address"
+                                    label="Địa chỉ DMX đầu tiên"
                                     id="rml-dmx-start-select"
                                     value={settings.rml_preferences.dmx_address_start.setting}
                                     onChange={(e) => onChangeSetting("dmx_address_start", e.target.value)}
@@ -239,7 +239,7 @@ const RmlCard = ({ className }) => {
                                 />
                                 <TextField
                                     type="number"
-                                    label="Inactivity Timeout"
+                                    label="Thời gian chờ không hoạt động"
                                     id="rml-inactivity-select"
                                     value={settings.rml_preferences.inactivity_timeout.setting}
                                     onChange={(e) => onChangeSetting("inactivity_timeout", e.target.value)}

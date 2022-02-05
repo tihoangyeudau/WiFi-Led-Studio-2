@@ -156,7 +156,7 @@ const TopBar = () => {
         <div>
           <IconButton
             color="inherit"
-            aria-label="mở ngăn kéo"
+            aria-label="mở ngăn"
             onClick={handleLeftBarOpen}
             edge="start"
             className={clsx(classes.menuButton, "step-three", open && classes.hide)}
@@ -170,7 +170,7 @@ const TopBar = () => {
         </div>
 
         <Typography variant="h6" noWrap>
-          {pathname === '/' ? `Wls`
+          {pathname === '/' ? `WiFi Led Studio`
             : (pathname.split('/').length === 3 && pathname.split('/')[1] === 'device') ? virtuals[pathname.split('/')[2]]?.config.name
               : pathname.split('/').pop()}
         </Typography>

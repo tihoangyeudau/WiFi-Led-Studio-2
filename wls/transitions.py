@@ -87,12 +87,12 @@ class Transitions(metaclass=IterClass):
             np.clip(x1, None, 255 * 2 * (weight - 0.5), x1)
 
     NAMED_FUNCTIONS = {
-        "Add": add,
-        "Dissolve": dissolve,
-        "Push": push,
-        "Slide": slide,
-        "Iris": iris,
-        "Through White": throughWhite,
-        "Through Black": throughBlack,
+        "Thêm": add,
+        "Tan biến": dissolve,
+        "Đẩy": push,
+        "Trượt": slide,
+        "Mống mắt": iris,
+        "Xuyên qua màu trắng": throughWhite,
+        "Xuyên qua màu đen": throughBlack,
         "None": "None",
     }

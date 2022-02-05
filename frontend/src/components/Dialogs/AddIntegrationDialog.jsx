@@ -138,19 +138,19 @@ const AddIntegrationDialog = () => {
         {initial.config &&
         Object.keys(initial.config).length === 0 &&
         initial.config.constructor === Object
-          ? "Add"
-          : "Edit"}{" "}
+          ? "Thêm"
+          : "Sửa"}{" "}
         {integrationType.toUpperCase()} Integration
       </DialogTitle>
       <DialogContent>
         <DialogContentText>
-          To add an interation to Wls, please first select the type of integration you
-          wish to add then provide the necessary configuration.
+          Để thêm tương tác vào WiFi Led Studio, trước tiên hãy chọn loại tích hợp bạn
+          muốn thêm sau đó cung cấp cấu hình cần thiết.
         </DialogContentText>
         <div className={classes.wrapper}>
-          <label>Integration Type</label>
+          <label>Loại tích hợp</label>
           <Select
-            label="Type"
+            label="Loại"
             style={{ flexGrow: 1 }}
             disableUnderline
             value={integrationType}
@@ -177,14 +177,14 @@ const AddIntegrationDialog = () => {
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} color="primary">
-          Cancel
+          Huỷ
         </Button>
         <Button onClick={handleAddDevice} color="primary">
           {initial.config &&
           Object.keys(initial.config).length === 0 &&
           initial.config.constructor === Object
-            ? "Add"
-            : "Save"}
+            ? "Thêm"
+            : "Lưu"}
         </Button>
       </DialogActions>
     </Dialog>

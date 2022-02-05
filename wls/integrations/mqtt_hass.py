@@ -299,13 +299,13 @@ class MQTT_HASS(Integration):
                     "entity_category": "config",
                     "options": list(
                         [
-                            "Add",
-                            "Dissolve",
-                            "Push",
-                            "Slide",
-                            "Iris",
-                            "Through White",
-                            "Through Black",
+                            "Thêm",
+                            "Tan biến",
+                            "Đẩy",
+                            "Trượt",
+                            "Mống mắt",
+                            "Xuyên qua màu trắng",
+                            "Xuyên qua màu đen",
                             "None",
                         ]
                     ),

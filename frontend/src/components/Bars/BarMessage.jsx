@@ -39,7 +39,7 @@ const MessageBar = () => {
       action={[
         <IconButton
           key="close"
-          aria-label="close"
+          aria-label="đóng"
           color="inherit"
           onClick={handleClose}
         >

@@ -133,7 +133,7 @@ export default function CloudScreen({
                                 {cloudEffects[effect].map((p, ind) => <Grid item key={ind}>
                                     <Card className={`${classes.cloudEffectCard} ${ virtual.effect.name.toLowerCase() === effect.toLowerCase() && activeCloudPreset === p.Name.toLowerCase() ? ' active' : '' }`} key={ind} onClick={() => handleCloudPresets(p)}>
                                         <CardHeader title={p.Name} subheader={<div style={{ color: '#999' }}>{`by ${p.user.username}`}</div>} action={
-                                            <IconButton aria-label="Import" onClick={(e)=> { e.stopPropagation(); handleCloudPresets(p, true)}}>
+                                            <IconButton aria-label="Nhập" onClick={(e)=> { e.stopPropagation(); handleCloudPresets(p, true)}}>
                                                 <CloudDownload />
                                             </IconButton>
                                         } />

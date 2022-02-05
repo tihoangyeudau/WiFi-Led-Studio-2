@@ -75,7 +75,7 @@ class Virtual:
             vol.Optional(
                 "transition_mode",
                 description="Kiểu chuyển đổi giữa các hiệu ứng",
-                default="Add",
+                default="Thêm",
             ): vol.In([mode for mode in Transitions]),
             vol.Optional(
                 "frequency_min",

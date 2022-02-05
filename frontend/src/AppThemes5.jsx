@@ -31,7 +31,7 @@ export const BladeDarkBlueTheme5 = createTheme({
       main: '#0dbedc',
     },
     secondary: {
-      main: '#0dbedc',
+      main: '#065f6e',
     },
     accent: {
       main: '#20173c',

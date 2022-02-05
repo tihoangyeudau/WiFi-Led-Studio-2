@@ -28,13 +28,13 @@ const AddSceneDialog = () => {
 
   return (
     <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
-    <DialogTitle id="form-dialog-title">Add Scene</DialogTitle>
+    <DialogTitle id="form-dialog-title">Thêm cảnh</DialogTitle>
     <DialogContent>
-        Image is optional and can be one of:
+        Hình ảnh là tùy chọn và có thể là một trong số:
         <ul style={{ paddingLeft: '1rem' }}>
-        <li>iconName <Link href="https://material-ui.com/components/material-icons/">Find MUI icons here</Link>        
-        <Typography color="textSecondary" variant="subtitle1"><em>eg. flare, AccessAlarms</em></Typography></li>
-        <li>mdi:icon-name <Link href="https://materialdesignicons.com">Find Material Design icons here</Link>
+        <li>iconName <Link href="https://material-ui.com/components/material-icons/">Tìm biểu tượng MUI tại đây</Link>        
+        <Typography color="textSecondary" variant="subtitle1"><em>ví dụ. bùng phát, báo động</em></Typography></li>
+        <li>mdi:icon-name <Link href="https://materialdesignicons.com">Tìm các biểu tượng Material Design tại đây</Link>
         <Typography color="textSecondary" variant="subtitle1"><em>eg. mdi:balloon, mdi:led-strip-variant</em></Typography></li>
         <li>image:custom-url
         <Typography color="textSecondary" variant="subtitle1" style={{ wordBreak: 'break-all'}}><em>eg. image:https://i.ytimg.com/vi/4G2unzNoOnY/maxresdefault.jpg</em></Typography></li>
@@ -44,7 +44,7 @@ const AddSceneDialog = () => {
         autoFocus
         margin="dense"
         id="name"
-        label="Name"
+        label="Tên"
         type="text"
         value={name}
         onChange={(e) => setName(e.target.value)}
@@ -52,14 +52,14 @@ const AddSceneDialog = () => {
           setOverwrite(Object.keys(scenes).indexOf(e.target.value.toLowerCase()) > -1)
         }}
         error={overwrite}
-        helperText={overwrite && "Scene already existing!"}
+        helperText={overwrite && "Cảnh đã có!"}
         required
         fullWidth
       />
       <TextField
         margin="dense"
         id="scene_image"
-        label="Image"
+        label="Hình ảnh"
         type="text"
         value={image}
         onChange={(e) => setImage(e.target.value)}
@@ -68,10 +68,10 @@ const AddSceneDialog = () => {
     </DialogContent>
     <DialogActions>
       <Button onClick={handleClose}>
-        Cancel
+        Huỷ
       </Button>
       <Button onClick={handleAddScene}>
-      {overwrite ? 'Overwrite' : 'Add'}
+      {overwrite ? 'Ghi đè' : 'Thêm'}
       </Button>
     </DialogActions>
   </Dialog>

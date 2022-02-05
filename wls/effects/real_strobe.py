@@ -12,7 +12,7 @@ from wls.utils import empty_queue
 
 class Strobe(AudioReactiveEffect, GradientEffect):
 
-    NAME = "Nhấp nháy"
+    NAME = "Nháy cực đỉnh"
     CATEGORY = "Cổ điển"
 
     CONFIG_SCHEMA = vol.Schema(

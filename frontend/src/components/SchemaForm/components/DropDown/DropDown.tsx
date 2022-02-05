@@ -67,7 +67,7 @@ const EffectDropDown = ({
         <ToggleButtonGroup
           value={formats}
           onChange={handleFormat}
-          aria-label="text formatting"
+          aria-label="định dạng văn bản"
           className={classes.FormToggleWrapper}
         >
           {groups &&

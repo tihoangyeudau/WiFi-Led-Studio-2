@@ -8,7 +8,7 @@ from wls.effects.audio import AudioReactiveEffect
 class EnergyAudioEffect(AudioReactiveEffect):
 
     NAME = "Năng lượng"
-    CATEGORY = "Classic"
+    CATEGORY = "Cổ điển"
 
     CONFIG_SCHEMA = vol.Schema(
         {

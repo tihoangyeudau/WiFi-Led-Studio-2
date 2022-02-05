@@ -166,7 +166,7 @@ const GradientPicker = ({
                   size="small"
                   variant="outlined"
                   id="gradientNameInput"
-                  label="Enter name to save as..."
+                  label="Nhập tên để lưu dưới dạng ..."
                   style={{ marginRight: '1rem', flex: 1 }}
                   value={name}
                   onChange={(e) => {

@@ -35,7 +35,7 @@ String.args = {
   schema: {
     default: 'UDP',
     enum: ['UDP', 'DDP', 'E131'],
-    title: 'Sync Mode',
+    title: 'Chế độ đồng bộ',
     type: 'string',
   },
   model: {},

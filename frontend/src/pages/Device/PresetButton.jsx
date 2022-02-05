@@ -70,7 +70,7 @@ export default function PresetButton({ delPreset, uploadPresetCloud, deletePrese
                         variant="outlined"
                         direction="left"
                         onConfirm={delPreset}
-                        label={"Delete Preset"}
+                        label={"Xoá cài trước"}
                         anchorOrigin={{
                             vertical: "top",
                             horizontal: "center",

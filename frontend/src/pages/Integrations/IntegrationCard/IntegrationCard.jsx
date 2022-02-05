@@ -50,7 +50,7 @@ const IntegrationCard = ({ integration }) => {
         title={integrations[integration].config.name} 
         subheader={integrations[integration].config.description} 
         action={
-          <Switch aria-label="status" checked={integrations[integration].active} onClick={() => handleActivateIntegration(integrations[integration])} />
+          <Switch aria-label="trạng thái" checked={integrations[integration].active} onClick={() => handleActivateIntegration(integrations[integration])} />
         }
       />
       <CardActions style={{alignSelf: 'flex-end'}}>
@@ -61,7 +61,7 @@ const IntegrationCard = ({ integration }) => {
           })}
           onClick={handleExpandClick}
           aria-expanded={expanded}
-          aria-label="show more"
+          aria-label="hiển thị thêm"
         >
           <ExpandMoreIcon />
         </IconButton>

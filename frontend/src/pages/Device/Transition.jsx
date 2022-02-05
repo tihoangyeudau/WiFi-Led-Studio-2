@@ -53,10 +53,10 @@ const TransitionCard = ({ virtual, style }) => {
 
   return (
     <Card variant="outlined" className={`${classes.card} step-device-two`} style={style}>
-      <CardHeader title="Transitions" subheader="Seamlessly blend between effects" />
+      <CardHeader title="Chuyển tiếp" subheader="Kết hợp liền mạch giữa các hiệu ứng" />
       <CardContent className={classes.content}>
         <FormControl className={classes.formControl}>
-          <BladeFrame title="Duration">
+          <BladeFrame title="Khoảng thời gian">
           <Slider
             defaultValue={transition_time || schemas?.transition_time.default}
             onChangeCommitted={onSliderChange}
@@ -70,7 +70,7 @@ const TransitionCard = ({ virtual, style }) => {
           />
           </BladeFrame>
         </FormControl>
-        <BladeFrame title="Mode" style={{ flexGrow: 0, flexBasis: '180px', minWidth: '180px', minHeight: '72px' }}>
+        <BladeFrame title="Kiểu" style={{ flexGrow: 0, flexBasis: '180px', minWidth: '180px', minHeight: '72px' }}>
         <Select
             defaultValue={transition_mode || schemas?.transition_mode.default}
             onChange={(e) => {

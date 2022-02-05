@@ -61,8 +61,8 @@ function createWindow(args) {
     return win
 }
 
-const NOTIFICATION_TITLE = 'Wls Client - by Blade'
-const NOTIFICATION_BODY = 'Testing Notification from the Main process'
+const NOTIFICATION_TITLE = 'Máy khách WiFi Led Studio'
+const NOTIFICATION_BODY = 'Kiểm tra thông báo từ quy trình chính'
 
 function showNotification() {
     new Notification({ title: NOTIFICATION_TITLE, body: NOTIFICATION_BODY }).show()
@@ -91,8 +91,8 @@ app.whenReady().then(async () => {
     require("@electron/remote/main").enable(wind.webContents)
     if (isDev) {
         await installExtension([REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS], { loadExtensionOptions: { allowFileAccess: true }, forceDownload: false })
-            .then(name => console.log(`Added Extension:  ${name}`))
-            .catch(error => console.log(`An error occurred: , ${error}`));
+            .then(name => console.log(`Đã thêm phần mở rộng:  ${name}`))
+            .catch(error => console.log(`Đã xảy ra lỗi: , ${error}`));
     }
 
     const icon = path.join(__dirname, 'icon_16x16a.png')
@@ -100,39 +100,39 @@ app.whenReady().then(async () => {
 
     if (integratedCore) {
         contextMenu = Menu.buildFromTemplate([
-            { label: 'Show', click: () => wind.show() },
-            { label: 'Minimize', click: () => wind.minimize() },
-            { label: 'Minimize to tray', click: () => wind.hide() },
-            { label: 'Test Notifiation', click: () => showNotification() },
-            { label: 'seperator', type: 'separator' },
-            { label: 'Dev', click: () => wind.webContents.openDevTools() },
-            { label: 'seperator', type: 'separator' },
-            { label: 'Start core', click: () => subpy = require("child_process").spawn(`./${wlsCore}`, []) },
-            { label: 'Stop core', click: () => wind.webContents.send('fromMain', 'shutdown') },
+            { label: 'Hiển thị', click: () => wind.show() },
+            { label: 'Thu nhỏ', click: () => wind.minimize() },
+            { label: 'Thu nhỏ vào khay', click: () => wind.hide() },
+            { label: 'Thông báo thử nghiệm', click: () => showNotification() },
+            { label: 'Người dùng', type: 'separator' },
+            { label: 'Người phát triển', click: () => wind.webContents.openDevTools() },
+            { label: 'Người dùng', type: 'separator' },
+            { label: 'Bắt đầu', click: () => subpy = require("child_process").spawn(`./${wlsCore}`, []) },
+            { label: 'Dừng', click: () => wind.webContents.send('fromMain', 'shutdown') },
             // { label: 'Download core', click: () =>  download(wind, `https://github.com/YeonV/Wls-Frontend-v2/releases/latest/download/Wls_core-${app.getVersion().split('-')[1]}--win-portable.exe`, { directory: thePath, overwrite: true }).then((f) => { app.relaunch(); app.exit() }) },
-            { label: 'Restart Client', click: () => { app.relaunch(); app.exit() }},
-            { label: 'Open folder', click: () => shell.openPath(thePath) },
-            { label: 'seperator', type: 'separator' },
-            { label: 'Exit', click: () => app.quit() }
+            { label: 'Khởi động lại', click: () => { app.relaunch(); app.exit() }},
+            { label: 'Mở thư mục', click: () => shell.openPath(thePath) },
+            { label: 'Người dùng', type: 'separator' },
+            { label: 'Thoát', click: () => app.quit() }
         ])
     } else {
         contextMenu = Menu.buildFromTemplate([
-            { label: 'Show', click: () => wind.show() },
-            { label: 'Minimize', click: () => wind.minimize() },
-            { label: 'Minimize to tray', click: () => wind.hide() },
-            { label: 'Test Notifiation', click: () => showNotification() },
-            { label: 'seperator', type: 'separator' },
-            { label: 'Dev', click: () => wind.webContents.openDevTools() },
-            { label: 'seperator', type: 'separator' },
-            { label: 'Stop core', click: () => wind.webContents.send('fromMain', 'shutdown') },
+            { label: 'Hiển thị', click: () => wind.show() },
+            { label: 'Thu nhỏ', click: () => wind.minimize() },
+            { label: 'Thu nhỏ vào khay', click: () => wind.hide() },
+            { label: 'Thông báo thử nghiệm', click: () => showNotification() },
+            { label: 'Người dùng', type: 'separator' },
+            { label: 'Người phát triển', click: () => wind.webContents.openDevTools() },
+            { label: 'Người dùng', type: 'separator' },
+            { label: 'Dừng', click: () => wind.webContents.send('fromMain', 'shutdown') },
             // { label: 'Download core', click: () => download(wind, `https://github.com/YeonV/Wls-Frontend-v2/releases/latest/download/Wls_core-${app.getVersion().split('-')[1]}--win-portable.exe`, { directory: thePath, overwrite: true, onProgress: (obj)=>{wind.webContents.send('fromMain', ['download-progress', obj])} }).then((f) => { wind.webContents.send('fromMain', 'clear-frontend'); app.relaunch(); app.exit() })},
-            { label: 'Restart Client', click: () => {app.relaunch(); app.exit() }},
-            { label: 'Open folder', click: () => shell.openPath(thePath) },
-            { label: 'seperator', type: 'separator' },
-            { label: 'Exit', click: () => app.quit() }
+            { label: 'Khởi động lại', click: () => {app.relaunch(); app.exit() }},
+            { label: 'Mở thư mục', click: () => shell.openPath(thePath) },
+            { label: 'Người dùng', type: 'separator' },
+            { label: 'Thoát', click: () => app.quit() }
         ])
     }
-    tray.setToolTip(`Wls Client${isDev ? ' DEV' : ''}`)
+    tray.setToolTip(`Máy khách WiFi Led Studio${isDev ? ' DEV' : ''}`)
     tray.setContextMenu(contextMenu)
     tray.setIgnoreDoubleClickEvents(true)
     tray.on('click', (e) => wind.show())
@@ -140,14 +140,14 @@ app.whenReady().then(async () => {
     ipcMain.on("toMain", (event, parameters) => {
         console.log(parameters)
         if (parameters === 'start-core') {
-            console.log("Starting Core", wlsCore)
+            console.log("Khởi động", wlsCore)
             if (integratedCore) {
                 subpy = require("child_process").spawn(`./${wlsCore}`, [])
             }
             return
         }
         if (parameters === 'open-config') {
-            console.log("Open Config")
+            console.log("Mở cấu hình")
             shell.showItemInFolder(path.join(app.getPath('appData'), '/.wls/config.json'))
             return
         }
@@ -157,7 +157,7 @@ app.whenReady().then(async () => {
             return
         }
         if (parameters === 'download-core') {
-            download(wind, `https://github.com/YeonV/Wls-Frontend-v2/releases/latest/download/Wls_core-${app.getVersion().split('-')[1]}--win-portable.exe`, { directory: thePath, overwrite: true, onProgress: (obj)=>{wind.webContents.send('fromMain', ['download-progress', obj])} }).then((f) => { wind.webContents.send('fromMain', 'clear-frontend'); app.relaunch(); app.exit() })
+            download(wind, `https://rainbowmusicled.com`, { directory: thePath, overwrite: true, onProgress: (obj)=>{wind.webContents.send('fromMain', ['download-progress', obj])} }).then((f) => { wind.webContents.send('fromMain', 'clear-frontend'); app.relaunch(); app.exit() })
             return
         }
     });

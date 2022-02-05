@@ -77,12 +77,12 @@ const FrequenciesCard = ({ virtual, style }) => {
   return (
     <Card variant="outlined" className={`${classes.card} step-device-four`} style={style}>
       <CardHeader
-        title="Frequencies"
-        subheader="Adjust the audio range used for this strip"
+        title="Tần số"
+        subheader="Điều chỉnh dải âm thanh được sử dụng cho đèn này"
       />
       <CardContent className={classes.content}>
         <div style={{ width: '100%' }}>
-          <BladeFrame title="Range" style={{padding: '16px 2rem 6px 2rem', marginBottom: '1rem'}}>
+          <BladeFrame title="Phạm vi" style={{padding: '16px 2rem 6px 2rem', marginBottom: '1rem'}}>
           <Slider
             value={[value[0], value[1]]}
             aria-labelledby="discrete-slider-custom"
@@ -117,7 +117,7 @@ const FrequenciesCard = ({ virtual, style }) => {
             <div style={{ maxWidth: '120px' }}>
               <TextField
                 id="min"
-                label="Min"
+                label="Tối thiểu"
                 type="number"
                 InputLabelProps={{
                   shrink: true,
@@ -140,7 +140,7 @@ const FrequenciesCard = ({ virtual, style }) => {
             <div style={{ maxWidth: '120px' }}>
               <TextField
                 id="max"
-                label="Max"
+                label="Tối đa"
                 type="number"
 
                 value={Math.round(hzIt(value[1])) > 20001 ? value[1] : Math.round(hzIt(value[1]))}

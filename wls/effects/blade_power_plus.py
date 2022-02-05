@@ -17,7 +17,7 @@ _LOGGER = logging.getLogger(__name__)
 class BladePowerPlus(AudioReactiveEffect, HSVEffect):
 
     NAME = "RML pro"
-    CATEGORY = "Classic"
+    CATEGORY = "Cổ điển"
 
     _power_funcs = {
         "Nhịp": "beat_power",

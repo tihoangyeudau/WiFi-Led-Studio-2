@@ -9,7 +9,7 @@ from wls.effects.hsv_effect import HSVEffect
 
 class Melt(AudioReactiveEffect, HSVEffect):
 
-    NAME = "Tan chảy"
+    NAME = "Tan chẩy"
     CATEGORY = "Khí quyển"
 
     CONFIG_SCHEMA = vol.Schema(

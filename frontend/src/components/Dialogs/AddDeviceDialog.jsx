@@ -142,13 +142,13 @@ const AddDeviceDialog = () => {
       </DialogTitle>
       <DialogContent>
         <DialogContentText>
-          To add a device to Wls, please first select the type of device you
-          wish to add then provide the necessary configuration.
+          Để thêm đèn vào WiFi Led Studio, trước tiên hãy chọn loại đèn bạn
+          muốn thêm sau đó cung cấp cấu hình cần thiết.
         </DialogContentText>
         <div className={classes.wrapper}>
-          <label>Device Type</label>
+          <label>Loại đèn</label>
           <Select
-            label="Type"
+            label="Loại"
             disabled={!(initial.config &&
               Object.keys(initial.config).length === 0 &&
               initial.config.constructor === Object)}
@@ -177,14 +177,14 @@ const AddDeviceDialog = () => {
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} color="primary">
-          Cancel
+          Huỷ
         </Button>
         <Button onClick={handleAddDevice} color="primary">
           {initial.config &&
             Object.keys(initial.config).length === 0 &&
             initial.config.constructor === Object
-            ? "Add"
-            : "Save"}
+            ? "Thêm"
+            : "Lưu"}
         </Button>
       </DialogActions>
     </Dialog>
