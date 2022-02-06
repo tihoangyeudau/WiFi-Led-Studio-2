@@ -83,7 +83,7 @@ const Device = ({
                 align={'right'}
               >
                 {' '}
-                kích hoạt các tính năng nâng cao hơn với{' '}
+                Kích hoạt các tính năng nâng cao hơn với{' '}
                 <Link style={{ color: 'inherit' }} to={'/Settings?ui'}>
                   {' '}
                   Chế độ chuyên gia
