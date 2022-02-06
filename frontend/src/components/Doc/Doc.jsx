@@ -116,10 +116,10 @@ export default function Doc({
               onClick={handleClose}
               style={{ marginRight: '1rem' }}
             >
-              back
+              quay lại
             </Button>
             <Typography variant="h6" className={classes.title}>
-              Documentation
+              Tài liệu
             </Typography>
           </Toolbar>
         </AppBar>

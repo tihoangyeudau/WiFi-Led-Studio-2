@@ -54,11 +54,11 @@ const SmartBar = ({ open, setOpen }) => {
           }}
           onInputChange={(event, value) => {
             if (value === 'HackedByBlade!') {
-              alert("DevMode activated!")
+              alert("Chế độ nhà phát triển đã được kích hoạt!")
               setFeatures('dev', true)
             }
             if (features['dev']) {
-              if (value === 'clear') { setViewMode('user'); setShowFeatures('dev', false); setShowFeatures('go', false); setShowFeatures('streamto', false); setShowFeatures('waves', false);setShowFeatures('effectfilter', false); setShowFeatures('cloud', false); setShowFeatures('rml', false); setShowFeatures('integrations', false); setShowFeatures('spotify', false); setShowFeatures('webaudio', false); setFeatures('streamto', false); setFeatures('go', false); setFeatures('waves', false); setFeatures('cloud', false);setFeatures('effectfilter', false); setFeatures('rml', false); setFeatures('dev', false); setFeatures('integrations', false); setFeatures('spotify', false); setFeatures('webaudio', false); window.localStorage.removeItem('wls-theme'); window.localStorage.setItem('BladeMod', 0); window.location.reload() }
+              if (value === 'clear') { setViewMode('user'); setShowFeatures('dev', false); setShowFeatures('go', false); setShowFeatures('streamto', false); setShowFeatures('waves', true);setShowFeatures('effectfilter', false); setShowFeatures('cloud', false); setShowFeatures('rml', true); setShowFeatures('integrations', false); setShowFeatures('spotify', false); setShowFeatures('webaudio', false); setFeatures('streamto', false); setFeatures('go', false); setFeatures('waves', false); setFeatures('cloud', false);setFeatures('effectfilter', false); setFeatures('rml', false); setFeatures('dev', false); setFeatures('integrations', false); setFeatures('spotify', false); setFeatures('webaudio', false); window.localStorage.removeItem('wls-theme'); window.localStorage.setItem('BladeMod', 0); window.location.reload() }
               if (value === 'BladeCloud') { setShowFeatures('cloud', true) }
               if (value === 'BladeRml') { setShowFeatures('rml', true) }
               if (value === 'BladeIntegrations') { setShowFeatures('integrations', true) }

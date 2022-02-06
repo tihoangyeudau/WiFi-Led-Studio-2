@@ -59,7 +59,7 @@ export default function TroubleshootButton({ virtual }) {
               onClick={() => setOpen(false)}
               style={{ marginRight: '1rem' }}
             >
-              back
+              quay lại
             </Button>
             <Typography variant="h6" className={classes.title}>
               {virtual.config.name}{' '}
@@ -68,7 +68,7 @@ export default function TroubleshootButton({ virtual }) {
         </AppBar>
         <div>
           <div className={classes.segmentTitle}>
-            <Typography variant="caption">Troubleshoot</Typography>
+            <Typography variant="caption">Khắc phục sự cố</Typography>
           </div>
           {rmlData.name
             ? <Grid container spacing={4} style={{ width: 'calc(max(38.5vw, 480px))', paddingLeft: '0.5rem', margin: '0 auto' }}>

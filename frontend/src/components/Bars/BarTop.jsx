@@ -174,6 +174,7 @@ const TopBar = () => {
             : (pathname.split('/').length === 3 && pathname.split('/')[1] === 'device') ? virtuals[pathname.split('/')[2]]?.config.name
               : pathname.split('/').pop()}
         </Typography>
+        
         <div style={{ display: 'flex' }}>
           {disconnected &&
             <Box>

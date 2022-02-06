@@ -462,7 +462,7 @@ class Virtual:
 
     def deactivate(self):
         self._active = False
-        if hasattr(self, "_thread"):
+        if (threading.current_thread() != self._thread):
             self._thread.join()
         self.deactivate_segments()
         self._wls.events.fire_event(VirtualPauseEvent(self.id))

@@ -10,11 +10,11 @@ class MagnitudeAudioEffect(AudioReactiveEffect, GradientEffect):
     CATEGORY = "Cổ điển"
 
     _power_funcs = {
-        "Nhịp": "beat_power",
-        "Trầm": "bass_power",
-        "Thấp (Nhịp+Trầm)": "lows_power",
-        "Trung": "mids_power",
-        "Cao": "high_power",
+        "Beat": "beat_power",
+        "Bass": "bass_power",
+        "Lows (beat+bass)": "lows_power",
+        "Mids": "mids_power",
+        "High": "high_power",
     }
 
     CONFIG_SCHEMA = vol.Schema(
@@ -22,7 +22,7 @@ class MagnitudeAudioEffect(AudioReactiveEffect, GradientEffect):
             vol.Optional(
                 "frequency_range",
                 description="Dải tần số để phát hiện nhịp",
-                default="Thấp (Nhịp+Trầm)",
+                default="Lows (beat+bass)",
             ): vol.In(list(_power_funcs.keys())),
         }
     )

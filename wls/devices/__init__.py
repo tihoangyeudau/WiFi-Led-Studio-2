@@ -415,7 +415,7 @@ class SerialDevice(Device):
                 default="",
             ): vol.In(list(AvailableCOMPorts.available_ports)),
             vol.Required(
-                "baudrate", description="tốc độ truyền", default=500000
+                "baudrate", description="tốc độ truyền", default=115200
             ): vol.All(int, vol.Range(min=115200)),
         }
     )

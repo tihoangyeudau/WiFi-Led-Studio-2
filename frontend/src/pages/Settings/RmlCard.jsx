@@ -62,7 +62,7 @@ const RmlCard = ({ className }) => {
 
     return settings.rml_preferences ? (
         <Card style={{ marginBottom: '2rem' }} className={className}>
-            <CardHeader title="RML Integration" subheader="Configure RML-Settings" action={
+            <CardHeader title="Tích hợp Rainbow Music Led" subheader="Tuỳ chỉnh đèn Rainbow Music Led" action={
                 <Icon
                     style={{
                         margin: '1rem',

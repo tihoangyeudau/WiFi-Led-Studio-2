@@ -97,7 +97,7 @@ export default function FullScreenDialog({
               onClick={handleClose}
               style={{ marginRight: '1rem' }}
             >
-              back
+              quay lại
             </Button>
             <Typography variant="h6" className={classes.title}>
               {virtual.config.name}{' '}
@@ -106,7 +106,7 @@ export default function FullScreenDialog({
         </AppBar>
 
         <div className={classes.segmentTitle}>
-          <Typography variant="caption">Segments-Settings</Typography>
+          <Typography variant="caption">Cài đặt đèn ảo</Typography>
         </div>
         {virtual.segments?.length > 0 &&
           virtual.segments.map((s, i) => (

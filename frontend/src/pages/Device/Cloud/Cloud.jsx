@@ -113,10 +113,10 @@ export default function CloudScreen({
                 <AppBar className={classes.appBar}>
                     <Toolbar>
                         <Button color="primary" variant="contained" startIcon={<NavigateBefore />} onClick={handleClose}>
-                            back
+                            quay lại
                         </Button>
                         <Typography variant="h6" className={classes.title}>
-                            Wls Cloud
+                            Đám mây WiFi Led Studio
                         </Typography>
                     </Toolbar>
                 </AppBar>
