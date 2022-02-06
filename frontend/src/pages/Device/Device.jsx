@@ -86,7 +86,7 @@ const Device = ({
                 Kích hoạt các tính năng nâng cao hơn với{' '}
                 <Link style={{ color: 'inherit' }} to={'/Settings?ui'}>
                   {' '}
-                  Chế độ chuyên gia
+                  Chế độ nâng cao
                 </Link>
               </Typography>
             )}
