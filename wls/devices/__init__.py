@@ -437,7 +437,7 @@ class SerialDevice(Device):
 
         except serial.SerialException:
             _LOGGER.critical(
-                "Serial Error: Please ensure your device is connected, functioning and the correct COM port is selected."
+                "Lỗi nối tiếp: Vui lòng đảm bảo thiết bị của bạn được kết nối, hoạt động và chọn đúng cổng COM."
             )
             # Todo: Trigger the UI to refresh after the clear effect call. Currently it still shows as active.
             self.deactivate()

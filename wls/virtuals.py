@@ -519,7 +519,7 @@ class Virtual:
             device = self._wls.devices.get(device_id)
             if device is None:
                 _LOGGER.warning(
-                    f"Đèn ảo {self.id}: Không có thiết bị nào đang hoạt động - Đang hủy kích hoạt."
+                    f"Đèn {self.id} đã được xoá,  hiện không có thiết bị nào đang hoạt động."
                 )
                 self.deactivate()
             elif device.is_active():
