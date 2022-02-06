@@ -92,7 +92,7 @@ class Transitions(metaclass=IterClass):
         "Đẩy": push,
         "Trượt": slide,
         "Mống mắt": iris,
-        "Xuyên qua màu trắng": throughWhite,
-        "Xuyên qua màu đen": throughBlack,
-        "None": "None",
+        "Xuyên trắng": throughWhite,
+        "Xuyên đen": throughBlack,
+        "Không": "Không",
     }

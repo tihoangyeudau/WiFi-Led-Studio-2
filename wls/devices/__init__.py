@@ -27,7 +27,7 @@ _LOGGER = logging.getLogger(__name__)
 
 def fps_validator(value):
     if not isinstance(value, int):
-        raise ValueError("fps must be an integer")
+        raise ValueError("fps phải là một số nguyên")
     return next(
         (f for f in AVAILABLE_FPS.keys() if f >= value),
         list(AVAILABLE_FPS.keys())[-1],
@@ -98,7 +98,7 @@ class Device(BaseRegistry):
                     base.config_updated(self, validated_config)
 
         _LOGGER.info(
-            f"Device {self.name} config updated to {validated_config}."
+            f"Đèn {self.name} đã cập nhật cấu hình {validated_config}."
         )
 
         for virtual_id in self._wls.virtuals:
@@ -131,7 +131,7 @@ class Device(BaseRegistry):
         # update each segment from this virtual
         if not self._active:
             _LOGGER.warning(
-                f"Cannot update pixels of inactive device {self.name}"
+                f"Không thể cập nhật điểm ảnh của đèn không hoạt động {self.name}"
             )
             return
 
@@ -252,7 +252,7 @@ class Device(BaseRegistry):
                 if force:
                     blocking_virtual.deactivate()
                 else:
-                    msg = f"Failed to activate effect! '{virtual_name}' overlaps with active virtual '{blocking_virtual.name}'"
+                    msg = f"Không thể kích hoạt hiệu ứng! '{virtual_name}' chồng chéo với đèn ảo đang hoạt động '{blocking_virtual.name}'"
                     _LOGGER.warning(msg)
                     raise ValueError(msg)
 
@@ -261,7 +261,7 @@ class Device(BaseRegistry):
             self.invalidate_cached_props()
         self._segments.append((virtual_id, start_pixel, end_pixel))
         _LOGGER.debug(
-            f"Device {self.id}: Added segment {virtual_id, start_pixel, end_pixel}"
+            f"Đèn {self.id}: Đã thêm phân đoạn {virtual_id, start_pixel, end_pixel}"
         )
 
     def clear_virtual_segments(self, virtual_id):
@@ -334,7 +334,7 @@ class NetworkedDevice(Device):
                 self._config["ip_address"],
             )
             _LOGGER.info(
-                f"Device {self.name}: Resolved destination to {self._destination}"
+                f"Đèn {self.name}: Đã giải quyết đích đến {self._destination}"
             )
             if success_callback:
                 success_callback()
@@ -343,7 +343,7 @@ class NetworkedDevice(Device):
 
     def activate(self, *args, **kwargs):
         if self._destination is None:
-            msg = f"Device {self.name}: Failed to activate, is it online?"
+            msg = f"Đèn {self.name}: Không thể kích hoạt, nó có trực tuyến không?"
             _LOGGER.warning(msg)
             callback = partial(self.activate, *args, **kwargs)
             async_fire_and_forget(
@@ -358,7 +358,7 @@ class NetworkedDevice(Device):
     def destination(self):
         if self._destination is None:
             _LOGGER.warning(
-                f"Device {self.name}: Searching for device... Is it online?"
+                f"Đèn {self.name}: Đang tìm kiếm đèn ... Có trực tuyến không?"
             )
             async_fire_and_forget(
                 self.resolve_address(), loop=self._wls.loop
@@ -375,7 +375,7 @@ class UDPDevice(NetworkedDevice):
         {
             vol.Required(
                 "port",
-                description="Port for the UDP device",
+                description="Cổng cho thiết bị UDP",
             ): vol.All(int, vol.Range(min=1, max=65535)),
         }
     )
@@ -383,14 +383,14 @@ class UDPDevice(NetworkedDevice):
     def activate(self):
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         _LOGGER.debug(
-            f"{self._device_type} sender for {self._config['name']} started."
+            f"{self._device_type} đã bắt đầu gửi cho {self._config['name']}."
         )
         super().activate()
 
     def deactivate(self):
         super().deactivate()
         _LOGGER.debug(
-            f"{self._device_type} sender for {self._config['name']} stopped."
+            f"{self._device_type} đã dừng gửi cho {self._config['name']}."
         )
         self._sock = None
 
@@ -411,7 +411,7 @@ class SerialDevice(Device):
         {
             vol.Required(
                 "com_port",
-                description="COM port for AmbilightUSB compatible device",
+                description="Cổng COM cho đèn tương thích AmbilightUSB",
                 default="",
             ): vol.In(list(AvailableCOMPorts.available_ports)),
             vol.Required(
@@ -465,7 +465,7 @@ class Devices(RegistryLoader):
 
     def create_from_config(self, config):
         for device in config:
-            _LOGGER.info(f"Loading device from config: {device}")
+            _LOGGER.info(f"Đang tải đèn từ cấu hình: {device}")
             try:
                 self._wls.devices.create(
                     id=device["id"],
@@ -511,7 +511,7 @@ class Devices(RegistryLoader):
                     self._wls.loop, self._wls.thread_executor, device_ip
                 )
             except ValueError:
-                _LOGGER.error(f"Discarding device {device_ip}")
+                _LOGGER.error(f"Loại bỏ thiết bị {device_ip}")
                 return
 
             for existing_device in self._wls.devices.values():
@@ -526,7 +526,7 @@ class Devices(RegistryLoader):
                             device_config["universe"]
                             == existing_device.config["universe"]
                         ):
-                            msg = f"Ignoring {device_ip}: Shares IP and starting universe with existing device {existing_device.name}"
+                            msg = f"Bỏ qua đèn {device_ip}: Chia sẻ IP và Universe đầu tiên với đèn hiện có là {existing_device.name}"
                             _LOGGER.info(msg)
                             raise ValueError(msg)
                     elif device_type == "openrgb":
@@ -536,11 +536,11 @@ class Devices(RegistryLoader):
                             device_config["openrgb_name"]
                             == existing_device.config["openrgb_name"]
                         ):
-                            msg = f"Ignoring {device_ip}: Shares IP and openrgb name with existing device {existing_device.name}"
+                            msg = f"Bỏ qua đèn {device_ip}: Chia sẻ IP và tên openrgb với đèn hiện có là {existing_device.name}"
                             _LOGGER.info(msg)
                             raise ValueError(msg)
                     else:
-                        msg = f"Ignoring {device_ip}: Shares destination with existing device {existing_device.name}"
+                        msg = f"Bỏ qua đèn {device_ip}: Chia sẻ điểm đến với đèn hiện có {existing_device.name}"
                         _LOGGER.info(msg)
                         raise ValueError(msg)
 
@@ -593,7 +593,7 @@ class Devices(RegistryLoader):
                 #     sync_mode = rml.get_sync_mode()
 
             if sync_mode == "ARTNET":
-                msg = f"Cannot add RML device at {resolved_dest}. Unsupported mode: 'ARTNET', and too many pixels for UDP sync (>480)"
+                msg = f"Không thể thêm đèn tại {resolved_dest}. Chế độ không được hỗ trợ: 'ARTNET' và quá nhiều LED để đồng bộ hóa UDP (> 480)"
                 _LOGGER.warning(msg)
                 raise ValueError(msg)
 
@@ -604,7 +604,7 @@ class Devices(RegistryLoader):
 
         # Create the device
         _LOGGER.info(
-            "Adding device of type {} with config {}".format(
+            "Đang thêm đèn loại {} với cấu hình {}".format(
                 device_type, device_config
             )
         )
@@ -628,7 +628,7 @@ class Devices(RegistryLoader):
         )
 
         # Generate virtual configuration for the device
-        _LOGGER.info(f"Creating a virtual for device {device.name}")
+        _LOGGER.info(f"Tạo đèn ảo từ đèn {device.name}")
         virtual_id = generate_id(device.name)
         virtual_config = {
             "name": device.name,
@@ -679,7 +679,7 @@ class Devices(RegistryLoader):
     async def find_rml_devices(self):
         # Scan the LAN network that match RML using zeroconf - Multicast DNS
         # Service Discovery Library
-        _LOGGER.info("Scanning for RML devices...")
+        _LOGGER.info("Đang tìm đèn...")
         rml_listener = RMLListener(self._wls)
         rmlbrowser = self._zeroconf.add_service_listener(
             "_rml._tcp.local.", rml_listener
@@ -687,7 +687,7 @@ class Devices(RegistryLoader):
         try:
             await asyncio.sleep(30)
         finally:
-            _LOGGER.info("Scan Finished")
+            _LOGGER.info("Đã tìm xong")
             self._zeroconf.remove_service_listener(rml_listener)
 
 
@@ -696,14 +696,14 @@ class RMLListener(zeroconf.ServiceBrowser):
         self._wls = _wls
 
     def remove_service(self, zeroconf_obj, type, name):
-        _LOGGER.info(f"Service {name} removed")
+        _LOGGER.info(f"Dịch vụ {name} đã bị loại bỏ")
 
     def add_service(self, zeroconf_obj, type, name):
         info = zeroconf_obj.get_service_info(type, name)
 
         if info:
             hostname = str(info.server).rstrip(".")
-            _LOGGER.info(f"Found device: {hostname}")
+            _LOGGER.info(f"Đã tìm thấy đèn: {hostname}")
 
             device_type = "rml"
             device_config = {"ip_address": hostname}

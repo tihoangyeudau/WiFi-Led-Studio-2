@@ -393,7 +393,7 @@ class Virtual:
             self._transition_effect is not None
             and self._transition_effect.is_active
             and hasattr(self._transition_effect, "pixels")
-            and self._config["transition_mode"] != "None"
+            and self._config["transition_mode"] != "Không"
             and self._config["transition_time"] > 0
         ):
             # Get and process transition effect frame

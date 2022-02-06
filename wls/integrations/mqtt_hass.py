@@ -304,9 +304,9 @@ class MQTT_HASS(Integration):
                             "Đẩy",
                             "Trượt",
                             "Mống mắt",
-                            "Xuyên qua màu trắng",
-                            "Xuyên qua màu đen",
-                            "None",
+                            "Xuyên trắng",
+                            "Xuyên đen",
+                            "Không",
                         ]
                     ),
                     "device": hass_device,
