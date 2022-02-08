@@ -4,17 +4,17 @@ from setuptools import setup
 
 import wls.consts as const
 
-PROJECT_DOCS = "https://wls.readthedocs.io"
-PROJECT_PACKAGE_NAME = "wls"
+PROJECT_DOCS = "https://rainbowmusicled.com"
+PROJECT_PACKAGE_NAME = "WiFi Led Studio"
 PROJECT_VERSION = const.PROJECT_VERSION
-PROJECT_LICENSE = "The MIT License"
+PROJECT_LICENSE = "Rainbow Music Led License"
 PROJECT_AUTHOR = "Austin Hodges"
-PROJECT_AUTHOR_EMAIL = "austin.b.hodges@gmail.com"
-PROJECT_MAINTAINER = "Wls Developers"
-PROJECT_MAINTAINER_EMAIL = "wls.app@gmail.com"
-PROJECT_URL = "https://github.com/Wls/Wls"
-PROJECT_WEBSITE = "https://wls.app"
-PROJECT_DOCS = "https://wls.readthedocs.io"
+PROJECT_AUTHOR_EMAIL = "rainbowmusicled@gmail.com"
+PROJECT_MAINTAINER = "Rainbow Music Led Developers"
+PROJECT_MAINTAINER_EMAIL = "tuantrung2905@gmail.com"
+PROJECT_URL = "https://github.com/tihoangyeudau/WiFi-Led_Studio-2"
+PROJECT_WEBSITE = "https://rainbowmusicled.com"
+PROJECT_DOCS = "https://rainbowmusicled.com"
 
 # Need to install numpy first
 SETUP_REQUIRES = [
@@ -68,7 +68,7 @@ setup(
         "Documentation": PROJECT_DOCS,
         "Website": PROJECT_WEBSITE,
         "Source": PROJECT_URL,
-        "Discord": "https://discord.gg/PqXMuthSNx",
+        "Shopee": "https://shopee.com/rainbow_music_led",
     },
     install_requires=INSTALL_REQUIRES,
     setup_requires=SETUP_REQUIRES,
