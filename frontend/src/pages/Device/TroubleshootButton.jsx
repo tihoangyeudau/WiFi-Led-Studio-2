@@ -103,7 +103,7 @@ export default function TroubleshootButton({ virtual }) {
               </Grid>
             </Grid>
             : <div style={{ textAlign: 'center', margin: 10 }}>
-              <Button variant={'outlined'} disabled={loading} onClick={ping}>Scan </Button>
+              <Button variant={'outlined'} disabled={loading} onClick={ping}>Quét </Button>
             </div>}
         </div>
       </Dialog>

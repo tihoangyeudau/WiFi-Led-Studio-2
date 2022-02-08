@@ -11,7 +11,7 @@ from pkg_resources import parse_version
 from wls.consts import CONFIGURATION_VERSION
 
 CONFIG_DIRECTORY = ".wls"
-CONFIG_FILE_NAME = "caidat.json"
+CONFIG_FILE_NAME = "cauhinh.json"
 PRESETS_FILE_NAME = "caitruoc.json"
 
 PRIVATE_KEY_FILE = "privkey.pem"
