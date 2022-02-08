@@ -69,7 +69,6 @@ const EffectsCard = ({ virtId }) => {
   const virtual = getV();
   
   const effectType = virtual && virtual.effect.type;
-  const [theModel, setTheModel] = useState(virtual?.effect?.config)
   
   const handleRandomize = () => {
     setVirtualEffect(
@@ -114,10 +113,6 @@ const EffectsCard = ({ virtId }) => {
       setPixelGraphs([virtId]);
     }
   }, [graphs, setPixelGraphs, getVirtuals, getSchemas, effectType]);
-
-  useEffect(() => {
-    virtuals && virtual?.effect?.config && setTheModel(virtual.effect.config)
-  }, [virtuals, virtual, virtual.effect, virtual.effect.config]);
   
   return (
     <>
@@ -129,7 +124,7 @@ const EffectsCard = ({ virtId }) => {
               flexDirection: 'column-reverse',
               justifyContent: 'space-between',
             }}
-            >
+          >
             <h1>{virtual && virtual.config.name}</h1>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
               {effects && effectType && (
@@ -141,7 +136,7 @@ const EffectsCard = ({ virtId }) => {
                     variant="outlined"
                     style={{ marginRight: '.5rem' }}
                     className={'step-device-six'}
-                    >
+                  >
                     <Casino />
                   </Button>
                   <Button variant="outlined" style={{ marginRight: '.5rem' }} className={'step-device-five'} onClick={() => handlePlayPause()}>
@@ -208,7 +203,7 @@ const EffectsCard = ({ virtId }) => {
                       handleEffectConfig={handleEffectConfig}
                       virtId={virtual.id}
                       schema={effects[effectType].schema}
-                      model={theModel}
+                      model={virtual.effect.config}
                       virtual_id={virtId}
                       selectedType={effectType}
                     />

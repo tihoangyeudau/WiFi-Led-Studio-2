@@ -12,10 +12,6 @@ const PixelSlider = ({ s, handleRangeSegment }) => {
     getDevices();
   }, [getDevices]);
 
-  useEffect(() => {
-    setRange([s[1], s[2]])
-  }, [s]);
-
   if (!devices[s[0]]) {
     return <></>;
   }

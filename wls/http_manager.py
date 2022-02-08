@@ -40,7 +40,6 @@ class HttpServer:
             name="favicon",
         )
         self.app.router.add_route("get", "/manifest.json", self.manifest)
-        self.app.router.add_route("get", "/serviceWorker.js", self.service_worker)
         self.app.router.add_route("get", "/", self.index)
 
         self.app.router.add_static(
@@ -58,11 +57,6 @@ class HttpServer:
     async def manifest(self, response):
         return web.FileResponse(
             path=wls_frontend.where() + "/manifest.json", status=200
-        )
-
-    async def service_worker(self, response):
-        return web.FileResponse(
-            path=wls_frontend.where() + "/serviceWorker.js", status=200
         )
 
     async def start(self, ssl_certs=None):
