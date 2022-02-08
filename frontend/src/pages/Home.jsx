@@ -10,10 +10,9 @@ import {
   CircularProgress,
   Badge,
 } from '@material-ui/core';
-import logoCircle from '../assets/ring.png';
 import TourHome from '../components/Tours/TourHome';
 import useStore from '../utils/apiStore';
-import FX from "../components/Icons/FX";
+import logoMain from "../assets/logomain.png";
 import { deleteFrontendConfig } from "../utils/helpers";
 import ButtonBar from "../components/ButtonBar";
 // import useAddToHomescreenPrompt from "../utils/useAddToHomeScreenPromt";
@@ -48,8 +47,7 @@ export default function Home(props) {
     <>
       <div className="Content">
         <div style={{ position: 'relative' }} >
-          <img src={logoCircle} className="App-logo" alt="logo-circle" />
-          <FX />
+          <img src={logoMain} className="App-logo" alt="logo-main" />
         </div>
       </div>
       <Card

@@ -30,7 +30,6 @@ const LeftBar = () => {
         </div>
         WiFi Led Studio
       </a>}
-      <div className={classes.devbadge} onClick={() => window.localStorage.setItem('BladeMod', 0)} />
     </div>
   );
 

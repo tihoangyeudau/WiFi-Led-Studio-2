@@ -46,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
   },
   logoLink: {
     display: 'block',
-    fontSize: '18px',
+    fontSize: '12px',
     textAlign: 'left',
     fontWeight: '400',
     lineHeight: '30px',
