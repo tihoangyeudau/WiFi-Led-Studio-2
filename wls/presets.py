@@ -1,6 +1,6 @@
 wls_presets = {
     "bar": {
-        "reset": {"config": {}, "name": "Reset"},
+        "reset": {"config": {}, "name": "Đặt lại"},
         "bouncing-blues": {
             "config": {
                 "background_brightness": 1,
@@ -16,7 +16,7 @@ wls_presets = {
                 "mirror": True,
                 "mode": "bounce",
             },
-            "name": "Bouncing Blues",
+            "name": "Xanh nảy",
         },
         "passing-by": {
             "config": {
@@ -33,7 +33,7 @@ wls_presets = {
                 "mirror": False,
                 "mode": "wipe",
             },
-            "name": "Passing By",
+            "name": "Đi ngang qua",
         },
         "plasma-cascade": {
             "config": {
@@ -50,7 +50,7 @@ wls_presets = {
                 "mirror": True,
                 "mode": "wipe",
             },
-            "name": "Plasma Cascade",
+            "name": "Thác Plasma",
         },
         "smooth-bounce": {
             "config": {
@@ -67,7 +67,7 @@ wls_presets = {
                 "mirror": True,
                 "mode": "bounce",
             },
-            "name": "Smooth Bounce",
+            "name": "Nảy mượt",
         },
         "Rainbow-lr": {
             "config": {
@@ -84,11 +84,11 @@ wls_presets = {
                 "mirror": False,
                 "mode": "wipe",
             },
-            "name": "Rainbow LR",
+            "name": "Cầu vồng trái phải",
         },
     },
     "energy": {
-        "reset": {"config": {}, "name": "Reset"},
+        "reset": {"config": {}, "name": "Đặt lại"},
         "clear-sky": {
             "config": {
                 "background_brightness": 1,
@@ -104,7 +104,7 @@ wls_presets = {
                 "mixing_mode": "overlap",
                 "sensitivity": 0.65,
             },
-            "name": "Clear Sky",
+            "name": "Trời trong",
         },
         "smooth-plasma": {
             "config": {
@@ -121,7 +121,7 @@ wls_presets = {
                 "mixing_mode": "overlap",
                 "sensitivity": 0.4,
             },
-            "name": "Smooth Plasma",
+            "name": "Plasma mượt",
         },
         "smooth-rainbow": {
             "config": {
@@ -144,7 +144,7 @@ wls_presets = {
                 "mode": "bounce",
                 "sensitivity": 0.7,
             },
-            "name": "Smooth Rainbow",
+            "name": "Cầu vồng mượt",
         },
         "snappy-blues": {
             "config": {
@@ -161,11 +161,11 @@ wls_presets = {
                 "mixing_mode": "additive",
                 "sensitivity": 0.9,
             },
-            "name": "Snappy Blues",
+            "name": "Xanh linh hoạt",
         },
     },
     "fade": {
-        "reset": {"config": {}, "name": "Reset"},
+        "reset": {"config": {}, "name": "Đặt lại"},
         "blues": {
             "config": {
                 "background_brightness": 1,
@@ -179,7 +179,7 @@ wls_presets = {
                 "mirror": False,
                 "speed": 5,
             },
-            "name": "Blues",
+            "name": "Xanh",
         },
         "calm-reds": {
             "config": {
@@ -194,7 +194,7 @@ wls_presets = {
                 "mirror": False,
                 "speed": 5,
             },
-            "name": "Calm Reds",
+            "name": "Đỏ dịu",
         },
         "rainbow-cycle": {
             "config": {
@@ -209,7 +209,7 @@ wls_presets = {
                 "mirror": False,
                 "speed": 5,
             },
-            "name": "Rainbow Cycle",
+            "name": "Bánh xe cầu vồng",
         },
         "red-to-blue": {
             "config": {
@@ -224,7 +224,7 @@ wls_presets = {
                 "mirror": False,
                 "speed": 4.9,
             },
-            "name": "Red to Blue",
+            "name": "Đỏ sang xanh",
         },
         "sunset": {
             "config": {
@@ -239,11 +239,11 @@ wls_presets = {
                 "mirror": False,
                 "speed": 5,
             },
-            "name": "Sunset",
+            "name": "Hoàng hôn",
         },
     },
     "gradient": {
-        "reset": {"config": {}, "name": "Reset"},
+        "reset": {"config": {}, "name": "Đặt lại"},
         "breathing": {
             "config": {
                 "background_brightness": 1,
@@ -260,7 +260,7 @@ wls_presets = {
                 "modulation_speed": 0.59,
                 "speed": 0.41,
             },
-            "name": "Breathing",
+            "name": "Thở",
         },
         "falling-blues": {
             "config": {
@@ -278,7 +278,7 @@ wls_presets = {
                 "modulation_speed": 0.12,
                 "speed": 2.8,
             },
-            "name": "Falling Blues",
+            "name": "Xanh rơi",
         },
         "rolling-sunset": {
             "config": {
@@ -296,7 +296,7 @@ wls_presets = {
                 "modulation_speed": 0.5,
                 "speed": 1,
             },
-            "name": "Rolling Sunset",
+            "name": "Hoàng hôn lắc lư",
         },
         "Rainbow-roll": {
             "config": {
@@ -314,7 +314,7 @@ wls_presets = {
                 "modulation_speed": 0.97,
                 "speed": 5.6,
             },
-            "name": "Rainbow Roll",
+            "name": "Cuộn cầu vồng",
         },
         "spectrum": {
             "config": {
@@ -332,7 +332,7 @@ wls_presets = {
                 "modulation_speed": 0.97,
                 "speed": 5.6,
             },
-            "name": "Spectrum",
+            "name": "Quang phổ",
         },
         "twister": {
             "config": {
@@ -350,7 +350,7 @@ wls_presets = {
                 "modulation_speed": 0.34,
                 "speed": 6.7,
             },
-            "name": "Twister",
+            "name": "Máy xoắn",
         },
         "waves": {
             "config": {
@@ -368,11 +368,11 @@ wls_presets = {
                 "modulation_speed": 0.52,
                 "speed": 6.4,
             },
-            "name": "Waves",
+            "name": "Sóng",
         },
     },
     "magnitude": {
-        "reset": {"config": {}, "name": "Reset"},
+        "reset": {"config": {}, "name": "Đặt lại"},
         "cold-fire": {
             "config": {
                 "background_brightness": 1,
@@ -386,7 +386,7 @@ wls_presets = {
                 "gradient_roll": 5,
                 "mirror": True,
             },
-            "name": "Cold Fire",
+            "name": "Lửa lạnh",
         },
         "jungle-cascade": {
             "config": {
@@ -401,7 +401,7 @@ wls_presets = {
                 "gradient_roll": 4,
                 "mirror": True,
             },
-            "name": "Jungle Cascade",
+            "name": "Rừng trùng điệp",
         },
         "lively": {
             "config": {
@@ -416,7 +416,7 @@ wls_presets = {
                 "gradient_roll": 7,
                 "mirror": True,
             },
-            "name": "Lively",
+            "name": "Sống động",
         },
         "rolling-rainbow": {
             "config": {
@@ -431,7 +431,7 @@ wls_presets = {
                 "gradient_roll": 5,
                 "mirror": False,
             },
-            "name": "Rolling Rainbow",
+            "name": "Cầu vồng lăn",
         },
         "warm-bass": {
             "config": {
@@ -446,11 +446,11 @@ wls_presets = {
                 "gradient_roll": 1,
                 "mirror": False,
             },
-            "name": "Warm Bass",
+            "name": "Trầm ấm",
         },
     },
     "multiBar": {
-        "reset": {"config": {}, "name": "Reset"},
+        "reset": {"config": {}, "name": "Đặt lại"},
         "bright-cascade": {
             "config": {
                 "background_brightness": 1,
@@ -466,7 +466,7 @@ wls_presets = {
                 "mirror": True,
                 "mode": "cascade",
             },
-            "name": "Bright Cascade",
+            "name": "Dòng thác sáng",
         },
         "falling-blues": {
             "config": {
@@ -483,7 +483,7 @@ wls_presets = {
                 "mirror": False,
                 "mode": "cascade",
             },
-            "name": "Falling Blues",
+            "name": "Xanh rơi",
         },
         "red-blue-expanse": {
             "config": {
@@ -500,7 +500,7 @@ wls_presets = {
                 "mirror": True,
                 "mode": "cascade",
             },
-            "name": "Red Blue Expanse",
+            "name": "Xanh đỏ mở rộng",
         },
         "Rainbow-oscillation": {
             "config": {
@@ -517,11 +517,11 @@ wls_presets = {
                 "mirror": False,
                 "mode": "wipe",
             },
-            "name": "Rainbow Oscillation",
+            "name": "Dao động cầu vồng",
         },
     },
     "rain": {
-        "reset": {"config": {}, "name": "Reset"},
+        "reset": {"config": {}, "name": "Đặt lại"},
         "cold-drops": {
             "config": {
                 "background_brightness": 1.0,
@@ -531,14 +531,14 @@ wls_presets = {
                 "flip": False,
                 "high_color": "pink",
                 "high_sensitivity": 0.1,
-                "lows_color": "white",
+                "lows_color": "yellow",
                 "lows_sensitivity": 0.1,
                 "mids_color": "cyan",
                 "mids_sensitivity": 0.05,
                 "mirror": True,
                 "raindrop_animation": "Laser",
             },
-            "name": "Cold Drops",
+            "name": "Giọt lạnh",
         },
         "meteor-shower": {
             "config": {
@@ -556,7 +556,7 @@ wls_presets = {
                 "mirror": False,
                 "raindrop_animation": "Blob",
             },
-            "name": "Meteor Shower",
+            "name": "Mưa sao băng",
         },
         "prismatic": {
             "config": {
@@ -574,7 +574,7 @@ wls_presets = {
                 "mirror": True,
                 "raindrop_animation": "Laser",
             },
-            "name": "Prismatic",
+            "name": "Lăng kính",
         },
         "ripples": {
             "config": {
@@ -592,7 +592,7 @@ wls_presets = {
                 "mirror": True,
                 "raindrop_animation": "Ripple",
             },
-            "name": "Ripples",
+            "name": "Gợn sóng",
         },
         "smooth-rwb": {
             "config": {
@@ -614,11 +614,11 @@ wls_presets = {
                 "raindrop_animation": "Ripple",
                 "responsiveness": 0.88,
             },
-            "name": "Smooth RWB",
+            "name": "Đỏ trắng xanh mượt",
         },
     },
     "rainbow": {
-        "reset": {"config": {}, "name": "Reset"},
+        "reset": {"config": {}, "name": "Đặt lại"},
         "cascade": {
             "config": {
                 "background_brightness": 1.0,
@@ -630,7 +630,7 @@ wls_presets = {
                 "mirror": True,
                 "speed": 0.3,
             },
-            "name": "Cascade",
+            "name": "Thác",
         },
         "crawl": {
             "config": {
@@ -643,7 +643,7 @@ wls_presets = {
                 "mirror": False,
                 "speed": 3.5,
             },
-            "name": "Crawl",
+            "name": "Trườn",
         },
         "faded": {
             "config": {
@@ -656,7 +656,7 @@ wls_presets = {
                 "mirror": False,
                 "speed": 9.7,
             },
-            "name": "Faded",
+            "name": "Mờ",
         },
         "gentle": {
             "config": {
@@ -669,7 +669,7 @@ wls_presets = {
                 "mirror": True,
                 "speed": 3.3,
             },
-            "name": "Gentle",
+            "name": "Dịu dàng",
         },
         "slow-roll": {
             "config": {
@@ -682,11 +682,11 @@ wls_presets = {
                 "mirror": True,
                 "speed": 1.1,
             },
-            "name": "Slow Roll",
+            "name": "Cuộn chậm",
         },
     },
     "scroll": {
-        "reset": {"config": {}, "name": "Reset"},
+        "reset": {"config": {}, "name": "Đặt lại"},
         "cold-crawl": {
             "config": {
                 "background_brightness": 1.0,
@@ -702,7 +702,7 @@ wls_presets = {
                 "speed": 1,
                 "threshold": 1,
             },
-            "name": "Cold Crawl",
+            "name": "Trườn lạnh",
         },
         "dynamic-rgb": {
             "config": {
@@ -719,7 +719,7 @@ wls_presets = {
                 "speed": 5,
                 "threshold": 0,
             },
-            "name": "Dynamic RGB",
+            "name": "RGB động",
         },
         "fast-hits": {
             "config": {
@@ -736,7 +736,7 @@ wls_presets = {
                 "speed": 6,
                 "threshold": 0.6,
             },
-            "name": "Fast Hits",
+            "name": "Đập nhanh",
         },
         "gentle-rgb": {
             "config": {
@@ -754,7 +754,7 @@ wls_presets = {
                 "speed": 3,
                 "threshold": 0,
             },
-            "name": "Gentle RGB",
+            "name": "RGB nhẹ",
         },
         "icicles": {
             "config": {
@@ -771,7 +771,7 @@ wls_presets = {
                 "speed": 2,
                 "threshold": 0.0215,
             },
-            "name": "Icicles",
+            "name": "Băng",
         },
         "rays": {
             "config": {
@@ -788,7 +788,7 @@ wls_presets = {
                 "speed": 5,
                 "threshold": 0.7,
             },
-            "name": "Rays",
+            "name": "Phóng xạ",
         },
         "warmth": {
             "config": {
@@ -805,11 +805,11 @@ wls_presets = {
                 "speed": 8,
                 "threshold": 0.55,
             },
-            "name": "Warmth",
+            "name": "Ấm áp",
         },
     },
     "singleColor": {
-        "reset": {"config": {}, "name": "Reset"},
+        "reset": {"config": {}, "name": "Đặt lại"},
         "blue": {
             "config": {
                 "background_brightness": 1.0,
@@ -826,7 +826,7 @@ wls_presets = {
                 "speed": 5,
                 "threshold": 0.7,
             },
-            "name": "Blue",
+            "name": "Xanh",
         },
         "cyan": {
             "config": {
@@ -844,7 +844,7 @@ wls_presets = {
                 "speed": 5,
                 "threshold": 0.7,
             },
-            "name": "Cyan",
+            "name": "Xanh lơ",
         },
         "green": {
             "config": {
@@ -862,7 +862,7 @@ wls_presets = {
                 "speed": 5,
                 "threshold": 0.7,
             },
-            "name": "Green",
+            "name": "Xanh lá",
         },
         "magenta": {
             "config": {
@@ -880,7 +880,7 @@ wls_presets = {
                 "speed": 5,
                 "threshold": 0.7,
             },
-            "name": "Magenta",
+            "name": "Hồng phớt",
         },
         "orange": {
             "config": {
@@ -898,7 +898,7 @@ wls_presets = {
                 "speed": 5,
                 "threshold": 0.7,
             },
-            "name": "Orange",
+            "name": "Cam",
         },
         "pink": {
             "config": {
@@ -916,7 +916,7 @@ wls_presets = {
                 "speed": 5,
                 "threshold": 0.7,
             },
-            "name": "Pink",
+            "name": "Hồng",
         },
         "red": {
             "config": {
@@ -934,7 +934,7 @@ wls_presets = {
                 "speed": 5,
                 "threshold": 0.7,
             },
-            "name": "Red",
+            "name": "Đỏ",
         },
         "red-waves": {
             "config": {
@@ -950,7 +950,7 @@ wls_presets = {
                 "modulation_speed": 0.76,
                 "speed": 0.62,
             },
-            "name": "Red Waves",
+            "name": "Sóng đỏ",
         },
         "steel-pulse": {
             "config": {
@@ -966,7 +966,7 @@ wls_presets = {
                 "modulation_speed": 0.75,
                 "speed": 0.62,
             },
-            "name": "Steel Pulse",
+            "name": "Xung thép",
         },
         "turquoise-roll": {
             "config": {
@@ -982,7 +982,7 @@ wls_presets = {
                 "modulation_speed": 0.76,
                 "speed": 0.62,
             },
-            "name": "Turquoise Roll",
+            "name": "Xoáy ngọc lam",
         },
         "yellow": {
             "config": {
@@ -1000,11 +1000,11 @@ wls_presets = {
                 "speed": 5,
                 "threshold": 0.7,
             },
-            "name": "Yellow",
+            "name": "Vàng",
         },
     },
     "strobe": {
-        "reset": {"config": {}, "name": "Reset"},
+        "reset": {"config": {}, "name": "Đặt lại"},
         "aggro-red": {
             "config": {
                 "background_brightness": 1,
@@ -1027,7 +1027,7 @@ wls_presets = {
                 "strobe_decay": 1.5,
                 "strobe_frequency": "1/2 (.-. )",
             },
-            "name": "Aggro Red",
+            "name": "Đỏ hung",
         },
         "blues-on-the-beat": {
             "config": {
@@ -1051,7 +1051,7 @@ wls_presets = {
                 "strobe_decay": 1.5,
                 "strobe_frequency": "1/2 (.-. )",
             },
-            "name": "Blues on the Beat",
+            "name": "Nhịp xanh",
         },
         "fast-strobe": {
             "config": {
@@ -1074,7 +1074,7 @@ wls_presets = {
                 "strobe_decay": 1.5,
                 "strobe_frequency": "1/2 (.-. )",
             },
-            "name": "Fast Strobe",
+            "name": "Nháy nhanh",
         },
         "faster-strobe": {
             "config": {
@@ -1094,7 +1094,7 @@ wls_presets = {
                 "strobe_decay": 1.5,
                 "strobe_frequency": "1/2 (.-. )",
             },
-            "name": "Faster Strobe",
+            "name": "Nháy nhanh hơn",
         },
         "painful": {
             "config": {
@@ -1114,11 +1114,11 @@ wls_presets = {
                 "strobe_decay": 1.5,
                 "strobe_frequency": "1/2 (.-. )",
             },
-            "name": "Painful",
+            "name": "Bối rối",
         },
     },
     "wavelength": {
-        "reset": {"config": {}, "name": "Reset"},
+        "reset": {"config": {}, "name": "Đặt lại"},
         "classic": {
             "config": {
                 "background_brightness": 1,
@@ -1131,7 +1131,7 @@ wls_presets = {
                 "gradient_roll": 0,
                 "mirror": False,
             },
-            "name": "Classic",
+            "name": "Cổ điển",
         },
         "greens": {
             "config": {
@@ -1145,7 +1145,7 @@ wls_presets = {
                 "gradient_roll": 1,
                 "mirror": True,
             },
-            "name": "Greens",
+            "name": "Xanh",
         },
         "icy": {
             "config": {
@@ -1159,7 +1159,7 @@ wls_presets = {
                 "gradient_roll": 1,
                 "mirror": False,
             },
-            "name": "Icy",
+            "name": "Băng giá",
         },
         "plasma": {
             "config": {
@@ -1187,7 +1187,7 @@ wls_presets = {
                 "gradient_roll": 3,
                 "mirror": True,
             },
-            "name": "rolling blues",
+            "name": "Cuộn xanh",
         },
         "rolling-warmth": {
             "config": {
@@ -1201,7 +1201,7 @@ wls_presets = {
                 "gradient_roll": 7,
                 "mirror": True,
             },
-            "name": "Rolling Warmth",
+            "name": "Cuộn ấm",
         },
         "sunset-sweep": {
             "config": {
@@ -1215,11 +1215,11 @@ wls_presets = {
                 "gradient_roll": 4,
                 "mirror": False,
             },
-            "name": "Sunset Sweep",
+            "name": "Quét hoàng hôn",
         },
     },
     "real_strobe": {
-        "reset": {"config": {}, "name": "Reset"},
+        "reset": {"config": {}, "name": "Đặt lại"},
         "dancefloor": {
             "config": {
                 "background_brightness": 1,
@@ -1238,7 +1238,7 @@ wls_presets = {
                 "strobe_decay_rate": 0.85,
                 "strobe_width": 50,
             },
-            "name": "Dance floor",
+            "name": "Sàn nhảy",
         },
         "strobe_only": {
             "config": {
@@ -1258,7 +1258,7 @@ wls_presets = {
                 "strobe_decay_rate": 0.85,
                 "strobe_width": 50,
             },
-            "name": "Strobe only",
+            "name": "Chỉ nháy",
         },
         "bass_only": {
             "config": {
@@ -1278,7 +1278,7 @@ wls_presets = {
                 "strobe_decay_rate": 0.85,
                 "strobe_width": 0,
             },
-            "name": "Bass only",
+            "name": "Chỉ trầm",
         },
         "extreme": {
             "config": {
@@ -1298,7 +1298,7 @@ wls_presets = {
                 "strobe_decay_rate": 1,
                 "strobe_width": 50,
             },
-            "name": "Extreme",
+            "name": "Cực đại",
         },
         "glitter": {
             "config": {
@@ -1318,11 +1318,11 @@ wls_presets = {
                 "strobe_decay_rate": 0.5,
                 "strobe_width": 50,
             },
-            "name": "Glitter",
+            "name": "Long lanh",
         },
     },
     "blade_power_plus": {
-        "reset": {"config": {}, "name": "Reset"},
+        "reset": {"config": {}, "name": "Đặt lại"},
         "orange-hi-hat": {
             "config": {
                 "background_brightness": 0.3,
@@ -1341,7 +1341,7 @@ wls_presets = {
                 "multiplier": 1,
                 "solid_color": False,
             },
-            "name": "Orange HiHat",
+            "name": "Chói cam",
         },
         "ocean-bass": {
             "config": {
@@ -1352,7 +1352,7 @@ wls_presets = {
                 "color": "cyan",
                 "color_correction": True,
                 "flip": False,
-                "frequency_range": "Lows (beat+bass)",
+                "frequency_range": "Thấp (nhịp+trầm)",
                 "gradient_name": "Ocean",
                 "gradient_repeat": 1,
                 "gradient_roll": 0,
@@ -1361,23 +1361,23 @@ wls_presets = {
                 "multiplier": 0.5,
                 "solid_color": False,
             },
-            "name": "Ocean Bass",
+            "name": "Trầm đại dương",
         },
     },
-    "bands": {"reset": {"config": {}, "name": "Reset"}},
-    "bands_matrix": {"reset": {"config": {}, "name": "Reset"}},
-    "block_reflections": {"reset": {"config": {}, "name": "Reset"}},
-    "crawler": {"reset": {"config": {}, "name": "Reset"}},
-    "blocks": {"reset": {"config": {}, "name": "Reset"}},
-    "energy2": {"reset": {"config": {}, "name": "Reset"}},
-    "equalizer": {"reset": {"config": {}, "name": "Reset"}},
-    "fire": {"reset": {"config": {}, "name": "Reset"}},
-    "glitch": {"reset": {"config": {}, "name": "Reset"}},
-    "hue_fix_demo": {"reset": {"config": {}, "name": "Reset"}},
-    "lava_lamp": {"reset": {"config": {}, "name": "Reset"}},
-    "marching": {"reset": {"config": {}, "name": "Reset"}},
-    "melt": {"reset": {"config": {}, "name": "Reset"}},
-    "pitchSpectrum": {"reset": {"config": {}, "name": "Reset"}},
-    "power": {"reset": {"config": {}, "name": "Reset"}},
-    "spectrum": {"reset": {"config": {}, "name": "Reset"}},
+    "bands": {"reset": {"config": {}, "name": "Đặt lại"}},
+    "bands_matrix": {"reset": {"config": {}, "name": "Đặt lại"}},
+    "block_reflections": {"reset": {"config": {}, "name": "Đặt lại"}},
+    "crawler": {"reset": {"config": {}, "name": "Đặt lại"}},
+    "blocks": {"reset": {"config": {}, "name": "Đặt lại"}},
+    "energy2": {"reset": {"config": {}, "name": "Đặt lại"}},
+    "equalizer": {"reset": {"config": {}, "name": "Đặt lại"}},
+    "fire": {"reset": {"config": {}, "name": "Đặt lại"}},
+    "glitch": {"reset": {"config": {}, "name": "Đặt lại"}},
+    "hue_fix_demo": {"reset": {"config": {}, "name": "Đặt lại"}},
+    "lava_lamp": {"reset": {"config": {}, "name": "Đặt lại"}},
+    "marching": {"reset": {"config": {}, "name": "Đặt lại"}},
+    "melt": {"reset": {"config": {}, "name": "Đặt lại"}},
+    "pitchSpectrum": {"reset": {"config": {}, "name": "Đặt lại"}},
+    "power": {"reset": {"config": {}, "name": "Đặt lại"}},
+    "spectrum": {"reset": {"config": {}, "name": "Đặt lại"}},
 }

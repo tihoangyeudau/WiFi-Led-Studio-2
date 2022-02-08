@@ -20,11 +20,11 @@ class BladePowerPlus(AudioReactiveEffect, HSVEffect):
     CATEGORY = "Cổ điển"
 
     _power_funcs = {
-        "Beat": "beat_power",
-        "Bass": "bass_power",
-        "Lows (beat+bass)": "lows_power",
-        "Mids": "mids_power",
-        "High": "high_power",
+        "Nhịp": "beat_power",
+        "Trầm": "bass_power",
+        "Thấp (nhịp+trầm)": "lows_power",
+        "Trung": "mids_power",
+        "Cao": "high_power",
     }
 
     CONFIG_SCHEMA = vol.Schema(
@@ -57,7 +57,7 @@ class BladePowerPlus(AudioReactiveEffect, HSVEffect):
             vol.Optional(
                 "frequency_range",
                 description="Dải tần số để phát hiện nhịp",
-                default="Lows (beat+bass)",
+                default="Thấp (nhịp+trầm)",
             ): vol.In(list(_power_funcs.keys())),
             vol.Optional(
                 "invert_roll",

@@ -269,14 +269,14 @@ def migrate_config(old_config):
     # most invalid keys were from invalid frequency ranges.
     # this replacement dict should fix that
     replacement_frequency_ranges = {
-        "Siêu trầm (1-20Hz)": "Beat",
-        "Trầm phụ (20-60Hz)": "Lows (beat+bass)",
-        "Trầm (60-250Hz)": "Lows (beat+bass)",
-        "Trung thấp (250-500Hz)": "Lows (beat+bass)",
-        "Trung (500Hz-2kHz)": "Mids",
-        "Trung trên (2Khz-4kHz)": "Mids",
-        "Trung cao (4kHz-6kHz)": "High",
-        "Tần số cao (6kHz-24kHz)": "High",
+        "Siêu trầm (1-20Hz)": "Nhịp",
+        "Trầm phụ (20-60Hz)": "Thấp (nhịp+trầm)",
+        "Trầm (60-250Hz)": "Thấp (nhịp+trầm)",
+        "Trung thấp (250-500Hz)": "Thấp (nhịp+trầm)",
+        "Trung (500Hz-2kHz)": "Trung",
+        "Trung trên (2Khz-4kHz)": "Trung",
+        "Trung cao (4kHz-6kHz)": "Cao",
+        "Tần số cao (6kHz-24kHz)": "Cao",
     }
 
     class DummyWls:

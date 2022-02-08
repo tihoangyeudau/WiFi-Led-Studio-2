@@ -115,10 +115,10 @@ EffectForm.args = {
       },
       frequency_range: {
         type: 'string',
-        enum: ['Beat', 'Bass', 'Lows (beat+bass)', 'Mids', 'High'],
+        enum: ['Nhịp', 'Trầm', 'Thấp (nhịp+trầm)', 'Trung', 'Cao'],
         title: 'Dải tần số',
         description: 'Dải tần số để phát hiện nhịp',
-        default: 'Lows (beat+bass)',
+        default: 'Thấp (nhịp+trầm)',
       },
       invert_roll: {
         type: 'boolean',
@@ -131,7 +131,7 @@ EffectForm.args = {
   model: {
     blur: 2,
     decay: 0.7,
-    frequency_range: 'Lows (beat+bass)',
+    frequency_range: 'Thấp (nhịp+trầm)',
     brightness: 1,
     mirror: false,
     invert_roll: false,
