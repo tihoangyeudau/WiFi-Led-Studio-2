@@ -207,24 +207,6 @@ def parse_args():
     return parser.parse_args()
 
 
-def installed_via_pip():
-
-    """Check to see if Wls is installed via pip
-    Returns:
-        boolean
-    """
-    pip_package_command = subprocess.check_output(
-        [sys.executable, "-m", "pip", "freeze"]
-    )
-    installed_packages = [
-        r.decode().split("==")[0] for r in pip_package_command.split()
-    ]
-    if "wls" in installed_packages:
-        return True
-    else:
-        return False
-
-
 def main():
     """Main entry point allowing external calls"""
     args = parse_args()
@@ -254,7 +236,7 @@ def main():
     else:
         p.nice(15)
 
-    if not (currently_frozen() or installed_via_pip()):
+    if not currently_frozen():
         if args.offline_mode:
             _LOGGER.warning(
                 "Chế độ Ngoại tuyến được Bật - Vui lòng kiểm tra các bản cập nhật thường xuyên."
