@@ -5,10 +5,10 @@ from setuptools import setup
 import wls.consts as const
 
 PROJECT_DOCS = "https://rainbowmusicled.com"
-PROJECT_PACKAGE_NAME = "WiFi Led Studio"
+PROJECT_PACKAGE_NAME = "wls"
 PROJECT_VERSION = const.PROJECT_VERSION
 PROJECT_LICENSE = "Rainbow Music Led License"
-PROJECT_AUTHOR = "Austin Hodges"
+PROJECT_AUTHOR = "Rainbow Music Led"
 PROJECT_AUTHOR_EMAIL = "rainbowmusicled@gmail.com"
 PROJECT_MAINTAINER = "Rainbow Music Led Developers"
 PROJECT_MAINTAINER_EMAIL = "tuantrung2905@gmail.com"
