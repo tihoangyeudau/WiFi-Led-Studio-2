@@ -143,7 +143,7 @@ class ScenesEndpoint(RestEndpoint):
                 # Check virtual is in scene, make no changes if it isn't
                 if virtual.id not in scene["virtuals"].keys():
                     _LOGGER.info(
-                        ("Đèn ảo với id {} không có dữ liệu trong cảnh {}").format(
+                        ("Đèn với id {} không có dữ liệu trong cảnh {}").format(
                             virtual.id, scene_id
                         )
                     )

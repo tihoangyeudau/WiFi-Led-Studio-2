@@ -294,9 +294,6 @@ def main():
     else:
         icon = None
 
-    if not args.offline_mode and currently_frozen():
-        update_wls(icon)
-
     if icon:
         icon.run(setup=entry_point)
     else:
