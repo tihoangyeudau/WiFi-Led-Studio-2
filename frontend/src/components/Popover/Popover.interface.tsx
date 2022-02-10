@@ -128,7 +128,7 @@ export const PopoverDefaults: PopoverProps = {
   vertical: 'center',
   horizontal: 'left',
   size: 'small',
-  text: 'Are you sure?',
+  text: 'Bạn chắc chứ?',
   label: undefined,
   anchorOrigin: undefined,
   transformOrigin: undefined,
