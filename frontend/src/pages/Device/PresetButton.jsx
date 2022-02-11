@@ -85,21 +85,21 @@ export default function PresetButton({ delPreset, uploadPresetCloud, deletePrese
                         <ListItemIcon>
                             <CopyAll fontSize="small" />
                         </ListItemIcon>
-                        <ListItemText>Copy Preset</ListItemText>
+                        <ListItemText>Sao chép cài trước</ListItemText>
                     </MenuItem>
                 {(window.localStorage.getItem('wls-cloud-role') === 'creator') && features['cloud'] && isLogged &&
                     <MenuItem onClick={(e) => { uploadPresetCloud(e); setAnchorEl(null); }}>
                         <ListItemIcon>
                             <CloudUpload fontSize="small" />
                         </ListItemIcon>
-                        <ListItemText>Upload to Cloud</ListItemText>
+                        <ListItemText>Tải lên Mây</ListItemText>
                     </MenuItem>}
                 {(window.localStorage.getItem('wls-cloud-role') === 'creator') && features['cloud'] && isLogged &&
                     <MenuItem onClick={(e) => { deletePresetCloud(e); setAnchorEl(null); }}>
                         <ListItemIcon>
                             <CloudOff fontSize="small" />
                         </ListItemIcon>
-                        <ListItemText>Delete from Cloud</ListItemText>
+                        <ListItemText>Xoá từ Mây</ListItemText>
                     </MenuItem>}
             </Menu >
         </div >

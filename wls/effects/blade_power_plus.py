@@ -32,7 +32,7 @@ class BladePowerPlus(AudioReactiveEffect, HSVEffect):
             vol.Optional(
                 "mirror",
                 description="Phản chiếu",
-                default=False,
+                default=True,
             ): bool,
             vol.Optional(
                 "blur",
@@ -47,7 +47,7 @@ class BladePowerPlus(AudioReactiveEffect, HSVEffect):
             vol.Optional(
                 "multiplier",
                 description="Làm cho thanh phản ứng lớn hơn/nhỏ hơn",
-                default=0.5,
+                default=0.7,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=1.0)),
             vol.Optional(
                 "background_color",
@@ -57,7 +57,7 @@ class BladePowerPlus(AudioReactiveEffect, HSVEffect):
             vol.Optional(
                 "frequency_range",
                 description="Dải tần số để phát hiện nhịp",
-                default="Thấp (nhịp+trầm)",
+                default="Trung",
             ): vol.In(list(_power_funcs.keys())),
             vol.Optional(
                 "invert_roll",

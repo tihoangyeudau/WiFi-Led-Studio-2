@@ -531,7 +531,7 @@ wls_presets = {
                 "flip": False,
                 "high_color": "pink",
                 "high_sensitivity": 0.1,
-                "lows_color": "yellow",
+                "lows_color": "white",
                 "lows_sensitivity": 0.1,
                 "mids_color": "cyan",
                 "mids_sensitivity": 0.05,
@@ -539,6 +539,24 @@ wls_presets = {
                 "raindrop_animation": "Laser",
             },
             "name": "Giọt lạnh",
+        },
+        "sunlight-drops": {
+            "config": {
+                "background_brightness": 1.0,
+                "background_color": "black",
+                "blur": 1.0,
+                "brightness": 1.0,
+                "flip": False,
+                "high_color": "pink",
+                "high_sensitivity": 0.1,
+                "lows_color": "yellow",
+                "lows_sensitivity": 0.1,
+                "mids_color": "cyan",
+                "mids_sensitivity": 0.05,
+                "mirror": False,
+                "raindrop_animation": "Blob",
+            },
+            "name": "Giọt nắng",
         },
         "meteor-shower": {
             "config": {

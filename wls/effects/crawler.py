@@ -17,12 +17,12 @@ class Crawler(AudioReactiveEffect, HSVEffect):
             vol.Optional(
                 "speed",
                 description="Tốc độ",
-                default=0.5,
+                default=0.6,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=1.0)),
             vol.Optional(
                 "reactivity",
                 description="Độ nhậy",
-                default=0.25,
+                default=0.7,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=1.0)),
             vol.Optional(
                 "sway",

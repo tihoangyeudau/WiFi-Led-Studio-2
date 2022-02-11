@@ -188,7 +188,7 @@ EffectType.args = {
         category: 'Dạng áp suất',
       },
       {
-        name: 'Tan chẩy',
+        name: 'Tan chảy',
         id: 'melt',
         category: 'Dạng áp suất',
       },
