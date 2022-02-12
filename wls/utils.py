@@ -467,6 +467,198 @@ class RML:
         )
 
 
+class RML2:
+    """
+    Chữa cháy
+    """
+    def rml_identifier(device_ip, device_name):
+
+        """
+            Uses a JSON API call to determine if the device is RML or RML compatible
+            Specifically searches for "RML" in the brand json - currently all major
+            branches/forks of RML contain RML in the branch data.
+
+        Args:
+            device_ip (string): The device IP to be queried
+            device_name (string): The name of the device
+        Returns:
+            boolean
+        """
+        try:
+            device_info = requests.get(
+                f"http://{device_ip}/json/info", timeout=0.25
+            )
+            if device_info.ok:
+                device_json = device_info.json()
+
+                if device_json["brand"] in "RAINBOW MUSIC LED":
+                    _LOGGER.info(
+                        f"{device_name} là đèn mang thương hiệu: {device_json['brand']}"
+                    )
+                    return True
+                else:
+                    _LOGGER.info(
+                        f"{device_name} không phải đèn mang thương hiệu: {device_json['brand']}"
+                    )
+                    return False
+            else:
+                _LOGGER.warning(
+                    f"{device_name} lỗi RML API: {device_info.status_code}"
+                )
+                return False
+        except requests.exceptions.RequestException:
+            _LOGGER.info(
+                f"Bộ nhận dạng không thể kết nối với {device_name}. Có vẻ như không phải đèn của Rainbow Music Led."
+            )
+            return False
+
+
+    def rml_power_state(device_ip, device_name):
+        """
+            Uses a JSON API call to determine the RML device power state (on/off)
+
+        Args:
+            device_ip (string): The device IP to be queried
+            device_name (string): The name of the device
+        Returns:
+            boolean: True is "On", False is "Off"
+        """
+        try:
+            device_state = requests.get(
+                f"http://{device_ip}/json/state", timeout=0.25
+            )
+            if device_state.ok:
+                device_json = device_state.json()
+                _LOGGER.info(f"Đèn {device_name} đã bật chưa?: {device_json['on']}")
+                if device_json["on"] is True:
+                    return True
+                else:
+                    return False
+            else:
+                _LOGGER.warning(
+                    f"{device_name} lỗi RML API: {device_state.status_code}"
+                )
+                return False
+        except requests.exceptions.RequestException as CapturedError:
+            _LOGGER.warning(
+                f"Lỗi khi lấy trạng thái bật/tắt cho {device_name}: {CapturedError}"
+            )
+            return False
+
+
+    def turn_rml_on(device_ip, device_name):
+        """
+            Uses a HTTP post call to turn a RAINBOW MUSIC LED compatible device on
+
+        Args:
+            device_ip (string): The device IP to be turned on
+            device_name (string): The name of the device
+        Returns:
+            boolean: Success or failure of API call
+        """
+        try:
+            turn_on = requests.post(f"http://{device_ip}/win&T=1", timeout=0.25)
+
+            if turn_on.ok:
+                _LOGGER.info(f"Đang bật đèn {device_name}.")
+                return True
+            else:
+                _LOGGER.warning(
+                    f"{device_name} lỗi RML API: {turn_on.status_code}"
+                )
+                return False
+        except requests.exceptions.RequestException as CapturedError:
+            _LOGGER.warning(f"Lỗi bật đèn {device_name}: {CapturedError}")
+
+
+    def turn_rml_off(device_ip, device_name):
+        """
+            Uses a HTTP post call to turn a RML compatible device off
+
+        Args:
+            device_ip (string): The device IP to be turned off
+            device_name (string): The name of the device
+        Returns:
+            boolean: Success or failure of API call
+        """
+        try:
+            turn_off = requests.post(f"http://{device_ip}/win&T=0", timeout=0.25)
+
+            if turn_off.ok:
+                _LOGGER.info(f"Đang tắt đèn {device_name}.")
+                return True
+            else:
+                _LOGGER.warning(
+                    f"{device_name} lỗi RML API: {turn_off.status_code}"
+                )
+                return False
+        except requests.exceptions.RequestException as CapturedError:
+            _LOGGER.warning(f"Lỗi khi tắt đèn {device_name}: {CapturedError}")
+
+
+    def adjust_rml_brightness(device_ip, device_name, brightness):
+        """
+            Uses a HTTP post call to adjust a RML compatible device's
+            brightness
+
+
+        Args:
+            device_ip (string): The device IP to adjust brightness
+            device_name (string): The name of the device
+            brightness (int): The brightness value between 0-255
+
+        Returns:
+            boolean: Success or failure of API call
+        """
+        validated_brightness = np.clip(brightness, 0, 255)
+
+        try:
+            adjust_brightness = requests.post(
+                f"http://{device_ip}/win&A={validated_brightness}", timeout=0.25
+            )
+
+            if adjust_brightness.ok:
+                _LOGGER.info(
+                    f"Đang chỉnh độ sáng đèn {device_name} sang: {validated_brightness}."
+                )
+                return True
+            else:
+                _LOGGER.warning(
+                    f"Lỗi khi chỉnh độ sáng đèn {device_name}."
+                )
+                return False
+        except requests.exceptions.RequestException as CapturedError:
+            _LOGGER.warning(
+                f"Lỗi khi chỉnh độ sáng đèn {device_name}: {CapturedError}"
+            )
+
+
+    def resolve_destination(destination):
+        """Uses a socket to attempt domain lookup
+
+        Args:
+            destination (string): The domain name to be resolved.
+
+        Returns:
+            On success: string containing the resolved IP address.
+            On failure: boolean false.
+        """
+        try:
+            ipaddress.ip_address(destination)
+            return destination
+        except ValueError:
+
+            cleaned_dest = destination.rstrip(".")
+
+            try:
+                return socket.gethostbyname(cleaned_dest)
+            except socket.gaierror:
+
+                _LOGGER.warning(f"Không giải quyết được {cleaned_dest}.")
+
+            return False
+
+
 def empty_queue(queue: asyncio.Queue):
     """Empty an asyncio queue
 

@@ -7,7 +7,7 @@ from wls.devices import NetworkedDevice
 from wls.devices.ddp import DDPDevice
 from wls.devices.e131 import E131Device
 from wls.devices.udp import UDPRealtimeDevice
-from wls.utils import RML
+from wls.utils import RML, RML2
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -91,7 +91,19 @@ class RMLDevice(NetworkedDevice):
         self.subdevice._destination = self._destination
 
     def activate(self):
-
+        self.RMLReceiver = False
+        self.device_ip = RML2.resolve_destination(self._config["ip_address"])
+        if not self.device_ip:
+            _LOGGER.warning(
+                f"Không thể giải quyết điểm đến {self._config['ip_address']}, Huỷ kích hoạt đèn {self.name}. Hãy đảm bảo IP/hostname chính xác và đèn đang được kết nối."
+            )
+            return
+            # If the device is a RML device, turn it on
+        if RML2.rml_identifier(self.device_ip, self.name):
+            self.WLEDReceiver = True
+            self.rml_state = RML2.rml_power_state(self.device_ip, self.name)
+            if self.rml_state is False:
+                RML2.turn_rml_on(self.device_ip, self.name)
         if self.subdevice is None:
             self.setup_subdevice()
         self.subdevice.activate()
@@ -101,6 +113,8 @@ class RMLDevice(NetworkedDevice):
         if self.subdevice is not None:
             self.subdevice.deactivate()
         super().deactivate()
+        if self.RMLReceiver is True and self.rml_state is True:
+            RML2.turn_rml_off(self.device_ip, self.name)
 
     def flush(self, data):
         self.subdevice.flush(data)
