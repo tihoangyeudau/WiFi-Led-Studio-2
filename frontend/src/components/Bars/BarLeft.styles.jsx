@@ -1,6 +1,5 @@
 import { makeStyles } from '@material-ui/core/styles';
 import { drawerWidth } from '../../utils/helpers';
-import blademod from '../../assets/blademod.svg';
 import isElectron from 'is-electron';
 
 const useStyles = makeStyles((theme) => ({
@@ -72,7 +71,6 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   devbadge: {
-    backgroundImage: `url(${blademod})`,
     backgroundColor: isElectron() ? 'transparent' : theme.palette.secondary.main,
     border: theme.palette.primary.main,
     color: '#fff',

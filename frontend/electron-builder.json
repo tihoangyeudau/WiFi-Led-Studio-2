@@ -1,10 +1,10 @@
 {
     "publish": {
         "provider": "generic",
-        "url": "https://github.com/YeonV/Wls-Frontend-v2"
+        "url": "http://rainbowmusicled.com"
     },
     "productName": "Wls-Client",
-    "appId": "com.wls.app",
+    "appId": "com.rml.wls",
     "directories": {
         "buildResources": "buildResources",
         "output": "release"

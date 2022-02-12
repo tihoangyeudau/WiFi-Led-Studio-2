@@ -177,53 +177,6 @@ def async_callback(loop, callback, *args):
     return future
 
 
-def git_version():
-
-    """Uses a subprocess to attempt to get the git revision of the running build.
-
-    Args:
-        None
-
-    Returns:
-        On success: string containing the git revision
-        On failure: string containing "Unknown"
-    """
-
-    def _minimal_ext_cmd(cmd):
-        # construct minimal environment
-        env = {}
-        for k in ["SYSTEMROOT", "PATH"]:
-            v = os.environ.get(k)
-            if v is not None:
-                env[k] = v
-        # LANGUAGE is used on win32
-        env["LANGUAGE"] = "C"
-        env["LANG"] = "C"
-        env["LC_ALL"] = "C"
-        out = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env
-        ).communicate()[0]
-        return out
-
-    try:
-        out = _minimal_ext_cmd(["git", "rev-parse", "HEAD"])
-        GIT_REVISION = out.strip().decode("ascii")
-    except OSError:
-        GIT_REVISION = "Unknown"
-
-    # dirty little hack for pipeline builds
-    if GIT_REVISION in ["", "Unknown"]:
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        if "git_version" in os.listdir(dir_path):
-            ver_file = os.path.join(dir_path, "git_version")
-            with open(ver_file) as f:
-                GIT_REVISION = f.readlines()[0]
-        else:
-            GIT_REVISION = "Unknown"
-
-    return GIT_REVISION
-
-
 class RML:
     """
     A collection of RML helper functions

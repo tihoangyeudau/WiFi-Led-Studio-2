@@ -131,7 +131,7 @@ export default function App() {
     initFrontendConfig();
     console.info(
       '%c WiFi Led Studio ' + '%c\n @ Rainbow Music Led ',
-      'padding: 10px 40px; color: #ffffff; border-radius: 5px 5px 0 0; background-image:url(https://my.wls.app/favicon/favicon-32x32.png); background-color: #800000; background-repeat: no-repeat; background-position: 10% 50%;',
+      'padding: 10px 40px; color: #ffffff; border-radius: 5px 5px 0 0; background-color: #800000; background-repeat: no-repeat; background-position: 10% 50%;',
       'background: #fff; color: #800000; border-radius: 0 0 5px 5px;padding: 5px 0;'
     );
     // log("successSUCCESS", { id: 'test' })

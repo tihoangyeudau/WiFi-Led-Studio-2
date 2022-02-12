@@ -241,8 +241,6 @@ def main():
             _LOGGER.warning(
                 "Chế độ Ngoại tuyến được Bật - Vui lòng kiểm tra các bản cập nhật thường xuyên."
             )
-        else:
-            import wls.sentry_config  # noqa: F401
 
     if args.sentry_test:
         """This will crash Wls and submit a Sentry error if Sentry is configured"""
