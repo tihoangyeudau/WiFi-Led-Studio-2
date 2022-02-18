@@ -336,7 +336,7 @@ AddVirtual.args = {
       frequency_min: {
         type: 'integer',
         minimum: 20,
-        maximum: 15000,
+        maximum: 24000,
         title: 'Frequency Min',
         description: 'Hiệu ứng phản ứng âm thanh tần số thấp nhất của đèn ảo này',
         default: 20,
@@ -344,10 +344,10 @@ AddVirtual.args = {
       frequency_max: {
         type: 'integer',
         minimum: 20,
-        maximum: 15000,
+        maximum: 24000,
         title: 'Tần số tối đa',
         description: 'Hiệu ứng phản ứng âm thanh tần số cao nhất của đèn ảo này',
-        default: 15000,
+        default: 18000,
       },
     },
     permitted_keys: [
@@ -382,17 +382,17 @@ AudioCard.args = {
       mic_rate: {
         type: 'integer',
         title: 'Tỉ lệ thu âm',
-        default: 30000,
+        default: 48000,
       },
       fft_size: {
         type: 'integer',
         title: 'Kích thước Fft',
-        default: 4096,
+        default: 1024,
       },
       min_volume: {
         type: 'number',
-        minimum: 0,
-        maximum: 10,
+        minimum: 0.2,
+        maximum: 0.8,
         title: 'Âm lượng tối thiểu',
         default: 0.2,
       },

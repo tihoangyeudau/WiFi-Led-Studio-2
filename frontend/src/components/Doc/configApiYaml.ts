@@ -109,7 +109,7 @@ paths:
                       - active: false
                         config:
                           center_offset: 0
-                          frequency_max: 15000
+                          frequency_max: 24000
                           frequency_min: 20
                           icon_name: rml
                           mapping: span
@@ -135,7 +135,7 @@ paths:
                       - active: false
                         config:
                           center_offset: 0
-                          frequency_max: 15000
+                          frequency_max: 24000
                           frequency_min: 20
                           icon_name: rml
                           mapping: span
@@ -161,7 +161,7 @@ paths:
                       - active: false
                         config:
                           center_offset: 0
-                          frequency_max: 15000
+                          frequency_max: 24000
                           frequency_min: 20
                           icon_name: rml
                           mapping: span
@@ -187,7 +187,7 @@ paths:
                       - active: false
                         config:
                           center_offset: 0
-                          frequency_max: 15000
+                          frequency_max: 24000
                           frequency_min: 20
                           icon_name: rml
                           mapping: span
@@ -213,7 +213,7 @@ paths:
                       - active: false
                         config:
                           center_offset: 0
-                          frequency_max: 15000
+                          frequency_max: 24000
                           frequency_min: 20
                           icon_name: rml
                           mapping: span
@@ -239,7 +239,7 @@ paths:
                       - active: false
                         config:
                           center_offset: 0
-                          frequency_max: 15000
+                          frequency_max: 24000
                           frequency_min: 20
                           icon_name: rml
                           mapping: span
@@ -671,7 +671,7 @@ paths:
                       - active: false
                         config:
                           center_offset: 0
-                          frequency_max: 15000
+                          frequency_max: 24000
                           frequency_min: 20
                           icon_name: rml
                           mapping: span
@@ -697,7 +697,7 @@ paths:
                       - active: false
                         config:
                           center_offset: 0
-                          frequency_max: 15000
+                          frequency_max: 24000
                           frequency_min: 20
                           icon_name: rml
                           mapping: span
@@ -723,7 +723,7 @@ paths:
                       - active: false
                         config:
                           center_offset: 0
-                          frequency_max: 15000
+                          frequency_max: 24000
                           frequency_min: 20
                           icon_name: rml
                           mapping: span
@@ -749,7 +749,7 @@ paths:
                       - active: false
                         config:
                           center_offset: 0
-                          frequency_max: 15000
+                          frequency_max: 24000
                           frequency_min: 20
                           icon_name: rml
                           mapping: span
@@ -775,7 +775,7 @@ paths:
                       - active: false
                         config:
                           center_offset: 0
-                          frequency_max: 15000
+                          frequency_max: 24000
                           frequency_min: 20
                           icon_name: rml
                           mapping: span
@@ -801,7 +801,7 @@ paths:
                       - active: false
                         config:
                           center_offset: 0
-                          frequency_max: 15000
+                          frequency_max: 24000
                           frequency_min: 20
                           icon_name: rml
                           mapping: span
@@ -936,7 +936,7 @@ paths:
                     active: false
                     config:
                       center_offset: 0
-                      frequency_max: 15000
+                      frequency_max: 24000
                       frequency_min: 20
                       icon_name: rml
                       mapping: span
@@ -1082,7 +1082,7 @@ paths:
                       - active: false
                         config:
                           center_offset: 0
-                          frequency_max: 15000
+                          frequency_max: 24000
                           frequency_min: 20
                           icon_name: rml
                           mapping: span
@@ -1108,7 +1108,7 @@ paths:
                       - active: false
                         config:
                           center_offset: 0
-                          frequency_max: 15000
+                          frequency_max: 24000
                           frequency_min: 20
                           icon_name: rml
                           mapping: span
@@ -1134,7 +1134,7 @@ paths:
                       - active: false
                         config:
                           center_offset: 0
-                          frequency_max: 15000
+                          frequency_max: 24000
                           frequency_min: 20
                           icon_name: rml
                           mapping: span
@@ -1160,7 +1160,7 @@ paths:
                       - active: false
                         config:
                           center_offset: 0
-                          frequency_max: 15000
+                          frequency_max: 24000
                           frequency_min: 20
                           icon_name: rml
                           mapping: span
@@ -1186,7 +1186,7 @@ paths:
                       - active: false
                         config:
                           center_offset: 0
-                          frequency_max: 15000
+                          frequency_max: 24000
                           frequency_min: 20
                           icon_name: rml
                           mapping: span
@@ -1212,7 +1212,7 @@ paths:
                       - active: false
                         config:
                           center_offset: 0
-                          frequency_max: 15000
+                          frequency_max: 24000
                           frequency_min: 20
                           icon_name: rml
                           mapping: span

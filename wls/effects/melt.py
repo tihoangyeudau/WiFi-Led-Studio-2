@@ -17,13 +17,13 @@ class Melt(AudioReactiveEffect, HSVEffect):
             vol.Optional(
                 "speed",
                 description="Tốc độ",
-                default=0.9,
-            ): vol.All(vol.Coerce(float), vol.Range(min=0.001, max=1)),
+                default=1.5,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.001, max=2)),
             vol.Optional(
                 "reactivity",
                 description="Độ nhậy",
-                default=0.5,
-            ): vol.All(vol.Coerce(float), vol.Range(min=0.0001, max=1)),
+                default=1.0,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.0001, max=2)),
         }
     )
 

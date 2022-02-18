@@ -24,12 +24,12 @@ from wls.events import GraphUpdateEvent
 
 # these parameters are hard coded and will break configs if changed
 
-FFT_SIZE = 4096
-MIC_RATE = 30000
+FFT_SIZE = 1024
+MIC_RATE = 48000
 MAX_FREQ = MIC_RATE // 2
 MIN_FREQ = 20
 MIN_FREQ_DIFFERENCE = 50
-MEL_MAX_FREQS = [350, 2000, MAX_FREQ]
+MEL_MAX_FREQS = [250, 4000, MAX_FREQ]
 
 FrequencyRange = namedtuple("FrequencyRange", "min,max")
 
@@ -44,9 +44,9 @@ FREQUENCY_RANGES = {
     "Tần số cao (6kHz-24kHz)": FrequencyRange(6000, 24000),
 }
 
-LOWS_RANGE = f"Low ({MIN_FREQ}Hz-{MEL_MAX_FREQS[0]}Hz)"
-MIDS_RANGE = f"Mid ({MEL_MAX_FREQS[0]}Hz-{MEL_MAX_FREQS[1]}Hz)"
-HIGH_RANGE = f"High ({MEL_MAX_FREQS[1]}Hz-{MEL_MAX_FREQS[2]}Hz)"
+LOWS_RANGE = f"Thấp ({MIN_FREQ}Hz-{MEL_MAX_FREQS[0]}Hz)"
+MIDS_RANGE = f"Trung ({MEL_MAX_FREQS[0]}Hz-{MEL_MAX_FREQS[1]}Hz)"
+HIGH_RANGE = f"Cao ({MEL_MAX_FREQS[1]}Hz-{MEL_MAX_FREQS[2]}Hz)"
 
 FREQUENCY_RANGES_SIMPLE = {
     LOWS_RANGE: FrequencyRange(MIN_FREQ, MEL_MAX_FREQS[0]),
@@ -507,3 +507,4 @@ class Melbanks:
                         self.melbank_processors[i].melbank_frequencies,
                     )
                 )
+
