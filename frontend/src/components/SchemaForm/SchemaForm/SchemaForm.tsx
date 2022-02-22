@@ -154,7 +154,6 @@ const SchemaForm = ({
                         Object.keys(group[c]).map((e) => (
                           <MenuItem
                             value={e}
-                            disabled={group[c][e].indexOf('[Loopback]') > -1}
                           >
                             {group[c][e].indexOf('[Loopback]') > -1 ? (
                               <SpeakerIcon style={{ marginRight: '10px' }} />
