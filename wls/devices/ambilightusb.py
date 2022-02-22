@@ -51,4 +51,3 @@ class AmbilightUSBDevice(SerialDevice):
             _LOGGER.critical(
                 "Kết nối nối tiếp bị gián đoạn. Vui lòng kiểm tra kết nối và đảm bảo thiết bị của bạn hoạt động bình thường."
             )
-            self.deactivate()

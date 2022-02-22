@@ -22,9 +22,10 @@ class OpenRGB(NetworkedDevice):
                     "name", description="Tên đèn"
                 ): str,
                 vol.Required(
-                    "openrgb_name",
-                    description="Tên chính xác của thiết bị openRGB (trong openRGB).",
-                ): str,
+                    "openrgb_id",
+                    description="ID của thiết bị OpenRGB (ở trong OpenRGB).",
+                    default=0,
+                ): vol.All(int, vol.Range(min=0)),
                 vol.Required(
                     "pixel_count",
                     description="Số lượng LED",
@@ -43,7 +44,7 @@ class OpenRGB(NetworkedDevice):
         self._wls = wls
         self.ip_address = self._config["ip_address"]
         self.port = self._config["port"]
-        self.openrgb_device_name = self._config["openrgb_name"]
+        self.openrgb_device_id = self._config["openrgb_id"]
         self._online = True
 
     def activate(self):
@@ -52,12 +53,13 @@ class OpenRGB(NetworkedDevice):
 
             try:
                 self.openrgb_device = OpenRGBClient(
-                    self.ip_address, self.port, "Wls", 2  # protocol_version
-                ).get_devices_by_name(f"{self.openrgb_device_name}")[0]
+                    self.ip_address, self.port, "Wls", 3  # protocol_version
+                )
+                self.openrgb_device = self.openrgb_device.devices[self.openrgb_device_id]
                 self._online = True
             except (ConnectionRefusedError, TimeoutError):
                 _LOGGER.warning(
-                    f"{self.openrgb_device_name} không liên lạc được. Máy chủ api có đang chạy không?"
+                    f"{self.openrgb_device_id} không liên lạc được. Máy chủ api có đang chạy không?"
                 )
                 self._online = False
                 return
@@ -74,13 +76,13 @@ class OpenRGB(NetworkedDevice):
             self.deactivate()
         except IndexError:
             _LOGGER.critical(
-                f"Không thể tìm thấy thiết bị openRGB có tên: {self.openrgb_device_name}"
+                f"Không thể tìm thấy thiết bị openRGB có ID: {self.openrgb_device_id}"
             )
             self._online = False
             self.deactivate()
         except ValueError:
             _LOGGER.critical(
-                f"{self.openrgb_device_name} không hỗ trợ chế độ trực tiếp và không phù hợp với các hiệu ứng phát trực tiếp từ Wls"
+                f"{self.openrgb_device_id} không hỗ trợ chế độ trực tiếp và không phù hợp với các hiệu ứng phát trực tiếp từ Wls"
             )
             self.deactivate()
         else:
@@ -101,7 +103,7 @@ class OpenRGB(NetworkedDevice):
         except AttributeError:
             self.activate()
         except ConnectionAbortedError:
-            _LOGGER.warning(f"Thiết bị ngắt kết nối: {self.openrgb_device_name}")
+            _LOGGER.warning(f"Thiết bị ngắt kết nối: {self.openrgb_device_id}")
             self._wls.events.fire_event(DevicesUpdatedEvent(self.id))
             self._online = False
             self.deactivate()

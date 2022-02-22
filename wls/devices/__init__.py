@@ -74,7 +74,7 @@ class Device(BaseRegistry):
         self._pixels = None
         self._silence_start = None
         self._device_type = ""
-        self._online = False
+        self._online = True
 
     def __del__(self):
         if self._active:
@@ -336,9 +336,11 @@ class NetworkedDevice(Device):
             _LOGGER.info(
                 f"Đèn {self.name}: Đã giải quyết đích đến {self._destination}"
             )
+            self._online = True
             if success_callback:
                 success_callback()
         except ValueError as msg:
+            self._online = False
             _LOGGER.warning(f"Device {self.name}: {msg}")
 
     def activate(self, *args, **kwargs):
@@ -530,13 +532,13 @@ class Devices(RegistryLoader):
                             _LOGGER.info(msg)
                             raise ValueError(msg)
                     elif device_type == "openrgb":
-                        # check the openrgb name for OpenRGB device, it might still be okay at a shared ip_address
+                        # check the OpenRGB ID for OpenRGB device, it might still be okay at a shared ip_address
                         # eg. for multi OpenRGB devices
                         if (
-                            device_config["openrgb_name"]
-                            == existing_device.config["openrgb_name"]
+                            device_config["openrgb_id"]
+                            == existing_device.config["openrgb_id"]
                         ):
-                            msg = f"Bỏ qua đèn {device_ip}: Chia sẻ IP và tên openrgb với đèn hiện có là {existing_device.name}"
+                            msg = f"Bỏ qua đèn {device_ip}: Chia sẻ IP và ID openrgb với đèn hiện có là {existing_device.name}"
                             _LOGGER.info(msg)
                             raise ValueError(msg)
                     else:
