@@ -58,11 +58,12 @@ const SmartBar = ({ open, setOpen }) => {
               setFeatures('dev', true)
             }
             if (features['dev']) {
-              if (value === 'clear') { setViewMode('user'); setShowFeatures('dev', false); setShowFeatures('go', false); setShowFeatures('streamto', false); setShowFeatures('waves', true);setShowFeatures('effectfilter', false); setShowFeatures('cloud', false); setShowFeatures('rml', true); setShowFeatures('integrations', false); setShowFeatures('spotify', false); setShowFeatures('webaudio', false); setFeatures('streamto', false); setFeatures('go', false); setFeatures('waves', false); setFeatures('cloud', false);setFeatures('effectfilter', false); setFeatures('rml', false); setFeatures('dev', false); setFeatures('integrations', false); setFeatures('spotify', false); setFeatures('webaudio', false); window.localStorage.removeItem('wls-theme'); window.localStorage.setItem('BladeMod', 0); window.location.reload() }
+              if (value === 'clear') { setViewMode('user'); setShowFeatures('dev', false); setShowFeatures('go', false); setShowFeatures('streamto', false); setShowFeatures('waves', true);setShowFeatures('effectfilter', false); setShowFeatures('cloud', false); setShowFeatures('rml', true); setShowFeatures('integrations', false); setShowFeatures('spotify', false); setShowFeatures('youtube', false); setShowFeatures('webaudio', false); setFeatures('streamto', false); setFeatures('go', false); setFeatures('waves', false); setFeatures('cloud', false);setFeatures('effectfilter', false); setFeatures('rml', false); setFeatures('dev', false); setFeatures('integrations', false); setFeatures('spotify', false); setFeatures('webaudio', false); window.localStorage.removeItem('wls-theme'); window.localStorage.setItem('BladeMod', 0); window.location.reload() }
               if (value === 'BladeCloud') { setShowFeatures('cloud', true) }
               if (value === 'BladeRml') { setShowFeatures('rml', true) }
               if (value === 'BladeIntegrations') { setShowFeatures('integrations', true) }
               if (value === 'BladeSpotify') { setShowFeatures('spotify', true) }
+              if (value === 'BladeYoutube') { setShowFeatures('youtube', true) }
               if (value === 'BladeWebaudio') { setShowFeatures('webaudio', true) }
               if (value === 'BladeWaves') { setShowFeatures('waves', true) }
               if (value === 'BladeStreamTo') { setShowFeatures('streamto', true) }
@@ -70,7 +71,7 @@ const SmartBar = ({ open, setOpen }) => {
               if (value === 'BladeGo') { setShowFeatures('go', true) }
               if (value.startsWith('theme:') && ["DarkBlue", "DarkGrey", "Light", "DarkGreen", "DarkRed", "DarkOrange"].indexOf(value.replace('theme:', '')) > -1) { window.localStorage.setItem('wls-theme', value.replace('theme:', '')); window.location.reload() }
             }
-            if (value === 'BladeIsYeon') { setViewMode('expert'); setShowFeatures('dev', true); setShowFeatures('go', true); setShowFeatures('streamto', true); setShowFeatures('cloud', true);setShowFeatures('effectfilter', true); setShowFeatures('waves', true); setShowFeatures('rml', true); setShowFeatures('integrations', true); setShowFeatures('spotify', true); setShowFeatures('webaudio', true); setFeatures('streamto', true); setFeatures('go', true); setFeatures('waves', true); setFeatures('cloud', true); setFeatures('rml', true); setFeatures('integrations', true);setFeatures('effectfilter', true); setFeatures('spotify', true); setFeatures('webaudio', true); window.localStorage.setItem('wls-theme', "DarkBlue"); window.location.reload() }
+            if (value === 'BladeIsYeon') { setViewMode('expert'); setShowFeatures('dev', true); setShowFeatures('go', true); setShowFeatures('streamto', true); setShowFeatures('cloud', true);setShowFeatures('effectfilter', true); setShowFeatures('waves', true); setShowFeatures('rml', true); setShowFeatures('integrations', true); setShowFeatures('spotify', true); setShowFeatures('youtube', false); setShowFeatures('webaudio', true); setFeatures('streamto', true); setFeatures('go', true); setFeatures('waves', true); setFeatures('cloud', true); setFeatures('rml', true); setFeatures('integrations', true);setFeatures('effectfilter', true); setFeatures('spotify', true); setFeatures('webaudio', true); window.localStorage.setItem('wls-theme', "DarkBlue"); window.location.reload() }
 
           }}
           renderOption={(props, option) => (

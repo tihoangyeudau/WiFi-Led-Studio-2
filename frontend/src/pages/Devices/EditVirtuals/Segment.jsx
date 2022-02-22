@@ -32,7 +32,7 @@ const Segment = ({ s, i, virtual, segments }) => {
         updateVirtualSegments({ virtId: virtual.id, segments: newSegments }).then(() => getVirtuals());
     };
     const handleRangeSegment = (start, end) => {
-        const newSegments = segments.map((seg, index) => index === i ? [seg[0], start, end, !seg[3]] : seg);
+        const newSegments = segments.map((seg, index) => index === i ? [seg[0], start, end, seg[3]] : seg);
         updateVirtualSegments({ virtId: virtual.id, segments: newSegments }).then(() => getVirtuals());
     };
 

@@ -100,7 +100,7 @@ class RMLDevice(NetworkedDevice):
             return
             # If the device is a RML device, turn it on
         if RML2.rml_identifier(self.device_ip, self.name):
-            self.WLEDReceiver = True
+            self.RMLReceiver = True
             self.rml_state = RML2.rml_power_state(self.device_ip, self.name)
             if self.rml_state is False:
                 RML2.turn_rml_on(self.device_ip, self.name)

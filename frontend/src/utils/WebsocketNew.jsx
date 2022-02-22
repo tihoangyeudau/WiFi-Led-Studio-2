@@ -6,8 +6,8 @@ import Sockette from 'sockette';
 import isElectron from 'is-electron';
 
 function createSocket() {
-  const newBase = !!window.localStorage.getItem('wls-newbase')
-  if (newBase) {
+  
+  if (!!window.localStorage.getItem('wls-newbase')) {
     const _wsNew = new Sockette(`${(window.localStorage.getItem('wls-host') || (isElectron() ? 'http://localhost:8080' : window.location.href.split('/#')[0])).replace('https://', 'wss://').replace('http://', 'ws://')}/ws`, {
       timeout: 5e3,
       maxAttempts: 10,
@@ -49,7 +49,7 @@ function createSocket() {
   }
   return
 }
-const wsNew = createSocket();
+const wsNew = !!window.localStorage.getItem('wls-newbase') && createSocket();
 export default wsNew;
 export const WsContextNew = React.createContext(wsNew);
 

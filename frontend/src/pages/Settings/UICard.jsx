@@ -170,8 +170,12 @@ const UICard = () => {
                 <SettingsSwitch checked={features['frequencies']} onChange={(e) => setFeatures('frequencies', !features['frequencies'])} />
             </div>}
             {viewMode !== 'user' && <div className={`${classes.settingsRow} step-settings-x `}>
-                <label>Trình phát nhúng Spotify</label>
+                <label>Trình phát Spotify</label>
                 <SettingsSwitch checked={features['spotify']} onChange={(e) => setFeatures('spotify', !features['spotify'])} />
+            </div>}
+            {viewMode !== 'user' && <div className={`${classes.settingsRow} step-settings-x `}>
+                <label>Trình phát Youtube</label>
+                <SettingsSwitch checked={features['youtube']} onChange={(e) => setFeatures('youtube', !features['youtube'])} />
             </div>}
             {viewMode !== 'user' && <div className={`${classes.settingsRow} step-settings-x `}>
                 <label>Sóng nền (ngốn CPU)</label>
@@ -191,12 +195,13 @@ const UICard = () => {
                     }}
                     margin="dense"
                     onBlur={(e) => {
-                        if (e.target.value === 'clear') { setViewMode('expert'); setShowFeatures('streamto', false); setShowFeatures('dev', true); setShowFeatures('go', false); setShowFeatures('waves', true);setShowFeatures('effectfilter', true); setShowFeatures('cloud', false); setShowFeatures('rml', true); setShowFeatures('integrations', false); setShowFeatures('spotify', false); setShowFeatures('webaudio', false); setFeatures('streamto', false); setFeatures('waves', true); setFeatures('go', false); setFeatures('cloud', false);setFeatures('effectfilter', false); setFeatures('rml', true); setFeatures('dev', true); setFeatures('integrations', false); setFeatures('spotify', false); setFeatures('webaudio', false); window.localStorage.removeItem('wls-theme'); window.localStorage.setItem('BladeMod', 0); window.location.reload() }
-                        if (e.target.value === 'BladeIsYeon') { setViewMode('expert'); setShowFeatures('dev', true); setShowFeatures('go', true); setShowFeatures('streamto', true); setShowFeatures('cloud', true);setShowFeatures('effectfilter', true); setShowFeatures('waves', true); setShowFeatures('rml', true); setShowFeatures('integrations', true); setShowFeatures('spotify', true); setShowFeatures('webaudio', true); setFeatures('streamto', true); setFeatures('go', true); setFeatures('waves', true); setFeatures('cloud', true); setFeatures('rml', true); setFeatures('integrations', true);setFeatures('effectfilter', true); setFeatures('spotify', true); setFeatures('webaudio', true); window.localStorage.setItem('wls-theme', "DarkBlue"); window.location.reload() }
+                        if (e.target.value === 'clear') { setViewMode('user'); setShowFeatures('streamto', false); setShowFeatures('dev', false); setShowFeatures('go', false); setShowFeatures('waves', false); setShowFeatures('effectfilter', false); setShowFeatures('cloud', false); setShowFeatures('rml', false); setShowFeatures('integrations', false); setShowFeatures('spotify', false); setShowFeatures('youtube', false); setShowFeatures('webaudio', false); setFeatures('streamto', false); setFeatures('waves', false); setFeatures('go', false); setFeatures('cloud', false);setFeatures('effectfilter', false); setFeatures('rml', false); setFeatures('dev', false); setFeatures('integrations', false); setFeatures('spotify', false); setFeatures('youtube', false); setFeatures('webaudio', false); window.localStorage.removeItem('wls-theme'); window.localStorage.setItem('BladeMod', 0); window.location.reload() }
+                        if (e.target.value === 'BladeIsYeon') { setViewMode('expert'); setShowFeatures('dev', true); setShowFeatures('go', true); setShowFeatures('streamto', true); setShowFeatures('cloud', true); setShowFeatures('effectfilter', true); setShowFeatures('waves', true); setShowFeatures('rml', true); setShowFeatures('integrations', true); setShowFeatures('spotify', true); setShowFeatures('youtube', true); setShowFeatures('webaudio', true); setFeatures('streamto', true); setFeatures('go', true); setFeatures('waves', true); setFeatures('cloud', true); setFeatures('rml', true); setFeatures('integrations', true);setFeatures('effectfilter', true); setFeatures('spotify', true); setFeatures('youtube', true); setFeatures('webaudio', true); window.localStorage.setItem('wls-theme', "DarkRed"); window.location.reload() }
                         if (e.target.value === 'BladeCloud') { setShowFeatures('cloud', true) }
                         if (e.target.value === 'BladeRml') { setShowFeatures('rml', true) }
                         if (e.target.value === 'BladeIntegrations') { setShowFeatures('integrations', true) }
                         if (e.target.value === 'BladeSpotify') { setShowFeatures('spotify', true) }
+                        if (e.target.value === 'BladeYoutube') { setShowFeatures('youtube', true) }
                         if (e.target.value === 'BladeWebaudio') { setShowFeatures('webaudio', true) }
                         if (e.target.value === 'BladeWaves') { setShowFeatures('waves', true) }
                         if (e.target.value === 'BladeStreamTo') { setShowFeatures('streamto', true) }
