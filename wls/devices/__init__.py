@@ -57,10 +57,7 @@ class Device(BaseRegistry):
                 vol.Optional(
                     "refresh_rate",
                     description="Tần số phát mầu mục tiêu được gửi đến đèn",
-                    default=next(
-                        (f for f in AVAILABLE_FPS if f >= 60),
-                        list(AVAILABLE_FPS)[-1],
-                    ),
+                    default=32
                 ): fps_validator,
             }
         )

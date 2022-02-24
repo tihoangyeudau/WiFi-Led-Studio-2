@@ -503,7 +503,7 @@ def create_backup(config_dir, config_file, errortype):
     """
 
     date = datetime.datetime.now().strftime("%d-%m-%y_%H-%M-%S")
-    backup_location = os.path.join(config_dir, f"config_backup_{date}.json")
+    backup_location = os.path.join(config_dir, f"cauhinh_duphong_{date}.json")
     try:
         os.rename(config_file, backup_location)
     except OSError:

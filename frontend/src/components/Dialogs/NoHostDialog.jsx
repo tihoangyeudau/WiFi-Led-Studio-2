@@ -106,7 +106,7 @@ export default function NoHostDialog() {
               if (params.inputValue !== '') {
                 filtered.push({
                   inputValue: params.inputValue,
-                  title: `Add "${params.inputValue}"`,
+                  title: `Thêm "${params.inputValue}"`,
                 });
               }
 

@@ -20,6 +20,7 @@ PERMITTED_KEYS = {
     "audio": (
         "min_volume",
         "audio_device",
+        "mic_rate",
     ),
     "melbanks": (
         "max_frequencies",

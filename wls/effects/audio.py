@@ -12,7 +12,7 @@ import wls.api.websocket
 from wls.api.websocket import WEB_AUDIO_CLIENTS, WebAudioStream
 from wls.effects import Effect
 from wls.effects.math import ExpFilter
-from wls.effects.melbank import FFT_SIZE, MIC_RATE, Melbanks
+from wls.effects.melbank import FFT_SIZE, mic_rate, Melbanks
 from wls.events import AudioDeviceChangeEvent, Event
 
 _LOGGER = logging.getLogger(__name__)
@@ -92,7 +92,9 @@ class AudioInputSource:
         return vol.Schema(
             {
                 vol.Optional("sample_rate", default=60): int,
-                vol.Optional("mic_rate", default=MIC_RATE): int,
+                vol.Optional("mic_rate", default=mic_rate / 100): vol.All(
+                    vol.Coerce(int), vol.Range(min=0, max=1920)
+                ),
                 vol.Optional("fft_size", default=FFT_SIZE): int,
                 vol.Optional("min_volume", default=0.2): vol.All(
                     vol.Coerce(float), vol.Range(min=0.2, max=0.8)
@@ -210,20 +212,20 @@ class AudioInputSource:
         freq_domain_length = (self._config["fft_size"] // 2) + 1
 
         self._raw_audio_sample = np.zeros(
-            self._config["mic_rate"] // self._config["sample_rate"],
+            self._config["mic_rate"] * 100 // self._config["sample_rate"],
             dtype=np.float32,
         )
 
         # Setup the phase vocoder to perform a windowed FFT
         self._phase_vocoder = aubio.pvoc(
             self._config["fft_size"],
-            self._config["mic_rate"] // self._config["sample_rate"],
+            self._config["mic_rate"] * 100 // self._config["sample_rate"],
         )
         self._frequency_domain_null = aubio.cvec(self._config["fft_size"])
         self._frequency_domain = self._frequency_domain_null
         self._frequency_domain_x = np.linspace(
             0,
-            self._config["mic_rate"],
+            self._config["mic_rate"] * 100,
             freq_domain_length,
         )
 
@@ -237,13 +239,13 @@ class AudioInputSource:
                 )
             else:
                 self._stream = self._audio.InputStream(
-                    samplerate=self._config["mic_rate"],
+                    samplerate=self._config["mic_rate"] * 100,
                     device=device_idx,
                     channels=1,
                     callback=self._audio_sample_callback,
                     dtype=np.float32,
                     latency="low",
-                    blocksize=self._config["mic_rate"]
+                    blocksize=self._config["mic_rate"] * 100
                     // self._config["sample_rate"],
                 )
 
@@ -262,7 +264,7 @@ class AudioInputSource:
             )
             self.deactivate()
         except sd.PortAudioError as e:
-            _LOGGER.error(f"{e}, Đang hoàn nguyên về thiết bị đầu vào mặc định")
+            _LOGGER.error(f"{e}, Đang trả về thiết bị đầu vào mặc định")
             open_audio_stream(default_device)
 
     def deactivate(self):
@@ -406,8 +408,8 @@ class AudioAnalysisSource(AudioInputSource):
 
         fft_params = (
             self._config["fft_size"],
-            self._config["mic_rate"] // self._config["sample_rate"],
-            self._config["mic_rate"],
+            self._config["mic_rate"] * 100 // self._config["sample_rate"],
+            self._config["mic_rate"] * 100,
         )
 
         # pitch, tempo, onset

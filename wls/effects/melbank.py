@@ -24,12 +24,12 @@ from wls.events import GraphUpdateEvent
 
 # these parameters are hard coded and will break configs if changed
 
-FFT_SIZE = 1024
-MIC_RATE = 48000
-MAX_FREQ = MIC_RATE // 2
+FFT_SIZE = 4096
+mic_rate = 48000
+MAX_FREQ = mic_rate // 2
 MIN_FREQ = 20
 MIN_FREQ_DIFFERENCE = 50
-MEL_MAX_FREQS = [250, 4000, MAX_FREQ]
+MEL_MAX_FREQS = [350, 4000, MAX_FREQ]
 
 FrequencyRange = namedtuple("FrequencyRange", "min,max")
 
@@ -41,7 +41,7 @@ FREQUENCY_RANGES = {
     "Trung (500Hz-2kHz)": FrequencyRange(500, 2000),
     "Trung trên (2Khz-4kHz)": FrequencyRange(2000, 4000),
     "Trung cao (4kHz-6kHz)": FrequencyRange(4000, 6000),
-    "Tần số cao (6kHz-24kHz)": FrequencyRange(6000, 24000),
+    "Tần số cao (6kHz-22kHz)": FrequencyRange(6000, 22000),
 }
 
 LOWS_RANGE = f"Thấp ({MIN_FREQ}Hz-{MEL_MAX_FREQS[0]}Hz)"
@@ -124,7 +124,7 @@ class Melbank:
                 self._config["samples"], FFT_SIZE
             )
             self.filterbank.set_triangle_bands(
-                self.melbank_frequencies, MIC_RATE
+                self.melbank_frequencies, mic_rate
             )
             self.melbank_frequencies = self.melbank_frequencies[1:-1]
 
@@ -142,7 +142,7 @@ class Melbank:
                 self._config["samples"], FFT_SIZE
             )
             self.filterbank.set_triangle_bands(
-                self.melbank_frequencies, MIC_RATE
+                self.melbank_frequencies, mic_rate
             )
             self.melbank_frequencies = self.melbank_frequencies[1:-1]
 
@@ -150,7 +150,7 @@ class Melbank:
         # 6000Hz
         if self._config["coeffs_type"] == "slaney":
             self.filterbank = aubio.filterbank(40, FFT_SIZE)
-            self.filterbank.set_mel_coeffs_slaney(MIC_RATE)
+            self.filterbank.set_mel_coeffs_slaney(mic_rate)
 
             # Sanley frequencies are linear-log spaced where 133Hz to 1000Hz is linear
             # spaced and 1000Hz to 6000Hz is log spaced. It also produced a hardcoded
@@ -178,7 +178,7 @@ class Melbank:
                 self._config["samples"], FFT_SIZE
             )
             self.filterbank.set_mel_coeffs(
-                MIC_RATE,
+                mic_rate,
                 self._config["min_frequency"],
                 self._config["max_frequency"],
             )
@@ -199,7 +199,7 @@ class Melbank:
                 self._config["samples"], FFT_SIZE
             )
             self.filterbank.set_mel_coeffs_htk(
-                MIC_RATE,
+                mic_rate,
                 self._config["min_frequency"],
                 self._config["max_frequency"],
             )
@@ -221,7 +221,7 @@ class Melbank:
                 freq_min=self._config["min_frequency"],
                 freq_max=self._config["max_frequency"],
                 num_fft_bands=int(FFT_SIZE // 2) + 1,
-                sample_rate=MIC_RATE,
+                sample_rate=mic_rate,
             )
             self.filterbank = aubio.filterbank(
                 self._config["samples"], FFT_SIZE
@@ -253,7 +253,7 @@ class Melbank:
                 self._config["samples"], FFT_SIZE
             )
             self.filterbank.set_triangle_bands(
-                self.melbank_frequencies, MIC_RATE
+                self.melbank_frequencies, mic_rate
             )
             self.melbank_frequencies = self.melbank_frequencies[1:-1]
 
@@ -280,7 +280,7 @@ class Melbank:
                 self._config["samples"], FFT_SIZE
             )
             self.filterbank.set_triangle_bands(
-                self.melbank_frequencies, MIC_RATE
+                self.melbank_frequencies, mic_rate
             )
             self.melbank_frequencies = self.melbank_frequencies[1:-1]
 
@@ -300,7 +300,7 @@ class Melbank:
                 lower_edges_hz=lower_edges_hz,
                 upper_edges_hz=upper_edges_hz,
                 num_fft_bands=int(FFT_SIZE // 2) + 1,
-                sample_rate=MIC_RATE,
+                sample_rate=mic_rate,
             )
 
             self._config["samples"] = len(center_frequencies_hz)
@@ -326,7 +326,7 @@ class Melbank:
                 lower_edges_hz=lower_edges_hz,
                 upper_edges_hz=upper_edges_hz,
                 num_fft_bands=int(FFT_SIZE // 2) + 1,
-                sample_rate=MIC_RATE,
+                sample_rate=mic_rate,
             )
 
             self._config["samples"] = len(center_frequencies_hz)
