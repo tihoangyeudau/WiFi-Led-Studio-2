@@ -34,7 +34,7 @@ export const useStyles = makeStyles(theme => ({
     borderColor: '#444'
   },
   card: {
-    maxWidth: '540px',
+    maxWidth: '780px',
     margin: '0 auto', // mobile
   },
   '@media (max-width: 580px)': {

@@ -93,7 +93,7 @@ class AudioInputSource:
             {
                 vol.Optional("sample_rate", default=60): int,
                 vol.Optional("mic_rate", default=mic_rate / 100): vol.All(
-                    vol.Coerce(int), vol.Range(min=0, max=1920)
+                    vol.Coerce(int), vol.Range(min=0, max=1920, min_included=False)
                 ),
                 vol.Optional("fft_size", default=FFT_SIZE): int,
                 vol.Optional("min_volume", default=0.2): vol.All(
