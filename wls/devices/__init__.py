@@ -549,18 +549,8 @@ class Devices(RegistryLoader):
             rml_config = await rml.get_config()
 
             led_info = rml_config["leds"]
-            # If we've found the device via RML scan, it won't have a custom name from the frontend
-            # However if it's "RML" (i.e, Default) then we will name the device exactly how RML does, by using the second half of it's MAC address
-            # This allows us to respect the users choice of names if adding a RML device via frontend
-            # I turned black off as this logic is clearer on one line
-            # fmt: off
-            if "name" in device_config.keys() and device_config["name"] is not None:
-                rml_name = device_config["name"]
-            elif rml_config["name"] == "RML":
-                rml_name = f"{rml_config['name']}-{rml_config['mac'][6:]}".upper()
-            else:
-                rml_name = rml_config['name']
-            # fmt: on
+            rml_name = rml_config['name']
+
             rml_count = led_info["count"]
             rml_rgbmode = led_info["rgbw"]
 
