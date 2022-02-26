@@ -12,11 +12,12 @@ import wls.api.websocket
 from wls.api.websocket import WEB_AUDIO_CLIENTS, WebAudioStream
 from wls.effects import Effect
 from wls.effects.math import ExpFilter
-from wls.effects.melbank import FFT_SIZE, mic_rate, Melbanks
+from wls.effects.melbank import FFT_SIZE, Melbanks
 from wls.events import AudioDeviceChangeEvent, Event
 
 _LOGGER = logging.getLogger(__name__)
 
+samplerates = 44100, 48000, 96000, 192000
 MIN_MIDI = 21
 MAX_MIDI = 108
 
@@ -86,15 +87,10 @@ class AudioInputSource:
     @property
     def AUDIO_CONFIG_SCHEMA():
         default_device_index = AudioInputSource.default_device_index()
-        valid_device_indexes = AudioInputSource.valid_device_indexes()
-        input_devices = AudioInputSource.input_devices()
-
+        
         return vol.Schema(
             {
                 vol.Optional("sample_rate", default=60): int,
-                vol.Optional("mic_rate", default=mic_rate / 100): vol.All(
-                    vol.Coerce(int), vol.Range(min=0, max=1920, min_included=False)
-                ),
                 vol.Optional("fft_size", default=FFT_SIZE): int,
                 vol.Optional("min_volume", default=0.2): vol.All(
                     vol.Coerce(float), vol.Range(min=0.2, max=0.8)
@@ -152,6 +148,15 @@ class AudioInputSource:
         default_device = self.default_device_index()
         valid_device_indexes = self.valid_device_indexes()
         device_idx = self._config["audio_device"]
+        supported_samplerates = []
+        for fs in samplerates:
+            try:
+                sd.check_input_settings(device=device_idx, samplerate=fs)
+            except Exception as e:
+                continue
+            else:
+                supported_samplerates.append(fs)
+        mic_rate = int(supported_samplerates[0])
 
         if device_idx > max(valid_device_indexes):
             _LOGGER.warning(
@@ -212,20 +217,20 @@ class AudioInputSource:
         freq_domain_length = (self._config["fft_size"] // 2) + 1
 
         self._raw_audio_sample = np.zeros(
-            self._config["mic_rate"] * 100 // self._config["sample_rate"],
+            mic_rate // self._config["sample_rate"],
             dtype=np.float32,
         )
 
         # Setup the phase vocoder to perform a windowed FFT
         self._phase_vocoder = aubio.pvoc(
             self._config["fft_size"],
-            self._config["mic_rate"] * 100 // self._config["sample_rate"],
+            mic_rate // self._config["sample_rate"],
         )
         self._frequency_domain_null = aubio.cvec(self._config["fft_size"])
         self._frequency_domain = self._frequency_domain_null
         self._frequency_domain_x = np.linspace(
             0,
-            self._config["mic_rate"] * 100,
+            mic_rate,
             freq_domain_length,
         )
 
@@ -239,13 +244,13 @@ class AudioInputSource:
                 )
             else:
                 self._stream = self._audio.InputStream(
-                    samplerate=self._config["mic_rate"] * 100,
+                    samplerate=mic_rate,
                     device=device_idx,
                     channels=1,
                     callback=self._audio_sample_callback,
                     dtype=np.float32,
                     latency="low",
-                    blocksize=self._config["mic_rate"] * 100
+                    blocksize=mic_rate
                     // self._config["sample_rate"],
                 )
 
@@ -406,10 +411,20 @@ class AudioAnalysisSource(AudioInputSource):
                 self._wls, self, self._wls.config.get("melbanks", {})
             )
 
+        supported_samplerates = []
+        for fs in samplerates:
+            try:
+                sd.check_input_settings(device=self._config["audio_device"], samplerate=fs)
+            except Exception as e:
+                continue
+            else:
+                supported_samplerates.append(fs)
+        mic_rate = int(supported_samplerates[0])
+
         fft_params = (
             self._config["fft_size"],
-            self._config["mic_rate"] * 100 // self._config["sample_rate"],
-            self._config["mic_rate"] * 100,
+            mic_rate // self._config["sample_rate"],
+            mic_rate,
         )
 
         # pitch, tempo, onset

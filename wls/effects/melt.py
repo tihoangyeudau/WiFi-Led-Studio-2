@@ -22,7 +22,7 @@ class Melt(AudioReactiveEffect, HSVEffect):
             vol.Optional(
                 "reactivity",
                 description="Độ nhậy",
-                default=1.0,
+                default=1.5,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.0001, max=2)),
         }
     )
