@@ -6,6 +6,10 @@ import voluptuous as vol
 
 from wls.devices import NetworkedDevice, packets
 from wls.events import DevicesUpdatedEvent
+from wls.devices.__init__ import(
+    AVAILABLE_FPS,
+    fps_validator,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -39,6 +43,14 @@ class OpenRGB(NetworkedDevice):
                     description="Cổng cho thiết bị UDP",
                     default=6742,
                 ): vol.All(int, vol.Range(min=1, max=65535)),
+                vol.Optional(
+                    "refresh_rate",
+                    description="Target rate that pixels are sent to the device",
+                    default=next(
+                        (f for f in AVAILABLE_FPS if f >= 60),
+                        list(AVAILABLE_FPS)[-1],
+                    ),
+                ): fps_validator,
             }
         )
 

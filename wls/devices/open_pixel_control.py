@@ -5,6 +5,10 @@ import struct
 import voluptuous as vol
 
 from wls.devices import NetworkedDevice
+from wls.devices.__init__ import(
+    AVAILABLE_FPS,
+    fps_validator,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -27,6 +31,14 @@ class OpenPixelControl(NetworkedDevice):
                 description="Kênh gửi dữ liệu pixel",
                 default=0,
             ): vol.All(int, vol.Range(min=0, max=255)),
+            vol.Optional(
+                "refresh_rate",
+                description="Target rate that pixels are sent to the device",
+                default=next(
+                    (f for f in AVAILABLE_FPS if f >= 60),
+                    list(AVAILABLE_FPS)[-1],
+                ),
+            ): fps_validator,
         }
     )
 

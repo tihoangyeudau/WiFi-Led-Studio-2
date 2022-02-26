@@ -8,6 +8,9 @@ from wls.devices.ddp import DDPDevice
 from wls.devices.e131 import E131Device
 from wls.devices.udp import UDPRealtimeDevice
 from wls.utils import RML, RML2
+from wls.devices.__init__ import(
+    fps_validator,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -31,6 +34,11 @@ class RMLDevice(NetworkedDevice):
                 description="Thời gian giữa hiệu ứng WiFi Led Studio tắt và hiệu ứng đèn Rainbow Music Led kích hoạt",
                 default=1,
             ): vol.All(int, vol.Range(0, 255)),
+            vol.Optional(
+                "refresh_rate",
+                description="Target rate that pixels are sent to the device",
+                default=32
+            ): fps_validator,
         }
     )
 

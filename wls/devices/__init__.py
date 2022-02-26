@@ -51,11 +51,6 @@ class Device(BaseRegistry):
                     description="Số lượng LED bù vào trung tâm của đèn",
                     default=0,
                 ): int,
-                vol.Optional(
-                    "refresh_rate",
-                    description="Tần số phát mầu mục tiêu được gửi đến đèn",
-                    default=32
-                ): fps_validator,
             }
         )
 
