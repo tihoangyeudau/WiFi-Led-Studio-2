@@ -18,6 +18,7 @@ from wls.events import AudioDeviceChangeEvent, Event
 _LOGGER = logging.getLogger(__name__)
 
 samplerates = 44100, 48000, 96000, 192000
+channels = 1, 2, 3, 4, 5, 6, 7, 8
 MIN_MIDI = 21
 MAX_MIDI = 108
 
@@ -236,6 +237,16 @@ class AudioInputSource:
 
         def open_audio_stream(device_idx):
             device = input_devices[device_idx]
+            supported_channels = []
+            for maxInputChannels in channels:
+                try:
+                    sd.check_input_settings(device=self._config["audio_device"], channels=maxInputChannels)
+                except Exception as e:
+                    continue
+                else:
+                    supported_channels.append(maxInputChannels)
+            number_of_channel = int(supported_channels[0])
+
             if hostapis[device["hostapi"]]["name"] == "WEB AUDIO":
                 wls.api.websocket.ACTIVE_AUDIO_STREAM = (
                     self._stream
@@ -246,7 +257,7 @@ class AudioInputSource:
                 self._stream = self._audio.InputStream(
                     samplerate=mic_rate,
                     device=device_idx,
-                    channels=1,
+                    channels=number_of_channel,
                     callback=self._audio_sample_callback,
                     dtype=np.float32,
                     latency="low",
