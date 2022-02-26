@@ -37,6 +37,9 @@ class RPI_WS281X(Device):
         return vol.Schema(
             {
                 vol.Required(
+                "name", description="Tên dễ nhớ cho đèn"
+                ): str,
+                vol.Required(
                     "pixel_count",
                     description="Số lượng LED",
                     default=1,

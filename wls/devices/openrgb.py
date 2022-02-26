@@ -19,6 +19,9 @@ class OpenRGB(NetworkedDevice):
         return vol.Schema(
             {
                 vol.Required(
+                "name", description="Tên dễ nhớ cho đèn"
+                ): str,
+                vol.Required(
                     "name", description="Tên đèn"
                 ): str,
                 vol.Required(

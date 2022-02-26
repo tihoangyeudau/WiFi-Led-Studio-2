@@ -41,9 +41,6 @@ class Device(BaseRegistry):
     def CONFIG_SCHEMA():
         return vol.Schema(
             {
-                vol.Required(
-                    "name", description="Tên đèn"
-                ): str,
                 vol.Optional(
                     "icon_name",
                     description="https://material-ui.com/components/material-icons/",
