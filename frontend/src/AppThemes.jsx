@@ -38,8 +38,8 @@ export const BladeDarkBlueTheme = createTheme({
       main: '#20173c',
     },
     background: { 
-      default: '#030303', 
-      paper: '#151515' 
+      default: '#33383d',
+      paper: '#394046',
     },
   },
   props: {
