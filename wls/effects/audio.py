@@ -53,7 +53,10 @@ class AudioInputSource:
 
     @staticmethod
     def default_device_index():
-        return sd.default.device[0]
+        if (sd.default.device[0] == -1):
+            return len(AudioInputSource.query_devices()) - 1
+        else:
+            return sd.default.device[0]
 
     @staticmethod
     def query_hostapis():
