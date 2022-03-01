@@ -53,7 +53,12 @@ class AudioInputSource:
 
     @staticmethod
     def default_device_index():
-        return len(AudioInputSource.query_devices()) - 1
+        if (sd.default.device[1] == -1):
+            msg = f"Không tìm thấy loa/tai nghe nào, hãy đảm bảo bạn đã nối chúng với máy tính hoặc ko vô hiệu hoá chúng!"
+            _LOGGER.exception(msg)
+            raise Exception(msg)
+        else:
+            return len(AudioInputSource.query_devices()) - 1
 
     @staticmethod
     def query_hostapis():
