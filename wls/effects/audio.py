@@ -17,11 +17,14 @@ from wls.events import AudioDeviceChangeEvent, Event
 
 _LOGGER = logging.getLogger(__name__)
 
-samplerates = 44100, 48000, 96000, 192000
-channels = 1, 2, 3, 4, 5, 6, 7, 8
 MIN_MIDI = 21
 MAX_MIDI = 108
 
+default_output = sd.query_devices(sd.default.device[1])['name']
+for i in range(0, len(sd.query_devices())):
+    device_name = sd.query_devices(i)['name']
+    if (default_output in device_name) and (default_output != device_name):
+        default_index_loopback = i
 
 class AudioInputSource:
 
@@ -35,22 +38,12 @@ class AudioInputSource:
     _volume_filter = ExpFilter(-90, alpha_decay=0.99, alpha_rise=0.99)
 
     @staticmethod
-    def device_index_validator(val):
-        """
-        Validates device index in case the saved setting is no longer valid
-        """
-        if val in AudioInputSource.valid_device_indexes():
-            return val
-        else:
-            return AudioInputSource.default_device_index()
-
-    @staticmethod
     def valid_device_indexes():
         """
         A list of integers corresponding to valid input devices
         """
         return tuple(AudioInputSource.input_devices().keys())
-
+  
     @staticmethod
     def default_device_index():
         if (sd.default.device[1] == -1):
@@ -58,7 +51,7 @@ class AudioInputSource:
             _LOGGER.exception(msg)
             raise Exception(msg)
         else:
-            return len(AudioInputSource.query_devices()) - 1
+            return default_index_loopback
 
     @staticmethod
     def query_hostapis():
@@ -103,7 +96,7 @@ class AudioInputSource:
                 ),
                 vol.Optional(
                     "audio_device", default=default_device_index
-                ): AudioInputSource.device_index_validator,
+                ): int,
             },
             extra=vol.ALLOW_EXTRA,
         )
@@ -154,26 +147,10 @@ class AudioInputSource:
         default_device = self.default_device_index()
         valid_device_indexes = self.valid_device_indexes()
         device_idx = self._config["audio_device"]
-        supported_samplerates = []
-        for fs in samplerates:
-            try:
-                sd.check_input_settings(device=device_idx, samplerate=fs)
-            except Exception as e:
-                continue
-            else:
-                supported_samplerates.append(fs)
-        mic_rate = int(supported_samplerates[0])
+        device_samplerate = sd.query_devices(device_idx)
+        mic_rate = int(device_samplerate['default_samplerate'])
 
-        if device_idx > max(valid_device_indexes):
-            _LOGGER.warning(
-                f"Chỉ mục thiết bị âm thanh không hợp lệ: {device_idx}. Hoàn nguyên về thiết bị đầu vào mặc định."
-            )
-            device_idx = default_device
-
-        elif device_idx not in valid_device_indexes:
-            _LOGGER.warning(
-                f"Thiết bị âm thanh {input_devices[device_idx]['name']} không có kênh đầu vào. Hoàn nguyên về thiết bị đầu vào mặc định."
-            )
+        if (device_idx >= 0) or (max(valid_device_indexes) >= 0):
             device_idx = default_device
 
         # hostapis = self._audio.query_hostapis()
@@ -242,15 +219,7 @@ class AudioInputSource:
 
         def open_audio_stream(device_idx):
             device = input_devices[device_idx]
-            supported_channels = []
-            for maxInputChannels in channels:
-                try:
-                    sd.check_input_settings(device=self._config["audio_device"], channels=maxInputChannels)
-                except Exception as e:
-                    continue
-                else:
-                    supported_channels.append(maxInputChannels)
-            number_of_channel = int(supported_channels[0])
+            number_of_channel = 1
 
             if hostapis[device["hostapi"]]["name"] == "WEB AUDIO":
                 wls.api.websocket.ACTIVE_AUDIO_STREAM = (
@@ -427,15 +396,9 @@ class AudioAnalysisSource(AudioInputSource):
                 self._wls, self, self._wls.config.get("melbanks", {})
             )
 
-        supported_samplerates = []
-        for fs in samplerates:
-            try:
-                sd.check_input_settings(device=self._config["audio_device"], samplerate=fs)
-            except Exception as e:
-                continue
-            else:
-                supported_samplerates.append(fs)
-        mic_rate = int(supported_samplerates[0])
+        device_idx = self._config["audio_device"]
+        device_samplerate = sd.query_devices(device_idx)
+        mic_rate = int(device_samplerate['default_samplerate'])
 
         fft_params = (
             self._config["fft_size"],
