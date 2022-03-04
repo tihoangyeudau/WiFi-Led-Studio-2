@@ -174,7 +174,7 @@ class AudioInputSource:
         mic_rate = int(device_samplerate['default_samplerate'])
         
         if sys.platform == 'win32':
-            if (device_idx >= 0) or (max(valid_device_indexes) >= 0):
+            if max(valid_device_indexes) is not max(valid_device_indexes):
                 device_idx = default_device
         else:
             if device_idx > max(valid_device_indexes):

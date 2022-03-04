@@ -12,10 +12,15 @@ class RainbowEffect(TemporalEffect):
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
+            "speed",
+                description="Tốc độ",
+                default=0.07,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=0.1)),
+            vol.Optional(
                 "frequency",
-                description="Tần suất của đường cong hiệu ứng",
-                default=1.0,
-            ): vol.All(vol.Coerce(float), vol.Range(min=0.1, max=10)),
+                description="Độ phân giải của cầu vồng",
+                default=0.6,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=1)),
         }
     )
 
