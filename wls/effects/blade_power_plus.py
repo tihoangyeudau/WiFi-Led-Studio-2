@@ -6,6 +6,7 @@ import voluptuous as vol
 
 from wls.color import validate_color
 from wls.effects.audio import AudioReactiveEffect
+from wls.effects.gradient import GradientEffect
 from wls.effects.hsv_effect import HSVEffect
 
 RGB = namedtuple("RGB", "red, green, blue")
@@ -14,7 +15,7 @@ hsv = namedtuple("hsv", "hue, saturation, value")
 _LOGGER = logging.getLogger(__name__)
 
 
-class BladePowerPlus(AudioReactiveEffect, HSVEffect):
+class BladePowerPlus(AudioReactiveEffect, HSVEffect, GradientEffect):
 
     NAME = "RML pro"
     CATEGORY = "Cổ điển"
@@ -68,9 +69,17 @@ class BladePowerPlus(AudioReactiveEffect, HSVEffect):
     )
 
     def on_activate(self, pixel_count):
+
+        #   HSV array is in vertical orientation:
+        #   Pixel 1: [ H, S, V ]
+        #   Pixel 2: [ H, S, V ]
+        #   Pixel 3: [ H, S, V ] and so on...
+
+        self.hsv = np.zeros((pixel_count, 3))
         self.bar = 0
-        self.hsv_array[:, 0] = np.linspace(0, 1, self.pixel_count)
-        self.hsv_array[:, 1] = 1
+
+        rgb_gradient = self.apply_gradient(1)
+        self.hsv = self.rgb_to_hsv(rgb_gradient)
 
     def config_updated(self, config):
         self.power_func = self._power_funcs[self._config["frequency_range"]]
@@ -83,6 +92,15 @@ class BladePowerPlus(AudioReactiveEffect, HSVEffect):
 
     def render_hsv(self):
         # Must be zeroed every cycle to clear the previous frame
+        self.out = np.zeros((self.pixel_count, 3))
         bar_idx = int(self.bar * self.pixel_count)
-        self.hsv_array[:, 2] *= self._config["decay"] / 2 + 0.45
-        self.hsv_array[:bar_idx, 2] = self._config["brightness"]
+
+        # Manually roll gradient because apply_gradient is only called once in activate instead of every render
+        self._roll_hsv()
+
+        # Construct hsv array
+        self.out[:, 0] = self.hsv[:, 0]
+        self.out[:, 1] = self.hsv[:, 1]
+        self.out[:bar_idx, 2] = self._config["brightness"]
+
+        self.hsv_array = self.out
