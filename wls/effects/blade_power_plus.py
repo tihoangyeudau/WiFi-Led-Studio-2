@@ -89,6 +89,7 @@ class BladePowerPlus(AudioReactiveEffect, HSVEffect, GradientEffect):
         self.bar = (
             getattr(data, self.power_func)() * self._config["multiplier"] * 2
         )
+        super().gradient_magnitude_beat_power(data)
 
     def render_hsv(self):
         # Must be zeroed every cycle to clear the previous frame

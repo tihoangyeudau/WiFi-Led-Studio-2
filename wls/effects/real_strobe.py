@@ -139,3 +139,4 @@ class Strobe(AudioReactiveEffect, GradientEffect):
         ):
             self.onsets_queue.put(True)
             self.last_strobe_time = currentTime
+        super().gradient_magnitude_beat_power(data)

@@ -50,6 +50,8 @@ class MultiBarAudioEffect(AudioReactiveEffect, GradientEffect):
             self.color_idx += self._config["color_step"]
             self.color_idx = self.color_idx % 1  # loop back to zero
 
+        super().gradient_magnitude_beat_power(data)
+
     def render(self):
         # Run linear beat oscillator through easing method
         if self._config["ease_method"] == "ease_in_out":

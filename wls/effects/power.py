@@ -65,6 +65,7 @@ class PowerAudioEffect(AudioReactiveEffect, GradientEffect):
         r = self.melbank(filtered=True, size=self.pixel_count)
         # Apply the melbank data to the gradient curve
         self.bg = self.apply_gradient(r)
+        super().gradient_magnitude_beat_power(data)
 
     def render(self):
         self.pixels = self.bg + self.bass_overlay + self.sparks_overlay

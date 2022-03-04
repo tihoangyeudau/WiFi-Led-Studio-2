@@ -54,6 +54,7 @@ class Strobe(AudioReactiveEffect, GradientEffect):
         self.brightness = (
             ((-o % (1 / self.freq)) * self.freq) ** self.strobe_decay
         ) * (1 - o) ** self.beat_decay
+        super().gradient_magnitude_beat_power(data)
 
     def render(self):
         self.pixels[:] = self.color * self.brightness
