@@ -23,7 +23,7 @@ class TemporalEffect(Effect):
                 "speed",
                 default=1.0,
                 description="Tốc độ",
-            ): vol.All(vol.Coerce(float), vol.Range(min=0.1, max=10)),
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.001, max=5)),
         }
     )
 

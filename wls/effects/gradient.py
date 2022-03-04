@@ -28,9 +28,9 @@ class GradientEffect(Effect):
             ): validate_gradient,
             vol.Optional(
                 "gradient_roll",
-                description="Số lượng thay đổi dải mầu",
+                description="Tốc độ dải mầu",
                 default=0,
-            ): vol.All(vol.Coerce(float), vol.Range(min=0, max=10)),
+            ): vol.All(vol.Coerce(float), vol.Range(min=0, max=1.0)),
         }
     )
 
