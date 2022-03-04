@@ -247,7 +247,7 @@ class AudioInputSource:
         self._frequency_domain = self._frequency_domain_null
         self._frequency_domain_x = np.linspace(
             0,
-            mic_rate,
+            MIC_RATE,
             freq_domain_length,
         )
 

@@ -25,7 +25,7 @@ from wls.events import GraphUpdateEvent
 # these parameters are hard coded and will break configs if changed
 
 FFT_SIZE = 4096
-MIC_RATE = 30000
+MIC_RATE = 44100
 MAX_FREQ = MIC_RATE // 2
 MIN_FREQ = 20
 MIN_FREQ_DIFFERENCE = 50
