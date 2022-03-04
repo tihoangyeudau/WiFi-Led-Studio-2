@@ -19,9 +19,6 @@ TYPES_MAP = {
 
 if sys.platform == 'win32':
     PERMITTED_KEYS = {
-        "audio": (
-            "min_volume",
-        ),
         "melbanks": (
             "max_frequencies",
             "min_frequency",
@@ -41,7 +38,6 @@ if sys.platform == 'win32':
 else:
     PERMITTED_KEYS = {
     "audio": (
-        "min_volume",
         "audio_device",
     ),
     "melbanks": (

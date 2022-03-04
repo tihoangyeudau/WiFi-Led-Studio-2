@@ -106,9 +106,6 @@ class AudioInputSource:
                 {
                     vol.Optional("sample_rate", default=60): int,
                     vol.Optional("fft_size", default=FFT_SIZE): int,
-                    vol.Optional("min_volume", default=0.2): vol.All(
-                        vol.Coerce(float), vol.Range(min=0.2, max=0.8)
-                    ),
                     vol.Optional(
                         "audio_device", default=default_device_index
                     ): int,
@@ -120,9 +117,6 @@ class AudioInputSource:
                 {
                     vol.Optional("sample_rate", default=60): int,
                     vol.Optional("fft_size", default=FFT_SIZE): int,
-                    vol.Optional("min_volume", default=0.2): vol.All(
-                        vol.Coerce(float), vol.Range(min=0.2, max=0.8)
-                    ),
                     vol.Optional(
                         "audio_device", default=default_device_index
                     ): AudioInputSource.device_index_validator,
@@ -364,7 +358,7 @@ class AudioInputSource:
 
         # Calculate the frequency domain from the filtered data and
         # force all zeros when below the volume threshold
-        if self._volume_filter.value > self._config["min_volume"]:
+        if self._volume_filter.value > 0.2:
             self._processed_audio_sample = self._raw_audio_sample
 
             # Perform a pre-emphasis to balance the highs and lows

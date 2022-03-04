@@ -485,7 +485,7 @@ class Melbanks:
         frequency_domain = self._audio._frequency_domain
         volume = (
             self._audio.volume(filtered=True)
-            > self._audio._config["min_volume"]
+            > 0.2
         )
 
         for i in range(self.mel_count):
