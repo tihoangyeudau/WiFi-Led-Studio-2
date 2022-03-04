@@ -57,14 +57,17 @@ export default function Home(props) {
           margin: '0.5rem auto 2rem auto',
         }}
       >
-        <CardHeader title="Chào mừng bạn sử dụng WiFi Led Studio" />
+        <CardHeader title="Chào mừng bạn sử dụng WiFi Led Studio của Rainbow Music Led" />
         <CardContent>
-          Trước khi bắt đầu, bạn hãy hoàn thành các bước sau:
+          Trước khi bắt đầu, bạn hãy đảm bảo đã thực hiện các bước sau:
           <ul>
             <li>Cắm điện cho LED</li>
             <li>Cài WiFi cho LED (bản WiFi)</li>
             <li>Cắm 2 dây USB cho LED vào PC (bản USB)</li>
             <li>Kiểm tra đèn tín hiệu báo hoạt động</li>
+            <li>LƯU Ý: Nếu đổi loa nháy theo nhạc, hãy exit và mở lại WiFi Led Studio (WIN)</li>
+            <li>       Đối với MAC OS, bạn vào CÀI ĐẶT/CÀI ĐẶT ÂM THANH/CHỌN LẠI LOA nhé!</li>
+            <li>Nếu chọn loa dùng "soundcard Realtek" mà không thấy WiFi Led Studio nhận âm thanh để nháy theo nhạc, thì vào "trình gỡ cài đặt" > gỡ phần mềm tên là "Realtek Audio Driver" đi > khởi động lại pc là ok. Nếu cách này chưa được, thì hãy gỡ driver loa Realtek đi rồi restart lại pc để windows tự nhận driver là ok.</li>
           </ul>
         </CardContent>
         <CardActions>
