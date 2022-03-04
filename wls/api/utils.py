@@ -19,6 +19,8 @@ TYPES_MAP = {
 
 if sys.platform == 'win32':
     PERMITTED_KEYS = {
+        "audio": (
+        ),
         "melbanks": (
             "max_frequencies",
             "min_frequency",
@@ -37,25 +39,25 @@ if sys.platform == 'win32':
     }
 else:
     PERMITTED_KEYS = {
-    "audio": (
-        "audio_device",
-    ),
-    "melbanks": (
-        "max_frequencies",
-        "min_frequency",
-    ),
-    "rml_preferences": tuple(_default_rml_settings.keys()),
-    "core": (
-        "host",
-        "port",
-        "port_s",
-        "dev_mode",
-        "scan_on_startup",
-        "visualisation_fps",
-        "visualisation_maxlen",
-        "global_transitions",
-    ),
-}
+        "audio": (
+            "audio_device",
+        ),
+        "melbanks": (
+            "max_frequencies",
+            "min_frequency",
+        ),
+        "rml_preferences": tuple(_default_rml_settings.keys()),
+        "core": (
+            "host",
+            "port",
+            "port_s",
+            "dev_mode",
+            "scan_on_startup",
+            "visualisation_fps",
+            "visualisation_maxlen",
+            "global_transitions",
+        ),
+    }
 
 
 def createRegistrySchema(registry):
