@@ -1,5 +1,6 @@
 """Module to convert voluptuous schemas to dictionaries."""
 import collections
+import sys
 
 import voluptuous as vol
 
@@ -16,9 +17,32 @@ TYPES_MAP = {
     dict: "dict",
 }
 
-PERMITTED_KEYS = {
+if sys.platform == 'win32':
+    PERMITTED_KEYS = {
+        "audio": (
+            "min_volume",
+        ),
+        "melbanks": (
+            "max_frequencies",
+            "min_frequency",
+        ),
+        "rml_preferences": tuple(_default_rml_settings.keys()),
+        "core": (
+            "host",
+            "port",
+            "port_s",
+            "dev_mode",
+            "scan_on_startup",
+            "visualisation_fps",
+            "visualisation_maxlen",
+            "global_transitions",
+        ),
+    }
+else:
+    PERMITTED_KEYS = {
     "audio": (
         "min_volume",
+        "audio_device",
     ),
     "melbanks": (
         "max_frequencies",

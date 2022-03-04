@@ -1,5 +1,6 @@
 import logging
 import time
+import sys
 from collections import deque
 from functools import cached_property, lru_cache
 
@@ -20,11 +21,12 @@ _LOGGER = logging.getLogger(__name__)
 MIN_MIDI = 21
 MAX_MIDI = 108
 
-default_output = sd.query_devices(sd.default.device[1])['name']
-for i in range(0, len(sd.query_devices())):
-    device_name = sd.query_devices(i)['name']
-    if (default_output in device_name) and (default_output != device_name):
-        default_index_loopback = i
+if sys.platform == 'win32':
+    default_output = sd.query_devices(sd.default.device[1])['name']
+    for i in range(0, len(sd.query_devices())):
+        device_name = sd.query_devices(i)['name']
+        if (default_output in device_name) and (default_output != device_name):
+            default_loopback_index = i
 
 class AudioInputSource:
 
@@ -36,6 +38,16 @@ class AudioInputSource:
     _processed_audio_sample = None
     _volume = -90
     _volume_filter = ExpFilter(-90, alpha_decay=0.99, alpha_rise=0.99)
+    
+    @staticmethod
+    def device_index_validator(val):
+        """
+        Validates device index in case the saved setting is no longer valid
+        """
+        if val in AudioInputSource.valid_device_indexes():
+            return val
+        else:
+            return AudioInputSource.default_device_index()
 
     @staticmethod
     def valid_device_indexes():
@@ -51,7 +63,10 @@ class AudioInputSource:
             _LOGGER.exception(msg)
             raise Exception(msg)
         else:
-            return default_index_loopback
+            if sys.platform == 'win32':
+                return default_loopback_index
+            else:
+                return len(AudioInputSource.query_devices()) - 1
 
     @staticmethod
     def query_hostapis():
@@ -86,20 +101,34 @@ class AudioInputSource:
     @property
     def AUDIO_CONFIG_SCHEMA():
         default_device_index = AudioInputSource.default_device_index()
-        
-        return vol.Schema(
-            {
-                vol.Optional("sample_rate", default=60): int,
-                vol.Optional("fft_size", default=FFT_SIZE): int,
-                vol.Optional("min_volume", default=0.2): vol.All(
-                    vol.Coerce(float), vol.Range(min=0.2, max=0.8)
-                ),
-                vol.Optional(
-                    "audio_device", default=default_device_index
-                ): int,
-            },
-            extra=vol.ALLOW_EXTRA,
-        )
+        if sys.platform == 'win32':
+            return vol.Schema(
+                {
+                    vol.Optional("sample_rate", default=60): int,
+                    vol.Optional("fft_size", default=FFT_SIZE): int,
+                    vol.Optional("min_volume", default=0.2): vol.All(
+                        vol.Coerce(float), vol.Range(min=0.2, max=0.8)
+                    ),
+                    vol.Optional(
+                        "audio_device", default=default_device_index
+                    ): int,
+                },
+                extra=vol.ALLOW_EXTRA,
+            )
+        else:
+            return vol.Schema(
+                {
+                    vol.Optional("sample_rate", default=60): int,
+                    vol.Optional("fft_size", default=FFT_SIZE): int,
+                    vol.Optional("min_volume", default=0.2): vol.All(
+                        vol.Coerce(float), vol.Range(min=0.2, max=0.8)
+                    ),
+                    vol.Optional(
+                        "audio_device", default=default_device_index
+                    ): AudioInputSource.device_index_validator,
+                },
+                extra=vol.ALLOW_EXTRA,
+            )
 
     def __init__(self, wls, config):
         self._wls = wls
@@ -149,9 +178,21 @@ class AudioInputSource:
         device_idx = self._config["audio_device"]
         device_samplerate = sd.query_devices(device_idx)
         mic_rate = int(device_samplerate['default_samplerate'])
+        
+        if sys.platform == 'win32':
+            if (device_idx >= 0) or (max(valid_device_indexes) >= 0):
+                device_idx = default_device
+        else:
+            if device_idx > max(valid_device_indexes):
+                _LOGGER.warning(
+                    f"Chỉ mục thiết bị âm thanh không hợp lệ: {device_idx}. Hoàn nguyên về thiết bị đầu vào mặc định."
+                )
+                device_idx = default_device
 
-        if (device_idx >= 0) or (max(valid_device_indexes) >= 0):
-            device_idx = default_device
+            elif device_idx not in valid_device_indexes:
+                _LOGGER.warning(
+                    f"Thiết bị âm thanh {input_devices[device_idx]['name']} không có kênh đầu vào. Hoàn nguyên về thiết bị đầu vào mặc định."
+                )
 
         # hostapis = self._audio.query_hostapis()
         # devices = self._audio.query_devices()
@@ -396,8 +437,7 @@ class AudioAnalysisSource(AudioInputSource):
                 self._wls, self, self._wls.config.get("melbanks", {})
             )
 
-        device_idx = self._config["audio_device"]
-        device_samplerate = sd.query_devices(device_idx)
+        device_samplerate = sd.query_devices(self._config["audio_device"])
         mic_rate = int(device_samplerate['default_samplerate'])
 
         fft_params = (
