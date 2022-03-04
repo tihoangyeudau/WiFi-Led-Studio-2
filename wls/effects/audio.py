@@ -6,6 +6,7 @@ from functools import cached_property, lru_cache
 
 import aubio
 import numpy as np
+import samplerate
 import sounddevice as sd
 import voluptuous as vol
 
@@ -13,7 +14,7 @@ import wls.api.websocket
 from wls.api.websocket import WEB_AUDIO_CLIENTS, WebAudioStream
 from wls.effects import Effect
 from wls.effects.math import ExpFilter
-from wls.effects.melbank import FFT_SIZE, Melbanks
+from wls.effects.melbank import FFT_SIZE, MIC_RATE, Melbanks
 from wls.events import AudioDeviceChangeEvent, Event
 
 _LOGGER = logging.getLogger(__name__)
@@ -170,8 +171,6 @@ class AudioInputSource:
         default_device = self.default_device_index()
         valid_device_indexes = self.valid_device_indexes()
         device_idx = self._config["audio_device"]
-        device_samplerate = sd.query_devices(device_idx)
-        mic_rate = int(device_samplerate['default_samplerate'])
         
         if sys.platform == 'win32':
             if max(valid_device_indexes) is not max(valid_device_indexes):
@@ -235,14 +234,14 @@ class AudioInputSource:
         freq_domain_length = (self._config["fft_size"] // 2) + 1
 
         self._raw_audio_sample = np.zeros(
-            mic_rate // self._config["sample_rate"],
+            MIC_RATE // self._config["sample_rate"],
             dtype=np.float32,
         )
 
         # Setup the phase vocoder to perform a windowed FFT
         self._phase_vocoder = aubio.pvoc(
             self._config["fft_size"],
-            mic_rate // self._config["sample_rate"],
+            MIC_RATE // self._config["sample_rate"],
         )
         self._frequency_domain_null = aubio.cvec(self._config["fft_size"])
         self._frequency_domain = self._frequency_domain_null
@@ -264,15 +263,19 @@ class AudioInputSource:
                 )
             else:
                 self._stream = self._audio.InputStream(
-                    samplerate=mic_rate,
+                    samplerate=int(device["default_samplerate"]),
                     device=device_idx,
                     channels=number_of_channel,
                     callback=self._audio_sample_callback,
                     dtype=np.float32,
                     latency="low",
-                    blocksize=mic_rate
-                    // self._config["sample_rate"],
-                )
+                    blocksize=int(
+                    device["default_samplerate"]
+                    / self._config["sample_rate"]
+                ),
+            )
+
+            self.resampler = samplerate.Resampler("sinc_fastest", channels=1)
 
             _LOGGER.info(
                 f"Nguồn âm thanh đã mở: {hostapis[device['hostapi']]['name']}: {device.get('name', device.get('client'))}"
@@ -324,7 +327,26 @@ class AudioInputSource:
     def _audio_sample_callback(self, in_data, frame_count, time_info, status):
         """Callback for when a new audio sample is acquired"""
         # time_start = time.time()
-        self._raw_audio_sample = np.frombuffer(in_data, dtype=np.float32)
+        # self._raw_audio_sample = np.frombuffer(in_data, dtype=np.float32)
+        raw_sample = np.frombuffer(in_data, dtype=np.float32)
+
+        in_sample_len = len(raw_sample)
+        out_sample_len = MIC_RATE // self._config["sample_rate"]
+
+        if in_sample_len != out_sample_len:
+            # Simple resampling
+            self._raw_audio_sample = self.resampler.process(
+                raw_sample,
+                # MIC_RATE / self._stream.samplerate
+                out_sample_len / in_sample_len
+                # end_of_input=True
+            )
+        else:
+            self._raw_audio_sample = raw_sample
+
+        if len(self._raw_audio_sample) != out_sample_len:
+            _LOGGER.warning("Đã loại bỏ khung âm thanh không đúng định dạng")
+            return
 
         self.pre_process_audio()
         self._invalidate_caches()
@@ -431,13 +453,10 @@ class AudioAnalysisSource(AudioInputSource):
                 self._wls, self, self._wls.config.get("melbanks", {})
             )
 
-        device_samplerate = sd.query_devices(self._config["audio_device"])
-        mic_rate = int(device_samplerate['default_samplerate'])
-
         fft_params = (
             self._config["fft_size"],
-            mic_rate // self._config["sample_rate"],
-            mic_rate,
+            MIC_RATE // self._config["sample_rate"],
+            MIC_RATE,
         )
 
         # pitch, tempo, onset
