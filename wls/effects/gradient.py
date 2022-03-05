@@ -31,17 +31,11 @@ class GradientEffect(Effect):
                 description="Tốc độ dải mầu",
                 default=0,
             ): vol.All(vol.Coerce(float), vol.Range(min=0, max=1.0)),
-            vol.Optional(
-                "beat_speed",
-                description="Gradient Roll speed is adjusted based on audio beat magnitude",
-                default=False,
-            ): bool,
         }
     )
 
     _gradient_curve = None
     _gradient_roll_counter = 0
-    _gradient_beat_power = 0
 
     def _comb(self, N, k):
         N = int(N)
@@ -135,12 +129,7 @@ class GradientEffect(Effect):
         if self._config["gradient_roll"] == 0:
             return
 
-        self._gradient_roll_counter += (
-            self._config["gradient_roll"]
-            if not (self._config["beat_speed"])
-            else self._config["gradient_roll"]
-            * (1 + self._gradient_beat_power)
-        )
+        self._gradient_roll_counter += self._config["gradient_roll"]
 
         if self._gradient_roll_counter >= 1.0:
             pixels_to_roll = np.floor(self._gradient_roll_counter)
@@ -156,9 +145,6 @@ class GradientEffect(Effect):
         self._assert_gradient()
 
         return self._gradient_curve[:, int((self.pixel_count - 1) * point)]
-
-    def gradient_magnitude_beat_power(self, data):
-        self._gradient_beat_power = getattr(data, "lows_power")()
 
     def config_updated(self, config):
         """Invalidate the gradient"""

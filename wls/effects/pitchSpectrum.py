@@ -55,7 +55,6 @@ class PitchSpectrumAudioEffect(AudioReactiveEffect, GradientEffect):
                 self.avg_midi * (1.0 - self._config["responsiveness"])
                 + midi_value * self._config["responsiveness"]
             )
-        super().gradient_magnitude_beat_power(data)
 
         # Grab the note color based on where it falls in the midi range
         if self.avg_midi >= MIN_MIDI:
