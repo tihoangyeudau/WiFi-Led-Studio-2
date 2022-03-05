@@ -18,7 +18,7 @@ class Fire(AudioReactiveEffect, HSVEffect):
                 "speed",
                 description="Tốc độ",
                 default=0.04,
-            ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=0.5)),
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.01, max=0.5)),
             vol.Optional(
                 "color_shift",
                 description="Màu lửa",

@@ -30,7 +30,7 @@ class GradientEffect(Effect):
                 "gradient_roll",
                 description="Tốc độ dải mầu",
                 default=0,
-            ): vol.All(vol.Coerce(float), vol.Range(min=0, max=1.0)),
+            ): vol.All(vol.Coerce(float), vol.Range(min=0, max=10)),
         }
     )
 

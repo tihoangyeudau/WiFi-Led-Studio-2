@@ -38,12 +38,12 @@ class BladePowerPlus(AudioReactiveEffect, HSVEffect, GradientEffect):
             vol.Optional(
                 "blur",
                 description="Làm mờ",
-                default=2,
+                default=1,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=10)),
             vol.Optional(
                 "decay",
                 description="Tỷ lệ phân rã màu sắc",
-                default=0.7,
+                default=0.2,
             ): vol.All(vol.Coerce(float), vol.Range(0, 1)),
             vol.Optional(
                 "multiplier",
@@ -58,13 +58,18 @@ class BladePowerPlus(AudioReactiveEffect, HSVEffect, GradientEffect):
             vol.Optional(
                 "frequency_range",
                 description="Dải tần số để phát hiện nhịp",
-                default="Trung",
+                default="Thấp (nhịp+trầm)",
             ): vol.In(list(_power_funcs.keys())),
             vol.Optional(
                 "invert_roll",
-                description="Đảo ngược hướng của cuộn gradient",
+                description="Đảo ngược hướng dải màu",
                 default=False,
             ): bool,
+            vol.Optional(
+                "gradient_roll",
+                description="Tốc độ dải mầu",
+                default=0.6,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0, max=10)),
         }
     )
 

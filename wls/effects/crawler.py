@@ -17,28 +17,28 @@ class Crawler(AudioReactiveEffect, HSVEffect):
             vol.Optional(
                 "speed",
                 description="Tốc độ",
-                default=0.6,
+                default=0.4,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=1.0)),
             vol.Optional(
                 "reactivity",
                 description="Độ nhậy",
-                default=0.7,
-            ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=1.0)),
+                default=0.5,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.01, max=1.0)),
             vol.Optional(
                 "sway",
                 description="Độ lắc lư",
                 default=20,
-            ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=50)),
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.01, max=50)),
             vol.Optional(
                 "chop",
                 description="Độ dao động",
                 default=30,
-            ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=100)),
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.01, max=100)),
             vol.Optional(
                 "stretch",
                 description="Độ giãn nở",
-                default=0.00001,
-            ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=10)),
+                default=0.01,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.01, max=10)),
         }
     )
 

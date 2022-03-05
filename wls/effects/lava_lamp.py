@@ -26,7 +26,7 @@ class Lavalamp(AudioReactiveEffect, HSVEffect):
                 "reactivity",
                 description="Độ nhậy",
                 default=0.3,
-            ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=0.9)),
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.01, max=0.9)),
         }
     )
 

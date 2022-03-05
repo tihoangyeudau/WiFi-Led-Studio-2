@@ -15,13 +15,13 @@ class Energy2(AudioReactiveEffect, HSVEffect):
             vol.Optional(
                 "speed",
                 description="Tốc độ",
-                default=0.1,
-            ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=1.0)),
+                default=0.5,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.01, max=1.0)),
             vol.Optional(
                 "reactivity",
                 description="Độ nhậy",
-                default=0.2,
-            ): vol.All(vol.Coerce(float), vol.Range(min=0.00001, max=1.0)),
+                default=1.0,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.01, max=1.0)),
         }
     )
 

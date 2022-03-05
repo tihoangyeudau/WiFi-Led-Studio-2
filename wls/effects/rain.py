@@ -42,17 +42,17 @@ class RainAudioEffect(AudioReactiveEffect):
                 "lows_sensitivity",
                 description="Độ nhậy âm trầm",
                 default=0.1,
-            ): vol.All(vol.Coerce(float), vol.Range(min=0.03, max=0.3)),
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.03, max=1)),
             vol.Optional(
                 "mids_sensitivity",
                 description="Độ nhậy âm trung",
                 default=0.05,
-            ): vol.All(vol.Coerce(float), vol.Range(min=0.03, max=0.3)),
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.03, max=1)),
             vol.Optional(
                 "high_sensitivity",
                 description="Độ nhậy âm cao",
                 default=0.1,
-            ): vol.All(vol.Coerce(float), vol.Range(min=0.03, max=0.3)),
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.03, max=1)),
             vol.Optional(
                 "raindrop_animation",
                 description="Kiểu hoạt ảnh giọt nước",
