@@ -41,12 +41,12 @@ class RainAudioEffect(AudioReactiveEffect):
             vol.Optional(
                 "lows_sensitivity",
                 description="Độ nhậy âm trầm",
-                default=0.1,
+                default=0.3,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.03, max=1)),
             vol.Optional(
                 "mids_sensitivity",
                 description="Độ nhậy âm trung",
-                default=0.05,
+                default=0.3,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.03, max=1)),
             vol.Optional(
                 "high_sensitivity",
