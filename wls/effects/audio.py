@@ -253,7 +253,6 @@ class AudioInputSource:
 
         def open_audio_stream(device_idx):
             device = input_devices[device_idx]
-            number_of_channel = 1
 
             if hostapis[device["hostapi"]]["name"] == "WEB AUDIO":
                 wls.api.websocket.ACTIVE_AUDIO_STREAM = (
@@ -265,10 +264,10 @@ class AudioInputSource:
                 self._stream = self._audio.InputStream(
                     samplerate=int(device["default_samplerate"]),
                     device=device_idx,
-                    channels=number_of_channel,
+                    channels=device["max_input_channels"],
                     callback=self._audio_sample_callback,
                     dtype=np.float32,
-                    latency="low",
+                    latency=device["default_low_input_latency"],
                     blocksize=int(
                     device["default_samplerate"]
                     / self._config["sample_rate"]
