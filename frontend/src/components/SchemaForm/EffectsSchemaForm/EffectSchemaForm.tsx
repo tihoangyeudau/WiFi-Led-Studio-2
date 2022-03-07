@@ -38,7 +38,7 @@ const EffectSchemaForm = ({
       .sort((a) => (a.type === 'number' ? -1 : 1))
       .sort((a) => (a.type === 'integer' ? -1 : 1))
       .sort((a) => (a.type === 'string' && a.enum && a.enum.length ? -1 : 1))
-      .sort((a) => (a.id === 'gradient_name' ? -1 : 1))
+      .sort((a) => (a.id === 'gradient' ? -1 : 1))
       .sort((a) => (a.type === 'color' ? -1 : 1))
       .sort((a) => (a.id === 'color' ? -1 : 1));
 
