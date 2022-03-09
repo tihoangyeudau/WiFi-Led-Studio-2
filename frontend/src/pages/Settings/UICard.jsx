@@ -173,7 +173,7 @@ const UICard = () => {
                 <label>Trình phát Spotify</label>
                 <SettingsSwitch checked={features['spotify']} onChange={(e) => setFeatures('spotify', !features['spotify'])} />
             </div>}
-            {viewMode !== 'user' && window.localStorage.getItem('wls-newbase') === '1' && <div className={`${classes.settingsRow} step-settings-x `}>
+            {viewMode !== 'user' && <div className={`${classes.settingsRow} step-settings-x `}>
                 <label>Trình phát Youtube</label>
                 <SettingsSwitch checked={features['youtube']} onChange={(e) => setFeatures('youtube', !features['youtube'])} />
             </div>}
