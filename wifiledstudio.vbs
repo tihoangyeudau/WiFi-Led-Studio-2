@@ -49,4 +49,4 @@ Set objShell = WScript.CreateObject( "WScript.Shell" )
 strPath = """C:\Program Files (x86)\WiFi Led Studio\WiFi Led Studio.exe"""
 strAttr = " --open-ui"
 objShell.Run strPath & strAttr
-Set objShell = Nothing
+'Set objShell = Nothing
