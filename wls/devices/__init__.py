@@ -385,6 +385,7 @@ class UDPDevice(NetworkedDevice):
         )
         self._sock = None
 
+manufacturers = ['wch.cn', 'FTDI', 'Microsoft']
 
 class AvailableCOMPorts:
     ports = serial.tools.list_ports.comports()
@@ -392,8 +393,9 @@ class AvailableCOMPorts:
     available_ports = [""]
 
     for p in ports:
-        available_ports.append(p.device)
 
+        if format(p.manufacturer) in manufacturers:
+            available_ports.append(p.device)
 
 @BaseRegistry.no_registration
 class SerialDevice(Device):
