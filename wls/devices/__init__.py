@@ -397,7 +397,7 @@ else:
 
 
         for p in ports:
-            available_ports.append(p.name)
+            available_ports.append(p.device)
 
 @BaseRegistry.no_registration
 class SerialDevice(Device):
