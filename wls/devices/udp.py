@@ -29,11 +29,6 @@ class UDPRealtimeDevice(UDPDevice):
                 default=1,
             ): vol.All(int, vol.Range(min=1)),
             vol.Required(
-                "port",
-                description="cổng UDP của đèn",
-                default=7778,
-            ): vol.All(int, vol.Range(min=1, max=65535)),
-            vol.Required(
                 "udp_packet_type",
                 description="Mã hóa gói RGB",
                 default="DRGB",
@@ -154,12 +149,12 @@ class UDPRealtimeDevice(UDPDevice):
             if timestamp > self.last_frame_sent_time + half_of_timeout:
                 if self._destination is not None:
                     self._sock.sendto(
-                        bytes(packet), (self.destination, self._config["port"])
+                        bytes(packet), (self.destination, 7778)
                     )
                     self.last_frame_sent_time = timestamp
         else:
             if self._destination is not None:
                 self._sock.sendto(
-                    bytes(packet), (self.destination, self._config["port"])
+                    bytes(packet), (self.destination, 7778)
                 )
                 self.last_frame_sent_time = timestamp

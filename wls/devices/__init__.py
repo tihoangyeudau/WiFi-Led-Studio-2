@@ -362,15 +362,6 @@ class NetworkedDevice(Device):
 @BaseRegistry.no_registration
 class UDPDevice(NetworkedDevice):
 
-    CONFIG_SCHEMA = vol.Schema(
-        {
-            vol.Required(
-                "port",
-                description="Cổng cho thiết bị UDP",
-            ): vol.All(int, vol.Range(min=1, max=65535)),
-        }
-    )
-
     def activate(self):
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         _LOGGER.debug(

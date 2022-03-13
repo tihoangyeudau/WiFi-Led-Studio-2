@@ -46,11 +46,6 @@ class DDPDevice(UDPDevice):
                 description="Số lượng LED",
                 default=1,
             ): vol.All(int, vol.Range(min=1)),
-            vol.Required(
-                "port",
-                description="Cổng cho thiết bị UDP",
-                default=7979,
-            ): vol.All(int, vol.Range(min=1, max=65535)),
             vol.Optional(
                 "refresh_rate",
                 description="Target rate that pixels are sent to the device",
@@ -73,7 +68,7 @@ class DDPDevice(UDPDevice):
             DDPDevice.send_out(
                 self._sock,
                 self.destination,
-                self._config["port"],
+                7979,
                 data,
                 self.frame_count,
             )
