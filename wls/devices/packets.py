@@ -120,9 +120,9 @@ def build_ambilightusb_packet(data: np.ndarray, color_order: str):
     pixel_length = len(data)
     packet = bytearray(
         [
-            ord("A"),
-            ord("d"),
-            ord("a"),
+            ord("T"),
+            ord("n"),
+            ord("h"),
             (pixel_length >> 8),
             (pixel_length & 0x00FF),
         ]
