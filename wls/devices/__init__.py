@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import socket
+import sys
 from abc import abstractmethod
 from functools import cached_property, partial
 
@@ -376,17 +377,27 @@ class UDPDevice(NetworkedDevice):
         )
         self._sock = None
 
-manufacturers = ['wch.cn', 'FTDI', 'Microsoft']
+if sys.platform == 'win32':
+    manufacturers = ['wch.cn', 'FTDI', 'Microsoft']
 
-class AvailableCOMPorts:
-    ports = serial.tools.list_ports.comports()
+    class AvailableCOMPorts:
+        ports = serial.tools.list_ports.comports()
 
-    available_ports = [""]
+        available_ports = [""]
 
-    for p in ports:
+        for p in ports:
 
-        if format(p.manufacturer) in manufacturers:
-            available_ports.append(p.device)
+            if format(p.manufacturer) in manufacturers:
+                available_ports.append(p.device)
+else:
+    class AvailableCOMPorts:
+        ports = serial.tools.list_ports.comports()
+
+        available_ports = [""]
+
+
+        for p in ports:
+            available_ports.append(p.name)
 
 @BaseRegistry.no_registration
 class SerialDevice(Device):
