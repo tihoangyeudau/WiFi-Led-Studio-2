@@ -55,6 +55,14 @@ class RMLDevice(NetworkedDevice):
                     description="Thời gian giữa hiệu ứng WiFi Led Studio tắt và hiệu ứng đèn Rainbow Music Led kích hoạt",
                     default=1,
                 ): vol.All(int, vol.Range(0, 255)),
+                vol.Optional(
+                    "refresh_rate",
+                    description="Target rate that pixels are sent to the device",
+                    default=next(
+                        (f for f in AVAILABLE_FPS if f >= 60),
+                        list(AVAILABLE_FPS)[-1],
+                    ),
+                ): fps_validator,
             }
         )
 
