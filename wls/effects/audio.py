@@ -6,7 +6,8 @@ from functools import cached_property, lru_cache
 
 import aubio
 import numpy as np
-import samplerate
+if sys.platform == 'win32':
+    import samplerate
 import sounddevice as sd
 import voluptuous as vol
 
@@ -261,20 +262,33 @@ class AudioInputSource:
                     device["client"], self._audio_sample_callback
                 )
             else:
-                self._stream = self._audio.InputStream(
-                    samplerate=int(device["default_samplerate"]),
-                    device=device_idx,
-                    channels=device["max_input_channels"],
-                    callback=self._audio_sample_callback,
-                    dtype=np.float32,
-                    latency=device["default_low_input_latency"],
-                    blocksize=int(
-                    device["default_samplerate"]
-                    / self._config["sample_rate"]
-                ),
-            )
+                if sys.platform == 'win32':
+                    self._stream = self._audio.InputStream(
+                        samplerate=int(device["default_samplerate"]),
+                        device=device_idx,
+                        channels=device["max_input_channels"],
+                        callback=self._audio_sample_callback,
+                        dtype=np.float32,
+                        latency=device["default_low_input_latency"],
+                        blocksize=int(
+                        device["default_samplerate"]
+                        / self._config["sample_rate"]
+                        ),
+                    )
+                else:
+                    self._stream = self._audio.InputStream(
+                        samplerate=MIC_RATE,
+                        device=device_idx,
+                        channels=1,
+                        callback=self._audio_sample_callback,
+                        dtype=np.float32,
+                        latency="low",
+                        blocksize=MIC_RATE
+                        // self._config["sample_rate"],
+                    )
 
-            self.resampler = samplerate.Resampler("sinc_fastest", channels=1)
+            if sys.platform == 'win32':
+                self.resampler = samplerate.Resampler("sinc_fastest", channels=1)
 
             _LOGGER.info(
                 f"Nguồn âm thanh đã mở: {hostapis[device['hostapi']]['name']}: {device.get('name', device.get('client'))}"
@@ -326,26 +340,29 @@ class AudioInputSource:
     def _audio_sample_callback(self, in_data, frame_count, time_info, status):
         """Callback for when a new audio sample is acquired"""
         # time_start = time.time()
-        # self._raw_audio_sample = np.frombuffer(in_data, dtype=np.float32)
-        raw_sample = np.frombuffer(in_data, dtype=np.float32)
+        if sys.platform == 'win32':
+            # self._raw_audio_sample = np.frombuffer(in_data, dtype=np.float32)
+            raw_sample = np.frombuffer(in_data, dtype=np.float32)
 
-        in_sample_len = len(raw_sample)
-        out_sample_len = MIC_RATE // self._config["sample_rate"]
+            in_sample_len = len(raw_sample)
+            out_sample_len = MIC_RATE // self._config["sample_rate"]
 
-        if in_sample_len != out_sample_len:
-            # Simple resampling
-            self._raw_audio_sample = self.resampler.process(
-                raw_sample,
-                # MIC_RATE / self._stream.samplerate
-                out_sample_len / in_sample_len
-                # end_of_input=True
-            )
+            if in_sample_len != out_sample_len:
+                # Simple resampling
+                self._raw_audio_sample = self.resampler.process(
+                    raw_sample,
+                    # MIC_RATE / self._stream.samplerate
+                    out_sample_len / in_sample_len
+                    # end_of_input=True
+                )
+            else:
+                self._raw_audio_sample = raw_sample
+
+            if len(self._raw_audio_sample) != out_sample_len:
+                _LOGGER.warning("Đã loại bỏ khung âm thanh không đúng định dạng")
+                return
         else:
-            self._raw_audio_sample = raw_sample
-
-        if len(self._raw_audio_sample) != out_sample_len:
-            _LOGGER.warning("Đã loại bỏ khung âm thanh không đúng định dạng")
-            return
+            self._raw_audio_sample = np.frombuffer(in_data, dtype=np.float32)
 
         self.pre_process_audio()
         self._invalidate_caches()

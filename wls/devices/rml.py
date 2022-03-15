@@ -1,4 +1,5 @@
 import logging
+import sys
 
 import voluptuous as vol
 from pkg_resources import parse_version
@@ -21,26 +22,41 @@ class RMLDevice(NetworkedDevice):
     This class fetches its config (px count, etc) from the RML device
     at launch, and lets the user choose a sync mode to use.
     """
-
-    CONFIG_SCHEMA = vol.Schema(
-        {
-            vol.Optional(
-                "sync_mode",
-                description="Giao thức truyền trực tuyến tới thiết bị RML. Khuyến nghị: UDP <480 LED, DDP> 480 LED",
-                default="UDP",
-            ): vol.In(["UDP", "DDP", "E131"]),
-            vol.Optional(
-                "timeout",
-                description="Thời gian giữa hiệu ứng WiFi Led Studio tắt và hiệu ứng đèn Rainbow Music Led kích hoạt",
-                default=1,
-            ): vol.All(int, vol.Range(0, 255)),
-            vol.Optional(
-                "refresh_rate",
-                description="Target rate that pixels are sent to the device",
-                default=32
-            ): fps_validator,
-        }
-    )
+    if sys.platform == 'win32':
+        CONFIG_SCHEMA = vol.Schema(
+            {
+                vol.Optional(
+                    "sync_mode",
+                    description="Giao thức truyền trực tuyến tới thiết bị RML. Khuyến nghị: UDP <480 LED, DDP> 480 LED",
+                    default="UDP",
+                ): vol.In(["UDP", "DDP", "E131"]),
+                vol.Optional(
+                    "timeout",
+                    description="Thời gian giữa hiệu ứng WiFi Led Studio tắt và hiệu ứng đèn Rainbow Music Led kích hoạt",
+                    default=1,
+                ): vol.All(int, vol.Range(0, 255)),
+                vol.Optional(
+                    "refresh_rate",
+                    description="Target rate that pixels are sent to the device",
+                    default=32
+                ): fps_validator,
+            }
+        )
+    else:
+        CONFIG_SCHEMA = vol.Schema(
+            {
+                vol.Optional(
+                    "sync_mode",
+                    description="Giao thức truyền trực tuyến tới thiết bị RML. Khuyến nghị: UDP <480 LED, DDP> 480 LED",
+                    default="UDP",
+                ): vol.In(["UDP", "DDP", "E131"]),
+                vol.Optional(
+                    "timeout",
+                    description="Thời gian giữa hiệu ứng WiFi Led Studio tắt và hiệu ứng đèn Rainbow Music Led kích hoạt",
+                    default=1,
+                ): vol.All(int, vol.Range(0, 255)),
+            }
+        )
 
     SYNC_MODES = {
         "UDP": UDPRealtimeDevice,
