@@ -10,6 +10,7 @@ from wls.devices.e131 import E131Device
 from wls.devices.udp import UDPRealtimeDevice
 from wls.utils import RML, RML2
 from wls.devices.__init__ import(
+    AVAILABLE_FPS,
     fps_validator,
 )
 
