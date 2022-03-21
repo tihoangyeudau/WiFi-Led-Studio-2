@@ -90,8 +90,7 @@
     "build-storybook": "build-storybook -s public",
     "build-storybookgh": "PUBLIC_URL=/Wls-Frontend-v2/docs build-storybook -s public",
     "build-storybookwin": "set PUBLIC_URL=/Wls-Frontend-v2/docs && build-storybook -s public",
-    "copyFilesUp": "rimraf ../wls_frontend && cp -r ./build/ ../wls_frontend",
-    "copyFilesUp_win": "rmdir /s /q ..\\wls_frontend 2>nul & ren build wls_frontend && move wls_frontend .."
+    "copyFilesUp": "rmdir /s /q ..\\wls_frontend 2>nul & ren build wls_frontend && move wls_frontend .."
   },
   "eslintConfig": {
     "extends": [
