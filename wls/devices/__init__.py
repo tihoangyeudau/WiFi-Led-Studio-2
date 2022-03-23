@@ -379,6 +379,7 @@ class UDPDevice(NetworkedDevice):
 
 if sys.platform == 'win32':
     manufacturers = ['wch.cn', 'FTDI', 'Microsoft']
+    locations = ['None']
 
     class AvailableCOMPorts:
         ports = serial.tools.list_ports.comports()
@@ -387,7 +388,7 @@ if sys.platform == 'win32':
 
         for p in ports:
 
-            if format(p.manufacturer) in manufacturers:
+            if (format(p.manufacturer) in manufacturers) and (format(p.location) not in locations):
                 available_ports.append(p.device)
 else:
     class AvailableCOMPorts:
