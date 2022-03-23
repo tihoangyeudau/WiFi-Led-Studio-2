@@ -383,7 +383,6 @@ if sys.platform == 'win32':
 
     class AvailableCOMPorts:
         ports = serial.tools.list_ports.comports()
-
         available_ports = [""]
 
         for p in ports:
@@ -393,9 +392,7 @@ if sys.platform == 'win32':
 else:
     class AvailableCOMPorts:
         ports = serial.tools.list_ports.comports()
-
         available_ports = [""]
-
 
         for p in ports:
             available_ports.append(p.device)
