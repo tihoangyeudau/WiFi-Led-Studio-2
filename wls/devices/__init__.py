@@ -386,7 +386,7 @@ if sys.platform == 'win32':
 
         for p in ports:
 
-            if (format(p.manufacturer) in manufacturers) and (format(p.location) is not None):
+            if (format(p.manufacturer) in manufacturers) or (format(p.location) is not None):
                 available_ports.append(p.device)
 else:
     class AvailableCOMPorts:
