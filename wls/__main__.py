@@ -291,20 +291,12 @@ def entry_point(icon=None):
         if args.performance:
             print("Thu thập dữ liệu hiệu suất...")
             yappi.start()
-        if sys.platform == 'win32':
-            wls = WlsCore(
-                config_dir=args.config,
-                host=args.host,
-                port=args.port,
-                port_s=args.port_s,
-                icon=icon,
-            )
-        else:
-            wls = WlsCore(
-                config_dir=args.config,
-                host=args.host,
-                port=args.port,
-                port_s=args.port_s,
+        wls = WlsCore(
+            config_dir=args.config,
+            host=args.host,
+            port=args.port,
+            port_s=args.port_s,
+            icon=icon,
             )
 
         exit_code = wls.start(open_ui=args.open_ui)

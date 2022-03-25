@@ -75,9 +75,9 @@ class WlsCore:
         self.thread_executor = ThreadPoolExecutor()
         self.loop.set_default_executor(self.thread_executor)
         self.loop.set_exception_handler(self.loop_exception_handler)
-
-        if self.icon:
-            self.setup_icon_menu()
+        if sys.platform == "win32":
+            if self.icon:
+                self.setup_icon_menu()
 
         self.setup_logqueue()
         self.events = Events(self)
