@@ -297,6 +297,7 @@ def entry_point(icon=None):
                 host=args.host,
                 port=args.port,
                 port_s=args.port_s,
+                icon=icon,
             )
         else:
             wls = WlsCore(
@@ -304,7 +305,6 @@ def entry_point(icon=None):
                 host=args.host,
                 port=args.port,
                 port_s=args.port_s,
-                icon=icon,
             )
 
         exit_code = wls.start(open_ui=args.open_ui)
