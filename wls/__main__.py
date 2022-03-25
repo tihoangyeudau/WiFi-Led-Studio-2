@@ -278,6 +278,9 @@ def main():
             icon.run(setup=entry_point)
         else:
             entry_point()
+    else:
+        entry_point()
+
 
 
 def entry_point(icon=None):
