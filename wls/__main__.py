@@ -248,14 +248,15 @@ def main():
         div_by_zero = 1 / 0
 
     if args.tray or currently_frozen():
-        # If pystray is imported on a device that can't display it, it explodes. Catch it
-        try:
-            import pystray
-        except Exception as Error:
-            msg = f"Lỗi: Không thể biểu tượng khay. Đang Tắt. Lỗi: {Error}"
-            _LOGGER.critical(msg)
-            raise Exception(msg)
-            sys.exit(0)
+        if sys.platform == 'win32':
+            # If pystray is imported on a device that can't display it, it explodes. Catch it
+            try:
+                import pystray
+            except Exception as Error:
+                msg = f"Lỗi: Không thể biểu tượng khay. Đang Tắt. Lỗi: {Error}"
+                _LOGGER.critical(msg)
+                raise Exception(msg)
+                sys.exit(0)
 
         from PIL import Image
 
@@ -267,9 +268,10 @@ def main():
             icon_location = os.path.join(
                 current_directory, "..", "icons/" "tray.png"
             )
-        icon = pystray.Icon(
-            "Wls", icon=Image.open(icon_location), title="WiFi Led Studio @ Rainbow Music Led"
-        )
+        if sys.platform == 'win32':
+            icon = pystray.Icon(
+                "Wls", icon=Image.open(icon_location), title="WiFi Led Studio @ Rainbow Music Led"
+            )
         icon.visible = True
     else:
         icon = None
