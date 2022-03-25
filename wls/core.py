@@ -118,14 +118,14 @@ class WlsCore:
             _LOGGER.warning(
                 f"Không mở được trình duyệt web mặc định. Để truy cập giao diện web của WiFi Led Studio, hãy mở {url} trong trình duyệt. Để tránh lỗi này trong tương lai, hãy cài mặc định trình duyệt cho hệ thống của bạn."
             )
-    if sys.platform == 'win32':
-        def setup_icon_menu(self):
-            import pystray
 
-            self.icon.menu = pystray.Menu(
-                pystray.MenuItem("Mở", self.open_ui, default=True),
-                pystray.MenuItem("Thoát", self.stop),
-            )
+    def setup_icon_menu(self):
+        import pystray
+
+        self.icon.menu = pystray.Menu(
+            pystray.MenuItem("Mở", self.open_ui, default=True),
+            pystray.MenuItem("Thoát", self.stop),
+        )
 
     def setup_visualisation_events(self):
         """
