@@ -3,7 +3,7 @@ import os
 import imp
 
 a = Analysis(['/Users/macos/Documents/GitHub/WiFi-Led-Studio-2/wls/__main__.py'],
-             pathex=['.'],
+             pathex=['/Users/macos/Documents/GitHub/WiFi-Led-Studio-2/', '/Users/macos/Documents/GitHub/WiFi-Led-Studio-2/wls/'],
              binaries=[],
              datas=[('/Users/macos/Documents/GitHub/WiFi-Led-Studio-2/icons', 'icons/'), ('/Users/macos/Documents/GitHub/WiFi-Led-Studio-2/icons/tray.png', '.'),
              ('/Users/macos/Documents/GitHub/WiFi-Led-Studio-2/wls', 'wls/'),
@@ -23,13 +23,13 @@ pyz = PYZ(a.pure, a.zipped_data,
 exe = EXE(pyz,
           a.scripts,
           [],
-          name = 'WiFiLedStudio',
           exclude_binaries=True,
+          name = 'WiFiLedStudio',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
-          console=False,
+          console=True,
           windowed=True,)
 coll = COLLECT(exe,
                a.binaries,
@@ -38,13 +38,13 @@ coll = COLLECT(exe,
                strip=False,
                upx=True,
                upx_exclude=[],
-               name='WiFiLedStudio')
+               name='WiFiLedStudio',)
 app = BUNDLE(coll,
             name = 'WiFiLedStudio.app',
             icon = '/Users/macos/make setup/WiFi Led Studio.icns',
             bundle_identifier = 'com.rml.wls',
             info_plist = {
-                'NSHighResolutionCapable': 'True',
+                'NSHighResolutionCapable': 'True'
             }
 )
 
