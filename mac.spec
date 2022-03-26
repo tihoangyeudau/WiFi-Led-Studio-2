@@ -48,7 +48,8 @@ app = BUNDLE(coll,
             icon = '/Users/macos/make setup/WiFi Led Studio.icns',
             bundle_identifier = 'com.rml.wls',
             info_plist = {
-                'NSHighResolutionCapable': 'True'
+                'NSHighResolutionCapable': 'True',
+                'NSMicrophoneUsageDescription': 'Access Microphone',
             }
 )
 
