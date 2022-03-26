@@ -1,13 +1,13 @@
 # -*- mode: python ; coding: utf-8 -*-
 import os
-import imp
+import sys
 
 spec_root = os.path.join(os.path.dirname(sys.argv[0]), "file")
 block_cipher = None
 print(spec_root)
 
-a = Analysis(['f'{spec_root}\\wls\\__main__.py'],
-             pathex=['f'{spec_root}', 'f'{spec_root}\\wls'],
+a = Analysis(['/Users/macos/Documents/GitHub/WiFi-Led-Studio-2/wls/__main__.py'],
+             pathex=[spec_root, 'spec_root/wls'],
              binaries=[],
              datas=[('/Users/macos/Documents/GitHub/WiFi-Led-Studio-2/icons', 'icons/'), ('/Users/macos/Documents/GitHub/WiFi-Led-Studio-2/icons/tray.png', '.'),
              ('/Users/macos/Documents/GitHub/WiFi-Led-Studio-2/wls', 'wls/'),
