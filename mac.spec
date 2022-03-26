@@ -2,8 +2,12 @@
 import os
 import imp
 
-a = Analysis(['/Users/macos/Documents/GitHub/WiFi-Led-Studio-2/wls/__main__.py'],
-             pathex=['/Users/macos/Documents/GitHub/WiFi-Led-Studio-2/', '/Users/macos/Documents/GitHub/WiFi-Led-Studio-2/wls/'],
+spec_root = os.path.join(os.path.dirname(sys.argv[0]), "file")
+block_cipher = None
+print(spec_root)
+
+a = Analysis(['f'{spec_root}\\wls\\__main__.py'],
+             pathex=['f'{spec_root}', 'f'{spec_root}\\wls'],
              binaries=[],
              datas=[('/Users/macos/Documents/GitHub/WiFi-Led-Studio-2/icons', 'icons/'), ('/Users/macos/Documents/GitHub/WiFi-Led-Studio-2/icons/tray.png', '.'),
              ('/Users/macos/Documents/GitHub/WiFi-Led-Studio-2/wls', 'wls/'),
@@ -16,10 +20,10 @@ a = Analysis(['/Users/macos/Documents/GitHub/WiFi-Led-Studio-2/wls/__main__.py']
              excludes=[],
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
-             cipher=None,
+             cipher=block_cipher,
              noarchive=False)
 pyz = PYZ(a.pure, a.zipped_data,
-             cipher=None)
+             cipher=block_cipher)
 exe = EXE(pyz,
           a.scripts,
           [],
