@@ -124,7 +124,7 @@ class WlsCore:
         if sys.platform == "win32":
             path = os.path.join(os.environ["ProgramFiles"], "AmbilightWiFi\\bin", "ambilightwifi.exe").replace('\\', '\\\\')
             subprocess.call(path)
-        else if sys.platform == "darwin":
+        elif sys.platform == "darwin":
             subprocess.run(['open', '/Applications/Ambilight WiFi.app'], check=True)
         else:
             subprocess.run(['open', '/Applications/Ambilight WiFi.app'], check=True)
