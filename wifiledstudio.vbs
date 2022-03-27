@@ -44,9 +44,9 @@ Sub KillProc( myProcess )
     End If
 End Sub
 
-Dim objShell, strPath, strAttr
+Dim objShell, targetpath, strAttr
 Set objShell = WScript.CreateObject( "WScript.Shell" )
-strPath = """C:\Program Files (x86)\WiFi Led Studio\WiFi Led Studio.exe"""
+targetpath = objShell.ExpandEnvironmentStrings("""%ProgramFiles(x86)%\WiFi Led Studio\WiFi Led Studio.exe""")
 strAttr = " --open-ui"
-objShell.Run strPath & strAttr
+objShell.Run targetpath & strAttr
 'Set objShell = Nothing
