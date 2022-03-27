@@ -246,38 +246,35 @@ def main():
         """This will crash Wls and submit a Sentry error if Sentry is configured"""
         _LOGGER.warning("Chỉ đạo WiFi Led Studio vào một bức tường gạch")
         div_by_zero = 1 / 0
-    if sys.platform == 'win32':
-        if args.tray or currently_frozen():
-            # If pystray is imported on a device that can't display it, it explodes. Catch it
-            try:
-                import pystray
-            except Exception as Error:
-                msg = f"Lỗi: Không thể biểu tượng khay. Đang Tắt. Lỗi: {Error}"
-                _LOGGER.critical(msg)
-                raise Exception(msg)
-                sys.exit(0)
+    if args.tray or currently_frozen():
+        # If pystray is imported on a device that can't display it, it explodes. Catch it
+        try:
+            import pystray
+        except Exception as Error:
+            msg = f"Lỗi: Không thể biểu tượng khay. Đang Tắt. Lỗi: {Error}"
+            _LOGGER.critical(msg)
+            raise Exception(msg)
+            sys.exit(0)
 
-            from PIL import Image
+        from PIL import Image
 
-            if currently_frozen():
-                current_directory = os.path.dirname(__file__)
-                icon_location = os.path.join(current_directory, "tray.png")
-            else:
-                current_directory = os.path.dirname(__file__)
-                icon_location = os.path.join(
-                    current_directory, "..", "icons/" "tray.png"
-                )
-            icon = pystray.Icon(
-                "Wls", icon=Image.open(icon_location), title="WiFi Led Studio @ Rainbow Music Led"
+        if currently_frozen():
+            current_directory = os.path.dirname(__file__)
+            icon_location = os.path.join(current_directory, "tray.png")
+        else:
+            current_directory = os.path.dirname(__file__)
+            icon_location = os.path.join(
+                current_directory, "..", "icons/" "tray.png"
             )
-            icon.visible = True
-        else:
-            icon = None
+        icon = pystray.Icon(
+            "Wls", icon=Image.open(icon_location), title="WiFi Led Studio @ Rainbow Music Led"
+        )
+        icon.visible = True
+    else:
+        icon = None
 
-        if icon:
-            icon.run(setup=entry_point)
-        else:
-            entry_point()
+    if icon:
+        icon.run(setup=entry_point)
     else:
         entry_point()
 
@@ -319,9 +316,8 @@ def entry_point(icon=None):
             print(
                 "Vui lòng gửi dữ liệu hiệu suất cho Rainbow Music Led : https://facebook.com/rainbowmusicled"
             )
-    if sys.platform == 'win32':
-        if icon:
-            icon.stop()
+    if icon:
+        icon.stop()
 
 
 if __name__ == "__main__":
