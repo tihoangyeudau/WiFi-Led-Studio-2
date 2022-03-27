@@ -4,6 +4,7 @@ import sys
 import time
 import warnings
 import webbrowser
+import subprocess
 from concurrent.futures import ThreadPoolExecutor
 
 from wls.color import (
@@ -117,11 +118,19 @@ class WlsCore:
             _LOGGER.warning(
                 f"Không mở được trình duyệt web mặc định. Để truy cập giao diện web của WiFi Led Studio, hãy mở {url} trong trình duyệt. Để tránh lỗi này trong tương lai, hãy cài mặc định trình duyệt cho hệ thống của bạn."
             )
+
+    def open_app(self):
+        if sys.platform == "win32":
+            subprocess.call(['C:\\Program Files\\AmbilightWiFi\\bin\\ambilightwifi.exe'])
+        elif sys.platform == "darwin":
+            subprocess.Popen(os.getcwd()+"/application/Ambilight WiFi.app")
+
     def setup_icon_menu(self):
         import pystray
 
         self.icon.menu = pystray.Menu(
             pystray.MenuItem("Mở", self.open_ui, default=True),
+            pystray.MenuItem("Mở Ambilight WiFi", self.open_app),
             pystray.MenuItem("Thoát", self.stop),
         )
 
