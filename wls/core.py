@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import sys
+import os
 import time
 import warnings
 import webbrowser
@@ -121,9 +122,12 @@ class WlsCore:
 
     def open_app(self):
         if sys.platform == "win32":
-            subprocess.call(['C:\\Program Files\\AmbilightWiFi\\bin\\ambilightwifi.exe'])
+            path = os.path.join(os.environ["ProgramFiles"], "AmbilightWiFi\\bin", "ambilightwifi.exe").replace('\\', '\\\\')
+            subprocess.call(path)
         elif sys.platform == "darwin":
-            subprocess.Popen(os.getcwd()+"/application/Ambilight WiFi.app")
+            subprocess.run(['open', '/Applications/Ambilight WiFi.app'], check=True)
+        else:
+            subprocess.run(['open', '/Applications/Ambilight WiFi.app'], check=True)
 
     def setup_icon_menu(self):
         import pystray

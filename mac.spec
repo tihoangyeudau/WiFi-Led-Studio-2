@@ -10,7 +10,7 @@ a = Analysis(['./wls/__main__.py'],
              datas=[('/Users/macos/Documents/GitHub/WiFi-Led-Studio-2/icons', 'icons/'), ('/Users/macos/Documents/GitHub/WiFi-Led-Studio-2/icons/tray.png', '.'),
              ('/Users/macos/Documents/GitHub/WiFi-Led-Studio-2/wls', 'wls/'),
              ('/Users/macos/Documents/GitHub/WiFi-Led-Studio-2/wls_frontend', 'wls_frontend/')],
-             hiddenimports=['cffi', 'appkit', 'pycparser',  'sacn', 'aubio', 'numpy', 'math', 'voluptuous', 'numpy', 'aiohttp', 'mido','mido.frozen', 'paho', 'paho.mqtt', 'python-rtmidi','rtmidi', 'mido.backends.rtmidi', 'paho.mqtt.client','sounddevice',
+             hiddenimports=['zeroconf', 'cffi', 'appkit', 'pycparser',  'sacn', 'aubio', 'numpy', 'math', 'voluptuous', 'numpy', 'aiohttp', 'mido','mido.frozen', 'paho', 'paho.mqtt', 'python-rtmidi','rtmidi', 'mido.backends.rtmidi', 'paho.mqtt.client','sounddevice',
              'sentry_sdk', 'sentry_sdk.integrations.django','sentry_sdk.integrations.flask','sentry_sdk.integrations.bottle','sentry_sdk.integrations.falcon','sentry_sdk.integrations.sanic',
              'sentry_sdk.integrations.celery','sentry_sdk.integrations.aiohttp','sentry_sdk.integrations.rq','sentry_sdk.integrations.tornado','sentry_sdk.integrations.sqlalchemy',
              'sentry_sdk.integrations.boto3','_cffi_backend','serial','pystray._darwin','serial.tools.list_ports','tcp_latency','aiohttp_cors','psutil','yappi'],
@@ -48,6 +48,7 @@ app = BUNDLE(coll,
             info_plist = {
                 'NSHighResolutionCapable': 'True',
                 'NSMicrophoneUsageDescription': 'Access Microphone',
+                'LSUIElement': 'True',
             }
 )
 
