@@ -49,6 +49,7 @@ app = BUNDLE(coll,
                 'NSHighResolutionCapable': 'True',
                 'NSMicrophoneUsageDescription': 'Access Microphone',
                 'LSUIElement': 'True',
+                'UIApplicationExitsOnSuspend': 'True',
             }
 )
 
