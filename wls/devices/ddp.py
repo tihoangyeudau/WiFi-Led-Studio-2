@@ -6,7 +6,6 @@ import voluptuous as vol
 
 from wls.devices import UDPDevice
 from wls.devices.__init__ import(
-    AVAILABLE_FPS,
     fps_validator,
 )
 
@@ -49,10 +48,7 @@ class DDPDevice(UDPDevice):
             vol.Optional(
                 "refresh_rate",
                 description="Target rate that pixels are sent to the device",
-                default=next(
-                    (f for f in AVAILABLE_FPS if f >= 60),
-                    list(AVAILABLE_FPS)[-1],
-                ),
+                default=32,
             ): fps_validator,
         }
     )
