@@ -378,7 +378,7 @@ class UDPDevice(NetworkedDevice):
         self._sock = None
 
 if sys.platform == 'win32':
-    manufacturers = ['wch.cn', 'FTDI', 'Microsoft']
+    manufacturers = ['wch.cn', 'FTDI', 'Microsoft', 'Silicon Labs']
 
     class AvailableCOMPorts:
         ports = serial.tools.list_ports.comports()
@@ -386,7 +386,7 @@ if sys.platform == 'win32':
 
         for p in ports:
 
-            if (format(p.manufacturer) in manufacturers) or (format(p.location) != 'None'):
+            if (format(p.manufacturer) in manufacturers) and ("Standard Serial over Bluetooth link" not in format(p.description)):
                 available_ports.append(p.device)
 else:
     class AvailableCOMPorts:

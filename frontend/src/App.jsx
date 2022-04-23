@@ -49,8 +49,6 @@ import { TrainRounded } from '@mui/icons-material';
 import { SnackbarProvider } from 'notistack';
 import { Close } from '@material-ui/icons';
 import { useSnackbar } from 'notistack';
-import AddToHomeScreen from '@ideasio/add-to-homescreen-react';
-import './AddToHomescreen.css';
 
 export default function App() {
   const classes = useStyles();
@@ -271,45 +269,6 @@ export default function App() {
                 )}
               </div>
           </WsContextNew.Provider>}
-          <AddToHomeScreen
-            // debug={true}
-            // activateLogging={true}
-            startAutomatically={false}
-            appId="Thêm bản trình diễn trực tiếp nháy theo nhạc vào màn hình chính"
-            skipFirstVisit={false}
-            displayPace={0}
-            lifespan={60}
-            // maxDisplayCount={5}
-            customPromptContent={{
-              title: 'Bạn có muốn thêm WiFi Led Studio vào màn hình chính của mình không?',
-              cancelMsg: 'X',
-              installMsg: 'Add',
-              guidanceCancelMsg: 'X',
-              src: `${process.env.PUBLIC_URL}/favicon/apple-icon-76x76.png`,
-            }}
-            customPromptElements={{
-              container: 'athContainer',
-              containerAddOns: '',
-              banner: 'athBanner',
-              logoCell: 'athLogoCell',
-              logoCellAddOns: 'athContentCell',
-              logo: 'athLogo',
-              titleCell: 'athTitleCell',
-              titleCellAddOns: 'athContentCell',
-              title: 'athTitle',
-              cancelButtonCell: 'athCancelButtonCell',
-              cancelButtonCellAddOns: 'athButtonCell',
-              cancelButton: 'athCancelButton',
-              installButtonCell: 'athInstallButtonCell',
-              installButtonCellAddOns: 'athButtonCell',
-              installButton: 'athInstallButton',
-              installButtonAddOns: 'button',
-              guidance: 'athGuidance',
-              guidanceImageCell: 'athGuidanceImageCell',
-              guidanceImageCellAddOns: '',
-              guidanceCancelButton: 'athGuidanceCancelButton'
-            }}
-          />
         </SnackbarProvider>
       </MuiThemeProvider>
     </ThemeProvider>
