@@ -146,8 +146,6 @@ class RMLDevice(NetworkedDevice):
         if self.subdevice is not None:
             self.subdevice.deactivate()
         super().deactivate()
-        if self.RMLReceiver is True and self.rml_state is True:
-            RML2.turn_rml_off(self.device_ip, self.name)
 
     def flush(self, data):
         self.subdevice.flush(data)

@@ -571,31 +571,6 @@ class RML2:
             _LOGGER.warning(f"Lỗi bật đèn {device_name}: {CapturedError}")
 
 
-    def turn_rml_off(device_ip, device_name):
-        """
-            Uses a HTTP post call to turn a RML compatible device off
-
-        Args:
-            device_ip (string): The device IP to be turned off
-            device_name (string): The name of the device
-        Returns:
-            boolean: Success or failure of API call
-        """
-        try:
-            turn_off = requests.post(f"http://{device_ip}/win&T=0", timeout=0.25)
-
-            if turn_off.ok:
-                _LOGGER.info(f"Đang tắt đèn {device_name}.")
-                return True
-            else:
-                _LOGGER.warning(
-                    f"{device_name} lỗi RML API: {turn_off.status_code}"
-                )
-                return False
-        except requests.exceptions.RequestException as CapturedError:
-            _LOGGER.warning(f"Lỗi khi tắt đèn {device_name}: {CapturedError}")
-
-
     def adjust_rml_brightness(device_ip, device_name, brightness):
         """
             Uses a HTTP post call to adjust a RML compatible device's
