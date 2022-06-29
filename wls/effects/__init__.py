@@ -318,6 +318,7 @@ class Effect(BaseRegistry):
         pass
 
     def get_pixels(self):
+        if not hasattr(self, 'pixels'): return
         pixels = np.copy(self.pixels)
         # Apply some of the base output filters if necessary
         if self._config["flip"]:
@@ -329,7 +330,8 @@ class Effect(BaseRegistry):
         if self._config["background_color"]:
             # TODO: colors in future should have an alpha value, which would work nicely to apply to dim the background color
             # for now, just set it a bit less bright.
-            pixels += self._bg_color * 0.5
+            # pixels += self._bg_color * 0.5
+            pixels += self._bg_color
         if self._config["brightness"] is not None:
             np.multiply(
                 pixels,

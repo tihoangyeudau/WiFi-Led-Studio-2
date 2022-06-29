@@ -50,12 +50,14 @@ export const getOverlapping = (data) => {
 export const swap = (array, i, j) => [array[i], array[j]] = [array[j], array[i]];
 
 export const deleteFrontendConfig = () => {
-    window.localStorage.removeItem('undefined')
-    window.localStorage.removeItem('wls-host')
-    window.localStorage.removeItem('wls-hosts')
-    window.localStorage.removeItem('wls-ws')
-    window.localStorage.removeItem('wls-theme')
-    window.localStorage.removeItem('wls-frontend')
+    window.localStorage.removeItem('undefined');
+    window.localStorage.removeItem('ledfx-storage');
+    window.localStorage.removeItem('wls-host');
+    window.localStorage.removeItem('wls-hosts');
+    window.localStorage.removeItem('wls-ws');
+    window.localStorage.removeItem('wls-theme');
+    window.localStorage.removeItem('wls-frontend');
+    window.location.reload();
 }
 
 export const initFrontendConfig = () => {

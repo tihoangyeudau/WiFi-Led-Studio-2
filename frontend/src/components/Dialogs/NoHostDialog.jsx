@@ -47,8 +47,8 @@ export default function NoHostDialog() {
       setHost(hostvalue);
     }
     setDialogOpen(false);
-    setDisconnected(false)
-    // window.location.href = window.location.href;
+    setDisconnected(false);
+    window.location.reload();
   };
 
   const handleDelete = (e, title) => {
@@ -59,7 +59,7 @@ export default function NoHostDialog() {
 
   useEffect(() => {
     storedURL && setHostvalue(storedURL);
-    storedURLs && setHosts(storedURLs)    
+    storedURLs && setHosts(storedURLs);
   }, [storedURL, setHosts]);
 
   useEffect(() => {

@@ -232,7 +232,8 @@ const useStore = create(
         streamingToDevices: devices
       })),
 
-      graphs: isElectron(),
+      // graphs: !!isElectron(),
+      graphs: true,
       toggleGraphs: () => {
         set((state) => ({ graphs: !state.graphs }))
       },

@@ -193,7 +193,7 @@ const EffectsCard = ({ virtId }) => {
           <Card style={{ marginTop: '1rem' }}>
             <CardContent style={{ padding: '0 16px' }}>
 
-              <Accordion style={{ paddin: 0 }} defaultExpanded={viewMode !== 'user'}>
+              <Accordion style={{ paddin: 0 }} defaultExpanded>
                 <AccordionSummary
                   expandIcon={<ExpandMore />}
                   aria-controls="panel1a-content"
