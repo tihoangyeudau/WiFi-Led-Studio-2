@@ -142,7 +142,7 @@ EffectForm.args = {
     background_brightness: 1,
     flip: false,
   },
-  handleEffectConfig: (e: any) => {
+  handleEffectConfig: (e) => {
     // eslint-disable-next-line no-console
     console.log('Cập nhật hiệu ứng', e);
     return true;
