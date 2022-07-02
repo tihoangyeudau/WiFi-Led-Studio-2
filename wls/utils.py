@@ -202,7 +202,6 @@ class RML:
 
         except requests.exceptions.RequestException:
             msg = f"RML {ip_address}: Kết nối thất bại"
-            self._online = False
             raise ValueError(msg)
 
         if not response.ok:

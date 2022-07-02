@@ -232,7 +232,11 @@ class WlsCore:
     async def async_start(self, open_ui=False):
         _LOGGER.info("Khởi động WiFi Led Studio")
         await self.http.start(get_ssl_certs(config_dir=self.config_dir))
-        if self.icon is not None and self.icon.notify is not None and self.icon.HAS_NOTIFICATION:
+        if (
+            self.icon is not None
+            and self.icon.notify is not None
+            and self.icon.HAS_NOTIFICATION
+        ):
             self.icon.notify(
                 "Đã khởi động WiFi Led Studio.\nSử dụng biểu tượng trái tim ở Taskbar để mở.", "WiFi Led Studio @ Rainbow Music Led"
             )

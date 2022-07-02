@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from json import JSONDecodeError
 
@@ -6,7 +7,6 @@ from aiohttp import web
 
 from wls.api import RestEndpoint
 from wls.config import save_config
-import asyncio
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -82,10 +82,10 @@ class DeviceEndpoint(RestEndpoint):
         device = self._wls.devices.get(device_id)
         if device is None:
             response = {"not found": 404}
-            return web.json_response(data=response, status=404)      
+            return web.json_response(data=response, status=404)
 
         try:
-            if device.type == 'rml':
+            if device.type == "rml":
                 await device.resolve_address()
             status = 200
 
@@ -106,9 +106,10 @@ class DeviceEndpoint(RestEndpoint):
                     effect_response["config"] = virtual.active_effect.config
                     effect_response["name"] = virtual.active_effect.name
                     effect_response["type"] = virtual.active_effect.type
-                    response["virtuals"][virtual.id]["effect"] = effect_response
+                    response["virtuals"][virtual.id][
+                        "effect"
+                    ] = effect_response
 
-            
         except (voluptuous.Error, ValueError) as msg:
             response = {
                 "status": "failed",
@@ -116,8 +117,8 @@ class DeviceEndpoint(RestEndpoint):
             }
             status = 202
             # If there's an error updating config, don't write that config, just return an error            
-            return web.json_response(data=response, status=status)              
-       
+            return web.json_response(data=response, status=status)
+
         device.activate()
         return web.json_response(data=response, status=status)
 

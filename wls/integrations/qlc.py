@@ -204,7 +204,8 @@ class QLC(Integration):
 
     async def connect(self):
         resolved_ip = await resolve_destination(
-            self._wls.loop, self._config["ip_address"]
+            self._wls.loop,
+            self._config["ip_address"],
         )
         domain = f"{resolved_ip }:{self._config['port']}"
         url = f"http://{domain}/qlcplusWS"
