@@ -15,7 +15,7 @@ class Energy2(AudioReactiveEffect, HSVEffect):
             vol.Optional(
                 "speed",
                 description="Tốc độ",
-                default=0.5,
+                default=1.0,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.01, max=1.0)),
             vol.Optional(
                 "reactivity",
@@ -27,7 +27,7 @@ class Energy2(AudioReactiveEffect, HSVEffect):
 
     def config_updated(self, config):
         self._lows_power = 0
-        self._lows_filter = self.create_filter(alpha_decay=0.1, alpha_rise=0.1)
+        self._lows_filter = self.create_filter(alpha_decay=0.1, alpha_rise=0.99)
 
     def audio_data_updated(self, data):
         self._lows_power = self._lows_filter.update(
