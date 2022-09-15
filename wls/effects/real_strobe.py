@@ -25,12 +25,12 @@ class Strobe(AudioReactiveEffect, GradientEffect):
             vol.Optional(
                 "color_step",
                 description="Màu nháy thay đổi trên mỗi âm trầm",
-                default=0.0625,
+                default=0.15,
             ): vol.All(vol.Coerce(float), vol.Range(min=0, max=0.25)),
             vol.Optional(
                 "bass_strobe_decay_rate",
                 description="Tốc độ phân rã âm trầm. Càng cao -> phân rã càng nhanh.",
-                default=0.5,
+                default=0.3,
             ): vol.All(vol.Coerce(float), vol.Range(min=0, max=1)),
             vol.Optional(
                 "strobe_color",
@@ -45,7 +45,7 @@ class Strobe(AudioReactiveEffect, GradientEffect):
             vol.Optional(
                 "strobe_decay_rate",
                 description="Tỷ lệ phân rã nhấp nháy bộ gõ. Càng cao -> phân rã càng nhanh.",
-                default=0.5,
+                default=0.4,
             ): vol.All(vol.Coerce(float), vol.Range(min=0, max=1)),
         }
     )
