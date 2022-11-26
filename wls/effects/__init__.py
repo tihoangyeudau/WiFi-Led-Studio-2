@@ -1,5 +1,6 @@
 import colorsys
 import logging
+import threading
 
 # from wls.effects.audio import FREQUENCY_RANGES
 from functools import lru_cache
@@ -235,6 +236,7 @@ class Effect(BaseRegistry):
         self._wls = wls
         self._config = {}
         self.update_config(config)
+        self.lock = threading.Lock()
 
     def __del__(self):
         if self._active:
@@ -316,6 +318,11 @@ class Effect(BaseRegistry):
         frame if it wants to use it for something
         """
         pass
+
+    def _render(self):
+        self.lock.acquire()
+        self.render()
+        self.lock.release()
 
     def get_pixels(self):
         if not hasattr(self, "pixels"):

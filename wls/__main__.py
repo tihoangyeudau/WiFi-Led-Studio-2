@@ -311,10 +311,10 @@ def entry_point(icon=None):
             yappi.get_thread_stats().print_all()
             stats.save(filename, type="pstat")
             print(
-                f"Đã lưu dữ liệu hiệu suất vào thư mục cấu hình      : {filename}"
+                f"Đã lưu dữ liệu hiệu suất vào thư mục cấu hình: {filename}"
             )
             print(
-                "Vui lòng gửi dữ liệu hiệu suất cho Rainbow Music Led : https://facebook.com/rainbowmusicled"
+                "Vui lòng gửi dữ liệu hiệu suất cho Rainbow Music Led: https://facebook.com/rainbowmusicled"
             )
     if icon:
         icon.stop()

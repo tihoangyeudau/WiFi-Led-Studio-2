@@ -73,35 +73,35 @@ class RMLDevice(NetworkedDevice):
         "E131": E131Device,
     }
 
-    DEVICE_CONFIGS = {
-        "UDP": {
-            "name": None,
-            "ip_address": None,
-            "pixel_count": None,
-            "port": 7778,
-            "udp_packet_type": "DNRGB",
-            "timeout": 1,
-            "minimise_traffic": True,
-        },
-        "DDP": {
-            "name": None,
-            "ip_address": None,
-            "pixel_count": None,
-        },
-        "E131": {
-            "name": None,
-            "ip_address": None,
-            "pixel_count": None,
-            "universe": 1,
-            "universe_size": 510,
-            "channel_offset": 0,
-            "packet_priority": 100,
-        },
-    }
-
     def __init__(self, wls, config):
         super().__init__(wls, config)
         self.subdevice = None
+
+        self.device_configs = {
+            "UDP": {
+                "name": None,
+                "ip_address": None,
+                "pixel_count": None,
+                "port": 7778,
+                "udp_packet_type": "DNRGB",
+                "timeout": 1,
+                "minimise_traffic": True,
+            },
+            "DDP": {
+                "name": None,
+                "ip_address": None,
+                "pixel_count": None,
+            },
+            "E131": {
+                "name": None,
+                "ip_address": None,
+                "pixel_count": None,
+                "universe": 1,
+                "universe_size": 510,
+                "channel_offset": 0,
+                "packet_priority": 100,
+            },
+        }
 
     def config_updated(self, config):
         if not isinstance(
@@ -114,7 +114,7 @@ class RMLDevice(NetworkedDevice):
             self.subdevice.deactivate()
 
         device = self.SYNC_MODES[self._config["sync_mode"]]
-        config = self.DEVICE_CONFIGS[self._config["sync_mode"]]
+        config = self.device_configs[self._config["sync_mode"]]
         config["name"] = self._config["name"]
         config["ip_address"] = self._config["ip_address"]
         config["pixel_count"] = self._config["pixel_count"]

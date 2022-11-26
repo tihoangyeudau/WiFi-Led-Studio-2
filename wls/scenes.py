@@ -33,6 +33,14 @@ class Scenes:
                     description="Hình ảnh hoặc biểu tượng để hiển thị",
                     default="Wallpaper",
                 ): str,
+                vol.Optional(
+                    "scene_puturl",
+                    description="Khi kích hoạt cảnh, URL cũng là PUT",
+                ): str,
+                vol.Optional(
+                    "scene_payload",
+                    description="Khi kích hoạt cảnh, hãy gửi payload này tới scene_puturl",
+                ): str,
                 vol.Required(
                     "virtuals",
                     description="Hiệu ứng của đèn ảo này sẽ được lưu lại",

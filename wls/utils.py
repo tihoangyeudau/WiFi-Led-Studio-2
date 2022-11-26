@@ -8,7 +8,6 @@ import os
 import pkgutil
 import re
 import socket
-import subprocess
 import sys
 import time
 from abc import ABC

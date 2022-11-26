@@ -48,7 +48,7 @@ class BladePowerPlus(AudioReactiveEffect, HSVEffect, GradientEffect):
             vol.Optional(
                 "multiplier",
                 description="Làm cho thanh phản ứng lớn hơn/nhỏ hơn",
-                default=0.8,
+                default=0.3,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=1.0)),
             vol.Optional(
                 "background_color",

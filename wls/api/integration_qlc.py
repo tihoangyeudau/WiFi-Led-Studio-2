@@ -29,9 +29,9 @@ class QLCEndpoint(RestEndpoint):
         for effect_type, effect in self._wls.effects.classes().items():
             effect_names.append(effect.NAME)
 
-        scene_names = []
+        scene_ids = []
         for scene in self._wls.config["scenes"]:
-            scene_names.append(self._wls.config["scenes"][scene]["name"])
+            scene_ids.append(self._wls.config["scenes"][scene]["name"])
 
         response["event_types"] = {
             Event.EFFECT_SET: {
@@ -44,7 +44,7 @@ class QLCEndpoint(RestEndpoint):
             },
             Event.SCENE_SET: {
                 "event_name": "Scene Set",
-                "event_filters": {"scene_name": scene_names},
+                "event_filters": {"scene_id": scene_ids},
             },
         }
 
@@ -89,7 +89,7 @@ class QLCEndpoint(RestEndpoint):
         if type(event_filter) is not dict:
             response = {
                 "status": "failed",
-                "reason": f'Bộ lọc không hợp lệ "{event_filter}", nên được từ điển vd. {{ "scene_name" : "my scene" }} ',
+                "reason": f'Bộ lọc không hợp lệ "{event_filter}", nên được từ điển vd. {{ "scene_id" : "my scene" }} ',
             }
             return web.json_response(data=response, status=400)
 
@@ -150,7 +150,7 @@ class QLCEndpoint(RestEndpoint):
         if type(event_filter) is not dict:
             response = {
                 "status": "failed",
-                "reason": f'Bộ lọc không hợp lệ "{event_filter}", nên được từ điển vd. {{ "scene_name" : "my scene" }} ',
+                "reason": f'Bộ lọc không hợp lệ "{event_filter}", nên được từ điển vd. {{ "scene_id" : "my scene" }} ',
             }
             return web.json_response(data=response, status=400)
 
@@ -212,7 +212,7 @@ class QLCEndpoint(RestEndpoint):
         if type(event_filter) is not dict:
             response = {
                 "status": "failed",
-                "reason": f'Bộ lọc không hợp lệ "{event_filter}", nên được từ điển vd. {{ "scene_name" : "my scene" }} ',
+                "reason": f'Bộ lọc không hợp lệ "{event_filter}", nên được từ điển vd. {{ "scene_id" : "my scene" }} ',
             }
             return web.json_response(data=response, status=400)
 
