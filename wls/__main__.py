@@ -87,12 +87,8 @@ def setup_logging(loglevel, config_dir):
         backupCount=5,  # once it hits 2.5MB total, start removing logs.
     )
     file_handler.setLevel(file_loglevel)  # set loglevel
-    file_formatter = logging.Formatter(
-        file_logformat
-    )  # a simple log file format
-    file_handler.setFormatter(
-        file_formatter
-    )  # tell the file_handler to use this format
+    file_formatter = logging.Formatter(file_logformat)
+    file_handler.setFormatter(file_formatter)
 
     console_handler = logging.StreamHandler()
     console_handler.setLevel(console_loglevel)  # set loglevel
@@ -310,9 +306,7 @@ def entry_point(icon=None):
             stats = yappi.get_func_stats()
             yappi.get_thread_stats().print_all()
             stats.save(filename, type="pstat")
-            print(
-                f"Đã lưu dữ liệu hiệu suất vào thư mục cấu hình: {filename}"
-            )
+            print(f"Đã lưu dữ liệu hiệu suất vào thư mục cấu hình: {filename}")
             print(
                 "Vui lòng gửi dữ liệu hiệu suất cho Rainbow Music Led: https://facebook.com/rainbowmusicled"
             )
