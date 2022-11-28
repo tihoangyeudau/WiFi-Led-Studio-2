@@ -242,7 +242,7 @@ def main():
         """This will crash Wls and submit a Sentry error if Sentry is configured"""
         _LOGGER.warning("Chỉ đạo WiFi Led Studio vào một bức tường gạch")
         div_by_zero = 1 / 0
-    if args.tray or currently_frozen():
+    if args.tray:
         # If pystray is imported on a device that can't display it, it explodes. Catch it
         try:
             import pystray

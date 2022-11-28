@@ -40,6 +40,7 @@ class AudioInputSource:
     _processed_audio_sample = None
     _volume = -90
     _volume_filter = ExpFilter(-90, alpha_decay=0.99, alpha_rise=0.99)
+    _subscriber_threshold = 0
     
     @staticmethod
     def device_index_validator(val):
@@ -320,7 +321,7 @@ class AudioInputSource:
         """Registers a callback with the input source"""
         self._callbacks.append(callback)
 
-        if len(self._callbacks) == 1:
+        if len(self._callbacks) > 0 and not self._is_activated:
             self.activate()
 
     def unsubscribe(self, callback):
@@ -328,7 +329,7 @@ class AudioInputSource:
         if callback in self._callbacks:
             self._callbacks.remove(callback)
 
-        if len(self._callbacks) == 0:
+        if len(self._callbacks) <= self._subscriber_threshold:
             self.deactivate()
 
     def get_device_index_by_name(self, device_name: str):
@@ -461,6 +462,9 @@ class AudioAnalysisSource(AudioInputSource):
         self.subscribe(self.bar_oscillator)
         self.subscribe(self.volume_beat_now)
         self.subscribe(self.freq_power)
+
+        # ensure any new analysis callbacks are above this line
+        self._subscriber_threshold = len(self._callbacks)
 
     def initialise_analysis(self):
         # melbanks
