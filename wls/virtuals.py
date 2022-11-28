@@ -750,7 +750,7 @@ class Virtuals:
             )
             if "segments" in virtual:
                 try:
-                    self._ledfx.virtuals.get(virtual["id"]).update_segments(
+                    self._wls.virtuals.get(virtual["id"]).update_segments(
                         virtual["segments"]
                     )
                 except vol.MultipleInvalid:
