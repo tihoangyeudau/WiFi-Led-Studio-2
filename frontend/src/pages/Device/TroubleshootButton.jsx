@@ -77,29 +77,28 @@ export default function TroubleshootButton({ virtual }) {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '1.5rem', }}>
                   <Icon style={{ marginRight: '0.7rem', }}> <Rml /></Icon> {rmlData.name}</div>
                 <Divider style={{ margin: '0.25rem 0 1rem 0' }} />
-                <Row name={'AVERAGE PING'} value={pingData.max_ping ? `${pingData.max_ping.toFixed(2)} ms` : <CircularProgress size={12} />} />
-                <Row name={'AVERAGE PING'} value={pingData.avg_ping ? `${pingData.avg_ping.toFixed(2)} ms` : <CircularProgress size={12} />} />
-                <Row name={'MINIMUM PING'} value={pingData.min_ping ? `${pingData.min_ping.toFixed(2)} ms` : <CircularProgress size={12} />} />
-                <Row name={'PACKETS LOST'} value={`${pingData.packetlosspercent ? pingData.packetlosspercent.toFixed(2) : 0} %`} />
+                <Row name={'PING TRUNG BÌNH'} value={pingData.max_ping ? `${pingData.max_ping.toFixed(2)} ms` : <CircularProgress size={12} />} />
+                <Row name={'PING TRUNG BÌNH'} value={pingData.avg_ping ? `${pingData.avg_ping.toFixed(2)} ms` : <CircularProgress size={12} />} />
+                <Row name={'PING TỐI THIỂU'} value={pingData.min_ping ? `${pingData.min_ping.toFixed(2)} ms` : <CircularProgress size={12} />} />
+                <Row name={'GÓI BỊ MẤT'} value={`${pingData.packetlosspercent ? pingData.packetlosspercent.toFixed(2) : 0} %`} />
                 <Divider style={{ margin: '1rem 0' }} />
-                <Row name={'WiFi Signal strength'} value={`${rmlData.wifi?.signal} %`} />
-                <Row name={'WiFi Channel'} value={rmlData.wifi?.channel} />
+                <Row name={'Độ mạnh WiFi'} value={`${rmlData.wifi?.signal} %`} />
+                <Row name={'Kênh WiFi'} value={rmlData.wifi?.channel} />
                 <Row name={'MAC'} value={rmlData.mac} />
-                <Row name={'Frames Per Second'} value={`${rmlData.leds?.fps} fps`} />
+                <Row name={'Khung màu trên giây'} value={`${rmlData.leds?.fps} fps`} />
               </Grid>
               <Grid item xs={12} lg={6}>
                 <Divider style={{ margin: ' 0 0 0.5rem 0' }} />
-                <Row name={'Version'} value={rmlData.ver} />
+                <Row name={'Phiên bản'} value={rmlData.ver} />
                 <Row name={'Chip'} value={rmlData.arch} />
-                <Row name={'LED Count'} value={rmlData.leds?.count} />
+                <Row name={'Số bóng Led'} value={rmlData.leds?.count} />
                 <Row name={'RGBW'} value={JSON.stringify(rmlData.leds?.rgbw)} />
-                <Row name={'Estimated Power'} value={`${rmlData.leds?.pwr?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} mA`} />
-                <Row name={'Max power'} value={`${rmlData.leds?.maxpwr?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} mA`} />
-                <Row name={'Live Mode'} value={JSON.stringify(rmlData.live)} />
-                <Row name={'Live Mode Source'} value={rmlData.lip} />
-                <Row name={'Live Mode Protocol'} value={rmlData.lm} />
-                <Row name={'UDP Port'} value={rmlData.udpport} />
-                <Row name={'Uptime'} value={<Moment interval={1000} format="hh:mm:ss" durationFromNow>{moment().add(rmlData.uptime * -1, 's')}</Moment>} />
+                <Row name={'Dòng điện ước tính'} value={`${rmlData.leds?.pwr?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} mA`} />
+                <Row name={'Dòng điện tối đa'} value={`${rmlData.leds?.maxpwr?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} mA`} />
+                <Row name={'Chế độ phát trực tiếp'} value={JSON.stringify(rmlData.live)} />
+                <Row name={'Nguồn phát trực tiếp'} value={rmlData.lip} />
+                <Row name={'Giao thức phát trực tiếp'} value={rmlData.lm} />
+                <Row name={'Thời gian hoạt động '} value={<Moment interval={1000} format="hh:mm:ss" durationFromNow>{moment().add(rmlData.uptime * -1, 's')}</Moment>} />
               </Grid>
             </Grid>
             : <div style={{ textAlign: 'center', margin: 10 }}>
