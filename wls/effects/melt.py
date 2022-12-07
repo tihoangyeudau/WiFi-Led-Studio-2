@@ -27,7 +27,7 @@ class Melt(AudioReactiveEffect, HSVEffect):
              vol.Optional(
                 "blur",
                 description="Làm mờ",
-                default=2,
+                default=3,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=10)),
         }
     )
@@ -42,7 +42,7 @@ class Melt(AudioReactiveEffect, HSVEffect):
 
     def config_updated(self, config):
         self._lows_power = 0
-        self._lows_filter = self.create_filter(alpha_decay=0.1, alpha_rise=0.99)
+        self._lows_filter = self.create_filter(alpha_decay=0.1, alpha_rise=0.1)
 
     def audio_data_updated(self, data):
         self._lows_power = self._lows_filter.update(
