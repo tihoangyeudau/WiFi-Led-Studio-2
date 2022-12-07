@@ -25,7 +25,7 @@ class BlocksAudioEffect(AudioReactiveEffect, GradientEffect):
 
     def audio_data_updated(self, data):
         # Grab the filtered melbank
-        self.r = self.melbank(filtered=True, size=self.pixel_count) * 2
+        self.r = self.melbank(filtered=True, size=self.pixel_count)
 
     def render(self):
         out = np.tile(self.r, (3, 1))

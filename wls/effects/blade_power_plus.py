@@ -92,7 +92,7 @@ class BladePowerPlus(AudioReactiveEffect, HSVEffect, GradientEffect):
     def audio_data_updated(self, data):
         # Get filtered bar power
         self.bar = (
-            getattr(data, self.power_func)() * self._config["multiplier"] * 6
+            getattr(data, self.power_func)() * self._config["multiplier"] * 2
         )
 
     def render_hsv(self):
