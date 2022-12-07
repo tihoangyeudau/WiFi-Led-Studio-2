@@ -5,10 +5,6 @@ import numpy as np
 import voluptuous as vol
 
 from wls.devices import Device
-from wls.devices.__init__ import(
-    AVAILABLE_FPS,
-    fps_validator,
-)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -55,14 +51,6 @@ class RPI_WS281X(Device):
                 vol.Required(
                     "color_order", description="Thứ tự mầu", default="RGB"
                 ): vol.In(list(COLOR_ORDERS.keys())),
-                vol.Optional(
-                    "refresh_rate",
-                    description="Target rate that pixels are sent to the device",
-                    default=next(
-                        (f for f in AVAILABLE_FPS if f >= 60),
-                        list(AVAILABLE_FPS)[-1],
-                    ),
-                ): fps_validator,
             }
         )
 

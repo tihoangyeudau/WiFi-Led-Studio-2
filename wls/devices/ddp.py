@@ -5,9 +5,6 @@ import numpy as np
 import voluptuous as vol
 
 from wls.devices import UDPDevice
-from wls.devices.__init__ import(
-    fps_validator,
-)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -45,11 +42,6 @@ class DDPDevice(UDPDevice):
                 description="Số lượng LED",
                 default=1,
             ): vol.All(int, vol.Range(min=1)),
-            vol.Optional(
-                "refresh_rate",
-                description="Target rate that pixels are sent to the device",
-                default=32,
-            ): fps_validator,
         }
     )
 

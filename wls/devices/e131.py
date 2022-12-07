@@ -5,9 +5,6 @@ import sacn
 import voluptuous as vol
 
 from wls.devices import NetworkedDevice
-from wls.devices.__init__ import(
-    fps_validator,
-)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -48,11 +45,6 @@ class E131Device(NetworkedDevice):
                 description="Ưu tiên các gói sACN cho đèn này",
                 default=100,
             ): vol.All(int, vol.Range(min=0, max=200)),
-            vol.Optional(
-                "refresh_rate",
-                description="Target rate that pixels are sent to the device",
-                default=32,
-            ): fps_validator,
         }
     )
 
