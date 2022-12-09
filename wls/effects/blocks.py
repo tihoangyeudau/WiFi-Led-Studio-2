@@ -15,7 +15,7 @@ class BlocksAudioEffect(AudioReactiveEffect, GradientEffect):
             vol.Optional(
                 "block_count",
                 description="Số màu khối",
-                default=4,
+                default=5,
             ): vol.All(vol.Coerce(int), vol.Range(min=1, max=10))
         }
     )
@@ -25,7 +25,7 @@ class BlocksAudioEffect(AudioReactiveEffect, GradientEffect):
 
     def audio_data_updated(self, data):
         # Grab the filtered melbank
-        self.r = self.melbank(filtered=True, size=self.pixel_count)
+        self.r = self.melbank(filtered=True, size=self.pixel_count) * 2
 
     def render(self):
         out = np.tile(self.r, (3, 1))

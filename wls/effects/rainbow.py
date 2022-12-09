@@ -14,13 +14,13 @@ class RainbowEffect(TemporalEffect):
             vol.Optional(
             "speed",
                 description="Tốc độ",
-                default=0.07,
-            ): vol.All(vol.Coerce(float), vol.Range(min=0.002, max=0.5)),
+                default=3,
+            ): vol.All(vol.Coerce(float), vol.Range(min=1, max=100)),
             vol.Optional(
                 "frequency",
                 description="Độ phân giải của cầu vồng",
-                default=0.6,
-            ): vol.All(vol.Coerce(float), vol.Range(min=0.002, max=10)),
+                default=0.8,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.1, max=10)),
         }
     )
 

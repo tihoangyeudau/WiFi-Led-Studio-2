@@ -41,7 +41,7 @@ class PitchSpectrumAudioEffect(AudioReactiveEffect, GradientEffect):
 
     def audio_data_updated(self, data):
         # Grab the filtered melbank
-        y = self.melbank(filtered=False, size=self.pixel_count)
+        y = self.melbank(filtered=False, size=self.pixel_count) * 2
         midi_value = data.pitch()
         if midi_value is None:
             midi_value = 0

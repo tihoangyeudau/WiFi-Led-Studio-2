@@ -28,7 +28,7 @@ class Marching(AudioReactiveEffect, HSVEffect):
     def config_updated(self, config):
         self._lows_power = 0
         self._lows_filter = self.create_filter(
-            alpha_decay=0.05, alpha_rise=0.2
+            alpha_decay=0.05, alpha_rise=0.9
         )
 
     def audio_data_updated(self, data):
@@ -39,7 +39,7 @@ class Marching(AudioReactiveEffect, HSVEffect):
     def render_hsv(self):
         # "Global expression"
 
-        t1 = self.time(self._config["speed"] * 20)
+        t1 = self.time(self._config["speed"] * 30)
         t2 = self.time(self._config["speed"])
         # t1 += self._config["reactivity"] * self._lows_power
         t2 += self._config["reactivity"] * self._lows_power * 20

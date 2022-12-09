@@ -14,6 +14,11 @@ class SingleColorEffect(TemporalEffect, ModulateEffect):
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
+                "speed",
+                    description="Tốc độ",
+                    default=1,
+            ): vol.All(vol.Coerce(float), vol.Range(min=1, max=100)),
+            vol.Optional(
                 "color", description="Màu", default="#FF0000"
             ): validate_color,
         },

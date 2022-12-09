@@ -183,6 +183,16 @@ class TemporalGradientEffect(TemporalEffect, GradientEffect, ModulateEffect):
     NAME = "Dải mầu"
     CATEGORY = "Không nháy theo nhạc"
 
+    CONFIG_SCHEMA = vol.Schema(
+        {
+            vol.Optional(
+                "speed",
+                description="Tốc độ",
+                default=0.1,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.1, max=100)),
+        }
+    )
+
     def on_activate(self, pixel_count):
         pass
 

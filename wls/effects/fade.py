@@ -13,6 +13,16 @@ class FadeEffect(TemporalEffect, GradientEffect):
     NAME = "Phai màu"
     CATEGORY = "Không nháy theo nhạc"
 
+    CONFIG_SCHEMA = vol.Schema(
+        {
+            vol.Optional(
+                "speed",
+                default=10,
+                description="Tốc độ",
+            ): vol.All(vol.Coerce(float), vol.Range(min=1, max=100)),
+        }
+    )
+
     def config_updated(self, config):
         self.idx = 0
         self.forward = True

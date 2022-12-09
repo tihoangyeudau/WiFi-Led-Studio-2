@@ -45,7 +45,7 @@ class EnergyAudioEffect(AudioReactiveEffect):
             vol.Optional(
                 "sensitivity",
                 description="Độ nhậy",
-                default=0.6,
+                default=0.3,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.3, max=0.99)),
             vol.Optional(
                 "mixing_mode",
@@ -122,4 +122,4 @@ class EnergyAudioEffect(AudioReactiveEffect):
             self.p[: self.highs_idx] = self.high_color
 
         # Filter and update the pixel values
-        self.pixels = self._p_filter.update(self.p)
+        self.pixels = self._p_filter.update(self.p) * 2

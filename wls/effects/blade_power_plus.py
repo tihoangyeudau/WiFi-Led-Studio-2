@@ -48,7 +48,7 @@ class BladePowerPlus(AudioReactiveEffect, HSVEffect, GradientEffect):
             vol.Optional(
                 "multiplier",
                 description="Làm cho thanh phản ứng lớn hơn/nhỏ hơn",
-                default=0.3,
+                default=0.6,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=1.0)),
             vol.Optional(
                 "background_color",
@@ -92,7 +92,7 @@ class BladePowerPlus(AudioReactiveEffect, HSVEffect, GradientEffect):
     def audio_data_updated(self, data):
         # Get filtered bar power
         self.bar = (
-            getattr(data, self.power_func)() * self._config["multiplier"] * 2
+            getattr(data, self.power_func)() * self._config["multiplier"] * 4
         )
 
     def render_hsv(self):

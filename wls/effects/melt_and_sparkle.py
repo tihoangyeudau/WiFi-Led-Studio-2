@@ -11,7 +11,7 @@ from wls.effects.math import triangle
 from wls.utils import empty_queue
 
 
-class HuxleyMelt(AudioReactiveEffect, HSVEffect):
+class MeltSparkle(AudioReactiveEffect, HSVEffect):
 
     NAME = "Tan chảy lấp lánh"
     CATEGORY = "Dạng áp suất"
@@ -50,9 +50,9 @@ class HuxleyMelt(AudioReactiveEffect, HSVEffect):
             ): vol.All(vol.Coerce(float), vol.Range(min=0, max=1)),
             vol.Optional(
                 "strobe_width",
-                description="Chiều rộng nhấp nháy bộ gõ, tính bằng điểm màu",
-                default=0.01,
-            ): vol.All(vol.Coerce(float), vol.Range(min=0, max=1)),
+                description="Chiều rộng nhấp nháy bộ gõ, từ 1 điểm màu đến toàn bộ chiều dài",
+                default=0.3,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=1.0)),
             vol.Optional(
                 "strobe_decay_rate",
                 description="Tốc độ phân rã nhấp nháy bộ gõ. Cao hơn -> phân rã nhanh hơn.",
@@ -187,15 +187,15 @@ class HuxleyMelt(AudioReactiveEffect, HSVEffect):
         np.multiply(self.v, self.bg_bright, out=self.v)
 
         # Update strobe overlay array.
-        if not self.onsets_queue.empty():
+        if self.onsets_queue and not self.onsets_queue.empty():
             self.onsets_queue.get()
-            strobe_width = int(self.strobe_width * self.pixel_count)
-            # Can't use the random function if the strobe width takes up the entire strip, so return 0
-            position = (
-                0
-                if not (self.pixel_count - strobe_width)
-                else np.random.randint(self.pixel_count - strobe_width)
+            # If the config is at 0, we still clip to a minimum of 1 pixel.
+            strobe_width = np.clip(
+                int(self._config["strobe_width"] ** 3 * self.pixel_count),
+                1,
+                self.pixel_count - 1,
             )
+            position = np.random.randint(self.pixel_count - strobe_width)
             self.strobe_overlay[position : position + strobe_width] = 1.0
 
         # Adjust saturation by the strength of the overlay mask

@@ -56,4 +56,4 @@ class Strobe(AudioReactiveEffect, GradientEffect):
         ) * (1 - o) ** self.beat_decay
 
     def render(self):
-        self.pixels[:] = self.color * self.brightness
+        self.pixels[:] = self.color * self.brightness * 2

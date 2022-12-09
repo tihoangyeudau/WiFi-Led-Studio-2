@@ -15,7 +15,7 @@ class ScrollAudioEffect(AudioReactiveEffect):
             vol.Optional(
                 "blur",
                 description="Làm mờ",
-                default=3.0,
+                default=0.5,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=10)),
             vol.Optional(
                 "mirror",
@@ -23,18 +23,18 @@ class ScrollAudioEffect(AudioReactiveEffect):
                 default=True,
             ): bool,
             vol.Optional(
-                "speed", description="Tốc độ", default=3
+                "speed", description="Tốc độ", default=7
             ): vol.All(vol.Coerce(int), vol.Range(min=1, max=10)),
             vol.Optional(
                 "decay",
                 description="Tỷ lệ phân rã của cuộn",
-                default=0.97,
+                default=1,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.8, max=1.0)),
             vol.Optional(
                 "threshold",
                 description="Lọc ồn. Càng cao -> chỉ phát hiện âm thanh lớn",
-                default=0.0,
-            ): vol.All(vol.Coerce(float), vol.Range(min=0, max=1)),
+                default=5,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0, max=10)),
             vol.Optional(
                 "color_lows",
                 description="Màu âm trầm",
@@ -96,6 +96,6 @@ class ScrollAudioEffect(AudioReactiveEffect):
         self.pixels[speed:, :] = self.pixels[:-speed, :]
         self.pixels *= self.config["decay"]
 
-        self.pixels[:speed] = self.lows_color * self.intensities[0]
-        self.pixels[:speed] += self.mids_color * self.intensities[1]
-        self.pixels[:speed] += self.high_color * self.intensities[2]
+        self.pixels[:speed] = self.lows_color * self.intensities[0] * 2
+        self.pixels[:speed] += self.mids_color * self.intensities[1] * 2
+        self.pixels[:speed] += self.high_color * self.intensities[2] * 2

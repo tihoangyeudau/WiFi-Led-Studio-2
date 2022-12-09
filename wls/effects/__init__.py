@@ -313,6 +313,11 @@ class Effect(BaseRegistry):
         """
         pass
 
+    def _render(self):
+        self.lock.acquire()
+        self.render()
+        self.lock.release()
+
     def render(self):
         """
         To be implemented by child effect
@@ -321,11 +326,6 @@ class Effect(BaseRegistry):
         frame if it wants to use it for something
         """
         pass
-
-    def _render(self):
-        self.lock.acquire()
-        self.render()
-        self.lock.release()
 
     def get_pixels(self):
         if not hasattr(self, "pixels"):
