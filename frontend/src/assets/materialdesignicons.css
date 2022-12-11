@@ -11084,12 +11084,6 @@
 .mdi-middleware-outline::before {
     content: '\F0F5E';
 }
-.mdi-midi::before {
-    content: '\F08F1';
-}
-.mdi-midi-port::before {
-    content: '\F08F2';
-}
 .mdi-mine::before {
     content: '\F0DDA';
 }

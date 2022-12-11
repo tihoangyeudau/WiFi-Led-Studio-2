@@ -10,16 +10,6 @@ object-assign
   http://jedwatson.github.io/classnames
 */
 
-/*!
- * hotkeys-js v3.8.7
- * A simple micro-library for defining and dispatching keyboard shortcuts. It has no dependencies.
- * 
- * Copyright (c) 2021 kenny wong <wowohoo@qq.com>
- * http://jaywcjlove.github.io/hotkeys
- * 
- * Licensed under the MIT license.
- */
-
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
 
@@ -46,6 +36,8 @@ PERFORMANCE OF THIS SOFTWARE.
      *  Released under the MIT license
      */
 
+/*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
+
 /**
  * A better abstraction over CSS.
  *
@@ -54,7 +46,7 @@ PERFORMANCE OF THIS SOFTWARE.
  * @license MIT
  */
 
-/** @license MUI v5.2.6
+/** @license MUI v5.8.0
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -137,6 +129,15 @@ PERFORMANCE OF THIS SOFTWARE.
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ */
+
+/**! 
+ * hotkeys-js v3.9.3 
+ * A simple micro-library for defining and dispatching keyboard shortcuts. It has no dependencies. 
+ * 
+ * Copyright (c) 2022 kenny wong <wowohoo@qq.com> 
+ * http://jaywcjlove.github.io/hotkeys 
+ * Licensed under the MIT license 
  */
 
 //! moment.js

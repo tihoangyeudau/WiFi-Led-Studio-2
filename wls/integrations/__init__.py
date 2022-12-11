@@ -138,7 +138,7 @@ class Integrations(RegistryLoader):
                     wls=self._wls,
                 )
             except Exception as e:
-                _LOGGER.warning(f"Không tải được tích hợp MIDI: {e}")
+                _LOGGER.warning(f"Không tải được tích hợp: {e}")
 
     async def close_all_connections(self):
         for integration in self.values():
