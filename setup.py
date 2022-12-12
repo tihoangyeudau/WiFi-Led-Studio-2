@@ -42,7 +42,6 @@ INSTALL_REQUIRES = [
     "sounddevice~=0.4.2",
     "tcp-latency>=0.0.10",
     "voluptuous~=0.12.1",
-    "yappi~=1.3.3",
     "zeroconf==0.39.4",
     "pillow>=8.4.0",
     # Conditional Requirement

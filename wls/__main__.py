@@ -23,7 +23,6 @@ import sys
 from logging.handlers import RotatingFileHandler
 
 import psutil
-import yappi
 
 import wls.config as config_helpers
 from wls.consts import (
@@ -183,12 +182,6 @@ def parse_args():
         help="Ẩn bảng điều khiển WiFi Led Studio vào khay hệ thống",
     )
     parser.add_argument(
-        "--performance",
-        dest="performance",
-        action="store_true",
-        help="Hồ sơ hiệu suất của WiFi Led Studio. Nhà phát triển có thể sử dụng điều này để chẩn đoán các vấn đề về hiệu suất.",
-    )
-    parser.add_argument(
         "--offline",
         dest="offline_mode",
         action="store_true",
@@ -284,9 +277,6 @@ def entry_point(icon=None):
     while exit_code == 4:
         _LOGGER.info("Lõi WiFi Led Studio đang khởi tạo")
 
-        if args.performance:
-            print("Thu thập dữ liệu hiệu suất...")
-            yappi.start()
         wls = WlsCore(
             config_dir=args.config,
             host=args.host,
@@ -297,19 +287,6 @@ def entry_point(icon=None):
 
         exit_code = wls.start(open_ui=args.open_ui)
 
-        if args.performance:
-            print("Đã thu thập xong dữ liệu hiệu suất")
-            filename = config_helpers.get_profile_dump_location(
-                config_dir=args.config
-            )
-            yappi.stop()
-            stats = yappi.get_func_stats()
-            yappi.get_thread_stats().print_all()
-            stats.save(filename, type="pstat")
-            print(f"Đã lưu dữ liệu hiệu suất vào thư mục cấu hình: {filename}")
-            print(
-                "Vui lòng gửi dữ liệu hiệu suất cho Rainbow Music Led: https://facebook.com/rainbowmusicled"
-            )
     if icon:
         icon.stop()
 
