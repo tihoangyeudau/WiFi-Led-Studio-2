@@ -15,7 +15,7 @@ class ScrollAudioEffect(AudioReactiveEffect):
             vol.Optional(
                 "blur",
                 description="Làm mờ",
-                default=0.5,
+                default=0.1,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=10)),
             vol.Optional(
                 "mirror",
@@ -33,7 +33,7 @@ class ScrollAudioEffect(AudioReactiveEffect):
             vol.Optional(
                 "threshold",
                 description="Lọc ồn. Càng cao -> chỉ phát hiện âm thanh lớn",
-                default=5,
+                default=4.5,
             ): vol.All(vol.Coerce(float), vol.Range(min=0, max=10)),
             vol.Optional(
                 "color_lows",
