@@ -7,7 +7,7 @@ block_cipher = None
 a = Analysis(['./wls/__main__.py'],
              pathex=['.', './wls'],
              binaries=[],
-             datas=[('/Users/macos/Documents/GitHub/WiFi-Led-Studio-2/icons', 'icons/'), ('/Users/macos/Documents/GitHub/WiFi-Led-Studio-2/icons/tray.png', '.'),
+             datas=[('/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons', 'icons/'), ('/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons/tray.png', '.'),
              ('/usr/local/bin/build/WiFi Led Studio-3.1.0.app/Contents/MacOS/lib/wls', 'wls/'),
              ('/usr/local/bin/build/WiFi Led Studio-3.1.0.app/Contents/MacOS/lib/wls_frontend', 'wls_frontend/')],
              hiddenimports=['zeroconf', 'cffi', 'appkit', 'pycparser',  'sacn', 'aubio', 'numpy', 'math', 'voluptuous', 'numpy', 'aiohttp', 'paho', 'paho.mqtt', 'paho.mqtt.client','sounddevice',
@@ -43,7 +43,7 @@ coll = COLLECT(exe,
                name='WiFiLedStudio',)
 app = BUNDLE(coll,
             name = 'WiFiLedStudio.app',
-            icon = '/Users/macos/make setup/WiFi Led Studio.icns',
+            icon = '/Users/phamtuantrung/make setup/WiFi Led Studio.icns',
             bundle_identifier = 'com.rml.wls',
             info_plist = {
                 'NSHighResolutionCapable': 'True',
