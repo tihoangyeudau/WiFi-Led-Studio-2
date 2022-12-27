@@ -3,6 +3,7 @@
 # import numpy as np
 # import requests
 import logging
+from enum import IntEnum
 
 # from wls.config import save_config
 from wls.events import Event
@@ -13,21 +14,21 @@ from wls.utils import BaseRegistry, RegistryLoader, async_fire_and_forget
 _LOGGER = logging.getLogger(__name__)
 
 
+class Status(IntEnum):
+    DISCONNECTED = 0
+    CONNECTED = 1
+    DISCONNECTING = 2
+    CONNECTING = 3
+
+
 @BaseRegistry.no_registration
 class Integration(BaseRegistry):
-
-    # STATUS REFERENCE
-    # 0: disconnected
-    # 1: connected
-    # 2: disconnecting
-    # 3: connecting
-
     def __init__(self, wls, config, active, data):
         self._wls = wls
         self._config = config
         self._active = active
         self._data = data
-        self._status = 0
+        self._status = Status.DISCONNECTED
 
     def __del__(self):
         if self._active:
@@ -38,7 +39,7 @@ class Integration(BaseRegistry):
             ("Đang kích hoạt {} tích hợp").format(self._config["name"])
         )
         self._active = True
-        self._status = 3
+        self._status = Status.CONNECTING
         async_fire_and_forget(self.connect(), self._wls.loop)
 
     async def deactivate(self):
@@ -46,16 +47,16 @@ class Integration(BaseRegistry):
             ("Đang vô hiệu {} tích hợp").format(self._config["name"])
         )
         self._active = False
-        self._status = 2
+        self._status = Status.DISCONNECTING
         async_fire_and_forget(self.disconnect(), self._wls.loop)
 
     async def reconnect(self):
         _LOGGER.info(
             ("Đang kết nối {} tích hợp").format(self._config["name"])
         )
-        self._status = 2
+        self._status = Status.DISCONNECTING
         await self.disconnect()
-        self._status = 3
+        self._status = Status.CONNECTING
         await self.connect()
 
     async def connect(self, msg=None):
@@ -64,7 +65,7 @@ class Integration(BaseRegistry):
         This method must be overwritten by the integration implementation.
         Be sure to end this function with await super().connect()
         """
-        self._status = 1
+        self._status = Status.CONNECTED
         if msg:
             _LOGGER.info(msg)
 
@@ -74,7 +75,7 @@ class Integration(BaseRegistry):
         This method must be overwritten by the integration implementation.
         Be sure to end this function with await super().disconnect()
         """
-        self._status = 0
+        self._status = Status.DISCONNECTED
         if msg:
             _LOGGER.info(msg)
 
