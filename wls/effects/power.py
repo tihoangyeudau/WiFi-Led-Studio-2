@@ -67,4 +67,4 @@ class PowerAudioEffect(AudioReactiveEffect, GradientEffect):
         self.bg = self.apply_gradient(r)
 
     def render(self):
-        self.pixels = (self.bg + self.bass_overlay + self.sparks_overlay) * 1.05
+        self.pixels = (self.bg + self.bass_overlay + self.sparks_overlay)

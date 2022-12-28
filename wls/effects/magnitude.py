@@ -38,4 +38,4 @@ class MagnitudeAudioEffect(AudioReactiveEffect, GradientEffect):
         super().gradient_magnitude_beat_power(data)
 
     def render(self):
-        self.pixels = self.apply_gradient(self.magnitude) * 4
+        self.pixels = self.apply_gradient(self.magnitude) * 2
