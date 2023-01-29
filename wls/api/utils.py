@@ -35,6 +35,7 @@ if sys.platform == 'win32':
             "visualisation_fps",
             "visualisation_maxlen",
             "global_transitions",
+            "global_brightness",
         ),
     }
 else:
@@ -56,6 +57,7 @@ else:
             "visualisation_fps",
             "visualisation_maxlen",
             "global_transitions",
+            "global_brightness",
         ),
     }
 
