@@ -196,7 +196,9 @@ class ConfigEndpoint(RestEndpoint):
                     self._wls.config["melbanks"]
                 )
 
-            if core_config and not ("global_brightness" in core_config and len(core_config) == 1):
+            if core_config and not (
+                "global_brightness" in core_config and len(core_config) == 1
+            ):
                 self._wls.loop.call_soon_threadsafe(self._wls.stop, 4)
 
             save_config(
