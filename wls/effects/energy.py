@@ -100,7 +100,13 @@ class EnergyAudioEffect(AudioReactiveEffect):
             if self.beat_now:
                 # Cycle between 0,1,2 for lows, mids and highs
                 self.color_cycler = (self.color_cycler + 1) % 3
-                color = np.random.choice(tuple(self._wls.colors.values()))
+                
+                color_raw = self._wls.colors.get_all(merged=False)
+                if len(color_raw[1]) > 0:  # if there are user colors, use them
+                    color_list = list(color_raw[1].values())
+                else:
+                    color_list = list(color_raw[0].values())
+                color = parse_color(np.random.choice(color_list))
 
                 if self.color_cycler == 0:
                     self.lows_color = color
