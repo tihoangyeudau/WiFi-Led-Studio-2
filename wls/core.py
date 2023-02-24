@@ -129,14 +129,26 @@ class WlsCore:
         else:
             subprocess.run(['open', '/Applications/Ambilight WiFi.app'], check=True)
 
+    def restart_wls(self):
+            path = os.path.join(os.environ["ProgramFiles"], "WiFi Led Studio", "wifiledstudio.exe")
+            subprocess.call(path)
+
     def setup_icon_menu(self):
         import pystray
-
-        self.icon.menu = pystray.Menu(
-            pystray.MenuItem("Mở", self.open_ui, default=True),
-            pystray.MenuItem("Mở Ambilight WiFi", self.open_app),
-            pystray.MenuItem("Thoát", self.stop),
-        )
+        if sys.platform == "win32":
+            self.icon.menu = pystray.Menu(
+                pystray.MenuItem("Mở", self.open_ui, default=True),
+                pystray.MenuItem("Mở Ambilight WiFi", self.open_app),
+                pystray.MenuItem("Khởi động lại", self.restart_wls),
+                pystray.MenuItem("Thoát", self.stop),
+            )
+        else:
+            self.icon.menu = pystray.Menu(
+                pystray.MenuItem("Mở", self.open_ui, default=True),
+                pystray.MenuItem("Mở Ambilight WiFi", self.open_app),
+                pystray.MenuItem("Thoát", self.stop),
+            )
+            
 
     def setup_visualisation_events(self):
         """
