@@ -135,6 +135,7 @@ class WlsCore:
 
     def setup_icon_menu(self):
         import pystray
+
         if sys.platform == "win32":
             self.icon.menu = pystray.Menu(
                 pystray.MenuItem("Mở", self.open_ui, default=True),
