@@ -32,7 +32,7 @@ from wls.consts import (
     REQUIRED_PYTHON_VERSION,
 )
 from wls.core import WlsCore
-from wls.utils import currently_frozen
+from wls.utils import currently_frozen, get_icon_path
 
 
 def validate_python() -> None:
@@ -247,18 +247,11 @@ def main():
 
         from PIL import Image
 
-        if currently_frozen():
-            current_directory = os.path.dirname(__file__)
-            icon_location = os.path.join(current_directory, "tray.png")
-        else:
-            current_directory = os.path.dirname(__file__)
-            icon_location = os.path.join(
-                current_directory, "..", "icons/" "tray.png"
-            )
+        icon_location = get_icon_path("tray.png")
+
         icon = pystray.Icon(
             "Wls", icon=Image.open(icon_location), title="WiFi Led Studio @ Rainbow Music Led"
         )
-        icon.visible = True
     else:
         icon = None
 
@@ -272,6 +265,9 @@ def main():
 def entry_point(icon=None):
     # have to re-parse args here :/ no way to pass them through pysicon's setup
     args = parse_args()
+
+    if icon:
+        icon.visible = True
 
     exit_code = 4
     while exit_code == 4:

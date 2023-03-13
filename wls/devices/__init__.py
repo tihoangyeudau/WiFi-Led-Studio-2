@@ -608,12 +608,14 @@ class Devices(RegistryLoader):
         if hasattr(device, "async_initialize"):
             await device.async_initialize()
 
+        device_config = device.config
+
         # Update and save the configuration
         self._wls.config["devices"].append(
             {
                 "id": device.id,
                 "type": device.type,
-                "config": device.config,
+                "config": device_config,
             }
         )
 

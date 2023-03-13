@@ -39,7 +39,7 @@ class ScenesEndpoint(RestEndpoint):
         if scene_id is None:
             response = {
                 "status": "failed",
-                "reason": 'Thuộc tính bắt buộc "scene_id" không được cung cấp',
+                "reason": 'Thuộc tính bắt buộc "id" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
@@ -92,7 +92,7 @@ class ScenesEndpoint(RestEndpoint):
         if scene_id is None:
             response = {
                 "status": "failed",
-                "reason": 'Thuộc tính bắt buộc "scene_id" không được cung cấp',
+                "reason": 'Thuộc tính bắt buộc "id" không được cung cấp',
             }
             return web.json_response(data=response, status=400)
 
