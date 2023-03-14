@@ -14,10 +14,10 @@ a = Analysis([f'{spec_root}\\wls\\__main__.py'],
                 (f'C:/Users/tuant/AppData/Local/Programs/Python/Python311/Scripts/build/exe.win-amd64-3.11/lib/wls','wls/'),
                 (f'C:/Users/tuant/AppData/Local/Programs/Python/Python311/Scripts/build/exe.win-amd64-3.11/lib/wls_frontend','wls_frontend/'),
                 (f'C:/Users/tuant/AppData/Local/Programs/Python/Python311/Scripts/build/exe.win-amd64-3.11/lib/samplerate','samplerate/'),
-                (f'{spec_root}/icons','icons/'), (f'{spec_root}/icons/tray.png','wls/')
+                (f'{spec_root}/icons','icons/'), (f'{spec_root}/icons/tray.png','.')
              ],
              hiddenimports=[
-                'sounddevice','cffi','pycparser','sacn','aubio','numpy','math','voluptuous','numpy','aiohttp','paho','paho.mqtt','paho.mqtt.client',
+                'sounddevice','notifypy','cffi','pycparser','sacn','aubio','numpy','math','voluptuous','numpy','aiohttp','paho','paho.mqtt','paho.mqtt.client',
                 'sentry_sdk','sentry_sdk.integrations.django','sentry_sdk.integrations.flask','sentry_sdk.integrations.bottle','sentry_sdk.integrations.falcon','sentry_sdk.integrations.sanic',
                 'sentry_sdk.integrations.celery','sentry_sdk.integrations.aiohttp','sentry_sdk.integrations.rq','sentry_sdk.integrations.tornado','sentry_sdk.integrations.sqlalchemy',
                 'sentry_sdk.integrations.boto3','_cffi_backend','serial','pystray._win32','serial.tools.list_ports','tcp_latency','aiohttp_cors','psutil'
