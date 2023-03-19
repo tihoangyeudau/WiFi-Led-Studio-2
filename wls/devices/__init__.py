@@ -709,3 +709,7 @@ class RMLListener(zeroconf.ServiceBrowser):
                 loop=self._wls.loop,
                 exc_handler=handle_exception,
             )
+
+    def update_service(self, zeroconf_obj, type, name):
+        """Callback when a service is updated."""
+        pass

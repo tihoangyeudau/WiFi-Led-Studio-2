@@ -175,12 +175,22 @@ def parse_args():
         default=None,
         type=str,
     )
-    parser.add_argument(
+    group = parser.add_mutually_exclusive_group()
+
+    group.add_argument(
         "--tray",
         dest="tray",
         action="store_true",
-        help="Ẩn bảng điều khiển WiFi Led Studio vào khay hệ thống",
+        help="Buộc hiện icon WiFi Led Studio ở khay thanh tác vụ",
     )
+
+    group.add_argument(
+        "--no-tray",
+        dest="no_tray",
+        action="store_true",
+        help="Buộc ẩn icon WiFi Led Studio ở khay thanh tác vụ",
+    )
+
     parser.add_argument(
         "--offline",
         dest="offline_mode",
@@ -194,6 +204,29 @@ def parse_args():
         help="Điều này xảy ra sự cố. Hãy kiểm tra trình ghi sự cố sentry",
     )
     return parser.parse_args()
+
+
+def log_packages():
+    from platform import (
+        processor,
+        python_build,
+        python_implementation,
+        python_version,
+        release,
+        system,
+    )
+
+    from pkg_resources import working_set
+
+    _LOGGER.debug(f"{system()} : {release()} : {processor()}")
+    _LOGGER.debug(
+        f"{python_version()} : {python_build()} : {python_implementation()}"
+    )
+    _LOGGER.debug("Packages")
+    dists = [d for d in working_set]
+    dists.sort(key=lambda x: x.project_name)
+    for dist in dists:
+        _LOGGER.debug(f"{dist.project_name} : {dist.version}")
 
 
 def main():
@@ -235,7 +268,7 @@ def main():
         """This will crash Wls and submit a Sentry error if Sentry is configured"""
         _LOGGER.warning("Chỉ đạo WiFi Led Studio vào một bức tường gạch")
         div_by_zero = 1 / 0
-    if args.tray or currently_frozen():
+    if (args.tray or currently_frozen()) and not args.no_tray:
         # If pystray is imported on a device that can't display it, it explodes. Catch it
         try:
             import pystray
@@ -254,6 +287,9 @@ def main():
         )
     else:
         icon = None
+
+    if _LOGGER.isEnabledFor(logging.DEBUG):
+        log_packages()
 
     if icon:
         icon.run(setup=entry_point)

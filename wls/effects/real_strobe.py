@@ -33,18 +33,23 @@ class Strobe(AudioReactiveEffect, GradientEffect):
                 default=0.4,
             ): vol.All(vol.Coerce(float), vol.Range(min=0, max=1)),
             vol.Optional(
+                "color_shift_delay",
+                description="độ trễ chuyển màu cho nhấp nháy. Thấp hơn -> nhiều nhấp nháy hơn",
+                default=1,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0, max=1)),
+            vol.Optional(
                 "strobe_color",
-                description="Màu sắc cho bộ gõ",
+                description="Màu sắc cho nhấp nháy",
                 default="#FFFFFF",
             ): validate_color,
             vol.Optional(
                 "strobe_width",
-                description="Chiều rộng nhấp nháy bộ gõ, tính bằng pixel",
+                description="Chiều rộng nhấp nháy, tính bằng pixel",
                 default=10,
             ): vol.All(vol.Coerce(int), vol.Range(min=0, max=1000)),
             vol.Optional(
                 "strobe_decay_rate",
-                description="Tỷ lệ phân rã nhấp nháy bộ gõ. Càng cao -> phân rã càng nhanh.",
+                description="Tỷ lệ phân rã nhấp nháy. Càng cao -> phân rã càng nhanh.",
                 default=0.45,
             ): vol.All(vol.Coerce(float), vol.Range(min=0, max=1)),
         }
@@ -70,7 +75,7 @@ class Strobe(AudioReactiveEffect, GradientEffect):
         )
         self.last_color_shift_time = 0
         self.strobe_width = self._config["strobe_width"]
-        self.color_shift_delay_in_seconds = 1
+        self.color_shift_delay_in_seconds = self._config["color_shift_delay"]
         self.color_idx = 0
 
         self.last_strobe_time = 0
