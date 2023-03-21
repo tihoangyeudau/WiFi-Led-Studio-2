@@ -2,7 +2,6 @@ import logging
 from json import JSONDecodeError
 
 from aiohttp import web
-from notifypy import Notify
 
 from wls.api import RestEndpoint
 from wls.utils import get_icon_path
@@ -48,14 +47,6 @@ class NotifyEndpoint(RestEndpoint):
         if self.icon is not None:
             if self.icon.HAS_NOTIFICATION:
                 self.icon.notify(f"{title}:\n{text}")
-        else:
-            icon_location = get_icon_path("tray.png")
-            notification = Notify()
-            notification.application_name = "WiFi Led Studio @ Rainbow Music Led"
-            notification.title = title
-            notification.message = text
-            notification.icon = icon_location
-            notification.send(block=False)
 
         response = {
             "status": "success",

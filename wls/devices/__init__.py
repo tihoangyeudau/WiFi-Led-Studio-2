@@ -609,7 +609,8 @@ class Devices(RegistryLoader):
             await device.async_initialize()
 
         device_config = device.config
-
+        if device_type == "rml" and rml_name is not None:
+            device_config["name"] = rml_name
         # Update and save the configuration
         self._wls.config["devices"].append(
             {
