@@ -4,7 +4,6 @@ from json import JSONDecodeError
 from aiohttp import web
 
 from wls.api import RestEndpoint
-from wls.utils import get_icon_path
 
 _LOGGER = logging.getLogger(__name__)
 
