@@ -4,6 +4,6 @@ sudo apt-get install pavucontrol -y
 sudo apt-get install portaudio19-dev -y
 
 cd python-3.10.10
-./configure --enable-optimizations
+./configure
 sudo make install
 python3 --version
