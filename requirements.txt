@@ -16,10 +16,11 @@
     paho-mqtt~=1.5.1
     psutil>=5.8.0
     pyserial~=3.5
-    pystray==0.17
+    pystray>=0.17
     requests~=2.24.0
     sacn~=1.6.3
-    sentry-sdk==1.4.3
+    sentry-sdk==1.14.0
+    samplerate>=0.1.0
     sounddevice~=0.4.2
     tcp-latency~=0.0.10
     voluptuous~=0.12.1

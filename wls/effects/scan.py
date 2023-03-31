@@ -1,0 +1,127 @@
+import timeit
+
+import numpy as np
+import voluptuous as vol
+
+from wls.color import parse_color, validate_color
+from wls.effects.audio import AudioReactiveEffect
+
+# import logging
+
+
+# _LOGGER = logging.getLogger(__name__)
+
+
+class ScanAudioEffect(AudioReactiveEffect):
+    NAME = "Quét"
+    CATEGORY = "Cổ điển"
+
+    _power_funcs = {
+        "Nhịp": "beat_power",
+        "Trầm": "bass_power",
+        "Thấp (nhịp+trầm)": "lows_power",
+        "Trung": "mids_power",
+        "Cao": "high_power",
+    }
+
+    CONFIG_SCHEMA = vol.Schema(
+        {
+            vol.Optional(
+                "blur",
+                description="Mức mờ",
+                default=3.0,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=10)),
+            vol.Optional(
+                "mirror",
+                description="Phản chiếu",
+                default=False,
+            ): bool,
+            vol.Optional(
+                "bounce",
+                description="Trả lại quá trình quét",
+                default=True,
+            ): bool,
+            vol.Optional(
+                "scan_width", description="Chiều rộng của mắt quét trong %", default=30
+            ): vol.All(vol.Coerce(int), vol.Range(min=1, max=100)),
+            vol.Optional(
+                "speed", description="Cơ sở quét % mỗi giây", default=50
+            ): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
+            vol.Optional(
+                "color_scan",
+                description="Màu quét",
+                default="#FF0000",
+            ): validate_color,
+            vol.Optional(
+                "frequency_range",
+                description="Dải tần số để phát hiện nhịp",
+                default="Thấp (nhịp+trầm)",
+            ): vol.In(list(_power_funcs.keys())),
+            vol.Optional(
+                "multiplier",
+                description="Hệ số tốc độ",
+                default=3.0,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=5.0)),
+        }
+    )
+
+    def on_activate(self, pixel_count):
+        self.scan_pos = 0.0
+        self.returning = False
+        self.last_time = timeit.default_timer()
+        self.bar = 0
+
+    def config_updated(self, config):
+        self.background_color = np.array(
+            parse_color(self._config["background_color"]), dtype=float
+        )
+        self.color_scan = np.array(
+            parse_color(self._config["color_scan"]), dtype=float
+        )
+        self.power_func = self._power_funcs[self._config["frequency_range"]]
+
+    def audio_data_updated(self, data):
+        self.bar = (
+            getattr(data, self.power_func)() * self._config["multiplier"] * 2
+        )
+
+    def render(self):
+        now = timeit.default_timer()
+        time_passed = now - self.last_time
+        self.last_time = now
+
+        step_per_sec = self.pixel_count / 100.0 * self._config["speed"]
+        step_size = time_passed * step_per_sec
+
+        step_size = step_size * self.bar
+
+        scan_width_pixels = int(
+            max(1, int(self.pixel_count / 100.0 * self._config["scan_width"]))
+        )
+        if self.returning:
+            self.scan_pos -= step_size
+        else:
+            self.scan_pos += step_size
+
+        if self._config["bounce"]:
+            if self.scan_pos > self.pixel_count - scan_width_pixels:
+                self.returning = True
+            if self.scan_pos < 0:
+                self.returning = False
+        else:
+            if self.scan_pos > self.pixel_count:
+                self.scan_pos = 0.0
+            if self.scan_pos < 0:
+                self.returning = False
+
+        pixel_pos = max(0, min(int(self.scan_pos), self.pixel_count))
+
+        self.pixels[0 : self.pixel_count] = self.background_color
+        self.pixels[
+            pixel_pos : min(pixel_pos + scan_width_pixels, self.pixel_count)
+        ] = self.color_scan
+
+        if not self._config["bounce"]:
+            overflow = (pixel_pos + scan_width_pixels) - self.pixel_count
+            if overflow > 0:
+                self.pixels[:overflow] = self.color_scan

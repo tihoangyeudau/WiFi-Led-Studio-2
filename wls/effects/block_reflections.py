@@ -8,7 +8,7 @@ from wls.effects.hsv_effect import HSVEffect
 class BlockReflections(AudioReactiveEffect, HSVEffect):
 
     NAME = "Khối phản lực"
-    CATEGORY = "Dạng áp suất"
+    CATEGORY = "Áp suất"
 
     CONFIG_SCHEMA = vol.Schema(
         {
