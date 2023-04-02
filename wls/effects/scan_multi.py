@@ -28,7 +28,7 @@ class Scan:
 
 
 class ScanMultiAudioEffect(AudioReactiveEffect, GradientEffect):
-    NAME = "Đa qwuét"
+    NAME = "Đa quét"
     CATEGORY = "Cổ điển"
     HIDDEN_KEYS = ["gradient_roll"]
 
