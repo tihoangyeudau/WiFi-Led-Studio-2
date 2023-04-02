@@ -34,7 +34,7 @@ INSTALL_REQUIRES = [
     "psutil>=5.8.0",
     "pyserial>=3.5",
     "pystray>=0.17",
-    "requests>=2.24.0",
+    "requests~=2.28.2",
     "sacn~=1.6.3",
     "sentry-sdk==1.14.0",
     "sounddevice>=0.4.2",
