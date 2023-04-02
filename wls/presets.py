@@ -1434,4 +1434,6 @@ wls_presets = {
     "power": {"reset": {"config": {}, "name": "Đặt lại"}},
     "melt_and_sparkle": {"reset": {"config": {}, "name": "Đặt lại"}},
     "water": {"reset": {"config": {}, "name": "Đặt lại"}},
+    "scan": {"reset": {"config": {}, "name": "Đặt lại"}},
+    "scan_multi": {"reset": {"config": {}, "name": "Đặt lại"}},
 }

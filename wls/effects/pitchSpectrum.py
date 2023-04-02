@@ -1,7 +1,7 @@
+import numpy as np
 import voluptuous as vol
 
 from wls.color import RGB
-from wls.effects import mix_colors
 from wls.effects.audio import MAX_MIDI, MIN_MIDI, AudioReactiveEffect
 from wls.effects.gradient import GradientEffect
 
@@ -64,12 +64,17 @@ class PitchSpectrumAudioEffect(AudioReactiveEffect, GradientEffect):
 
         # Mix in the new color based on the filterbank information and fade out
         # the old colors
-        for index in range(self.pixel_count):
-            #
-            # SLOW SLOW SLOW for loop
-            #
-            new_color = mix_colors(self.pixels[index], note_color, y[index])
-            new_color = mix_colors(
-                new_color, RGB(0, 0, 0), self._config["fade_rate"]
-            )
-            self.pixels[index] = new_color
+         # Mix colors for each pixel
+        new_colors = np.multiply(self.pixels, (1 - y[:, None])) + np.multiply(
+            note_color, y[:, None]
+        )
+
+        # Apply fade_rate
+        fade_rate = self._config["fade_rate"]
+        black = np.zeros((self.pixel_count, 3))
+        new_colors = np.multiply(new_colors, (1 - fade_rate)) + np.multiply(
+            black, fade_rate
+        )
+
+        # Assign new_colors back to self.pixels
+        self.pixels = new_colors

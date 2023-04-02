@@ -9,7 +9,7 @@ from wls.effects.gradient import GradientEffect
 
 
 class ScanAudioEffect(AudioReactiveEffect, GradientEffect):
-    NAME = "Quét"
+    NAME = "Đơn quét"
     CATEGORY = "Cổ điển"
     HIDDEN_KEYS = ["gradient_roll"]
 
@@ -35,11 +35,11 @@ class ScanAudioEffect(AudioReactiveEffect, GradientEffect):
             ): bool,
             vol.Optional(
                 "bounce",
-                description="Trả lại quá trình quét",
+                description="Độ nảy",
                 default=True,
             ): bool,
             vol.Optional(
-                "scan_width", description="Chiều rộng của mắt quét trong %", default=30
+                "scan_width", description="Chiều rộng của mắt quét trong %", default=20
             ): vol.All(vol.Coerce(int), vol.Range(min=1, max=100)),
             vol.Optional(
                 "speed", description="Cơ sở quét % mỗi giây", default=50
@@ -66,8 +66,8 @@ class ScanAudioEffect(AudioReactiveEffect, GradientEffect):
             ): bool,
             vol.Optional(
                 "use_grad",
-                description="Sử dụng màu từ bộ chọn gradient",
-                default=False,
+                description="Sử dụng màu từ bộ chọn dải màu",
+                default=True,
             ): bool,
         }
     )
