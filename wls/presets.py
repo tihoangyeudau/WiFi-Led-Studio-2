@@ -1436,4 +1436,5 @@ wls_presets = {
     "water": {"reset": {"config": {}, "name": "Đặt lại"}},
     "scan": {"reset": {"config": {}, "name": "Đặt lại"}},
     "scan_multi": {"reset": {"config": {}, "name": "Đặt lại"}},
+    "scan_and_flare": {"reset": {"config": {}, "name": "Đặt lại"}},
 }

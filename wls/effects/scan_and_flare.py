@@ -1,8 +1,8 @@
+import logging
 import timeit
 
 import numpy as np
 import voluptuous as vol
-import logging
 
 from wls.color import parse_color, validate_color
 from wls.effects.audio import AudioReactiveEffect
@@ -30,13 +30,13 @@ class Sparkle:
         if now - self.born > self.die_off:
             self.alive = False
         self.health = 1 - ((now - self.born) / self.die_off)
-        self.pos += self.speed * frame_time
+        self.pos += self.speed * frame_time * self.health
         self.pos = self.pos % pixel_count
         self.pos = int(self.pos)
 
     def render(self, pixels, pixel_count):
         color = self.white * self.health
-        pixels[ self.pos : min(self.pos + self.width, pixel_count)] += color
+        pixels[self.pos : min(self.pos + self.width, pixel_count)] += color
         overflow = (self.pos + self.width) - pixel_count
         if overflow > 0:
             pixels[:overflow] += color
@@ -73,13 +73,15 @@ class ScanAndFlareAudioEffect(AudioReactiveEffect, GradientEffect):
                 default=True,
             ): bool,
             vol.Optional(
-                "scan_width", description="Chiều rộng của mắt quét trong %", default=30
+                "scan_width", description="Chiều rộng của mắt quét trong %", default=20
             ): vol.All(vol.Coerce(int), vol.Range(min=1, max=100)),
             vol.Optional(
                 "speed", description="Cơ sở quét % mỗi giây", default=50
             ): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
             vol.Optional(
-                "sparkles_max", description="Số lượng lóe sáng tối đa", default=10
+                "sparkles_max",
+                description="Số lượng lóe sáng tối đa",
+                default=10,
             ): vol.All(vol.Coerce(int), vol.Range(min=1, max=20)),
             vol.Optional(
                 "sparkles_size", description="Kích thước lóe sáng", default=0.1
@@ -88,7 +90,9 @@ class ScanAndFlareAudioEffect(AudioReactiveEffect, GradientEffect):
                 "sparkles_time", description="Số giây đến lúc tắt", default=1.0
             ): vol.All(vol.Coerce(float), vol.Range(min=0.01, max=2)),
             vol.Optional(
-                "sparkles_threshold", description="Ngưỡng kích hoạt", default=0.6
+                "sparkles_threshold",
+                description="Ngưỡng kích hoạtr",
+                default=0.6,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.1, max=0.9)),
             vol.Optional(
                 "color_scan",
@@ -113,7 +117,12 @@ class ScanAndFlareAudioEffect(AudioReactiveEffect, GradientEffect):
             vol.Optional(
                 "use_grad",
                 description="Sử dụng màu từ bộ chọn dải màu",
-                default=False,
+                default=True,
+            ): bool,
+            vol.Optional(
+                "spark_on",
+                description="Bật/tắt lóe sáng",
+                default=True,
             ): bool,
         }
     )
@@ -141,6 +150,8 @@ class ScanAndFlareAudioEffect(AudioReactiveEffect, GradientEffect):
         self.power = getattr(data, self.power_func)() * 2
         self.bar = self.power * self._config["multiplier"]
 
+    def render(self):
+        # setup colors
         if self._config["use_grad"]:
             gradient_pos = (self.scan_pos / self.pixel_count) % 1
             self.color_scan = self.get_gradient_color(gradient_pos)
@@ -150,7 +161,6 @@ class ScanAndFlareAudioEffect(AudioReactiveEffect, GradientEffect):
         if self._config["color_intensity"]:
             self.color_scan = self.color_scan * min(1.0, self.power)
 
-    def render(self):
         now = timeit.default_timer()
         time_passed = now - self.last_time
         self.last_time = now
@@ -192,16 +202,24 @@ class ScanAndFlareAudioEffect(AudioReactiveEffect, GradientEffect):
             if self.power > self._config["sparkles_threshold"] * 2:
                 # cannot convince myself to limit sparkles per second
                 # if now - self.last_sparkle > (1 / self._config["sparkles_max"]):
-                sparkle_width = scan_width_pixels * self._config["sparkles_size"]
+                sparkle_width = (
+                    scan_width_pixels * self._config["sparkles_size"]
+                )
                 if not self.returning:
-                    sparkle_pos = (pixel_pos - sparkle_width) % self.pixel_count
+                    sparkle_pos = (
+                        pixel_pos - sparkle_width
+                    ) % self.pixel_count
                 else:
-                    sparkle_pos = (pixel_pos + scan_width_pixels) % self.pixel_count
+                    sparkle_pos = (
+                        pixel_pos + scan_width_pixels
+                    ) % self.pixel_count
 
-                sparkle = Sparkle(sparkle_pos,
-                                  sparkle_width,
-                                  (0-step_per_sec) if self.returning else step_per_sec,
-                                  self._config["sparkles_time"])
+                sparkle = Sparkle(
+                    sparkle_pos,
+                    sparkle_width,
+                    (0 - step_per_sec) if self.returning else step_per_sec,
+                    self._config["sparkles_time"],
+                )
                 self.sparkles.append(sparkle)
                 self.last_sparkle = now
 
