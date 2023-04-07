@@ -26,7 +26,6 @@ import psutil
 
 import wls.config as config_helpers
 from wls.consts import (
-    PROJECT_NAME,
     PROJECT_VERSION,
     REQUIRED_PYTHON_STRING,
     REQUIRED_PYTHON_VERSION,
