@@ -1,13 +1,12 @@
-import logging
 import timeit
 
 import numpy as np
+import psutil
 import voluptuous as vol
 
 from wls.color import parse_color, validate_color
-from wls.effects.temporal import TemporalEffect
-
-_LOGGER = logging.getLogger(__name__)
+from wls.effects.audio import AudioReactiveEffect
+from wls.utils import Graph
 
 # Metro intent is to flash a pattern on led strips so end users can look for
 # sync between separate light strips due to protocol, wifi conditions or other
@@ -16,7 +15,7 @@ _LOGGER = logging.getLogger(__name__)
 # with common configurations will be in sync
 
 
-class MetroEffect(TemporalEffect):
+class MetroEffect(AudioReactiveEffect):
     NAME = "Tàu điện"
     CATEGORY = "Chuẩn đoán"
     HIDDEN_KEYS = ["speed", "background_brightness", "blur", "mirror"]
@@ -25,11 +24,6 @@ class MetroEffect(TemporalEffect):
 
     CONFIG_SCHEMA = vol.Schema(
         {
-            vol.Optional(
-                "speed",
-                default=20.0,
-                description="Khóa tại 20 fps",
-            ): vol.All(vol.Coerce(float), vol.Range(min=20, max=20)),
             vol.Optional(
                 "pulse_period",
                 description="Thời gian giữa các lần nháy tính bằng giây",
@@ -55,12 +49,27 @@ class MetroEffect(TemporalEffect):
                 description="Màu chớp",
                 default="#FFFFFF",
             ): validate_color,
+            vol.Optional(
+                "capture",
+                description="Chụp đồ thị, bật để bắt đầu, tắt để kết xuất",
+                default=True,
+            ): bool,
+            vol.Optional(
+                "cpu_secs",
+                description="Cửa sổ để đo mức sử dụng CPU",
+                default=1.0,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.1, max=1.0)),
         }
     )
 
     def __init__(self, wls, config):
-        super().__init__(wls, config)
         self.was_flash = False
+        self.graph_callbacks = None
+        self.graph_cpu = None
+        self.cores = 0
+        self.last_cpu = 0.0
+        config["capture"] = False
+        super().__init__(wls, config)
 
     def on_activate(self, pixel_count):
         pass
@@ -76,9 +85,50 @@ class MetroEffect(TemporalEffect):
         self.cycle_threshold = self._config["pulse_period"] * (
             self._config["pulse_ratio"]
         )
+        if self._config["capture"] and self.graph_callbacks is None:
+            # start a capture sequence, generate base graphs
+            self.graph_callbacks = Graph(
+                "Metro Callback Timing", ["Audio", "Render"], points=5000
+            )
+            self.cores = psutil.cpu_count()
+            # zero the local timer and prime cpu measurement
+            self.last_cpu = timeit.default_timer()
+            psutil.cpu_percent(percpu=True)
+            cpu_keys = [f"CPU {i}" for i in range(self.cores)]
+            self.graph_cpu = Graph(
+                "Metro CPU Usage",
+                cpu_keys,
+                points=1000,
+                y_title="CPU %",
+                y_axis_max=100.0,
+            )
+        elif not self._config["capture"] and self.graph_callbacks is not None:
+            self.graph_callbacks.dump_graph(only_jitter=True)
+            self.lock.acquire()
+            if self.graph_cpu:
+                self.graph_cpu.dump_graph(
+                    jitter=True, sub_title=f"{self._config['cpu_secs']} secs"
+                )
+            self.lock.release()
+            self.graph_callbacks = None
+            self.graph_cpu = None
 
-    def effect_loop(self):
-        pass_time = timeit.default_timer() - self.start_time
+        if self.graph_callbacks:
+            # Y value does not matter as we are only looking at jitter
+            self.graph_callbacks.append_tag("Config Update", 10.0)
+
+    def audio_data_updated(self, data):
+        if self.graph_callbacks is not None:
+            # value does not matter as we are only looking at jitter
+            self.graph_callbacks.append_by_key("Audio", 1.0)
+
+    def render(self):
+        now = timeit.default_timer()
+        if self.graph_callbacks is not None:
+            # value does not matter as we are only looking at jitter
+            self.graph_callbacks.append_by_key("Render", 1.0)
+
+        pass_time = now - self.start_time
         cycle_time = pass_time % self._config["pulse_period"]
 
         if cycle_time > self.cycle_threshold:
@@ -103,3 +153,10 @@ class MetroEffect(TemporalEffect):
                             start_pixel : end_pixel - 1
                         ] = self.flash_color
                 self.was_flash = True
+
+        if self.graph_cpu is not None:
+            if now - self.last_cpu > self._config["cpu_secs"]:
+                cpu = psutil.cpu_percent(percpu=True)
+                for i in range(self.cores):
+                    self.graph_cpu.append_by_key(f"CPU {i}", cpu[i])
+                self.last_cpu = now

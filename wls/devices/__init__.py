@@ -12,7 +12,7 @@ import voluptuous as vol
 import zeroconf
 
 from wls.config import save_config
-from wls.events import DeviceUpdateEvent, Event
+from wls.events import DeviceCreatedEvent, DeviceUpdateEvent, Event
 from wls.utils import (
     AVAILABLE_FPS,
     RML,
@@ -649,6 +649,8 @@ class Devices(RegistryLoader):
                 "is_device": device.id,
             }
         )
+
+        self._wls.events.fire_event(DeviceCreatedEvent(device.name))
 
         # Finally, save the config to file!
         save_config(

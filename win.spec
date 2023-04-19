@@ -1,6 +1,15 @@
 # -*- mode: python ; coding: utf-8 -*-
 import os
+from PyInstaller.utils.hooks import copy_metadata
 spec_root = os.path.abspath(SPECPATH)
+datas = [
+         (f'C:/Users/tuant/AppData/Local/Programs/Python/Python311/Scripts/build/exe.win-amd64-3.11/lib/wls','wls/'),
+         (f'C:/Users/tuant/AppData/Local/Programs/Python/Python311/Scripts/build/exe.win-amd64-3.11/lib/wls_frontend','wls_frontend/'),
+         (f'C:/Users/tuant/AppData/Local/Programs/Python/Python311/Scripts/build/exe.win-amd64-3.11/lib/samplerate','samplerate/'),
+         (f'C:/Users/tuant/AppData/Local/Programs/Python/Python311/Scripts/build/exe.win-amd64-3.11/lib/xyzservices','xyzservices/'),
+         (f'{spec_root}/icons','icons/'), (f'{spec_root}/icons/tray.png','.')
+      ]
+datas += copy_metadata('bokeh')
 
 venv_root = os.path.abspath(os.path.join(SPECPATH, '..'))
 block_cipher = None
@@ -9,12 +18,7 @@ print(venv_root)
 a = Analysis([f'{spec_root}\\wls\\__main__.py'],
              pathex=[f'{spec_root}', f'{spec_root}\\wls'],
              binaries=[],
-             datas=[
-                (f'C:/Users/tuant/AppData/Local/Programs/Python/Python311/Scripts/build/exe.win-amd64-3.11/lib/wls','wls/'),
-                (f'C:/Users/tuant/AppData/Local/Programs/Python/Python311/Scripts/build/exe.win-amd64-3.11/lib/wls_frontend','wls_frontend/'),
-                (f'C:/Users/tuant/AppData/Local/Programs/Python/Python311/Scripts/build/exe.win-amd64-3.11/lib/samplerate','samplerate/'),
-                (f'{spec_root}/icons','icons/'), (f'{spec_root}/icons/tray.png','.')
-             ],
+             datas=datas,
              hiddenimports=[
                            "sacn",
                            "aubio",
