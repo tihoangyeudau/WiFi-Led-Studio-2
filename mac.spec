@@ -1,15 +1,20 @@
 # -*- mode: python ; coding: utf-8 -*-
 import os
 import sys
+from PyInstaller.utils.hooks import copy_metadata
+datas = [('/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons', 'icons/'), ('/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons/tray.png', '.'),
+             ('/usr/local/bin/build/WiFi Led Studio-3.1.0.app/Contents/MacOS/lib/wls', 'wls/'),
+             ('/usr/local/bin/build/WiFi Led Studio-3.1.0.app/Contents/MacOS/lib/wls_frontend', 'wls_frontend/'),
+             ('/usr/local/bin/build/WiFi Led Studio-3.1.0.app/Contents/MacOS/lib/xyzservices', 'xyzservices/')]
+datas += copy_metadata('bokeh')
+
 
 block_cipher = None
 
 a = Analysis(['./wls/__main__.py'],
              pathex=['.', './wls'],
              binaries=[],
-             datas=[('/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons', 'icons/'), ('/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons/tray.png', '.'),
-             ('/usr/local/bin/build/WiFi Led Studio-3.1.0.app/Contents/MacOS/lib/wls', 'wls/'),
-             ('/usr/local/bin/build/WiFi Led Studio-3.1.0.app/Contents/MacOS/lib/wls_frontend', 'wls_frontend/')],
+             datas=datas,
              hiddenimports=[
                             "sacn",
                             "aubio",
