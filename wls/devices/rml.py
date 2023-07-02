@@ -144,7 +144,6 @@ class RMLDevice(NetworkedDevice):
         # https://github.com/Aircoookie/RML/pull/1944
         if rml_support_DDP(rml_build):
             _LOGGER.info(f"RML Build Supports Sync Setting API: {rml_build}")
-            )
             rml_sync_settings = await self.rml.get_sync_settings()
         # self.rml.enable_realtime_gamma()
         # self.rml.set_inactivity_timeout(self._config["timeout"])
