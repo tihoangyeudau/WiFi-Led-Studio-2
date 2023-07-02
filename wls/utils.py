@@ -1195,3 +1195,10 @@ class Graph:
                 color=next(colors),
             )
         show(p)
+
+
+def rml_support_DDP(build) -> bool:
+    if build >= 2110060:
+        return True
+    else:
+        return False

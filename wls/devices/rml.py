@@ -2,13 +2,12 @@ import logging
 import sys
 
 import voluptuous as vol
-from pkg_resources import parse_version
 
 from wls.devices import NetworkedDevice
 from wls.devices.ddp import DDPDevice
 from wls.devices.e131 import E131Device
 from wls.devices.udp import UDPRealtimeDevice
-from wls.utils import RML, RML2
+from wls.utils import RML, RML2, rml_support_DDP
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -130,7 +129,7 @@ class RMLDevice(NetworkedDevice):
         rml_name = rml_config["name"]
         rml_count = led_info["count"]
         rml_rgbmode = led_info["rgbw"]
-        rml_version = rml_config["ver"]
+        rml_build = rml_config["vid"]
 
         rml_config = {
             "name": rml_name,
@@ -143,9 +142,8 @@ class RMLDevice(NetworkedDevice):
 
         # Currently *assuming* that this PR gets released in 0.13
         # https://github.com/Aircoookie/RML/pull/1944
-        if parse_version(rml_version) >= parse_version("0.13.0"):
-            _LOGGER.info(
-                f"Phiên bản Rainbow Music Led hỗ trợ cài đặt API đồng bộ hóa: {rml_version}"
+        if rml_support_DDP(rml_build):
+            _LOGGER.info(f"RML Build Supports Sync Setting API: {rml_build}")
             )
             rml_sync_settings = await self.rml.get_sync_settings()
         # self.rml.enable_realtime_gamma()

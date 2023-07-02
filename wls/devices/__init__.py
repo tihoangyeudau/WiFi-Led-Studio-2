@@ -21,6 +21,7 @@ from wls.utils import (
     async_fire_and_forget,
     generate_id,
     resolve_destination,
+    rml_support_DDP,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -136,12 +137,19 @@ class Device(BaseRegistry):
         for pixels, start, end in data:
             self._pixels[start : end + 1] = pixels
 
-        if virtual_id == self.priority_virtual.id:
-            frame = self.assemble_frame()
-            self.flush(frame)
-            # _LOGGER.debug(f"Device {self.id} flushed by Virtual {virtual_id}")
+        if self.priority_virtual:
+            if virtual_id == self.priority_virtual.id:
+                frame = self.assemble_frame()
+                self.flush(frame)
+                # _LOGGER.debug(f"Device {self.id} flushed by Virtual {virtual_id}")
 
-            self._wls.events.fire_event(DeviceUpdateEvent(self.id, frame))
+            self._wls.events.fire_event(
+                    DeviceUpdateEvent(self.id, frame)
+                )
+        else:
+            _LOGGER.warning(
+                f"Flush skipped as {self.id} has no priority_virtual"
+            )
 
     def assemble_frame(self):
         """
@@ -266,8 +274,9 @@ class Device(BaseRegistry):
         self._segments = [
             segment for segment in self._segments if segment[0] != virtual_id
         ]
-        if virtual_id == self.priority_virtual:
-            self.invalidate_cached_props()
+        if self.priority_virtual:
+            if virtual_id == self.priority_virtual.id:
+                self.invalidate_cached_props()
 
     def clear_segments(self):
         self._segments = []
@@ -554,40 +563,25 @@ class Devices(RegistryLoader):
 
             rml_count = led_info["count"]
             rml_rgbmode = led_info["rgbw"]
+            rml_build = rml_config["vid"]
+
+            if rml_support_DDP(rml_build):
+                _LOGGER.info(f"RML build Supports DDP: {rml_build}")
+                sync_mode = "DDP"
+            else:
+                _LOGGER.info(
+                    f"RML build pre DDP, default to UDP: {rml_build}"
+                )
+                sync_mode = "UDP"
 
             rml_config = {
                 "name": rml_name,
                 "pixel_count": rml_count,
                 "icon_name": "rml",
                 "rgbw_led": rml_rgbmode,
+                "sync_mode": sync_mode,
             }
 
-            # determine sync mode
-            # UDP < 480
-            # DDP or E131 depending on: wls's configured preferred mode first, else the device's mode
-            # ARTNET can do one
-
-            if rml_count > 480:
-                await rml.get_sync_settings()
-                sync_mode = rml.get_sync_mode()
-            else:
-                sync_mode = "UDP"
-
-                # preferred_mode = self._wls.config["rml_preferences"][
-                #     "rml_preferred_mode"
-                # ]
-                # if preferred_mode:
-                #     sync_mode = preferred_mode
-                # else:
-                #     await rml.get_sync_settings()
-                #     sync_mode = rml.get_sync_mode()
-
-            if sync_mode == "ARTNET":
-                msg = f"Không thể thêm đèn tại {resolved_dest}. Chế độ không được hỗ trợ: 'ARTNET' và quá nhiều LED để đồng bộ hóa UDP (> 480)"
-                _LOGGER.warning(msg)
-                raise ValueError(msg)
-
-            rml_config["sync_mode"] = sync_mode
             device_config.update(rml_config)
 
         device_id = generate_id(device_config["name"])
