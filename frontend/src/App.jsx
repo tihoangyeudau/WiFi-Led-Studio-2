@@ -210,7 +210,7 @@ export default function App() {
                     }
                     stopColor={
                       wlsThemes[wlsTheme || 'DarkBlue'].palette.accent
-                        .main || '#ffdc0f'
+                        .main || '#0a8c9d'
                     }
                     width={width - 8}
                     height={height}
@@ -261,7 +261,7 @@ export default function App() {
                     }
                     stopColor={
                       wlsThemes[wlsTheme || 'DarkRed'].palette.accent
-                        .main || '#ffdc0f'
+                        .main || '#0a8c9d'
                     }
                     width={width - 8}
                     height={height}

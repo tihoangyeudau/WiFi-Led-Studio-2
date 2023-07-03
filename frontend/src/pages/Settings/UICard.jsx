@@ -126,7 +126,7 @@ const UICard = () => {
 
             </>)}
             <div className={`${classes.settingsRow} step-settings-x `}>
-                <label>Hiển thị biểu đồ (ngốn CPU)</label>
+                <label>Hiển thị thanh LED</label>
                 <SettingsSwitch checked={graphs} onChange={(e) => toggleGraphs()} />
             </div>
             <div className={`${classes.settingsRow} step-settings-x `}>
@@ -178,7 +178,7 @@ const UICard = () => {
                 <SettingsSwitch checked={features['youtube']} onChange={(e) => setFeatures('youtube', !features['youtube'])} />
             </div>}
             {viewMode !== 'user' && <div className={`${classes.settingsRow} step-settings-x `}>
-                <label>Sóng nền (ngốn CPU)</label>
+                <label>Sóng nền</label>
                 <SettingsSwitch checked={features['waves']} onChange={(e) => setFeatures('waves', !features['waves'])} />
             </div>}
             {showFeatures['dev'] && <div className={`${classes.settingsRow} step-settings-x `}>
