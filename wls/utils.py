@@ -1198,7 +1198,7 @@ class Graph:
 
 
 def rml_support_DDP(build) -> bool:
-    if build >= 2110060:
+    if build >= 2109220:
         return True
     else:
         return False
