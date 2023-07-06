@@ -24,8 +24,8 @@ class RMLDevice(NetworkedDevice):
             vol.Optional(
                 "sync_mode",
                 description="Giao thức truyền trực tuyến tới thiết bị RML. Khuyến nghị: DDP cho v0.13 trở lên. Sử dụng UDP cho các phiên bản cũ hơn.",
-                default="DDP",
-            ): vol.In(["DDP", "UDP", "E131"]),
+                default="UDP",
+            ): vol.In(["UDP", "DDP", "E131"]),
             vol.Optional(
                 "timeout",
                 description="Thời gian giữa hiệu ứng WiFi Led Studio tắt và hiệu ứng đèn Rainbow Music Led kích hoạt",
