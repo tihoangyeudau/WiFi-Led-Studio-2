@@ -31,7 +31,7 @@ class ScenesEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "Không giải mã được JSON",
+                "reason": "JSON Decoding failed",
             }
             return web.json_response(data=response, status=400)
 
@@ -39,14 +39,14 @@ class ScenesEndpoint(RestEndpoint):
         if scene_id is None:
             response = {
                 "status": "failed",
-                "reason": 'Thuộc tính bắt buộc "id" không được cung cấp',
+                "reason": 'Required attribute "id" was not provided',
             }
             return web.json_response(data=response, status=400)
 
         if scene_id not in self._wls.config["scenes"].keys():
             response = {
                 "status": "failed",
-                "reason": f"Cảnh {scene_id} không tồn tại",
+                "reason": f"Scene {scene_id} does not exist",
             }
             return web.json_response(data=response, status=400)
 
@@ -69,7 +69,7 @@ class ScenesEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "Không giải mã được JSON",
+                "reason": "JSON Decoding failed",
             }
             return web.json_response(data=response, status=400)
 
@@ -77,14 +77,14 @@ class ScenesEndpoint(RestEndpoint):
         if action is None:
             response = {
                 "status": "failed",
-                "reason": 'Thuộc tính bắt buộc "action" không được cung cấp',
+                "reason": 'Required attribute "action" was not provided',
             }
             return web.json_response(data=response, status=400)
 
         if action not in ["activate", "activate_in", "deactivate", "rename"]:
             response = {
                 "status": "failed",
-                "reason": f'Hành động không hợp lệ "{action}"',
+                "reason": f'Invalid action "{action}"',
             }
             return web.json_response(data=response, status=400)
 
@@ -92,14 +92,14 @@ class ScenesEndpoint(RestEndpoint):
         if scene_id is None:
             response = {
                 "status": "failed",
-                "reason": 'Thuộc tính bắt buộc "id" không được cung cấp',
+                "reason": 'Required attribute "id" was not provided',
             }
             return web.json_response(data=response, status=400)
 
         if scene_id not in self._wls.config["scenes"].keys():
             response = {
                 "status": "failed",
-                "reason": f'Cảnh "{scene_id}" không tồn tại',
+                "reason": f'Scene "{scene_id}" does not exist',
             }
             return web.json_response(data=response, status=400)
 
@@ -154,7 +154,7 @@ class ScenesEndpoint(RestEndpoint):
                 "status": "success",
                 "payload": {
                     "type": "info",
-                    "message": f"Đã kích hoạt cảnh {scene['name']}",
+                    "message": f"Activated scene {scene['name']}",
                 },
             }
 
@@ -163,7 +163,7 @@ class ScenesEndpoint(RestEndpoint):
                 # Check virtual is in scene, make no changes if it isn't
                 if virtual.id not in scene["virtuals"].keys():
                     _LOGGER.info(
-                        ("Đèn với id {} không có dữ liệu trong cảnh {}").format(
+                        ("virtual with id {} has no data in scene {}").format(
                             virtual.id, scene_id
                         )
                     )
@@ -177,7 +177,7 @@ class ScenesEndpoint(RestEndpoint):
                 "status": "success",
                 "payload": {
                     "type": "info",
-                    "message": f"Bỏ kích hoạt cảnh {scene['name']}",
+                    "message": f"Deactivated scene {scene['name']}",
                 },
             }
 
@@ -186,7 +186,7 @@ class ScenesEndpoint(RestEndpoint):
             if name is None:
                 response = {
                     "status": "failed",
-                    "reason": 'Thuộc tính bắt buộc "name" không được cung cấp',
+                    "reason": 'Required attribute "name" was not provided',
                 }
                 return web.json_response(data=response, status=400)
 
@@ -201,7 +201,7 @@ class ScenesEndpoint(RestEndpoint):
                 "status": "success",
                 "payload": {
                     "type": "info",
-                    "message": f"Đã đổi tên cảnh thành {name}",
+                    "message": f"Renamed scene to {name}",
                 },
             }
         return web.json_response(data=response, status=200)
@@ -213,7 +213,7 @@ class ScenesEndpoint(RestEndpoint):
         except JSONDecodeError:
             response = {
                 "status": "failed",
-                "reason": "Không giải mã được JSON",
+                "reason": "JSON Decoding failed",
             }
             return web.json_response(data=response, status=400)
 
@@ -221,13 +221,14 @@ class ScenesEndpoint(RestEndpoint):
         scene_tags = data.get("scene_tags")
         scene_puturl = data.get("scene_puturl")
         scene_payload = data.get("scene_payload")
+        scene_midiactivate = data.get("scene_midiactivate")
         scene_image = data.get("scene_image")
         if scene_image is None:
             scene_image = "Wallpaper"
         if scene_name is None:
             response = {
                 "status": "failed",
-                "reason": 'Thuộc tính bắt buộc "scene_name" không được cung cấp',
+                "reason": 'Required attribute "scene_name" was not provided',
             }
             return web.json_response(data=response, status=400)
 
@@ -240,13 +241,26 @@ class ScenesEndpoint(RestEndpoint):
         scene_config["scene_puturl"] = scene_puturl
         scene_config["scene_tags"] = scene_tags
         scene_config["scene_payload"] = scene_payload
-        for virtual in self._wls.virtuals.values():
-            effect = {}
-            if virtual.active_effect:
-                effect["type"] = virtual.active_effect.type
-                effect["config"] = virtual.active_effect.config
-                # effect['name'] = virtual.active_effect.name
-            scene_config["virtuals"][virtual.id] = effect
+        scene_config["scene_midiactivate"] = scene_midiactivate
+
+        if "virtuals" not in data.keys():
+            for virtual in self._wls.virtuals.values():
+                effect = {}
+                if virtual.active_effect:
+                    effect["type"] = virtual.active_effect.type
+                    effect["config"] = virtual.active_effect.config
+                    # effect['name'] = virtual.active_effect.name
+                scene_config["virtuals"][virtual.id] = effect
+        else:
+            virtuals = data.get("virtuals")
+
+            for virtualid in virtuals:
+                virtual = data.get("virtuals")[virtualid]
+                if bool(virtual):
+                    effect = {}
+                    effect["type"] = virtual["type"]
+                    effect["config"] = virtual["config"]
+                    scene_config["virtuals"][virtualid] = effect
 
         # Update the scene if it already exists, else create it
         self._wls.config["scenes"][scene_id] = scene_config
