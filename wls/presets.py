@@ -166,6 +166,23 @@ wls_presets = {
             },
             "name": "Xanh linh hoạt",
         },
+        "happa-light": {
+            "config": {
+                "background_brightness": 1.0,
+                "background_color": "black",
+                "blur": 0.6,
+                "brightness": 1.0,
+                "color_cycler": False,
+                "color_high": "#0000ff",
+                "color_lows": "#ff0000",
+                "color_mids": "#00ff00",
+                "flip": False,
+                "mirror": True,
+                "mixing_mode": "additive",
+                "sensitivity": 0.3
+            },
+            "name": "happa light"
+        },
     },
     "fade": {
         "reset": {"config": {}, "name": "Đặt lại"},
@@ -243,6 +260,27 @@ wls_presets = {
                 "speed": 10,
             },
             "name": "Hoàng hôn",
+        },
+    },
+    "fire": {
+        "reset": {"config": {}, "name": "Đặt lại"},
+        "happa-light": {
+            "config": {
+                "background_brightness": 1.0,
+                "background_color": "black",
+                "beat_speed": True,
+                "blur": 0.0,
+                "brightness": 1.0,
+                "color_correction": True,
+                "color_shift": 0.1,
+                "flip": False,
+                "gradient": "linear-gradient(90deg, rgb(255, 0, 0) 0%, rgb(255, 120, 0) 14%, rgb(255, 200, 0) 28%, rgb(0, 255, 0) 42%, rgb(0, 199, 140) 56%, rgb(0, 0, 255) 70%, rgb(128, 0, 128) 84%, rgb(255, 0, 178) 98%)",
+                "gradient_roll": 0.0,
+                "intensity": 3,
+                "mirror": False,
+                "speed": 0.02
+            },
+            "name": "happa light"
         },
     },
     "gradient": {
@@ -450,6 +488,44 @@ wls_presets = {
                 "mirror": False,
             },
             "name": "Trầm ấm",
+        },
+    },
+    "melt": {
+        "reset": {"config": {}, "name": "Đặt lại"},
+        "happa-light": {
+            "config": {
+                "background_brightness": 1.0,
+                "background_color": "black",
+                "beat_speed": True,
+                "blur": 0.5,
+                "brightness": 1.0,
+                "color_correction": True,
+                "flip": False,
+                "gradient": "linear-gradient(90deg, rgb(255, 0, 0) 0%, rgb(255, 120, 0) 14%, rgb(255, 200, 0) 28%, rgb(0, 255, 0) 42%, rgb(0, 199, 140) 56%, rgb(0, 0, 255) 70%, rgb(128, 0, 128) 84%, rgb(255, 0, 178) 98%)",
+                "gradient_roll": 0.0,
+                "mirror": False,
+                "reactivity": 0.4,
+                "speed": 0.35
+            },
+            "name": "happa light"
+        }
+    },
+    "pitchSpectrum": {
+        "happa-light": {
+            "config": {
+                "background_brightness": 1.0,
+                "background_color": "black",
+                "beat_speed": True,
+                "blur": 0.5,
+                "brightness": 1.0,
+                "fade_rate": 0.15,
+                "flip": False,
+                "gradient": "linear-gradient(90deg, rgb(255, 0, 0) 0%, rgb(255, 120, 0) 14%, rgb(255, 200, 0) 28%, rgb(0, 255, 0) 42%, rgb(0, 199, 140) 56%, rgb(0, 0, 255) 70%, rgb(128, 0, 128) 84%, rgb(255, 0, 178) 98%)",
+                "gradient_roll": 0.0,
+                "mirror": True,
+                "responsiveness": 0.15
+            },
+            "name": "happa light"
         },
     },
     "multiBar": {
@@ -846,6 +922,23 @@ wls_presets = {
             },
             "name": "Ấm áp",
         },
+        "happa-light": {
+            "config": {
+                "background_brightness": 1.0,
+                "background_color": "black",
+                "blur": 0.1,
+                "brightness": 1.0,
+                "color_high": "#0000ff",
+                "color_lows": "#ff0000",
+                "color_mids": "#00ff00",
+                "decay": 1.0,
+                "flip": False,
+                "mirror": True,
+                "speed": 1,
+                "threshold": 4.5
+            },
+            "name": "happa light"
+        }
     },
     "singleColor": {
         "reset": {"config": {}, "name": "Đặt lại"},
@@ -1151,6 +1244,111 @@ wls_presets = {
             "name": "Bối rối",
         },
     },
+    "scan": {
+        "reset": {"config": {}, "name": "Đặt lại"},
+        "happa-light": {
+            "config": {
+                "background_brightness": 1.0,
+                "background_color": "#000000",
+                "beat_speed": True,
+                "blur": 0.5,
+                "bounce": True,
+                "brightness": 1.0,
+                "color_intensity": True,
+                "color_scan": "#ff0000",
+                "flip": False,
+                "frequency_range": "Thấp (nhịp+trầm)",
+                "gradient": "linear-gradient(90deg, rgb(255, 0, 0) 0%, rgb(255, 120, 0) 14%, rgb(255, 200, 0) 28%, rgb(0, 255, 0) 42%, rgb(0, 199, 140) 56%, rgb(0, 0, 255) 70%, rgb(128, 0, 128) 84%, rgb(255, 0, 178) 98%)",
+                "gradient_roll": 0.0,
+                "mirror": False,
+                "multiplier": 3.0,
+                "scan_width": 3,
+                "speed": 35,
+                "use_grad": True
+            },
+            "name": "happa light"
+        },
+    },
+    "pitchSpectrum": {
+        "reset": {"config": {}, "name": "Đặt lại"},
+        "happa-light": {
+            "config": {
+                "background_brightness": 1.0,
+                "background_color": "#000000",
+                "beat_speed": True,
+                "blur": 0.3,
+                "brightness": 1.0,
+                "fade_rate": 0.15,
+                "flip": False,
+                "gradient": "linear-gradient(90deg, rgb(255, 0, 0) 0%, rgb(255, 120, 0) 14%, rgb(255, 200, 0) 28%, rgb(0, 255, 0) 42%, rgb(0, 199, 140) 56%, rgb(0, 0, 255) 70%, rgb(128, 0, 128) 84%, rgb(255, 0, 178) 98%)",
+                "gradient_roll": 0.0,
+                "mirror": True,
+                "responsiveness": 0.15
+            },
+            "name": "happa light"
+        },
+    },
+    "scan_and_flare": {
+        "reset": {"config": {}, "name": "Đặt lại"},
+        "happa-light": {
+            "config": {
+                "background_brightness": 1.0,
+                "background_color": "black",
+                "beat_speed": True,
+                "blur": 0.5,
+                "bounce": True,
+                "brightness": 1.0,
+                "color_intensity": True,
+                "color_scan": "#ff0000",
+                "flip": False,
+                "frequency_range": "Thấp (nhịp+trầm)",
+                "gradient": "linear-gradient(90deg, rgb(255, 0, 0) 0%, rgb(255, 120, 0) 14%, rgb(255, 200, 0) 28%, rgb(0, 255, 0) 42%, rgb(0, 199, 140) 56%, rgb(0, 0, 255) 70%, rgb(128, 0, 128) 84%, rgb(255, 0, 178) 98%)",
+                "gradient_roll": 0.0,
+                "mirror": False,
+                "multiplier": 3.0,
+                "scan_width": 3,
+                "spark_on": True,
+                "sparkles_max": 10,
+                "sparkles_size": 0.1,
+                "sparkles_threshold": 0.6,
+                "sparkles_time": 1.0,
+                "speed": 30,
+                "use_grad": True
+            },
+            "name": "happa light"
+        }
+    },
+    "scan_multi": {
+        "reset": {"config": {}, "name": "Đặt lại"},
+        "happa-light": {
+            "config": {
+                "advanced": True,
+                "attack": 0.9,
+                "background_brightness": 1.0,
+                "background_color": "black",
+                "beat_speed": True,
+                "blur": 0.5,
+                "bounce": True,
+                "brightness": 1.0,
+                "color_high": "#0000ff",
+                "color_intensity": True,
+                "color_low": "#ff0000",
+                "color_mid": "#00ff00",
+                "decay": 0.7,
+                "filter": False,
+                "flip": False,
+                "gradient": "linear-gradient(90deg, rgb(255, 0, 0) 0%, rgb(255, 120, 0) 14%, rgb(255, 200, 0) 28%, rgb(0, 255, 0) 42%, rgb(0, 199, 140) 56%, rgb(0, 0, 255) 70%, rgb(128, 0, 128) 84%, rgb(255, 0, 178) 98%)",
+                "gradient_roll": 0.0,
+                "input_source": "Power",
+                "mirror": False,
+                "multiplier": 3.0,
+                "scan_width": 3,
+                "speed": 25,
+                "use_grad": False
+            },
+            "name": "happa light"
+        },
+    },
     "wavelength": {
         "reset": {"config": {}, "name": "Đặt lại"},
         "classic": {
@@ -1250,6 +1448,20 @@ wls_presets = {
                 "mirror": False,
             },
             "name": "Quét hoàng hôn",
+        },
+        "happa-light": {
+            "config": {
+                "background_brightness": 1.0,
+                "background_color": "black",
+                "beat_speed": True,
+                "blur": 0.5,
+                "brightness": 1.0,
+                "flip": False,
+                "gradient": "linear-gradient(90deg, rgb(255, 0, 0) 0%, rgb(255, 120, 0) 14%, rgb(255, 200, 0) 28%, rgb(0, 255, 0) 42%, rgb(0, 199, 140) 56%, rgb(0, 0, 255) 70%, rgb(128, 0, 128) 84%, rgb(255, 0, 178) 98%)",
+                "gradient_roll": 0.0,
+                "mirror": False
+            },
+            "name": "happa light"
         },
     },
     "real_strobe": {
@@ -1373,6 +1585,26 @@ wls_presets = {
             },
             "name": "Đổi màu",
         },
+        "happa-light": {
+            "config": {
+                "background_brightness": 1.0,
+                "background_color": "black",
+                "bass_strobe_decay_rate": 0.4,
+                "beat_speed": True,
+                "blur": 0.0,
+                "brightness": 1.0,
+                "color_shift_delay": 1.0,
+                "color_step": 0.1,
+                "flip": False,
+                "gradient": "linear-gradient(90deg, rgb(255, 0, 0) 0%, rgb(255, 120, 0) 14%, rgb(255, 200, 0) 28%, rgb(0, 255, 0) 42%, rgb(0, 199, 140) 56%, rgb(0, 0, 255) 70%, rgb(128, 0, 128) 84%, rgb(255, 0, 178) 98%)",
+                "gradient_roll": 0.0,
+                "mirror": False,
+                "strobe_color": "white",
+                "strobe_decay_rate": 0.45,
+                "strobe_width": 1
+            },
+            "name": "happa light"
+        },
     },
     "blade_power_plus": {
         "reset": {"config": {}, "name": "Đặt lại"},
@@ -1416,6 +1648,25 @@ wls_presets = {
             },
             "name": "Trầm đại dương",
         },
+        "happa-light": {
+            "config": {
+                "background_brightness": 1.0,
+                "background_color": "black",
+                "beat_speed": True,
+                "blur": 0.5,
+                "brightness": 1.0,
+                "color_correction": True,
+                "decay": 0.2,
+                "flip": False,
+                "frequency_range": "Thấp (nhịp+trầm)",
+                "gradient": "linear-gradient(90deg, rgb(255, 0, 0) 0%, rgb(255, 120, 0) 14%, rgb(255, 200, 0) 28%, rgb(0, 255, 0) 42%, rgb(0, 199, 140) 56%, rgb(0, 0, 255) 70%, rgb(128, 0, 128) 84%, rgb(255, 0, 178) 98%)",
+                "gradient_roll": 0.1,
+                "invert_roll": False,
+                "mirror": True,
+                "multiplier": 0.6
+            },
+            "name": "happa light"
+        },
     },
     "bands": {"reset": {"config": {}, "name": "Đặt lại"}},
     "bands_matrix": {"reset": {"config": {}, "name": "Đặt lại"}},
@@ -1424,17 +1675,11 @@ wls_presets = {
     "blocks": {"reset": {"config": {}, "name": "Đặt lại"}},
     "energy2": {"reset": {"config": {}, "name": "Đặt lại"}},
     "equalizer": {"reset": {"config": {}, "name": "Đặt lại"}},
-    "fire": {"reset": {"config": {}, "name": "Đặt lại"}},
     "glitch": {"reset": {"config": {}, "name": "Đặt lại"}},
     "hue_fix_demo": {"reset": {"config": {}, "name": "Đặt lại"}},
     "lava_lamp": {"reset": {"config": {}, "name": "Đặt lại"}},
     "marching": {"reset": {"config": {}, "name": "Đặt lại"}},
-    "melt": {"reset": {"config": {}, "name": "Đặt lại"}},
-    "pitchSpectrum": {"reset": {"config": {}, "name": "Đặt lại"}},
     "power": {"reset": {"config": {}, "name": "Đặt lại"}},
     "melt_and_sparkle": {"reset": {"config": {}, "name": "Đặt lại"}},
     "water": {"reset": {"config": {}, "name": "Đặt lại"}},
-    "scan": {"reset": {"config": {}, "name": "Đặt lại"}},
-    "scan_multi": {"reset": {"config": {}, "name": "Đặt lại"}},
-    "scan_and_flare": {"reset": {"config": {}, "name": "Đặt lại"}},
 }
