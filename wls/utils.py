@@ -16,7 +16,6 @@ from collections import deque
 from collections.abc import MutableMapping
 from functools import lru_cache
 from itertools import chain
-from itertools import chain, cycle
 
 # from asyncio import coroutines, ensure_future
 from subprocess import PIPE, Popen
@@ -24,15 +23,26 @@ from subprocess import PIPE, Popen
 import numpy as np
 import requests
 import voluptuous as vol
-from bokeh.io import output_file, show
-from bokeh.layouts import column
-from bokeh.models import Label
-from bokeh.palettes import Category10
-from bokeh.plotting import figure
 
-from wls.config import get_default_config_directory, save_config
+from wls.config import save_config
 
 # from asyncio import coroutines, ensure_future
+
+try:
+    from itertools import cycle
+
+    from bokeh.io import output_file, show
+    from bokeh.layouts import column
+    from bokeh.models import Label
+    from bokeh.palettes import Category10
+    from bokeh.plotting import figure
+
+    from wls.config import get_default_config_directory
+
+    bokeh_available = True
+except ImportError:
+    bokeh_available = False
+
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -1172,29 +1182,32 @@ class Graph:
         """
         Will spawn an interaction graph session into the browser
         """
-        _LOGGER.info(f"Attempting to dump graph {self.title}")
+        if not bokeh_available:
+            _LOGGER.info("Bokeh is disabled dump is disabled")
+        else:
+            _LOGGER.info(f"Attempting to dump graph {self.title}")
 
-        TOOLS = "xpan,xwheel_zoom,box_zoom,reset,save,box_select"
-        colors = itertools.cycle(Category10[10])
+            TOOLS = "xpan,xwheel_zoom,box_zoom,reset,save,box_select"
+            colors = cycle(Category10[10])
 
-        p = figure(
-            title=self.title,
-            x_axis_label="sec since start",
-            y_axis_label=self.y_title,
-            tools=TOOLS,
-            width=1200,
-            height=600,
-        )
-
-        for range in self.ranges.values():
-            p.line(
-                range.list_x(),
-                range.list_y(),
-                legend_label=range.key,
-                line_width=2,
-                color=next(colors),
+            p = figure(
+                title=self.title,
+                x_axis_label="sec since start",
+                y_axis_label=self.y_title,
+                tools=TOOLS,
+                width=1200,
+                height=600,
             )
-        show(p)
+
+            for range in self.ranges.values():
+                p.line(
+                    range.list_x(),
+                    range.list_y(),
+                    legend_label=range.key,
+                    line_width=2,
+                    color=next(colors),
+                )
+            show(p)
 
 
 def rml_support_DDP(build) -> bool:

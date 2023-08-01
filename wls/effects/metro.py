@@ -6,7 +6,7 @@ import voluptuous as vol
 
 from wls.color import parse_color, validate_color
 from wls.effects.audio import AudioReactiveEffect
-from wls.utils import Graph
+from wls.utils import Graph, bokeh_available
 
 # Metro intent is to flash a pattern on led strips so end users can look for
 # sync between separate light strips due to protocol, wifi conditions or other
@@ -19,6 +19,8 @@ class MetroEffect(AudioReactiveEffect):
     NAME = "Tàu điện"
     CATEGORY = "Chuẩn đoán"
     HIDDEN_KEYS = ["speed", "background_brightness", "blur", "mirror"]
+    if not bokeh_available:
+        HIDDEN_KEYS.append("capture")
 
     start_time = timeit.default_timer()
 
