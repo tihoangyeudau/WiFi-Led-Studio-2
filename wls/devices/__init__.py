@@ -131,12 +131,17 @@ class Device(BaseRegistry):
         # update each segment from this virtual
         if not self._active:
             _LOGGER.warning(
-                f"Không thể cập nhật điểm ảnh của đèn không hoạt động {self.name}"
+                f"Cannot update pixels of inactive device {self.name}"
             )
             return
 
         for pixels, start, end in data:
-            self._pixels[start : end + 1] = pixels
+            # protect against an empty race condition
+            if pixels.shape[0] != 0:
+                if np.shape(pixels) == (3,) or np.shape(
+                    self._pixels[start : end + 1]
+                ) == np.shape(pixels):
+                    self._pixels[start : end + 1] = pixels
 
         if self.priority_virtual:
             if virtual_id == self.priority_virtual.id:
@@ -144,7 +149,7 @@ class Device(BaseRegistry):
                 self.flush(frame)
                 # _LOGGER.debug(f"Device {self.id} flushed by Virtual {virtual_id}")
 
-            self._wls.events.fire_event(
+                self._wls.events.fire_event(
                     DeviceUpdateEvent(self.id, frame)
                 )
         else:

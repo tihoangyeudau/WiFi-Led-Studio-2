@@ -436,7 +436,7 @@ class Virtual:
                     self._wls.events.fire_event(
                         VirtualUpdateEvent(self.id, self.assembled_frame)
                     )
-                self.lock.release()
+            self.lock.release()
 
             # adjust for the frame assemble time, min allowed sleep 1 ms
             # this will be more frame accurate on high res sleep systems
