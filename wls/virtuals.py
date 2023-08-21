@@ -1,3 +1,4 @@
+import itertools
 import logging
 import sys
 import threading
@@ -9,6 +10,7 @@ import numpy as np
 import voluptuous as vol
 import zeroconf
 
+from wls.color import parse_color
 from wls.effects import DummyEffect
 from wls.effects.math import interpolate_pixels
 from wls.effects.melbank import (
@@ -32,6 +34,8 @@ from wls.transitions import Transitions
 from wls.utils import fps_to_sleep_interval
 
 _LOGGER = logging.getLogger(__name__)
+
+color_list = ["red", "green", "blue", "cyan", "magenta", "#ffff00"]
 
 
 class Virtual:
@@ -138,6 +142,9 @@ class Virtual:
         # in, +ve mean fading out
         self.fade_timer = 0
         self._segments = []
+        self._calibration = False
+        self._highlight = -1
+        self.lock = threading.Lock()
 
         self.frequency_range = FrequencyRange(
             self._config["frequency_min"], self._config["frequency_max"]
@@ -247,7 +254,7 @@ class Virtual:
             if self.pixel_count != _pixel_count:
                 self.transitions = Transitions(self.pixel_count)
                 if self._active_effect is not None:
-                    self._active_effect.deactivate()
+                    self._active_effect._deactivate()
                     if self.pixel_count > 0:
                         self._active_effect.activate(self)
 
@@ -271,6 +278,7 @@ class Virtual:
         self.set_effect(effect)
 
     def set_effect(self, effect):
+        self.lock.acquire()
         if not self._devices:
             error = f"Đèn ảo {self.id}: Không thể kích hoạt, không có phân đoạn thiết bị được định cấu hình"
             _LOGGER.warning(error)
@@ -305,7 +313,7 @@ class Virtual:
                 self.id,
             )
         )
-
+        self.lock.release()
         try:
             self.active = True
         except RuntimeError:
@@ -321,31 +329,42 @@ class Virtual:
         self._active_effect = None
 
     def clear_effect(self):
+        self.lock.acquire()
         self._wls.events.fire_event(EffectClearedEvent())
 
-        self._transition_effect = self._active_effect
-        self._active_effect = DummyEffect(self.pixel_count)
+        if (
+            self._config["transition_mode"] != "None"
+            and self._config["transition_time"] > 0
+        ):
+            self._transition_effect = self._active_effect
+            self._active_effect = DummyEffect(self.pixel_count)
 
-        self.transition_frame_total = (
-            self.refresh_rate * self._config["transition_time"]
-        )
-        self.transition_frame_counter = 0
+            self.transition_frame_total = (
+                self.refresh_rate * self._config["transition_time"]
+            )
+            self.transition_frame_counter = 0
+        else:
+            # no transition effect to clean up, so clear the active effect now!
+            self.clear_active_effect()
+            self.clear_transition_effect()
 
         self._wls.loop.call_later(
             self._config["transition_time"], self.clear_frame
         )
+        self.lock.release()
 
     def clear_transition_effect(self):
         if self._transition_effect is not None:
-            self._transition_effect.deactivate()
+            self._transition_effect._deactivate()
         self._transition_effect = None
 
     def clear_active_effect(self):
         if self._active_effect is not None:
-            self._active_effect.deactivate()
+            self._active_effect._deactivate()
         self._active_effect = None
 
     def clear_frame(self):
+        self.lock.acquire()
         self.clear_active_effect()
         self.clear_transition_effect()
 
@@ -356,8 +375,10 @@ class Virtual:
             self._wls.events.fire_event(
                 VirtualUpdateEvent(self.id, self.assembled_frame)
             )
-
+            self.lock.release()
             self.deactivate()
+        else:
+            self.lock.release()
 
     def force_frame(self, color):
         """
@@ -369,6 +390,19 @@ class Virtual:
         self._wls.events.fire_event(
             VirtualUpdateEvent(self.id, self.assembled_frame)
         )
+
+    def set_calibration(self, calibration):
+        self._calibration = calibration
+        if calibration is False:
+            self._highlight = -1
+
+    def set_highlight(self, highlight):
+        if self._calibration is False:
+            return f"Cannot set highlight when {self.name} is not in calibration mode"
+        if highlight < -1 or highlight > ( len(self._segments) - 1):
+            return f"Highlight must be between -1 (off) and {len(self._segments) - 1} inclusive"
+        self._highlight = highlight
+        return None
     
     @property
     def active_effect(self):
@@ -379,6 +413,9 @@ class Virtual:
             if not self._active:
                 break
             start_time = timeit.default_timer()
+            # we need to lock before we test, or we could deactivate
+            # between test and execution
+            self.lock.acquire()
             if (
                 self._active_effect
                 and self._active_effect.is_active
@@ -399,6 +436,7 @@ class Virtual:
                     self._wls.events.fire_event(
                         VirtualUpdateEvent(self.id, self.assembled_frame)
                     )
+                self.lock.release()
 
             # adjust for the frame assemble time, min allowed sleep 1 ms
             # this will be more frame accurate on high res sleep systems
@@ -456,9 +494,18 @@ class Virtual:
                 max(self.transition_frame_counter, 0),
                 self.transition_frame_total,
             )
-            weight = (
-                self.transition_frame_counter / self.transition_frame_total
-            )
+
+            if self.transition_frame_total == 0:
+                # the transition should happen immediately
+                weight = 1
+            else:
+                # calculates how far in we are in the transition
+                # 0 = previous effect and 1 = next effect
+                weight = (
+                        self.transition_frame_counter
+                        / self.transition_frame_total
+                    )
+
             self.frame_transitions(
                 self.transitions, frame, transition_frame, weight
             )
@@ -533,31 +580,49 @@ class Virtual:
         """
         Flushes the provided data to the devices.
         """
+        # _LOGGER.info(f"Virtual {self.id}: Flushing frame")
+
         if pixels is None:
             pixels = self.assembled_frame
+
+        color_cycle = itertools.cycle(color_list)
+
         for device_id, segments in self._segments_by_device.items():
             data = []
-            for (
-                start,
-                stop,
-                step,
-                device_start,
-                device_end,
-            ) in segments:
-                if self._config["mapping"] == "span":
-                    data.append(
-                        (pixels[start:stop:step], device_start, device_end)
-                    )
-                elif self._config["mapping"] == "copy":
-                    target_len = device_end - device_start + 1
-                    data.append(
-                        (
-                            interpolate_pixels(pixels, target_len)[::step],
-                            device_start,
-                            device_end,
-                        )
-                    )
             device = self._wls.devices.get(device_id)
+
+            if self._calibration:
+                # set data to black for full length of led strip allow other segments to overwrite
+                data.append(
+                    (
+                        np.array([0.0, 0.0, 0.0], dtype=float),
+                        0,
+                        device.pixel_count - 1,
+                    )
+                )
+
+            for index, (start, stop, step, device_start, device_end) in enumerate(segments):
+                if self._calibration:
+                    color = np.array(parse_color(next(color_cycle)), dtype=float)
+                    if self._highlight == index:
+                        color = np.array(parse_color("white"), dtype=float)
+
+                    data.append((color, device_start, device_end))
+                else:
+                    if self._config["mapping"] == "span":
+                        data.append(
+                            (pixels[start:stop:step], device_start, device_end)
+                        )
+                    elif self._config["mapping"] == "copy":
+                        target_len = device_end - device_start + 1
+                        data.append(
+                            (
+                                interpolate_pixels(pixels, target_len)[::step],
+                                device_start,
+                                device_end,
+                            )
+                        )
+
             if device is None:
                 _LOGGER.warning(
                     f"Đèn {self.id} đã được xoá,  hiện không có thiết bị nào đang hoạt động."

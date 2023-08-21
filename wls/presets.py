@@ -1246,6 +1246,60 @@ wls_presets = {
     },
     "scan": {
         "reset": {"config": {}, "name": "Đặt lại"},
+        "super-scan": {
+            "config": {
+                "advanced": False,
+                "background_brightness": 1.0,
+                "background_color": "#000000",
+                "blur": 3,
+                "bounce": True,
+                "brightness": 1,
+                "color_intensity": True,
+                "color_scan": "#ff0000",
+                "count": 1,
+                "flip": False,
+                "frequency_range": "Thấp (nhịp+trầm)",
+                "full_grad": False,
+                "gradient": "linear-gradient(90deg, rgb(255, 0, 0) 0%, rgb(255, 120, 0) 14%, rgb(255, 200, 0) 28%, rgb(0, 255, 0) 42%, rgb(0, 199, 140) 56%, rgb(0, 0, 255) 70%, rgb(128, 0, 128) 84%, rgb(255, 0, 178) 98%)",
+                "gradient_roll": 0,
+                "mirror": False,
+                "modulate": False,
+                "modulation_effect": "sine",
+                "modulation_speed": 0.5,
+                "multiplier": 3,
+                "scan_width": 30,
+                "speed": 50,
+                "use_grad": False,
+            },
+            "name": "Càn quét",
+        },
+        "painbow": {
+            "config": {
+                "advanced": True,
+                "background_brightness": 0.0,
+                "background_color": "#000000",
+                "blur": 0.0,
+                "bounce": False,
+                "brightness": 1.0,
+                "color_intensity": True,
+                "color_scan": "#ff0000",
+                "count": 2,
+                "flip": False,
+                "frequency_range": "Thấp (nhịp+trầm)",
+                "full_grad": True,
+                "gradient": "linear-gradient(90deg, rgb(255, 0, 0) 0%, rgb(255, 120, 0) 14%, rgb(255, 200, 0) 28%, rgb(0, 255, 0) 42%, rgb(0, 199, 140) 56%, rgb(0, 0, 255) 70%, rgb(128, 0, 128) 84%, rgb(255, 0, 178) 98%)",
+                "gradient_roll": 1.0,
+                "mirror": False,
+                "modulate": False,
+                "modulation_effect": "sine",
+                "modulation_speed": 0.65,
+                "multiplier": 3.0,
+                "scan_width": 30,
+                "speed": 31,
+                "use_grad": True,
+            },
+            "name": "Cung tên",
+        },
         "happa-light": {
             "config": {
                 "background_brightness": 1.0,
@@ -1264,7 +1318,7 @@ wls_presets = {
                 "multiplier": 3.0,
                 "scan_width": 3,
                 "speed": 35,
-                "use_grad": True
+                "use_grad": True,
             },
             "name": "happa light"
         },
@@ -1313,7 +1367,7 @@ wls_presets = {
                 "sparkles_threshold": 0.6,
                 "sparkles_time": 1.0,
                 "speed": 30,
-                "use_grad": True
+                "use_grad": True,
             },
             "name": "happa light"
         }
@@ -1344,7 +1398,7 @@ wls_presets = {
                 "multiplier": 3.0,
                 "scan_width": 3,
                 "speed": 25,
-                "use_grad": False
+                "use_grad": False,
             },
             "name": "happa light"
         },

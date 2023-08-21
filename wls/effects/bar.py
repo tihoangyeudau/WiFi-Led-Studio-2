@@ -49,6 +49,7 @@ class BarAudioEffect(AudioReactiveEffect, GradientEffect):
         self.color_idx = 0
         self.bar_len = 0.3
         self.beat_count = 0
+        self.last_beat = 0.0
 
     def audio_data_updated(self, data):
         # Run linear beat oscillator through easing method
@@ -57,12 +58,13 @@ class BarAudioEffect(AudioReactiveEffect, GradientEffect):
         self.beat_count = data.beat_counter
 
         # color change and phase
-        if self.beat_now:
+        if self.last_beat > 0.2 and self.beat_oscillator < 0.1:
             self.phase = 1 - self.phase  # flip flop 0->1, 1->0
             if self.phase == 0:
                 # 8 colors, 4 beats to a bar
                 self.color_idx += self._config["color_step"]
                 self.color_idx = self.color_idx % 1  # loop back to zero
+        self.last_beat = self.beat_oscillator
 
     def render(self):
         if self._config["ease_method"] == "ease_in_out":
@@ -111,6 +113,8 @@ class BarAudioEffect(AudioReactiveEffect, GradientEffect):
             == (self._config["beat_skip"] == "even")
         ):
             color = np.array([0, 0, 0])
+        
+        self.pixels = np.zeros(np.shape(self.pixels))
         self.pixels[
             int(self.pixel_count * bar_start) : int(
                 self.pixel_count * bar_end
