@@ -122,8 +122,10 @@ class WlsCore:
 
     def open_app(self):
         if sys.platform == "win32":
-            path = os.path.join(os.environ["ProgramFiles"], "AmbilightWiFi\\bin", "ambilightwifi.exe").replace('\\', '\\\\')
+            path = os.path.join(os.environ["ProgramFiles"], "Ambilight WiFi-USB\\bin", "_ambilightwifi_.exe").replace('\\', '\\\\')
             subprocess.call(path)
+            path2 = os.path.join(os.environ["ProgramFiles"], "AmbilightWiFi\\bin", "ambilightwifi.exe").replace('\\', '\\\\')
+            subprocess.call(path2)
         elif sys.platform == "darwin":
             subprocess.run(['open', '/Applications/Ambilight WiFi.app'], check=True)
         else:
@@ -143,7 +145,7 @@ class WlsCore:
 
         self.icon.menu = pystray.Menu(
             pystray.MenuItem("Mở", self.open_ui, default=True),
-            pystray.MenuItem("Mở Ambilight WiFi", self.open_app),
+            pystray.MenuItem("Theo màu màn hình", self.open_app),
             pystray.MenuItem("Khởi động lại", self.restart_wls),
             pystray.MenuItem("Thoát", self.stop),
         )
