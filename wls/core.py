@@ -122,10 +122,15 @@ class WlsCore:
 
     def open_app(self):
         if sys.platform == "win32":
-            path = os.path.join(os.environ["ProgramFiles"], "Ambilight WiFi-USB\\bin", "_ambilightwifi_.exe").replace('\\', '\\\\')
-            subprocess.call(path)
-            path2 = os.path.join(os.environ["ProgramFiles"], "AmbilightWiFi\\bin", "ambilightwifi.exe").replace('\\', '\\\\')
-            subprocess.call(path2)
+            path1 = os.path.join(os.environ["ProgramFiles"], "Ambilight WiFi-USB\\bin", "_ambilightwifi_.exe")
+            path2 = os.path.join(os.environ["ProgramFiles"], "AmbilightWiFi\\bin", "ambilightwifi.exe")
+            
+            if os.path.exists(path1):
+                subprocess.call(path1)
+            elif os.path.exists(path2):
+                subprocess.call(path2)
+            else:
+                print("Neither path1 nor path2 exists.")
         elif sys.platform == "darwin":
             subprocess.run(['open', '/Applications/Ambilight WiFi.app'], check=True)
         else:
