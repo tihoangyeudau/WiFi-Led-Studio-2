@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { useState, useEffect } from 'react';
 import useStore from '../../../utils/apiStore';
 import DeviceCard from './DeviceCard'
@@ -19,10 +20,18 @@ const DeviceCardWrapper = ({ virtual, index }) => {
   const [isActive, setIsActive] = useState((virtuals && virtual && virtuals[virtual] && virtuals[virtual].effect && Object.keys(virtuals[virtual].effect)?.length > 0) || devices && devices[Object.keys(devices).find(d => d === virtual)]?.active_virtuals?.length > 0)
 
   const handleDeleteDevice = (virtual) => {
-    deleteVirtual(virtuals[virtual]?.id).then(() => {
-      getVirtuals();
-    });
-  };
+  deleteVirtual(virtuals[virtual]?.id).then(() => {
+    getVirtuals();
+    // Call API to close COM port after deleting the device
+    axios.post('/api/close_com_port', { deviceId: virtuals[virtual]?.id })
+      .then(response => {
+        console.log('COM port closed:', response.data);
+      })
+      .catch(error => {
+        console.error('Error closing COM port:', error);
+      });
+  });
+};
 
   const handleEditVirtual = (virtual) => {
     setDialogOpenAddVirtual(true, virtual)
