@@ -252,6 +252,8 @@ class Virtual:
             # eg. devices might be reordered, but total pixel count is same
             # so no need to restart the effect
             if self.pixel_count != _pixel_count:
+                # chenging segments is a deep edit, just flush any transition
+                self.clear_transition_effect()
                 self.transitions = Transitions(self.pixel_count)
                 if self._active_effect is not None:
                     self._active_effect._deactivate()
@@ -301,7 +303,6 @@ class Virtual:
         else:
             # no transition effect to clean up, so clear the active effect now!
             self.clear_active_effect()
-            self.clear_transition_effect()
 
         self._active_effect = effect
         self._active_effect.activate(self)
