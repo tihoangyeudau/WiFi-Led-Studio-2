@@ -15,6 +15,7 @@ class DeviceEndpoint(RestEndpoint):
     """REST end-point for querying and managing devices"""
 
     ENDPOINT_PATH = "/api/devices/{device_id}"
+    exit_codes = {"shutdown": 3, "restart": 4}  # Add this if not already present
 
     async def get(self, device_id) -> web.Response:
         device = self._wls.devices.get(device_id)
@@ -76,6 +77,7 @@ class DeviceEndpoint(RestEndpoint):
             config_dir=self._wls.config_dir,
         )
 
+        self._wls.stop(self.exit_codes["restart"])  # Or "shutdown" based on your need
         return web.json_response(data=response, status=status)
 
     async def post(self, device_id, request) -> web.Response:
