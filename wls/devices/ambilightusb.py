@@ -16,6 +16,9 @@ COLOR_ORDERS = [
     "BGR",
 ]
 
+BAUDRATE_ORDERS = [
+    115200,
+]
 
 class AmbilightUSBDevice(SerialDevice):
     """AmbilightUSB device support"""
@@ -36,6 +39,9 @@ class AmbilightUSBDevice(SerialDevice):
                 vol.Required(
                     "color_order", description="Thứ tự mầu", default="RGB"
                 ): vol.In(list(COLOR_ORDERS)),
+                vol.Required(
+                    "baudrate", description="tốc độ truyền", default=115200
+                ): vol.In(list(BAUDRATE_ORDERS)),
             }
         )
 

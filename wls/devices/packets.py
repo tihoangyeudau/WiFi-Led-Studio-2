@@ -147,6 +147,61 @@ def build_ambilightusb_packet(data: np.ndarray, color_order: str):
     return packet
 
 
+def build_ambilightusbpro_packet(data: np.ndarray, color_order: str):
+    """
+    Generic Ambilight USB Pro serial packet encoding
+    """
+    pixel_length = len(data)
+    led_count = pixel_length - 1 
+    packet = bytearray(
+        [
+            ord("T"),
+            ord("n"),
+            ord("h"),
+            (led_count >> 8),
+            (led_count & 0x00FF),
+        ]
+    )  # high byte, then low byte
+    packet.extend([packet[3] ^ packet[4] ^ 0x55])  # checksum
+    byteData = data.astype(np.dtype("B"))
+    # if color_order == "RGB": pass
+    if color_order == "GRB":
+        byteData[:, [1, 0]] = byteData[:, [0, 1]]  # swap columns
+    elif color_order == "BGR":
+        byteData[:, [2, 0]] = byteData[:, [0, 2]]
+    elif color_order == "RBG":
+        byteData[:, [2, 1]] = byteData[:, [1, 2]]
+    elif color_order == "BRG":
+        byteData[:, [2, 0]] = byteData[:, [0, 2]]
+        byteData[:, [2, 1]] = byteData[:, [1, 2]]
+    elif color_order == "GBR":
+        byteData[:, [2, 0]] = byteData[:, [0, 2]]
+        byteData[:, [1, 0]] = byteData[:, [0, 1]]
+    packet.extend(byteData.flatten().tobytes())
+
+    length = pixel_length * 3 
+    fletcher1 = 0
+    fletcher2 = 0 
+    fletcherExt = 0
+    position = 0
+    hasher = 6
+
+    while hasher < length + 6:
+        fletcherExt = (fletcherExt + (packet[hasher] ^ position)) % 255
+        fletcher1 = (fletcher1 + packet[hasher]) % 255
+        fletcher2 = (fletcher2 + fletcher1) % 255
+        hasher += 1
+        position += 1
+
+    packet.extend([fletcher1 & 0xFF])
+    packet.extend([fletcher2 & 0xFF])
+    if (fletcherExt != 0x41):
+        packet.extend([fletcherExt & 0xFF])
+    else:
+        packet.extend([0xaa])
+    return packet
+
+
 def build_openrgb_packet(
     data: np.ndarray,
     device_id: int,

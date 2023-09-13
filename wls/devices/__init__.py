@@ -454,7 +454,7 @@ class SerialDevice(Device):
 
         except serial.SerialException:
             _LOGGER.critical(
-                "Lỗi nối tiếp: Vui lòng đảm bảo thiết bị của bạn được kết nối, hoạt động và chọn đúng cổng COM."
+                "Lỗi kết nối: Vui lòng đảm bảo thiết bị của bạn không bị chiếm dụng, hoặc chọn lại cổng COM khác."
             )
             # Todo: Trigger the UI to refresh after the clear effect call. Currently it still shows as active.
             self.deactivate()
