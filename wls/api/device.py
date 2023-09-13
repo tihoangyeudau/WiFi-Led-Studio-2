@@ -130,6 +130,7 @@ class DeviceEndpoint(RestEndpoint):
 
         device.clear_effect()
         device.remove_from_virtuals()
+        device.deactivate()
         self._wls.devices.destroy(device_id)
 
         # Update and save the configuration

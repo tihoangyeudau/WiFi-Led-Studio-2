@@ -177,6 +177,7 @@ class VirtualEndpoint(RestEndpoint):
         device = self._wls.devices.get(device_id)
         if device is not None:
             device.remove_from_virtuals()
+            device.deactivate()
             self._wls.devices.destroy(device_id)
 
             # Update and save the configuration
