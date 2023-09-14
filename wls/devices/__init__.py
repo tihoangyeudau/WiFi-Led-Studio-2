@@ -467,8 +467,15 @@ class SerialDevice(Device):
             for p in serial.tools.list_ports.comports():
                 if p.pid == self.pid and p.vid == self.vid:
                     self.com_port = p.device
+                    break
+            self.establish_connection()
+            if self.serial and self.serial.isOpen():
                 break
+            time.sleep(5)
+
     def activate(self):
+        if not (self.serial and self.serial.isOpen()):
+            self.establish_connection()
 
     def deactivate(self):
         super().deactivate()
