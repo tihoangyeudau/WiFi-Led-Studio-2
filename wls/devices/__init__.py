@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import socket
+import time
 import sys
 from abc import abstractmethod
 from functools import cached_property, partial
@@ -442,6 +443,18 @@ class SerialDevice(Device):
         self.serial = None
         self.baudrate = self._config["baudrate"]
         self.com_port = self._config["com_port"]
+
+    def reconnect(self):
+        while True:
+            if self.serial and self.serial.isOpen():
+                self.serial.close()  # Đóng kết nối hiện tại
+            try:
+                self.serial = serial.Serial(self.com_port, self.baudrate)
+                if self.serial.isOpen:
+                    super().activate()
+                    break  # Thoát khỏi vòng lặp khi kết nối thành công
+            except serial.SerialException:
+                time.sleep(5)  # Đợi 5 giây trước khi thử lại
 
     def activate(self):
         try:
