@@ -438,15 +438,17 @@ class SerialDevice(Device):
         }
     )
 
+    MAX_RETRIES = 5  # Maximum number of reconnection attempts
+
     def __init__(self, wls, config):
         super().__init__(wls, config)
         self.serial = None
         self.baudrate = self._config["baudrate"]
         self.com_port = self._config["com_port"]
-        self.pid = None
-        self.vid = None
-
+        # Map pid and vid to com_port
+        self.pid_vid_map = {}
         for p in serial.tools.list_ports.comports():
+            self.pid_vid_map[(p.pid, p.vid)] = p.device
             if p.device == self.com_port:
                 self.pid = p.pid
                 self.vid = p.vid
@@ -454,14 +456,15 @@ class SerialDevice(Device):
 
     def establish_connection(self):
         try:
-            self.serial = serial.Serial(self.com_port, self.baudrate)
+            self.serial = serial.Serial(self.com_port, self.baudrate, timeout=1)  # Added timeout
             if self.serial.isOpen():
                 super().activate()
         except serial.SerialException as e:
-            _LOGGER.critical(f"Serial Exception: {e}")
+            print(f'Serial Exception: {e}')
 
     def reconnect(self):
-        while True:
+        retries = 0
+        while retries < self.MAX_RETRIES:
             if self.serial and self.serial.isOpen():
                 self.serial.close()
             for p in serial.tools.list_ports.comports():
@@ -471,7 +474,10 @@ class SerialDevice(Device):
             self.establish_connection()
             if self.serial and self.serial.isOpen():
                 break
-            time.sleep(5)
+            time.sleep(math.pow(2, retries))  # Exponential backoff
+            retries += 1
+        if retries == self.MAX_RETRIES:
+            print('Max retries reached, could not reconnect.')
 
     def activate(self):
         if not (self.serial and self.serial.isOpen()):
