@@ -11,6 +11,7 @@ import serial
 import serial.tools.list_ports
 import voluptuous as vol
 import zeroconf
+import math  # Importing the math module
 
 from wls.config import save_config
 from wls.events import DeviceCreatedEvent, DeviceUpdateEvent, Event
@@ -441,6 +442,16 @@ class SerialDevice(Device):
     MAX_RETRIES = 5  # Maximum number of reconnection attempts
 
     def __init__(self, wls, config):
+        # Load previous config if exists
+        try:
+            with open(self.CONFIG_FILE, 'r') as f:
+                prev_config = json.load(f)
+                self.pid = prev_config.get('pid')
+                self.vid = prev_config.get('vid')
+        except FileNotFoundError:
+            self.pid = None
+            self.vid = None
+
         super().__init__(wls, config)
         self.serial = None
         self.baudrate = self._config["baudrate"]
