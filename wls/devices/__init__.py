@@ -443,39 +443,38 @@ class SerialDevice(Device):
         self.serial = None
         self.baudrate = self._config["baudrate"]
         self.com_port = self._config["com_port"]
+        self.pid = None
+        self.vid = None
+
+        for p in serial.tools.list_ports.comports():
+            if p.device == self.com_port:
+                self.pid = p.pid
+                self.vid = p.vid
+                break
+
+    def establish_connection(self):
+        try:
+            self.serial = serial.Serial(self.com_port, self.baudrate)
+            if self.serial.isOpen():
+                super().activate()
+        except serial.SerialException as e:
+            _LOGGER.critical(f"Serial Exception: {e}")
 
     def reconnect(self):
         while True:
             if self.serial and self.serial.isOpen():
-                self.serial.close()  # Đóng kết nối hiện tại
-            try:
-                self.serial = serial.Serial(self.com_port, self.baudrate)
-                if self.serial.isOpen:
-                    super().activate()
-                    break  # Thoát khỏi vòng lặp khi kết nối thành công
-            except serial.SerialException:
-                time.sleep(5)  # Đợi 5 giây trước khi thử lại
-
+                self.serial.close()
+            for p in serial.tools.list_ports.comports():
+                if p.pid == self.pid and p.vid == self.vid:
+                    self.com_port = p.device
+                break
     def activate(self):
-        try:
-            if self.serial and self.serial.isOpen:
-                return
-
-            self.serial = serial.Serial(self.com_port, self.baudrate)
-            if self.serial.isOpen:
-                super().activate()
-
-        except serial.SerialException:
-            _LOGGER.critical(
-                "Lỗi kết nối: Vui lòng đảm bảo thiết bị của bạn không bị chiếm dụng, hoặc chọn lại cổng COM khác."
-            )
-            # Todo: Trigger the UI to refresh after the clear effect call. Currently it still shows as active.
-            self.deactivate()
 
     def deactivate(self):
         super().deactivate()
         if self.serial:
             self.serial.close()
+            self.serial = None
 
 
 class Devices(RegistryLoader):
