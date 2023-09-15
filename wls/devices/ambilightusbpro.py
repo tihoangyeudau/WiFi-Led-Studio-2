@@ -1,8 +1,8 @@
 import logging
-
+import tkinter as tk
+from tkinter import messagebox
 import serial
 import voluptuous as vol
-
 from wls.devices import SerialDevice, packets
 
 _LOGGER = logging.getLogger(__name__)
@@ -15,12 +15,6 @@ COLOR_ORDERS = [
     "GBR",
     "BGR",
 ]
-
-BAUDRATE_ORDERS = [
-    1500000,
-    1000000,
-]
-
 
 class AmbilightUSBProDevice(SerialDevice):
     """Ambilight USB Pro device support"""
@@ -43,7 +37,7 @@ class AmbilightUSBProDevice(SerialDevice):
                 ): vol.In(list(COLOR_ORDERS)),
                 vol.Required(
                     "baudrate", description="tốc độ truyền", default=1500000
-                ): vol.In(list(BAUDRATE_ORDERS)),
+                ): int,
             }
         )
 
@@ -57,9 +51,11 @@ class AmbilightUSBProDevice(SerialDevice):
             self.serial.write(
                 packets.build_ambilightusbpro_packet(data, self.color_order)
             )
-
-        except serial.SerialException:
-            _LOGGER.critical(
-                "Kết nối nối tiếp bị gián đoạn. Vui lòng kiểm tra kết nối và đảm bảo thiết bị của bạn hoạt động bình thường."
-            )
-            self.reconnect()  # Gọi phương thức tái kết nối từ SerialDevice
+        except serial.SerialException as e:
+            _LOGGER.error("SerialException occurred: %s", str(e))
+            # Create a simple popup dialog with OK and Reconnect buttons using tkinter
+            root = tk.Tk()
+            root.withdraw()  # Hide the main window
+            messagebox.showinfo("SerialException", "Tín hiệu USB bị ngắt kết nối. Bạn hãy kiểm tra và cắm lại dây USB nhé?")
+            root.destroy()  # Destroy the root window
+            self.reconnect()

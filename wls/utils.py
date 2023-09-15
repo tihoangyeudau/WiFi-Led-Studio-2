@@ -1090,7 +1090,7 @@ class RegistryLoader:
             try:
                 _config = _cls.schema()(_config)
             except Exception as e:
-                print(f"Bỏ qua kiểm tra schema do lỗi: {e}")
+                pass
             obj = _cls(config=_config, *args, **kwargs)
         else:
             obj = _cls(*args, **kwargs)
