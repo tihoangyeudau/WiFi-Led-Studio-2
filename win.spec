@@ -5,6 +5,7 @@ spec_root = os.path.abspath(SPECPATH)
 datas = [
          (f'C:/Users/tuant/AppData/Local/Programs/Python/Python311/Scripts/build/exe.win-amd64-3.11/lib/wls','wls/'),
          (f'C:/Users/tuant/AppData/Local/Programs/Python/Python311/Scripts/build/exe.win-amd64-3.11/lib/wls_frontend','wls_frontend/'),
+         (f'C:/Users/tuant/AppData/Local/Programs/Python/Python311/Scripts/build/exe.win-amd64-3.11/lib/samplerate','samplerate/'),
          (f'C:/Users/tuant/AppData/Local/Programs/Python/Python311/Scripts/build/exe.win-amd64-3.11/lib/xyzservices','xyzservices/'),
          (f'{spec_root}/icons','icons/'), (f'{spec_root}/icons/tray.png','.')
       ]
@@ -19,8 +20,6 @@ a = Analysis([f'{spec_root}\\wls\\__main__.py'],
              binaries=[],
              datas=datas,
              hiddenimports=[
-                           "tkinter",
-                           "tkinter.messagebox",
                            "sacn",
                            "aubio",
                            "numpy",
@@ -51,6 +50,8 @@ a = Analysis([f'{spec_root}\\wls\\__main__.py'],
                            "sentry_sdk.integrations.tornado",
                            "sentry_sdk.integrations.sqlalchemy",
                            "sentry_sdk.integrations.boto3",
+                           "tkinter",
+                           "tkinter.messagebox",
                            "_cffi_backend",
                            "serial",
                            "pystray",
