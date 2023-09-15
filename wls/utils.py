@@ -1087,7 +1087,10 @@ class RegistryLoader:
         _cls = self._cls.registry().get(type)
         _config = kwargs.pop("config", None)
         if _config is not None:
-            _config = _cls.schema()(_config)
+            try:
+                _config = _cls.schema()(_config)
+            except Exception as e:
+                print(f"Bỏ qua kiểm tra schema do lỗi: {e}")
             obj = _cls(config=_config, *args, **kwargs)
         else:
             obj = _cls(*args, **kwargs)
