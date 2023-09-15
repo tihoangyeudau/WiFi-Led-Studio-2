@@ -23,12 +23,6 @@ _LOGGER = logging.getLogger(__name__)
 MIN_MIDI = 21
 MAX_MIDI = 108
 
-if sys.platform == 'win32':
-    default_output = sd.query_devices(sd.default.device[1])['name']
-    for i in range(0, len(sd.query_devices())):
-        device_name = sd.query_devices(i)['name']
-        if (default_output in device_name) and (default_output != device_name):
-            default_loopback_index = i
 
 class AudioInputSource:
 
@@ -41,6 +35,16 @@ class AudioInputSource:
     _volume = -90
     _volume_filter = ExpFilter(-90, alpha_decay=0.99, alpha_rise=0.99)
     _subscriber_threshold = 0
+
+    @staticmethod
+    def update_default_loopback_index():
+        global default_loopback_index
+        if sys.platform == 'win32':
+            default_output = sd.query_devices(sd.default.device[1])['name']
+            for i in range(0, len(sd.query_devices())):
+                device_name = sd.query_devices(i)['name']
+                if (default_output in device_name) and (default_output != device_name):
+                    default_loopback_index = i
     
     @staticmethod
     def device_index_validator(val):
@@ -62,10 +66,12 @@ class AudioInputSource:
     @staticmethod
     def default_device_index():
         if (sd.default.device[1] == -1):
-            msg = f"Không tìm thấy loa/tai nghe nào, hãy đảm bảo bạn đã nối chúng với máy tính hoặc ko vô hiệu hoá chúng!"
-            _LOGGER.exception(msg)
+            msg = f"Không tìm thấy loa, hãy đảm bảo bạn đã kết nối loa với máy tính hoặc ko vô hiệu hoá soundcard!"
             raise Exception(msg)
         else:
+            # Gọi phương thức để cập nhật default_loopback_index
+            AudioInputSource.update_default_loopback_index()
+            
             if sys.platform == 'win32':
                 return default_loopback_index
             else:
@@ -188,45 +194,6 @@ class AudioInputSource:
                 _LOGGER.warning(
                     f"Thiết bị âm thanh {input_devices[device_idx]['name']} không có kênh đầu vào. Hoàn nguyên về thiết bị đầu vào mặc định."
                 )
-
-        # hostapis = self._audio.query_hostapis()
-        # devices = self._audio.query_devices()
-        # default_api = self._audio.default.hostapi
-
-        # Show device and api info in logger
-        # _LOGGER.debug("Audio Input Devices:")
-        # for api_idx, api in enumerate(hostapis):
-        #     _LOGGER.debug(
-        #         "Host API: {} {}".format(
-        #             api["name"],
-        #             "[DEFAULT]" if api_idx == default_api else "",
-        #         )
-        #     )
-        #     for idx in api["devices"]:
-        #         device = devices[idx]
-        #         if device["max_input_channels"] > 0:
-        #             _LOGGER.debug(
-        #                 "    [{}] {} {} {}".format(
-        #                     idx,
-        #                     device["name"],
-        #                     "[DEFAULT]" if idx == default_device else "",
-        #                     "[SELECTED]" if idx == device_idx else "",
-        #                 )
-        #             )
-
-        # old, do not use
-        # self.pre_emphasis.set_biquad(1., -self._config['pre_emphasis'], 0, 0, 0)
-
-        # USE THESE FOR SCOTT_MEL OR OTHERS
-        # self.pre_emphasis.set_biquad(1.3662, -1.9256, 0.5621, -1.9256, 0.9283)
-
-        # USE THESE FOR MATT_MEl
-        # weaker bass, good for vocals, highs
-        # self.pre_emphasis.set_biquad(0.87492, -1.74984, 0.87492, -1.74799, 0.75169)
-        # bass heavier overall more balanced
-        # self.pre_emphasis.set_biquad(
-        #     0.85870, -1.71740, 0.85870, -1.71605, 0.71874
-        # )
 
         # Setup a pre-emphasis filter to balance the input volume of lows to highs
         self.pre_emphasis = aubio.digital_filter(3)
