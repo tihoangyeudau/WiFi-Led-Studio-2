@@ -432,42 +432,39 @@ class SerialDevice(Device):
                 "com_port",
                 description="Cổng COM cho đèn USB",
                 default="",
-            ): vol.In(list(AvailableCOMPorts.available_ports)),
+            ): str,
             vol.Required(
-                "baudrate", description="tốc độ truyền", default=115200
-            ): vol.All(int, vol.Range(min=115200)),
+                "pid",
+                default=0,
+            ): int,
+            vol.Required(
+                "vid",
+                default=0,
+            ): int,
         }
     )
 
     MAX_RETRIES = 5  # Maximum number of reconnection attempts
 
     def __init__(self, wls, config):
-        # Load previous config if exists
-        try:
-            with open(self.CONFIG_FILE, 'r') as f:
-                prev_config = json.load(f)
-                self.pid = prev_config.get('pid')
-                self.vid = prev_config.get('vid')
-        except FileNotFoundError:
-            self.pid = None
-            self.vid = None
-
         super().__init__(wls, config)
         self.serial = None
         self.baudrate = self._config["baudrate"]
         self.com_port = self._config["com_port"]
-        # Map pid and vid to com_port
+        self.pid = self._config["pid"]
+        self.vid = self._config["vid"]
+        self.update_pid_vid_map()
+
+    def update_pid_vid_map(self):
         self.pid_vid_map = {}
         for p in serial.tools.list_ports.comports():
             self.pid_vid_map[(p.pid, p.vid)] = p.device
-            if p.device == self.com_port:
-                self.pid = p.pid
-                self.vid = p.vid
-                break
 
     def establish_connection(self):
+        self.update_pid_vid_map()
+        self.com_port = self.pid_vid_map.get((self.pid, self.vid), self.com_port)
         try:
-            self.serial = serial.Serial(self.com_port, self.baudrate, timeout=1)  # Added timeout
+            self.serial = serial.Serial(self.com_port, self.baudrate, timeout=1)
             if self.serial.isOpen():
                 super().activate()
         except serial.SerialException as e:
@@ -636,6 +633,13 @@ class Devices(RegistryLoader):
                 device_type, device_config
             )
         )
+
+        for p in serial.tools.list_ports.comports():
+            if 'com_port' in device_config and p.device == device_config['com_port']:
+                device_config["pid"] = p.pid
+                device_config["vid"] = p.vid
+                break
+
         device = self._wls.devices.create(
             id=device_id,
             type=device_type,
