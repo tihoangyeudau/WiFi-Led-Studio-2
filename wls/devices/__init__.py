@@ -404,24 +404,21 @@ class UDPDevice(NetworkedDevice):
         )
         self._sock = None
 
-if sys.platform == 'win32':
-    manufacturers = ['wch.cn', 'FTDI', 'Microsoft', 'Silicon Labs']
-
-    class AvailableCOMPorts:
-        ports = serial.tools.list_ports.comports()
-        available_ports = [""]
-
+def find_available_com_ports():
+    available_ports = [""]
+    ports = serial.tools.list_ports.comports()
+    if sys.platform == 'win32':
+        manufacturers = ['wch.cn', 'FTDI', 'Microsoft', 'Silicon Labs']
         for p in ports:
-
             if (format(p.manufacturer) in manufacturers) and ("Standard Serial over Bluetooth link" not in format(p.description)):
                 available_ports.append(p.device)
-else:
-    class AvailableCOMPorts:
-        ports = serial.tools.list_ports.comports()
-        available_ports = [""]
-
+    else:
         for p in ports:
             available_ports.append(p.device)
+    return available_ports
+
+class AvailableCOMPorts:
+    available_ports = find_available_com_ports()
 
 @BaseRegistry.no_registration
 class SerialDevice(Device):
@@ -432,7 +429,7 @@ class SerialDevice(Device):
                 "com_port",
                 description="Cổng COM cho đèn USB",
                 default="",
-            ): str,
+            ): vol.In(list(AvailableCOMPorts.available_ports)),
             vol.Required(
                 "pid",
                 default=0,
