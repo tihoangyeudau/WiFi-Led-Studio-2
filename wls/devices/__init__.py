@@ -11,7 +11,6 @@ import serial
 import serial.tools.list_ports
 import voluptuous as vol
 import zeroconf
-import math  # Importing the math module
 
 from wls.config import save_config
 from wls.events import DeviceCreatedEvent, DeviceUpdateEvent, Event
@@ -420,6 +419,19 @@ def find_available_com_ports():
 class AvailableCOMPorts:
     available_ports = find_available_com_ports()
 
+BAUDRATE_ORDERS = [
+    "Ambilight USB Pro",
+    "Ambilight USB",
+]
+
+pid_orders = [
+    "Mặc định",
+]
+
+vid_orders = [
+    "Mặc định",
+]
+
 @BaseRegistry.no_registration
 class SerialDevice(Device):
 
@@ -431,13 +443,19 @@ class SerialDevice(Device):
                 default="",
             ): vol.In(list(AvailableCOMPorts.available_ports)),
             vol.Required(
+                "baudrate", description="Phiên bản",
+                default="Ambilight USB Pro",
+            ): vol.In(list(BAUDRATE_ORDERS)),
+            vol.Required(
                 "pid",
-                default=0,
-            ): int,
+                description="Mã PID của đèn",
+                default="Mặc định",
+            ): vol.In(list(pid_orders)),
             vol.Required(
                 "vid",
-                default=0,
-            ): int,
+                description="Mã VID của đèn",
+                default="Mặc định",
+            ): vol.In(list(vid_orders)),
         }
     )
 
@@ -446,7 +464,7 @@ class SerialDevice(Device):
     def __init__(self, wls, config):
         super().__init__(wls, config)
         self.serial = None
-        self.baudrate = self._config["baudrate"]
+        self.baudrate = 1500000 if self._config["baudrate"] == "Ambilight USB Pro" else 115200
         self.com_port = self._config["com_port"]
         self.pid = self._config["pid"]
         self.vid = self._config["vid"]
@@ -464,12 +482,11 @@ class SerialDevice(Device):
             self.serial = serial.Serial(self.com_port, self.baudrate, timeout=1)
             if self.serial.isOpen():
                 super().activate()
-        except serial.SerialException as e:
+        except serial.SerialException:
             pass
 
     def reconnect(self):
-        retries = 0
-        while retries < self.MAX_RETRIES:
+        for retries in range(self.MAX_RETRIES):
             if self.serial and self.serial.isOpen():
                 self.serial.close()
             for p in serial.tools.list_ports.comports():
@@ -478,14 +495,13 @@ class SerialDevice(Device):
                     break
             try:
                 self.establish_connection()
-            except Exception as e:
+            except Exception:
                 pass
             if self.serial and self.serial.isOpen():
                 break
-            time.sleep(math.pow(2, retries))
-            retries += 1
-        if retries == self.MAX_RETRIES:
-            return
+            time.sleep(2 ** retries)
+        return
+
 
     def activate(self):
         if not (self.serial and self.serial.isOpen()):
