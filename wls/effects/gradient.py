@@ -34,7 +34,7 @@ class GradientEffect(Effect):
             vol.Optional(
                 "beat_speed",
                 description="Gradient Roll speed is adjusted based on audio beat magnitude",
-                default=True,
+                default=False,
             ): bool,
         }
     )
