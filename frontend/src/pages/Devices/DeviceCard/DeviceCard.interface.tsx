@@ -66,10 +66,6 @@ export interface DeviceCardProps {
   /**
    * Handle Function
    */
-  handleEditDevice?: any;
-  /**
-   * Handle Function
-   */
   handleClearEffect?: any;
   /**
    * Handle Function
@@ -99,7 +95,6 @@ export const DeviceCardDefaults: DeviceCardProps = {
   index: 1,
   handleDeleteDevice: () => console.log('DELETING DEVICE'), // eslint-disable-line no-console
   handleEditVirtual: () => console.log('EDITING VIRTUAL'), // eslint-disable-line no-console
-  handleEditDevice: () => console.log('EDITING DEVICE'), // eslint-disable-line no-console
   handleClearEffect: () => console.log('CLEARING EFFECT'), // eslint-disable-line no-console
   handlePlayPause: () => console.log('PLAY/PAUSE'), // eslint-disable-line no-console
   linkTo: '/',

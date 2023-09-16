@@ -37,7 +37,6 @@ Default.args = {
   graphsActive: true,
   handleDeleteDevice: undefined,
   handleEditVirtual: undefined,
-  handleEditDevice: undefined,
   handleClearEffect: undefined,
   handlePlayPause: undefined,
   additionalStyle: {},
