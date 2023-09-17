@@ -40,7 +40,7 @@ class AmbilightUSBProDevice(SerialDevice):
 
     def flush(self, data):
         try:
-            if self.baudrate == 1500000:
+            if self.baudrate == 1000000:
                 self.serial.write(
                     packets.build_ambilightusbpro_packet(data, self.color_order)
                 )
