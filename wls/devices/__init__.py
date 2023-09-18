@@ -476,8 +476,6 @@ class SerialDevice(Device):
             self.pid_vid_map[(p.pid, p.vid)] = p.device
 
     def establish_connection(self):
-        self.update_pid_vid_map()
-        self.com_port = self.pid_vid_map.get((self.pid, self.vid), self.com_port)
         try:
             self.serial = serial.Serial(self.com_port, self.baudrate, timeout=1)
             if self.serial.isOpen():
@@ -489,23 +487,37 @@ class SerialDevice(Device):
         for retries in range(self.MAX_RETRIES):
             if self.serial and self.serial.isOpen():
                 self.serial.close()
-            for p in serial.tools.list_ports.comports():
-                if p.pid == self.pid and p.vid == self.vid:
+            
+            matching_ports = [p for p in serial.tools.list_ports.comports() if p.pid == self.pid and p.vid == self.vid]
+            
+            if len(matching_ports) > 1:
+                print("Multiple devices with the same VID and PID detected. Activating using COM port...")
+                for p in matching_ports:
                     self.com_port = p.device
-                    break
-            try:
-                self.establish_connection()
-            except Exception:
-                pass
+                    try:
+                        self.establish_connection()
+                    except Exception as e:
+                        pass
+                    
+                    if self.serial and self.serial.isOpen():
+                        break
+            else:
+                try:
+                    self.com_port = matching_ports[0].device if matching_ports else None
+                    self.establish_connection()
+                except Exception as e:
+                    pass
+
             if self.serial and self.serial.isOpen():
                 break
+            
             time.sleep(2 ** retries)
         return
 
 
     def activate(self):
         if not (self.serial and self.serial.isOpen()):
-            self.establish_connection()
+            self.reconnect()
 
     def deactivate(self):
         super().deactivate()
