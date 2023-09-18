@@ -464,7 +464,7 @@ class SerialDevice(Device):
     def __init__(self, wls, config):
         super().__init__(wls, config)
         self.serial = None
-        self.baudrate = 1500000 if self._config["baudrate"] == "Ambilight USB Pro" else 115200
+        self.baudrate = 1000000 if self._config["baudrate"] == "Ambilight USB Pro" else 115200
         self.com_port = self._config["com_port"]
         self.pid = self._config["pid"]
         self.vid = self._config["vid"]
