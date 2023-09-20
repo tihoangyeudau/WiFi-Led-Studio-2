@@ -432,6 +432,10 @@ vid_orders = [
     "Mặc định",
 ]
 
+led_id_orders = [
+    "Rxxxxxx",
+]
+
 @BaseRegistry.no_registration
 class SerialDevice(Device):
 
@@ -456,6 +460,11 @@ class SerialDevice(Device):
                 description="Mã VID của đèn",
                 default="Mặc định",
             ): vol.In(list(vid_orders)),
+            vol.Required(
+                "led_id",
+                description="Mã ID của đèn",
+                default="Rxxxxxx",
+            ): vol.In(list(led_id_orders)),
         }
     )
 
@@ -468,6 +477,7 @@ class SerialDevice(Device):
         self.com_port = self._config["com_port"]
         self.pid = self._config["pid"]
         self.vid = self._config["vid"]
+        self.led_id = self._config["led_id"]
         self.update_pid_vid_map()
 
     def update_pid_vid_map(self):
@@ -476,51 +486,132 @@ class SerialDevice(Device):
             self.pid_vid_map[(p.pid, p.vid)] = p.device
 
     def establish_connection(self):
-        try:
-            self.serial = serial.Serial(self.com_port, self.baudrate, timeout=1)
-            if self.serial.isOpen():
-                super().activate()
-        except serial.SerialException:
-            pass
+        if self.baudrate ==1000000:
+            try:
+                if self.serial.isOpen():
+                    super().activate()
+                    print("Đã establish_connection")
+            except serial.SerialException as e:
+                print(f"Không establish_connection được: {e}")
+        else:
+            try:
+                self.serial = serial.Serial(self.com_port, self.baudrate, timeout=1)
+                if self.serial.isOpen():
+                    super().activate()
+                    print("Đã establish_connection")
+            except serial.SerialException as e:
+                print(f"Không establish_connection được: {e}")
+
 
     def reconnect(self):
         for retries in range(self.MAX_RETRIES):
             if self.serial and self.serial.isOpen():
                 self.serial.close()
-            
-            matching_ports = [p for p in serial.tools.list_ports.comports() if p.pid == self.pid and p.vid == self.vid]
-            
-            if len(matching_ports) > 1:
-                print("Multiple devices with the same VID and PID detected. Activating using COM port...")
-                for p in matching_ports:
-                    self.com_port = p.device
+                print("đã đóng cổng trước khi thử lại")
+
+            if self.baudrate == 1000000:
+                print("Bắt đầu thử check id")
+                self.serial_check_id_method()
+            else:
+                matching_ports = [p for p in serial.tools.list_ports.comports() if p.pid == self.pid and p.vid == self.vid]
+                if len(matching_ports) > 1:
+                    print("Multiple devices with the same VID and PID detected. Activating using COM port...")
+                    for p in matching_ports:
+                        self.com_port = p.device
+                        try:
+                            self.establish_connection()
+                        except Exception as e:
+                            pass
+                        
+                        if self.serial and self.serial.isOpen():
+                            break
+                else:
                     try:
+                        self.com_port = matching_ports[0].device if matching_ports else None
                         self.establish_connection()
                     except Exception as e:
                         pass
-                    
-                    if self.serial and self.serial.isOpen():
-                        break
-            else:
-                try:
-                    self.com_port = matching_ports[0].device if matching_ports else None
-                    self.establish_connection()
-                except Exception as e:
-                    pass
+
+            time.sleep(2 ** retries)
+        return
+
+    def serial_check_id_method(self):
+        try:
+            self.serial = serial.Serial(self.com_port, self.baudrate, timeout=1)
+            print("Đã mở cổng usb cho check id")
+        except serial.SerialException:
+            print("Không cổng usb cho check id")
+
+        for p2 in serial.tools.list_ports.comports():
+            self.com_port = p2.device
+            print("Chuẩn bị thử check id từng thiết bị tìm được trong list usb devices")
+            try:
+                time.sleep(1)
+                self.serial.write(b'CheckID')
+                time.sleep(1)
+                print("Đã gửi ký tự CheckID để chuyển sang Check ID mode trên wemos")
+                self.serial.write(b'r\n')
+                print("đã gửi ký tự r")
+                response = self.serial.readline().decode('ascii').strip()
+                if response.startswith("R") and len(response) == 7:
+                    print(f"ID thiết bị nhận được là: {response}")
+                    check_id = self.led_id  # Get the current CheckID from config
+                    if check_id == "Rxxxxxx":
+                        print(f"Lần đầu khởi tạo, lưu Check ID vào config")
+                        self.save_check_id_to_config(response)  # Save the new CheckID to config
+                        try:
+                            self.serial.write(b'm\n')
+                            print("đã gửi ký tự m")
+                            m_response = self.serial.readline().decode('ascii').strip()
+                            if m_response == 'l':
+                                print("đã nhận được ký tự l")
+                                self.establish_connection()
+                                return True
+                            else:
+                                print("Không nhận được ký tự l")
+                        except Exception as e:
+                            print(f"Không truy cập được cổng {self.com_port}: {e}")
+                    else:
+                        if response == check_id:
+                            print("ID đã lưu khớp với ID thiết bị, nhận dạng thành công")
+                            try:
+                                self.serial.write(b'm\n')
+                                print("đã gửi ký tự m")
+                                m_response = self.serial.readline().decode('ascii').strip()
+                                if m_response == 'l':
+                                    print("đã nhận được ký tự l")
+                                    self.establish_connection()
+                                    return True
+                                else:
+                                    print("Không nhận được ký tự l")
+                            except Exception as e:
+                                print(f"Không truy cập được cổng {self.com_port}: {e}")
+                        else:
+                            print("ID mới không khớp với ID đã lưu, thử cổng COM khác")
+                            self.serial.close()
+                else:
+                    print(f"Cổng {self.com_port} không phản hồi")
+                    self.serial.close()
+            except Exception as e:
+                print(f"An error occurred while communicating with port {self.com_port}: {e}")
 
             if self.serial and self.serial.isOpen():
                 break
-            
-            time.sleep(2 ** retries)
-        return
+
+    def save_check_id_to_config(self, response):
+        self._config["led_id"] = response
+        save_config(config=self._wls.config, config_dir=self._wls.config_dir)
+        print(f"Config sau khi lưu: {self._config['led_id']}")
 
 
     def activate(self):
         if not (self.serial and self.serial.isOpen()):
             self.reconnect()
+            print("Đã activate")
 
     def deactivate(self):
         super().deactivate()
+        print("đã deactivate")
         if self.serial:
             self.serial.close()
             self.serial = None
@@ -662,18 +753,21 @@ class Devices(RegistryLoader):
             )
         )
 
-        for p in serial.tools.list_ports.comports():
-            if 'com_port' in device_config and p.device == device_config['com_port']:
-                device_config["pid"] = p.pid
-                device_config["vid"] = p.vid
-                break
-
         device = self._wls.devices.create(
             id=device_id,
             type=device_type,
             config=device_config,
             wls=self._wls,
         )
+
+        # Tạo một đối tượng của class SerialDevice
+        serial_device = SerialDevice(self._wls, device.config)
+
+        # Lấy led_id từ SerialDevice
+        led_id = serial_device.led_id
+
+        # Cập nhật config của thiết bị với led_id mới
+        device.config["led_id"] = led_id
 
         if hasattr(device, "async_initialize"):
             await device.async_initialize()
