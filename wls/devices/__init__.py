@@ -419,9 +419,10 @@ def find_available_com_ports():
 class AvailableCOMPorts:
     available_ports = find_available_com_ports()
 
-BAUDRATE_ORDERS = [
-    "Ambilight USB Pro",
-    "Ambilight USB",
+VERSION_ORDERS = [
+    "Pro Max",
+    "Pro",
+    "Thường",
 ]
 
 pid_orders = [
@@ -447,9 +448,9 @@ class SerialDevice(Device):
                 default="",
             ): vol.In(list(AvailableCOMPorts.available_ports)),
             vol.Required(
-                "baudrate", description="Phiên bản",
+                "version", description="Phiên bản",
                 default="Ambilight USB Pro",
-            ): vol.In(list(BAUDRATE_ORDERS)),
+            ): vol.In(list(VERSION_ORDERS)),
             vol.Required(
                 "pid",
                 description="Mã PID của đèn",
@@ -473,7 +474,12 @@ class SerialDevice(Device):
     def __init__(self, wls, config):
         super().__init__(wls, config)
         self.serial = None
-        self.baudrate = 1000000 if self._config["baudrate"] == "Ambilight USB Pro" else 115200
+        if self._config["version"] == "Pro Max":
+            self.version = 1000000
+        elif self._config["version"] == "Pro":
+            self.version = 1500000
+        else:
+            self.version = 115200
         self.com_port = self._config["com_port"]
         self.pid = self._config["pid"]
         self.vid = self._config["vid"]
@@ -487,10 +493,10 @@ class SerialDevice(Device):
 
     def establish_connection(self):
         try:
-            if self.baudrate != 1000000:
-                self.serial = serial.Serial(self.com_port, self.baudrate, timeout=1)
+            if self.version != 1000000:
+                self.serial = serial.Serial(self.com_port, self.version, timeout=1)
             
-            if self.serial.isOpen():
+            if self.serial and self.serial.isOpen():
                 super().activate()
         except serial.SerialException as e:
             print(f"Không establish_connection được: {e}")
@@ -503,7 +509,7 @@ class SerialDevice(Device):
             if self.is_serial_open():
                 self.serial.close()
 
-            if self.baudrate == 1000000:
+            if self.version == 1000000:
                 self.serial_check_id_method()
             else:
                 matching_ports = [p for p in serial.tools.list_ports.comports() if p.pid == self.pid and p.vid == self.vid]
@@ -542,7 +548,7 @@ class SerialDevice(Device):
         for p2 in available_ports:
             self.com_port = p2.device
             try:
-                self.serial = serial.Serial(self.com_port, self.baudrate, timeout=1)
+                self.serial = serial.Serial(self.com_port, self.version, timeout=1)
                 time.sleep(0.1)
             except serial.SerialException:
                 print(f"Không truy cập được cổng {self.com_port}")
