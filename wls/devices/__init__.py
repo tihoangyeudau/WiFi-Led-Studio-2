@@ -12,6 +12,9 @@ import serial.tools.list_ports
 import voluptuous as vol
 import zeroconf
 
+import tkinter as tk
+from tkinter import messagebox
+
 from wls.config import save_config
 from wls.events import DeviceCreatedEvent, DeviceUpdateEvent, Event
 from wls.utils import (
@@ -610,6 +613,20 @@ class Devices(RegistryLoader):
         self._zeroconf = zeroconf.Zeroconf()
 
     def create_from_config(self, config):
+        usb_connected = False
+        while not usb_connected:
+            usb_connected = self.check_usb_connection()
+            
+            if not usb_connected:
+                root = tk.Tk()
+                root.withdraw()  # Ẩn cửa sổ chính
+                
+                # Hiển thị hộp thoại thông báo
+                messagebox.showinfo("Thông báo", "Vui lòng kết nối USB và nhấn OK để tiếp tục...")
+                
+                root.destroy()  # Đóng cửa sổ
+                time.sleep(1)
+
         for device in config:
             _LOGGER.info(f"Đang tải đèn từ cấu hình: {device}")
             try:
@@ -621,6 +638,15 @@ class Devices(RegistryLoader):
                 )
             except vol.MultipleInvalid as e:
                 _LOGGER.exception(e)
+
+    def check_usb_connection(self):
+        usb_devices = [p for p in serial.tools.list_ports.comports()]
+        if usb_devices:
+            for device in usb_devices:
+                print(f"USB đã kết nối: {device.device}")
+            return True
+        else:
+            return False
 
     def deactivate_devices(self):
         for device in self.values():
