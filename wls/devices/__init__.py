@@ -495,32 +495,35 @@ class SerialDevice(Device):
         except serial.SerialException as e:
             print(f"Không establish_connection được: {e}")
 
+    def is_serial_open(self):
+        return self.serial and self.serial.isOpen()
+
     def reconnect(self):
         for retries in range(self.MAX_RETRIES):
-            if self.serial and self.serial.isOpen():
+            if self.is_serial_open():
                 self.serial.close()
 
             if self.baudrate == 1000000:
                 self.serial_check_id_method()
             else:
                 matching_ports = [p for p in serial.tools.list_ports.comports() if p.pid == self.pid and p.vid == self.vid]
+                
                 if len(matching_ports) > 1:
                     print("Multiple devices with the same VID and PID detected. Activating using COM port...")
                     for p in matching_ports:
                         self.com_port = p.device
                         try:
                             self.establish_connection()
+                            if self.is_serial_open():
+                                break
                         except Exception as e:
-                            pass
-                        
-                        if self.serial and self.serial.isOpen():
-                            break
+                            print(f"Error while trying to establish connection: {e}")
                 else:
                     try:
                         self.com_port = matching_ports[0].device if matching_ports else None
                         self.establish_connection()
                     except Exception as e:
-                        pass
+                        print(f"Error while trying to establish connection: {e}")
 
             time.sleep(2 ** retries)
         return
@@ -535,14 +538,17 @@ class SerialDevice(Device):
             return None
 
     def serial_check_id_method(self):
-        try:
-            self.serial = serial.Serial(self.com_port, self.baudrate, timeout=1)
-            time.sleep(0.1)
-        except serial.SerialException:
-            print("Không cổng usb cho check id")
-
-        for p2 in serial.tools.list_ports.comports():
+        available_ports = serial.tools.list_ports.comports()
+        for p2 in available_ports:
             self.com_port = p2.device
+            try:
+                self.serial = serial.Serial(self.com_port, self.baudrate, timeout=1)
+                time.sleep(0.1)
+            except serial.SerialException:
+                print(f"Không truy cập được cổng {self.com_port}")
+                self.serial = None
+                continue
+
             response = self.send_and_receive(b'r\n')
 
             if not response:
@@ -561,10 +567,12 @@ class SerialDevice(Device):
                         print("Không nhận được ký tự l")
                 else:
                     print("ID mới không khớp với ID đã lưu, thử cổng COM khác")
-                    self.serial.close()
+                    if self.serial:
+                        self.serial.close()
             else:
                 print(f"Cổng {self.com_port} không phản hồi")
-                self.serial.close()
+                if self.serial:
+                    self.serial.close()
 
             if self.serial and self.serial.isOpen():
                 break
