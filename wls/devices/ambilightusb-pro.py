@@ -39,6 +39,12 @@ class AmbilightUSBProDevice(SerialDevice):
         self.color_order = self._config["color_order"]
 
     def flush(self, data):
+        if self.serial is None:
+            print("Không thể gửi dữ liệu: self.serial chưa được khởi tạo")
+            self.reconnect()
+            self.flush(data)
+            return
+
         try:
             if self.baudrate == 1000000:
                 self.serial.write(
@@ -50,4 +56,5 @@ class AmbilightUSBProDevice(SerialDevice):
                 )
         except serial.SerialException:
             self.reconnect()
+
 

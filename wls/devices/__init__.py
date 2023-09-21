@@ -577,10 +577,6 @@ class SerialDevice(Device):
                 if self.serial:
                     self.serial.close()
 
-            if self.serial and self.serial.isOpen():
-                break
-
-
     def save_check_id_to_config(self, response):
         self._config["led_id"] = response
         save_config(config=self._wls.config, config_dir=self._wls.config_dir)
