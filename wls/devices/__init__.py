@@ -406,15 +406,18 @@ class UDPDevice(NetworkedDevice):
 def find_available_com_ports():
     available_ports = [""]
     ports = serial.tools.list_ports.comports()
+    
     if sys.platform == 'win32':
         manufacturers = ['wch.cn', 'FTDI', 'Microsoft', 'Silicon Labs']
         for p in ports:
-            if (format(p.manufacturer) in manufacturers) and ("Standard Serial over Bluetooth link" not in format(p.description)):
+            if p.manufacturer in manufacturers and "Standard Serial over Bluetooth link" not in p.description:
                 available_ports.append(p.device)
     else:
         for p in ports:
             available_ports.append(p.device)
+    
     return available_ports
+
 
 class AvailableCOMPorts:
     available_ports = find_available_com_ports()
@@ -426,11 +429,11 @@ VERSION_ORDERS = [
 ]
 
 pid_orders = [
-    "Mặc định",
+    "29987",
 ]
 
 vid_orders = [
-    "Mặc định",
+    "6790",
 ]
 
 led_id_orders = [
@@ -449,17 +452,17 @@ class SerialDevice(Device):
             ): vol.In(list(AvailableCOMPorts.available_ports)),
             vol.Required(
                 "version", description="Phiên bản",
-                default="Ambilight USB Pro",
+                default="Pro Max",
             ): vol.In(list(VERSION_ORDERS)),
             vol.Required(
                 "pid",
                 description="Mã PID của đèn",
-                default="Mặc định",
+                default="29987",
             ): vol.In(list(pid_orders)),
             vol.Required(
                 "vid",
                 description="Mã VID của đèn",
-                default="Mặc định",
+                default="6790",
             ): vol.In(list(vid_orders)),
             vol.Required(
                 "led_id",
@@ -496,7 +499,7 @@ class SerialDevice(Device):
             if self.version != 1000000:
                 self.serial = serial.Serial(self.com_port, self.version, timeout=1)
             
-            if self.serial and self.serial.isOpen():
+            if self.serial.isOpen():
                 super().activate()
         except serial.SerialException as e:
             print(f"Không establish_connection được: {e}")
