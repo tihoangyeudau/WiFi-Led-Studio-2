@@ -404,7 +404,7 @@ class UDPDevice(NetworkedDevice):
         self._sock = None
 
 def find_available_com_ports():
-    available_ports = [""]
+    available_ports = ["COMx"]
     ports = serial.tools.list_ports.comports()
     
     if sys.platform == 'win32':
@@ -448,7 +448,7 @@ class SerialDevice(Device):
             vol.Required(
                 "com_port",
                 description="Cổng COM cho đèn USB",
-                default="",
+                default="COMx",
             ): vol.In(list(AvailableCOMPorts.available_ports)),
             vol.Required(
                 "version", description="Phiên bản",
