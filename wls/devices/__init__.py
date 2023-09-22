@@ -552,36 +552,40 @@ class SerialDevice(Device):
             self.com_port = p2.device
             try:
                 self.serial = serial.Serial(self.com_port, self.version, timeout=1)
-                time.sleep(0.1)
             except serial.SerialException:
                 print(f"Không truy cập được cổng {self.com_port}")
                 self.serial = None
                 continue
 
-            response = self.send_and_receive(b'r\n')
-
-            if not response:
-                self.send_and_receive(b'CheckID')
+            max_retries = 3
+            for _ in range(max_retries):
+                response = self.send_and_receive(b'CheckID')
+                print(f"Đã gửi yêu cầu kích hoạt lại chế độ check ID {self.com_port}")
                 response = self.send_and_receive(b'r\n')
+                print(f"Đã gửi yêu cầu kích hoạt chế độ Ambilight cho cổng {self.com_port}")
 
-            if response and response.startswith("R") and len(response) == 7:
-                check_id = self.led_id
-                if check_id == "Rxxxxxx" or response == check_id:
-                    self.save_check_id_to_config(response)
-                    m_response = self.send_and_receive(b'm\n')
-                    if m_response == 'l':
-                        self.establish_connection()
-                        return True
+                if response and response.startswith("R") and len(response) == 7:
+                    check_id = self.led_id
+                    if check_id == "Rxxxxxx" or response == check_id:
+                        self.save_check_id_to_config(response)
+                        m_response = self.send_and_receive(b'm\n')
+                        if m_response == 'l':
+                            print(f"Chế độ Ambilight cho cổng {self.com_port} đã được kích hoạt")
+                            self.establish_connection()
+                            return True
+                        else:
+                            print("Không nhận được ký tự l")
                     else:
-                        print("Không nhận được ký tự l")
+                        print("ID mới không khớp với ID đã lưu, thử cổng COM khác")
+                        if self.serial:
+                            self.serial.close()
+                    break
                 else:
-                    print("ID mới không khớp với ID đã lưu, thử cổng COM khác")
+                    print(f"Cổng {self.com_port} không phản hồi (Lần thử {_ + 1}/{max_retries})")
+                    if _ < max_retries - 1:
+                        continue
                     if self.serial:
                         self.serial.close()
-            else:
-                print(f"Cổng {self.com_port} không phản hồi")
-                if self.serial:
-                    self.serial.close()
 
     def save_check_id_to_config(self, response):
         self._config["led_id"] = response
@@ -594,7 +598,6 @@ class SerialDevice(Device):
     def deactivate(self):
         super().deactivate()
         if self.serial:
-            self.serial.write(b'CheckID')
             self.serial.close()
             self.serial = None
 

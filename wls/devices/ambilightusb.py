@@ -38,15 +38,10 @@ class AmbilightUSBDevice(SerialDevice):
         self._device_type = "Ambilight USB"
         self.color_order = self._config["color_order"]
 
-    def flush(self, data, retries=3):
-        if retries <= 0:
-            print("Đã thử kết nối lại nhiều lần nhưng không thành công.")
-            return
-
+    def flush(self, data):
         if self.serial is None:
-            print("Không thể gửi dữ liệu: self.serial chưa được khởi tạo")
+            print("Không thể gửi dữ liệu: Kiểm tra lại kết nối USB")
             self.reconnect()
-            self.flush(data, retries-1)
             return
 
         try:
@@ -58,8 +53,8 @@ class AmbilightUSBDevice(SerialDevice):
                 self.serial.write(
                     packets.build_ambilightusbpro_packet(data, self.color_order)
                 )
-        except serial.SerialException:
+        except serial.SerialException as e:
+            print("Không thể gửi dữ liệu: USB bị mất kết nối, hãy thử lại")
             self.reconnect()
-            self.flush(data, retries-1)
 
 
