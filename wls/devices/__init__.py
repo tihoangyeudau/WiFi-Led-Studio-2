@@ -515,24 +515,24 @@ class SerialDevice(Device):
             if self.version == 1000000:
                 self.serial_check_id_method()
             else:
-                matching_ports = [p for p in serial.tools.list_ports.comports() if p.pid == self.pid and p.vid == self.vid]
-                
-                if len(matching_ports) > 1:
-                    print("Multiple devices with the same VID and PID detected. Activating using COM port...")
-                    for p in matching_ports:
+                matching_ports = [p for p in serial.tools.list_ports.comports() if p.pid == self.pid and p.vid == self.vid] # Kiểm tra vid, pid trùng
+
+                if len(matching_ports) > 1: # Nếu có nhiều hơn 1 cổng usb trùng nhau
+                    print("Đã phát hiện các thiết bị trùng VID và PID. Chuyển sang Phương thức sử dụng cổng COM...")
+                    for p in matching_ports: # Trong các cổng USB trùng nhau đó
                         self.com_port = p.device
                         try:
-                            self.establish_connection()
-                            if self.is_serial_open():
+                            self.establish_connection() # Thử kích hoạt từng cổng
+                            if self.is_serial_open(): # Đến khi cổng nào được mở thành công thì dừng thử
                                 break
                         except Exception as e:
-                            print(f"Error while trying to establish connection: {e}")
-                else:
+                            print(f"Có lỗi khi cố gắng khởi tạo kết nối: {e}")
+                else: # Nếu chỉ có 1 thiết bị hoặc không có thiết bị nào
                     try:
-                        self.com_port = matching_ports[0].device if matching_ports else None
+                        self.com_port = matching_ports[0].device if matching_ports else None # Thử kích hoạt kết nối với thiết bị đó, nếu không có thiết bị nào, nó sẽ được gán là None
                         self.establish_connection()
                     except Exception as e:
-                        print(f"Error while trying to establish connection: {e}")
+                        print(f"Có lỗi khi cố gắng khởi tạo kết nối: {e}")
 
             time.sleep(2 ** retries)
         return
