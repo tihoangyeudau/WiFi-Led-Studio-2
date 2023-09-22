@@ -404,7 +404,7 @@ class UDPDevice(NetworkedDevice):
         self._sock = None
 
 def find_available_com_ports():
-    available_ports = ["COMx"]
+    available_ports = []
     ports = serial.tools.list_ports.comports()
     
     if sys.platform == 'win32':
@@ -448,7 +448,7 @@ class SerialDevice(Device):
             vol.Required(
                 "com_port",
                 description="Cổng COM cho đèn USB",
-                default="COMx",
+                default=None,
             ): vol.In(list(AvailableCOMPorts.available_ports)),
             vol.Required(
                 "version", description="Phiên bản",
@@ -495,14 +495,18 @@ class SerialDevice(Device):
             self.pid_vid_map[(p.pid, p.vid)] = p.device
 
     def establish_connection(self):
+        if self.com_port is None or self.com_port == "COMx":
+            return False
         try:
             if self.version != 1000000:
                 self.serial = serial.Serial(self.com_port, self.version, timeout=1)
             
-            if self.serial.isOpen():
+            if self.serial and self.serial.isOpen():
                 super().activate()
+                return True
         except serial.SerialException as e:
             print(f"Không establish_connection được: {e}")
+        return False
 
     def is_serial_open(self):
         return self.serial and self.serial.isOpen()
@@ -515,6 +519,14 @@ class SerialDevice(Device):
             if self.version == 1000000:
                 self.serial_check_id_method()
             else:
+                # Nếu không thể kết nối đến cổng COM hiện tại, thử kết nối đến tất cả các cổng COM khác
+                if not self.establish_connection():
+                    for port in AvailableCOMPorts.available_ports:
+                        if port:  # Bỏ qua giá trị None
+                            self.com_port = port
+                            if self.establish_connection():
+                                break    
+
                 matching_ports = [p for p in serial.tools.list_ports.comports() if p.pid == self.pid and p.vid == self.vid] # Kiểm tra vid, pid trùng
 
                 if len(matching_ports) > 1: # Nếu có nhiều hơn 1 cổng usb trùng nhau

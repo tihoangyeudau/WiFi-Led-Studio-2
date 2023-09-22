@@ -39,7 +39,7 @@ class AmbilightUSBDevice(SerialDevice):
         self.color_order = self._config["color_order"]
 
     def flush(self, data):
-        if self.serial is None:
+        if self.serial is None or not self.serial.isOpen():
             print("Không thể gửi dữ liệu: Kiểm tra lại kết nối USB")
             self.reconnect()
             return
@@ -56,5 +56,3 @@ class AmbilightUSBDevice(SerialDevice):
         except serial.SerialException as e:
             print("Không thể gửi dữ liệu: USB bị mất kết nối, hãy thử lại")
             self.reconnect()
-
-
