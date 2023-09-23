@@ -495,7 +495,7 @@ class SerialDevice(Device):
             self.pid_vid_map[(p.pid, p.vid)] = p.device
 
     def establish_connection(self):
-        if self.com_port is None or self.com_port == "COMx":
+        if self.com_port is None:
             return False
         try:
             if self.version != 1000000:
@@ -519,13 +519,17 @@ class SerialDevice(Device):
             if self.version == 1000000:
                 self.serial_check_id_method()
             else:
-                # Nếu không thể kết nối đến cổng COM hiện tại, thử kết nối đến tất cả các cổng COM khác
-                if not self.establish_connection():
-                    for port in AvailableCOMPorts.available_ports:
-                        if port:  # Bỏ qua giá trị None
-                            self.com_port = port
-                            if self.establish_connection():
-                                break    
+                # Ưu tiên thử kết nối đến com_port đã lưu trong config trước
+                if self.establish_connection():
+                    return
+
+                # Nếu không thể kết nối đến com_port đã lưu, thử kết nối đến các cổng COM khác
+                for port in serial.tools.list_ports.comports():
+                    if port.device:  # Bỏ qua giá trị None
+                        self.com_port = port.device
+                        if self.establish_connection():
+                            self.save_com_port_to_config()
+                            return
 
                 matching_ports = [p for p in serial.tools.list_ports.comports() if p.pid == self.pid and p.vid == self.vid] # Kiểm tra vid, pid trùng
 
@@ -559,48 +563,66 @@ class SerialDevice(Device):
             return None
 
     def serial_check_id_method(self):
+        # Ưu tiên thử kết nối đến com_port đã lưu trong config trước
+        if self.try_connect_to_com_port(self.com_port):
+            return True
+        
+        # Nếu không thể kết nối đến com_port đã lưu, thử kết nối đến các cổng COM khác
         available_ports = serial.tools.list_ports.comports()
         for p2 in available_ports:
-            self.com_port = p2.device
-            try:
-                self.serial = serial.Serial(self.com_port, self.version, timeout=1)
-            except serial.SerialException:
-                print(f"Không truy cập được cổng {self.com_port}")
-                self.serial = None
-                continue
+            if self.try_connect_to_com_port(p2.device):
+                return True
 
-            max_retries = 3
-            for _ in range(max_retries):
-                response = self.send_and_receive(b'CheckID')
-                print(f"Đã gửi yêu cầu kích hoạt lại chế độ check ID {self.com_port}")
-                response = self.send_and_receive(b'r\n')
-                print(f"Đã gửi yêu cầu kích hoạt chế độ Ambilight cho cổng {self.com_port}")
+    def try_connect_to_com_port(self, com_port):
+        self.com_port = com_port
+        try:
+            self.serial = serial.Serial(self.com_port, self.version, timeout=1)
+        except serial.SerialException:
+            print(f"Không truy cập được cổng {self.com_port}")
+            self.serial = None
+            return False
 
-                if response and response.startswith("R") and len(response) == 7:
-                    check_id = self.led_id
-                    if check_id == "Rxxxxxx" or response == check_id:
-                        self.save_check_id_to_config(response)
-                        m_response = self.send_and_receive(b'm\n')
-                        if m_response == 'l':
-                            print(f"Chế độ Ambilight cho cổng {self.com_port} đã được kích hoạt")
-                            self.establish_connection()
-                            return True
-                        else:
-                            print("Không nhận được ký tự l")
+        max_retries = 3
+        for _ in range(max_retries):
+            response = self.send_and_receive(b'CheckID')
+            print(f"Đã gửi yêu cầu kích hoạt lại chế độ check ID {self.com_port}")
+            response = self.send_and_receive(b'r\n')
+            print(f"Đã gửi yêu cầu kích hoạt chế độ Ambilight cho cổng {self.com_port}")
+
+            if response and response.startswith("R") and len(response) == 7:
+                check_id = self.led_id
+                self.com_port = com_port
+                if check_id == "Rxxxxxx" or response == check_id:
+                    self.save_check_id_to_config(response)
+                    self.save_com_port_to_config()
+                    m_response = self.send_and_receive(b'm\n')
+                    if m_response == 'l':
+                        print(f"Chế độ Ambilight cho cổng {self.com_port} đã được kích hoạt")
+                        self.establish_connection()
+                        return True
                     else:
-                        print("ID mới không khớp với ID đã lưu, thử cổng COM khác")
-                        if self.serial:
-                            self.serial.close()
-                    break
+                        print("Không nhận được ký tự l")
                 else:
-                    print(f"Cổng {self.com_port} không phản hồi (Lần thử {_ + 1}/{max_retries})")
-                    if _ < max_retries - 1:
-                        continue
+                    print("ID mới không khớp với ID đã lưu, thử cổng COM khác")
                     if self.serial:
                         self.serial.close()
+                break
+            else:
+                print(f"Cổng {self.com_port} không phản hồi (Lần thử {_ + 1}/{max_retries})")
+                if _ < max_retries - 1:
+                    continue
+                if self.serial:
+                    self.serial.close()
+
+        return False
 
     def save_check_id_to_config(self, response):
         self._config["led_id"] = response
+        save_config(config=self._wls.config, config_dir=self._wls.config_dir)
+
+    def save_com_port_to_config(self):
+        print(f"Saving com_port: {self.com_port}")
+        self._config["com_port"] = self.com_port
         save_config(config=self._wls.config, config_dir=self._wls.config_dir)
 
     def activate(self):
