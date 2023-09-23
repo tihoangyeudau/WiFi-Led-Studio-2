@@ -403,42 +403,24 @@ class UDPDevice(NetworkedDevice):
         )
         self._sock = None
 
+# Constants
+VERSION_ORDERS = ["Pro Max", "Pro", "Thường"]
+PID_ORDERS = ["29987"]
+VID_ORDERS = ["6790"]
+LED_ID_ORDERS = ["Rxxxxxx"]
+MAX_RETRIES = 1  # Maximum number of reconnection attempts
+MANUFACTURERS = ['wch.cn', 'FTDI', 'Microsoft', 'Silicon Labs']
+
 def find_available_com_ports():
-    available_ports = []
     ports = serial.tools.list_ports.comports()
-    
     if sys.platform == 'win32':
-        manufacturers = ['wch.cn', 'FTDI', 'Microsoft', 'Silicon Labs']
-        for p in ports:
-            if p.manufacturer in manufacturers and "Standard Serial over Bluetooth link" not in p.description:
-                available_ports.append(p.device)
-    else:
-        for p in ports:
-            available_ports.append(p.device)
-    
-    return available_ports
+        return [p.device for p in ports if p.manufacturer in MANUFACTURERS and "Standard Serial over Bluetooth link" not in p.description]
+    return [p.device for p in ports]
 
 
 class AvailableCOMPorts:
     available_ports = find_available_com_ports()
 
-VERSION_ORDERS = [
-    "Pro Max",
-    "Pro",
-    "Thường",
-]
-
-pid_orders = [
-    "29987",
-]
-
-vid_orders = [
-    "6790",
-]
-
-led_id_orders = [
-    "Rxxxxxx",
-]
 
 @BaseRegistry.no_registration
 class SerialDevice(Device):
@@ -458,17 +440,17 @@ class SerialDevice(Device):
                 "pid",
                 description="Mã PID của đèn",
                 default="29987",
-            ): vol.In(list(pid_orders)),
+            ): vol.In(list(PID_ORDERS)),
             vol.Required(
                 "vid",
                 description="Mã VID của đèn",
                 default="6790",
-            ): vol.In(list(vid_orders)),
+            ): vol.In(list(VID_ORDERS)),
             vol.Required(
                 "led_id",
                 description="Mã ID của đèn",
                 default="Rxxxxxx",
-            ): vol.In(list(led_id_orders)),
+            ): vol.In(list(LED_ID_ORDERS)),
         }
     )
 
@@ -477,22 +459,23 @@ class SerialDevice(Device):
     def __init__(self, wls, config):
         super().__init__(wls, config)
         self.serial = None
-        if self._config["version"] == "Pro Max":
-            self.version = 1000000
-        elif self._config["version"] == "Pro":
-            self.version = 1500000
-        else:
-            self.version = 115200
+        self.version = self._get_version_baudrate()
         self.com_port = self._config["com_port"]
         self.pid = self._config["pid"]
         self.vid = self._config["vid"]
         self.led_id = self._config["led_id"]
         self.update_pid_vid_map()
 
+    def _get_version_baudrate(self):
+        version_mapping = {
+            "Pro Max": 1000000,
+            "Pro": 1500000,
+            "Thường": 115200
+        }
+        return version_mapping.get(self._config["version"], 115200)
+
     def update_pid_vid_map(self):
-        self.pid_vid_map = {}
-        for p in serial.tools.list_ports.comports():
-            self.pid_vid_map[(p.pid, p.vid)] = p.device
+        self.pid_vid_map = {(p.pid, p.vid): p.device for p in serial.tools.list_ports.comports()}
 
     def establish_connection(self):
         if self.com_port is None:
@@ -505,54 +488,12 @@ class SerialDevice(Device):
                 super().activate()
                 return True
         except serial.SerialException as e:
-            print(f"Không establish_connection được: {e}")
+            pass
         return False
 
     def is_serial_open(self):
         return self.serial and self.serial.isOpen()
-
-    def reconnect(self):
-        for retries in range(self.MAX_RETRIES):
-            if self.is_serial_open():
-                self.serial.close()
-
-            if self.version == 1000000:
-                self.serial_check_id_method()
-            else:
-                # Ưu tiên thử kết nối đến com_port đã lưu trong config trước
-                if self.establish_connection():
-                    return
-
-                # Nếu không thể kết nối đến com_port đã lưu, thử kết nối đến các cổng COM khác
-                for port in serial.tools.list_ports.comports():
-                    if port.device:  # Bỏ qua giá trị None
-                        self.com_port = port.device
-                        if self.establish_connection():
-                            self.save_com_port_to_config()
-                            return
-
-                matching_ports = [p for p in serial.tools.list_ports.comports() if p.pid == self.pid and p.vid == self.vid] # Kiểm tra vid, pid trùng
-
-                if len(matching_ports) > 1: # Nếu có nhiều hơn 1 cổng usb trùng nhau
-                    print("Đã phát hiện các thiết bị trùng VID và PID. Chuyển sang Phương thức sử dụng cổng COM...")
-                    for p in matching_ports: # Trong các cổng USB trùng nhau đó
-                        self.com_port = p.device
-                        try:
-                            self.establish_connection() # Thử kích hoạt từng cổng
-                            if self.is_serial_open(): # Đến khi cổng nào được mở thành công thì dừng thử
-                                break
-                        except Exception as e:
-                            print(f"Có lỗi khi cố gắng khởi tạo kết nối: {e}")
-                else: # Nếu chỉ có 1 thiết bị hoặc không có thiết bị nào
-                    try:
-                        self.com_port = matching_ports[0].device if matching_ports else None # Thử kích hoạt kết nối với thiết bị đó, nếu không có thiết bị nào, nó sẽ được gán là None
-                        self.establish_connection()
-                    except Exception as e:
-                        print(f"Có lỗi khi cố gắng khởi tạo kết nối: {e}")
-
-            time.sleep(2 ** retries)
-        return
-
+    
     def send_and_receive(self, command):
         try:
             self.serial.write(command)
@@ -573,47 +514,91 @@ class SerialDevice(Device):
             if self.try_connect_to_com_port(p2.device):
                 return True
 
+    def reconnect(self):
+        for retries in range(self.MAX_RETRIES):
+            self._close_serial_if_open()
+
+            if self.version == 1000000:
+                self.serial_check_id_method()
+            else:
+                if self._try_establish_connection(self.com_port):
+                    return
+
+                if not self._try_all_available_ports():
+                    self._handle_matching_ports()
+
+            time.sleep(2 ** retries)
+
+    def _close_serial_if_open(self):
+        if self.is_serial_open():
+            self.serial.close()
+
+    def _try_establish_connection(self, com_port):
+        self.com_port = com_port
+        if self.establish_connection():
+            self.save_com_port_to_config()
+            return True
+        return False
+
+    def _try_all_available_ports(self):
+        for port in serial.tools.list_ports.comports():
+            if port.device and self._try_establish_connection(port.device):
+                return True
+        return False
+
+    def _handle_matching_ports(self):
+        matching_ports = [p for p in serial.tools.list_ports.comports() if p.pid == self.pid and p.vid == self.vid]
+        if len(matching_ports) > 1:
+            print("Đã phát hiện các thiết bị trùng VID và PID. Chuyển sang Phương thức sử dụng cổng COM...")
+            for p in matching_ports:
+                if self._try_establish_connection(p.device):
+                    break
+        else:
+            self._try_single_matching_port(matching_ports)
+
+    def _try_single_matching_port(self, matching_ports):
+        try:
+            self.com_port = matching_ports[0].device if matching_ports else None
+            self.establish_connection()
+        except Exception as e:
+            print(f"Có lỗi khi cố gắng khởi tạo kết nối: {e}")
+
     def try_connect_to_com_port(self, com_port):
         self.com_port = com_port
+        if self._initialize_serial_connection():
+            return self._handle_serial_responses()
+        return False
+
+    def _initialize_serial_connection(self):
         try:
             self.serial = serial.Serial(self.com_port, self.version, timeout=1)
+            return True
         except serial.SerialException:
             print(f"Không truy cập được cổng {self.com_port}")
             self.serial = None
             return False
 
+    def _handle_serial_responses(self):
         max_retries = 3
         for _ in range(max_retries):
-            response = self.send_and_receive(b'CheckID')
-            print(f"Đã gửi yêu cầu kích hoạt lại chế độ check ID {self.com_port}")
-            response = self.send_and_receive(b'r\n')
-            print(f"Đã gửi yêu cầu kích hoạt chế độ Ambilight cho cổng {self.com_port}")
+            if self._check_id_response() and self._ambilight_response():
+                return True
+            self._close_serial_if_open()
+        return False
 
-            if response and response.startswith("R") and len(response) == 7:
-                check_id = self.led_id
-                self.com_port = com_port
-                if check_id == "Rxxxxxx" or response == check_id:
-                    self.save_check_id_to_config(response)
-                    self.save_com_port_to_config()
-                    m_response = self.send_and_receive(b'm\n')
-                    if m_response == 'l':
-                        print(f"Chế độ Ambilight cho cổng {self.com_port} đã được kích hoạt")
-                        self.establish_connection()
-                        return True
-                    else:
-                        print("Không nhận được ký tự l")
-                else:
-                    print("ID mới không khớp với ID đã lưu, thử cổng COM khác")
-                    if self.serial:
-                        self.serial.close()
-                break
-            else:
-                print(f"Cổng {self.com_port} không phản hồi (Lần thử {_ + 1}/{max_retries})")
-                if _ < max_retries - 1:
-                    continue
-                if self.serial:
-                    self.serial.close()
+    def _check_id_response(self):
+        response = self.send_and_receive(b'CheckID')
+        print(f"Đã gửi yêu cầu kích hoạt lại chế độ check ID {self.com_port}")
+        return response and response.startswith("R") and len(response) == 7
 
+    def _ambilight_response(self):
+        response = self.send_and_receive(b'r\n')
+        print(f"Đã gửi yêu cầu kích hoạt chế độ Ambilight cho cổng {self.com_port}")
+        if response == self.led_id or response == "Rxxxxxx":
+            self.save_check_id_to_config(response)
+            self.save_com_port_to_config()
+            m_response = self.send_and_receive(b'm\n')
+            return m_response == 'l'
         return False
 
     def save_check_id_to_config(self, response):
@@ -621,7 +606,6 @@ class SerialDevice(Device):
         save_config(config=self._wls.config, config_dir=self._wls.config_dir)
 
     def save_com_port_to_config(self):
-        print(f"Saving com_port: {self.com_port}")
         self._config["com_port"] = self.com_port
         save_config(config=self._wls.config, config_dir=self._wls.config_dir)
 
