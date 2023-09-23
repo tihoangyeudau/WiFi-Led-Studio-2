@@ -57,16 +57,15 @@ export default function Home(props) {
           margin: '0.5rem auto 2rem auto',
         }}
       >
-        <CardHeader title="Chào mừng bạn sử dụng WiFi Led Studio của Rainbow Music Led" />
-        <CardContent>
-          Trước khi bắt đầu, bạn hãy đảm bảo đã thực hiện các bước sau:
-          <ul>
-            <li>Cắm điện cho LED</li>
-            <li>Cài WiFi cho LED (bản WiFi)</li>
-            <li>Cắm 2 dây USB cho LED vào PC (bản USB)</li>
-            <li>Kiểm tra đèn tín hiệu báo hoạt động</li>
-            <li>LƯU Ý: Nếu bạn đổi loa nháy theo nhạc, hãy (WINDOWS)-EXIT và OPEN lại WiFi Led Studio </li>
-            <li>(MACOS)-vào CÀI ĐẶT/CÀI ĐẶT ÂM THANH/CHỌN LẠI LOA</li>
+        <CardHeader style={{ textAlign: 'center' }} title="WIFI LED STUDIO" />
+        <CardContent style={{ textAlign: 'center' }}>
+          RAINBOW MUSIC LED © 2023
+          <ul style={{ listStyleType: 'none', padding: 0, textAlign: 'left' }}>
+            <li>Website chính thức: <a href="https://rainbowmusicled.com" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>https://rainbowmusicled.com</a></li>
+            <li>Website phụ: <a href="https://ambilight.vn" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>https://ambilight.vn</a></li>
+            <li>Fanpage: <a href="https://facebook.com/rainbowmusicled/" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>https://facebook.com/rainbowmusicled/</a></li>
+            <li>Shopee: <a href="https://shopee.vn/ambilight.vn" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>https://shopee.vn/ambilight.vn</a></li>
+            <li>Zalo/SĐT: <a href="tel:0981373223" style={{ color: 'white' }}>0981373223</a></li>
           </ul>
         </CardContent>
         <CardActions>
