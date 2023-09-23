@@ -538,8 +538,9 @@ class SerialDevice(Device):
 
     def send_and_receive(self, command):
         try:
+            time.sleep(0.05)
             self.serial.write(command)
-            time.sleep(0.1)
+            time.sleep(0.05)
             return self.serial.readline().decode('ascii').strip()
         except Exception as e:
             print(f"Không truy cập được cổng {self.com_port}: {e}")
@@ -565,7 +566,7 @@ class SerialDevice(Device):
             self.serial = None
             return False
 
-        max_retries = 3
+        max_retries = 10
         for _ in range(max_retries):
             response = self.send_and_receive(b'CheckID')
             print(f"Đã gửi yêu cầu kích hoạt lại chế độ check ID {self.com_port}")
@@ -593,7 +594,7 @@ class SerialDevice(Device):
             else:
                 print(f"Cổng {self.com_port} không phản hồi (Lần thử {_ + 1}/{max_retries})")
                 if _ < max_retries - 1:
-                    time.sleep(0.1)
+                    time.sleep(0.05)
                     continue
                 if self.serial:
                     self.serial.close()
