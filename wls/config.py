@@ -11,8 +11,8 @@ from pkg_resources import parse_version
 from wls.consts import CONFIGURATION_VERSION
 
 CONFIG_DIRECTORY = ".wls"
-CONFIG_FILE_NAME = "cauhinh.json"
-PRESETS_FILE_NAME = "caitruoc.json"
+CONFIG_FILE_NAME = "cau_hinh.json"
+PRESETS_FILE_NAME = "cai_truoc.json"
 
 PRIVATE_KEY_FILE = "privkey.pem"
 CHAIN_KEY_FILE = "fullchain.pem"
@@ -506,7 +506,7 @@ def create_backup(config_dir, config_file, errortype):
     """
 
     date = datetime.datetime.now().strftime("%d-%m-%y_%H-%M-%S")
-    backup_location = os.path.join(config_dir, f"cauhinh_duphong_{date}.json")
+    backup_location = os.path.join(config_dir, f"cau_hinh_duphong_{date}.json")
     try:
         os.rename(config_file, backup_location)
     except OSError:

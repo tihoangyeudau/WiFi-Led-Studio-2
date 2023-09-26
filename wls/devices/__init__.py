@@ -498,7 +498,7 @@ class SerialDevice(Device):
                             print(f"Đã tìm và kích hoạt cổng mới là {self.com_port}")
                             if self.com_port != self._config["com_port"]:
                                 self.save_com_port_to_config()
-                                print(f"Đã lưu {self.com_port} vào cauhinh.json")
+                                print(f"Đã lưu {self.com_port} vào cau_hinh.json")
 
                             return
 
@@ -552,10 +552,10 @@ class SerialDevice(Device):
                 if check_id == "Rxxxxxx" or response == check_id:
                     if check_id == "Rxxxxxx":
                         self.save_check_id_to_config(response)
-                        print(f"Đã lưu ID: {response} vào cauhinh.json")
+                        print(f"Đã lưu ID: {response} vào cau_hinh.json")
                     if self.com_port != self._config["com_port"]:
                         self.save_com_port_to_config()
-                        print(f"Đã lưu {self.com_port} vào cauhinh.json")
+                        print(f"Đã lưu {self.com_port} vào cau_hinh.json")
                     m_response = self.send_and_receive(b'm\n')
                     if m_response == 'l':
                         print(f"Chế độ Ambilight cho cổng {self.com_port} đã được kích hoạt")
