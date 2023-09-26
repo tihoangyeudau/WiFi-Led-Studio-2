@@ -549,7 +549,7 @@ class SerialDevice(Device):
             if response and response.startswith("R") and len(response) == 7:
                 check_id = self.led_id
                 self.com_port = com_port
-                if check_id == "Rxxxxxx" or response == check_id:
+                if check_id == "Rxxxxxx" or check_id == response:
                     if check_id == "Rxxxxxx":
                         self.save_check_id_to_config(response)
                         print(f"Đã lưu ID: {response} vào cau_hinh.json")
