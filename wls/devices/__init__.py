@@ -553,7 +553,8 @@ class SerialDevice(Device):
                 self.com_port = com_port
                 if check_id == "Rxxxxxx" or check_id == response:
                     if check_id == "Rxxxxxx":
-                        self.save_check_id_to_config(response)
+                        self.led_id = response # Cập nhật led_id từ Rxxxxxx thành ID mới tìm được
+                        self.save_check_id_to_config() # Lưu ID mới tìm được vào cấu hình thay thế cho Rxxxxxx
                         print(f"Đã lưu ID: {response} vào cau_hinh.json")
                     if self.com_port != self._config["com_port"]:
                         self.save_com_port_to_config()
@@ -579,9 +580,8 @@ class SerialDevice(Device):
 
         return False
 
-    def save_check_id_to_config(self, response):
-        self.led_id = response
-        self._config["led_id"] = response
+    def save_check_id_to_config(self):
+        self._config["led_id"] = self.led_id
         save_config(config=self._wls.config, config_dir=self._wls.config_dir)
 
     def save_com_port_to_config(self):
