@@ -528,6 +528,8 @@ class SerialDevice(Device):
                 print(f"Đã kích hoạt cổng mới là: {port.device}")
                 return True
 
+        return False
+
     def try_connect_to_com_port(self, com_port):
         self.com_port = com_port
         if self.com_port is None:
@@ -578,6 +580,7 @@ class SerialDevice(Device):
         return False
 
     def save_check_id_to_config(self, response):
+        self.led_id = response
         self._config["led_id"] = response
         save_config(config=self._wls.config, config_dir=self._wls.config_dir)
 
