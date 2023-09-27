@@ -412,7 +412,7 @@ MANUFACTURERS = ['wch.cn', 'FTDI', 'Microsoft', 'Silicon Labs']
 def find_available_com_ports():
     ports = serial.tools.list_ports.comports()
     if sys.platform == 'win32':
-        return [p.device for p in ports if p.manufacturer in MANUFACTURERS and "Standard Serial over Bluetooth link" not in p.description]
+        return [p.device for p in ports if p.manufacturer in MANUFACTURERS and "Bluetooth" not in p.description]
     return [p.device for p in ports]
 
 
@@ -490,7 +490,7 @@ class SerialDevice(Device):
                     return
 
                 # Nếu không thể kết nối đến com_port đã lưu, thử kết nối đến các cổng COM khác
-                available_ports = [port for port in serial.tools.list_ports.comports() if (port.manufacturer in MANUFACTURERS)]
+                available_ports = [port for port in serial.tools.list_ports.comports() if (port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description)]
                 for port in available_ports:
                     if port.device:  # Bỏ qua giá trị None
                         self.com_port = port.device
@@ -522,7 +522,7 @@ class SerialDevice(Device):
             return True
         
         # Nếu không thể kết nối đến com_port đã lưu, thử kết nối đến các cổng COM khác
-        available_ports = [port for port in serial.tools.list_ports.comports() if (port.manufacturer in MANUFACTURERS)]
+        available_ports = [port for port in serial.tools.list_ports.comports() if (port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description)]
         for port in available_ports:
             if self.try_connect_to_com_port(port.device):
                 print(f"Đã kích hoạt cổng mới là: {port.device}")
