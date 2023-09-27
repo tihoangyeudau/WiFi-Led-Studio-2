@@ -543,12 +543,14 @@ class SerialDevice(Device):
 
         max_retries = 10
         for attempt in range(max_retries):
-            response = self.send_and_receive(b'CheckID')
+            response = self.send_and_receive(b"CheckID")
             print(f"Đã gửi yêu cầu kích hoạt lại chế độ check ID {self.com_port}")
-            response = self.send_and_receive(b'r\n')
+            response = self.send_and_receive(b"r\n")
+            response = response.strip().replace("\n", "").replace("\r", "")
             print(f"Đã gửi yêu cầu kích hoạt chế độ Ambilight cho cổng {self.com_port}")
 
-            if response and response.startswith("R") and len(response) == 7:
+            index_of_R = response.find("R")
+            if (index_of_R != -1 and len(response) - index_of_R - 1 == 6):
                 check_id = self.led_id
                 self.com_port = com_port
                 if check_id == "Rxxxxxx" or check_id == response:
@@ -559,8 +561,9 @@ class SerialDevice(Device):
                     if self.com_port != self._config["com_port"]:
                         self.save_com_port_to_config()
                         print(f"Đã lưu {self.com_port} vào cau_hinh.json")
-                    m_response = self.send_and_receive(b'm\n')
-                    if m_response == 'l':
+                    m_response = self.send_and_receive(b"m\n")
+                    m_response = m_response.strip().replace("\n", "").replace("\r", "")
+                    if 'l' in m_response:
                         print(f"Chế độ Ambilight cho cổng {self.com_port} đã được kích hoạt")
                         self.establish_connection()
                         return True
