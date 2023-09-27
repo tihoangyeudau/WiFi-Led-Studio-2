@@ -404,7 +404,7 @@ class UDPDevice(NetworkedDevice):
         self._sock = None
 
 # Constants
-VERSION_ORDERS = ["Pro Max", "Pro", "Thường"]
+VERSION_ORDERS = ["Pro", "Pro Max", "Thường"]
 LED_ID_ORDERS = ["Rxxxxxx"]
 MAX_RETRIES = 1  # Maximum number of reconnection attempts
 MANUFACTURERS = ['wch.cn', 'FTDI', 'Microsoft', 'Silicon Labs']
@@ -432,7 +432,7 @@ class SerialDevice(Device):
             ): vol.In(list(AvailableCOMPorts.available_ports)),
             vol.Required(
                 "version", description="Phiên bản",
-                default="Pro Max",
+                default="Pro",
             ): vol.In(list(VERSION_ORDERS)),
             vol.Required(
                 "led_id",
