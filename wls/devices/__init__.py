@@ -405,7 +405,7 @@ class UDPDevice(NetworkedDevice):
 
 # Constants
 VERSION_ORDERS = ["Pro", "Pro Max", "Thường"]
-LED_ID_ORDERS = ["Rxxxxxx"]
+LED_ID_ORDERS = ["Rxxx"]
 MAX_RETRIES = 1  # Maximum number of reconnection attempts
 MANUFACTURERS = ['wch.cn', 'FTDI', 'Microsoft', 'Silicon Labs']
 
@@ -437,7 +437,7 @@ class SerialDevice(Device):
             vol.Required(
                 "led_id",
                 description="Mã ID của đèn",
-                default="Rxxxxxx",
+                default="Rxxx",
             ): vol.In(list(LED_ID_ORDERS)),
         }
     )
@@ -549,21 +549,20 @@ class SerialDevice(Device):
             response = response.strip().replace("\n", "").replace("\r", "")
             print(f"Đã gửi yêu cầu kích hoạt chế độ Ambilight cho cổng {self.com_port}")
 
-            index_of_R = response.find("R")
-            if (index_of_R != -1 and len(response) - index_of_R - 1 == 6):
+            if response and response.startswith("R") and len(response) == 4:
                 check_id = self.led_id
                 self.com_port = com_port
-                if check_id == "Rxxxxxx" or check_id == response:
-                    if check_id == "Rxxxxxx":
-                        self.led_id = response # Cập nhật led_id từ Rxxxxxx thành ID mới tìm được
-                        self.save_check_id_to_config() # Lưu ID mới tìm được vào cấu hình thay thế cho Rxxxxxx
+                if check_id == "Rxxx" or check_id == response:
+                    if check_id == "Rxxx":
+                        self.led_id = response # Cập nhật led_id từ Rxxx thành ID mới tìm được
+                        self.save_check_id_to_config() # Lưu ID mới tìm được vào cấu hình thay thế cho Rxxx
                         print(f"Đã lưu ID: {response} vào cau_hinh.json")
                     if self.com_port != self._config["com_port"]:
                         self.save_com_port_to_config()
                         print(f"Đã lưu {self.com_port} vào cau_hinh.json")
                     m_response = self.send_and_receive(b"m\n")
                     m_response = m_response.strip().replace("\n", "").replace("\r", "")
-                    if 'l' in m_response:
+                    if m_response == "ok":
                         print(f"Chế độ Ambilight cho cổng {self.com_port} đã được kích hoạt")
                         self.establish_connection()
                         return True
@@ -753,7 +752,7 @@ class Devices(RegistryLoader):
             # Nếu xảy ra lỗi (không thể tạo instance của lớp trừu tượng), 
             # lấy giá trị mặc định từ schema của SerialDevice class
             serial_device = {
-                "led_id": "Rxxxxxx"  # Đây là giá trị mặc định từ schema của bạn
+                "led_id": "Rxxx"  # Đây là giá trị mặc định từ schema của bạn
             }
 
         # Lấy led_id từ SerialDevice
