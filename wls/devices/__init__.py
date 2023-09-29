@@ -552,10 +552,10 @@ class SerialDevice(Device):
             if response and response.startswith("R") and len(response) == 4:
                 check_id = self.led_id
                 self.com_port = com_port
-                if check_id == "Rxxx" or check_id == response:
+                if check_id == "Rxxx" or check_id == response:  # Kiểm tra phản hồi ID có khớp với ID cũ không hoặc nếu ID cũ là Rxxx thì lưu ID phản hồi
                     if check_id == "Rxxx":
-                        self.led_id = response # Cập nhật led_id từ Rxxx thành ID mới tìm được
-                        self.save_check_id_to_config() # Lưu ID mới tìm được vào cấu hình thay thế cho Rxxx
+                        self.led_id = response                  # Cập nhật led_id từ Rxxx thành ID mới tìm được
+                        self.save_check_id_to_config()          # Lưu ID mới tìm được vào cấu hình thay thế cho Rxxx
                         print(f"Đã lưu ID: {response} vào cau_hinh.json")
                     if self.com_port != self._config["com_port"]:
                         self.save_com_port_to_config()
@@ -567,18 +567,16 @@ class SerialDevice(Device):
                         self.establish_connection()
                         return True
                     else:
-                        print("Không nhận được ký tự l")
-                else:
+                        print("Không nhận được ký tự ok")
+                else:                                           # Nếu ID phản hồi không khớp với ID mới
                     print("ID mới không khớp với ID đã lưu, thử cổng COM khác")
                 if self.serial:
                     self.serial.close()
                 break
             else:
-                print(f"Cổng {self.com_port} không phản hồi (Lần thử {attempt + 1}/{max_retries})")
+                print(f"Không nhận được ID. Cổng {self.com_port} không phản hồi (Lần thử {attempt + 1}/{max_retries})")
                 if attempt < max_retries - 1:
                     time.sleep(0.05)
-
-
 
         return False
 
