@@ -510,21 +510,23 @@ class SerialDevice(Device):
             time.sleep(0.05)
             self.serial.write(command)
             time.sleep(0.05)
-            return self.serial.readline().decode('ascii').strip()
+            return self.serial.readline().decode("ascii").strip()
         except Exception as e:
-            print(f"Không truy cập được cổng {self.com_port}: {e}")
+            print(f"Không gửi được tín hiệu đến cổng {self.com_port}: {e}")
             return None
 
     def serial_check_id_method(self):
         # Ưu tiên thử kết nối đến com_port đã lưu trong config trước
-        if self.try_connect_to_com_port(self.com_port):
+        connected = self.try_connect_to_com_port(self.com_port)
+        if connected:
             print(f"Đã kích hoạt cổng {self.com_port} đã lưu trước đó")
             return True
         
         # Nếu không thể kết nối đến com_port đã lưu, thử kết nối đến các cổng COM khác
         available_ports = [port for port in serial.tools.list_ports.comports() if (port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description)]
         for port in available_ports:
-            if self.try_connect_to_com_port(port.device):
+            connected = self.try_connect_to_com_port(port.device)
+            if connected:
                 print(f"Đã kích hoạt cổng mới là: {port.device}")
                 return True
 
@@ -541,12 +543,13 @@ class SerialDevice(Device):
             self.serial = None
             return False
 
-        max_retries = 10
+        max_retries = 3
         for attempt in range(max_retries):
             response = self.send_and_receive(b"CheckID")
             print(f"Đã gửi yêu cầu kích hoạt lại chế độ check ID {self.com_port}")
             response = self.send_and_receive(b"r\n")
-            response = response.strip().replace("\n", "").replace("\r", "")
+            if response:
+                response = response.strip().replace("\n", "").replace("\r", "")
             print(f"Đã gửi yêu cầu kích hoạt chế độ Ambilight cho cổng {self.com_port}")
 
             if response and response.startswith("R") and len(response) == 4:
@@ -561,7 +564,8 @@ class SerialDevice(Device):
                         self.save_com_port_to_config()
                         print(f"Đã lưu {self.com_port} vào cau_hinh.json")
                     m_response = self.send_and_receive(b"m\n")
-                    m_response = m_response.strip().replace("\n", "").replace("\r", "")
+                    if m_response:
+                        m_response = m_response.strip().replace("\n", "").replace("\r", "")
                     if m_response == "ok":
                         print(f"Chế độ Ambilight cho cổng {self.com_port} đã được kích hoạt")
                         self.establish_connection()
