@@ -404,7 +404,7 @@ class UDPDevice(NetworkedDevice):
         self._sock = None
 
 # Constants
-VERSION_ORDERS = ["Pro", "Pro Max", "Thường"]
+VERSION_ORDERS = ["Pro Max", "Pro", "Thường"]
 LED_ID_ORDERS = ["Rxxx"]
 MAX_RETRIES = 1  # Maximum number of reconnection attempts
 MANUFACTURERS = ['wch.cn', 'FTDI', 'Microsoft', 'Silicon Labs']
@@ -417,7 +417,7 @@ def find_available_com_ports():
 
 
 class AvailableCOMPorts:
-    available_ports = find_available_com_ports()
+    available_ports = ["Auto"] + find_available_com_ports()
 
 
 @BaseRegistry.no_registration
@@ -428,11 +428,11 @@ class SerialDevice(Device):
             vol.Required(
                 "com_port",
                 description="Cổng COM cho đèn USB",
-                default=None,
+                default="Auto",
             ): vol.In(list(AvailableCOMPorts.available_ports)),
             vol.Required(
                 "version", description="Phiên bản",
-                default="Pro",
+                default="Pro Max",
             ): vol.In(list(VERSION_ORDERS)),
             vol.Required(
                 "led_id",
