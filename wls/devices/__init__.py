@@ -405,7 +405,7 @@ class UDPDevice(NetworkedDevice):
 
 # Constants
 VERSION_ORDERS = ["Pro Max", "Pro", "Thường"]
-LED_ID_ORDERS = ["Rxxx"]
+LED_ID_ORDERS = ["Auto"]
 MAX_RETRIES = 1  # Maximum number of reconnection attempts
 MANUFACTURERS = ['wch.cn', 'FTDI', 'Microsoft', 'Silicon Labs']
 
@@ -437,7 +437,7 @@ class SerialDevice(Device):
             vol.Required(
                 "led_id",
                 description="Mã ID của đèn",
-                default="Rxxx",
+                default="Auto",
             ): vol.In(list(LED_ID_ORDERS)),
         }
     )
@@ -555,10 +555,10 @@ class SerialDevice(Device):
             if response and response.startswith("R") and len(response) == 4:
                 check_id = self.led_id
                 self.com_port = com_port
-                if check_id == "Rxxx" or check_id == response:  # Kiểm tra phản hồi ID có khớp với ID cũ không hoặc nếu ID cũ là Rxxx thì lưu ID phản hồi
-                    if check_id == "Rxxx":
-                        self.led_id = response                  # Cập nhật led_id từ Rxxx thành ID mới tìm được
-                        self.save_check_id_to_config()          # Lưu ID mới tìm được vào cấu hình thay thế cho Rxxx
+                if check_id == "Auto" or check_id == response:  # Kiểm tra phản hồi ID có khớp với ID cũ không hoặc nếu ID cũ là Auto thì lưu ID phản hồi
+                    if check_id == "Auto":
+                        self.led_id = response                  # Cập nhật led_id từ Auto thành ID mới tìm được
+                        self.save_check_id_to_config()          # Lưu ID mới tìm được vào cấu hình thay thế cho Auto
                         print(f"Đã lưu ID: {response} vào cau_hinh.json")
                     if self.com_port != self._config["com_port"]:
                         self.save_com_port_to_config()
@@ -754,7 +754,7 @@ class Devices(RegistryLoader):
             # Nếu xảy ra lỗi (không thể tạo instance của lớp trừu tượng), 
             # lấy giá trị mặc định từ schema của SerialDevice class
             serial_device = {
-                "led_id": "Rxxx"  # Đây là giá trị mặc định từ schema của bạn
+                "led_id": "Auto"  # Đây là giá trị mặc định từ schema của bạn
             }
 
         # Lấy led_id từ SerialDevice
