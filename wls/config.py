@@ -111,9 +111,7 @@ def load_logger():
 def get_default_config_directory() -> str:
     """Get the default configuration directory"""
 
-    base_dir = (
-        os.getenv("APPDATA") if os.name == "nt" else os.path.expanduser("~")
-    )
+    base_dir = os.path.expanduser("~")
     return os.path.join(base_dir, CONFIG_DIRECTORY)
 
 
