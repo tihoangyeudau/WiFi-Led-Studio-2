@@ -745,15 +745,14 @@ def get_icon_path(icon_filename) -> str:
 
 
 def generate_id(name):
-    """Converts a name to a id"""
-    part1 = re.sub("[^a-zA-Z0-9]", " ", name).lower()
-    return re.sub(" +", " ", part1).strip().replace(" ", "-")
-
+    """Converts a name to an ID while preserving the case."""
+    # Replace all non-alphanumeric characters, except Vietnamese characters, with a space
+    part1 = re.sub("[^a-zA-Z0-9àáâãèéêìíòóôõùúýăđĩũơưạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỷỹ ]", " ", name)
+    return re.sub(" +", " ", part1).strip()
 
 def generate_title(id):
-    """Converts an id to a more human readable title"""
-    return re.sub("[^a-zA-Z0-9]", " ", id).title()
-
+    """Converts an ID to a more human readable title."""
+    return re.sub("[^a-zA-Z0-9àáâãèéêìíòóôõùúýăđĩũơưạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỷỹ]", " ", id).title()
 
 def hasattr_explicit(cls, attr):
     """Returns if the given object has explicitly declared an attribute"""
