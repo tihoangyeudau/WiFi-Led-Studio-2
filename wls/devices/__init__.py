@@ -555,10 +555,10 @@ class SerialDevice(Device):
             if response and response.startswith("R") and len(response) == 4:
                 check_id = self.led_id
                 self.com_port = com_port
-                if check_id == "Auto" or check_id == response:  # Kiểm tra phản hồi ID có khớp với ID cũ không hoặc nếu ID cũ là Auto thì lưu ID phản hồi
-                    if check_id == "Auto":
-                        self.led_id = response                  # Cập nhật led_id từ Auto thành ID mới tìm được
-                        self.save_check_id_to_config()          # Lưu ID mới tìm được vào cấu hình thay thế cho Auto
+                if check_id == "_Auto_" or check_id == response:  # Kiểm tra phản hồi ID có khớp với ID cũ không hoặc nếu ID cũ là _Auto_ thì lưu ID phản hồi
+                    if check_id == "_Auto_":
+                        self.led_id = response                  # Cập nhật led_id từ _Auto_ thành ID mới tìm được
+                        self.save_check_id_to_config()          # Lưu ID mới tìm được vào cấu hình thay thế cho _Auto_
                         print(f"Đã lưu ID: {response} vào cau_hinh.json")
                     if self.com_port != self._config["com_port"]:
                         self.save_com_port_to_config()
@@ -754,7 +754,7 @@ class Devices(RegistryLoader):
             # Nếu xảy ra lỗi (không thể tạo instance của lớp trừu tượng), 
             # lấy giá trị mặc định từ schema của SerialDevice class
             serial_device = {
-                "led_id": "Auto"  # Đây là giá trị mặc định từ schema của bạn
+                "led_id": "_Auto_"  # Đây là giá trị mặc định từ schema của bạn
             }
 
         # Lấy led_id từ SerialDevice
