@@ -191,7 +191,8 @@ export default function App() {
                         path="/connect/:providerName/redirect"
                         component={LoginRedirect}
                       />
-                      <Route exact path="/" component={Home} />
+                      <Route exact path="/" component={Devices} />
+                      <Route path="/home" component={Home} />
                       <Route path="/devices" component={Devices} />
                       <Route path="/device/:virtId" component={Device} />
                       <Route path="/scenes" component={Scenes} />
@@ -242,7 +243,8 @@ export default function App() {
                         path="/connect/:providerName/redirect"
                         component={LoginRedirect}
                       />
-                      <Route exact path="/" component={Home} />
+                      <Route exact path="/" component={Devices} />
+                      <Route path="/home" component={Home} />
                       <Route path="/devices" component={Devices} />
                       <Route path="/device/:virtId" component={Device} />
                       <Route path="/scenes" component={Scenes} />

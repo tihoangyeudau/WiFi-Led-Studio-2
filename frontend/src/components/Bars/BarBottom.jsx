@@ -66,9 +66,9 @@ export default function LabelBottomNavigation() {
       <BottomNavigationAction
         component={Link}
         className={'step-one'}
-        label="Trang chủ"
-        value="/"
-        to="/"
+        label="Giới thiệu"
+        value="/Home"
+        to="/Home"
         icon={<Home />}
       />
       <BottomNavigationAction

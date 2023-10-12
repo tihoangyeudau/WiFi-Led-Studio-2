@@ -80,7 +80,7 @@ const AddIntegrationDialog = () => {
 
     if (!valid) {
       showSnackbar({
-        message: "Please fill in all required fields.",
+        message: "Thông tin điền chưa đầy đủ.",
         messageType: "warning",
       });
     } else {
