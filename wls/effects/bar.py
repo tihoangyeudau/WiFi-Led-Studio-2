@@ -31,7 +31,7 @@ class BarAudioEffect(AudioReactiveEffect, GradientEffect):
                 "beat_skip",
                 description="Bỏ qua nhịp chẵn hoặc lẻ",
                 default="none",
-            ): vol.In(list(["none", "odds", "even"])),
+            ): vol.In(list(["none", "odd", "even"])),
             vol.Optional(
                 "skip_every",
                 description="Nếu bỏ qua nhịp, hãy bỏ qua từng nhịp",
