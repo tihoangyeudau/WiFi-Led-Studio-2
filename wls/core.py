@@ -132,9 +132,9 @@ class WlsCore:
             else:
                 print("Neither path1 nor path2 exists.")
         elif sys.platform == "darwin":
-            subprocess.run(['open', '/Applications/Ambilight WiFi.app'], check=True)
+            subprocess.run(['open', '/Applications/Ambilight WiFi-USB.app'], check=True)
         else:
-            subprocess.run(['open', '/Applications/Ambilight WiFi.app'], check=True)
+            subprocess.run(['open', '/Applications/Ambilight WiFi-USB.app'], check=True)
 
     def restart_wls(self):
         if sys.platform == "win32":
