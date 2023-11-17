@@ -408,13 +408,14 @@ VERSION_ORDERS = ["Pro Max", "Pro", "Thường"]
 LED_ID_ORDERS = ["_Auto_"]
 MAX_RETRIES = 1  # Maximum number of reconnection attempts
 MANUFACTURERS = ['wch.cn', 'FTDI', 'Microsoft', 'Silicon Labs']
+if sys.platform == 'darwin':
+    undesired_port_names = ["tty", "modem"]
 
 def find_available_com_ports():
-    ports = serial.tools.list_ports.comports()
     if sys.platform == 'win32':
-        return [p.device for p in ports if p.manufacturer in MANUFACTURERS and "Bluetooth" not in p.description]
-    else:
-        return [p.device for p in ports]
+        return [port.device for port in serial.tools.list_ports.comports() if port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description]
+    elif sys.platform == "darwin":
+        return [port.device for port in serial.tools.list_ports.comports() if all(name not in port.device for name in undesired_port_names)]
 
 
 class AvailableCOMPorts:
@@ -494,7 +495,7 @@ class SerialDevice(Device):
                 if sys.platform == 'win32':
                     available_ports = [port for port in serial.tools.list_ports.comports() if (port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description)]
                 else:
-                    available_ports = [port for port in serial.tools.list_ports.comports()]
+                    available_ports = [port.device for port in serial.tools.list_ports.comports() if all(name not in port.device for name in undesired_port_names)]
                 for port in available_ports:
                     if port.device:  # Bỏ qua giá trị None
                         self.com_port = port.device
@@ -530,7 +531,7 @@ class SerialDevice(Device):
         if sys.platform == 'win32':
             available_ports = [port for port in serial.tools.list_ports.comports() if (port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description)]
         else:
-            available_ports = [port for port in serial.tools.list_ports.comports()]
+            available_ports = [port.device for port in serial.tools.list_ports.comports() if all(name not in port.device for name in undesired_port_names)]
         for port in available_ports:
             connected = self.try_connect_to_com_port(port.device)
             if connected:
