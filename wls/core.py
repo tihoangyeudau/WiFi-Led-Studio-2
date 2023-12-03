@@ -256,7 +256,7 @@ class WlsCore:
             and self.icon.HAS_NOTIFICATION
         ):
             self.icon.notify(
-                "Đã khởi động WiFi Led Studio.\nSử dụng biểu tượng trái tim ở Taskbar để mở.", "WiFi Led Studio @ Rainbow Music Led"
+                "Tôi ở dưới đây!\nSử dụng biểu tượng Quả cầu ở tray taskbar để mở giao diện.", "Ứng dụng nháy theo nhạc của Rainbow Music Led"
             )
         self.devices = Devices(self)
         self.effects = Effects(self)

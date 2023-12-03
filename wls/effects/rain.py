@@ -102,11 +102,16 @@ class RainAudioEffect(AudioReactiveEffect):
         overlaid_frames = np.zeros((3, self.pixel_count + self.frame_width))
         # Indexes of active drop animations
         drop_indices = np.flatnonzero(self.drop_frames)
+
         # TODO vectorize this to remove for loop
         for index in drop_indices:
+            frame_index = self.drop_frames[index]
+            # Ensure frame_index is within the bounds of drop_animation
+            if frame_index >= self.n_frames:
+                continue
+
             colored_frame = [
-                self.drop_animation[self.drop_frames[index]]
-                * self.drop_colors[color, index]
+                self.drop_animation[frame_index] * self.drop_colors[color, index]
                 for color in range(3)
             ]
             overlaid_frames[
@@ -116,8 +121,7 @@ class RainAudioEffect(AudioReactiveEffect):
         np.clip(overlaid_frames, 0, 255, out=overlaid_frames)
         self.pixels = overlaid_frames[
             :,
-            self.frame_side_lengths : self.frame_side_lengths
-            + self.pixel_count,
+            self.frame_side_lengths : self.frame_side_lengths + self.pixel_count,
         ].T
 
     def audio_data_updated(self, data):
