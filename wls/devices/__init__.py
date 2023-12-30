@@ -668,6 +668,7 @@ class Devices(RegistryLoader):
         """
         # First, we try to make sure this device doesn't share a destination with any existing device
         if "ip_address" in device_config.keys():
+            device_config["ip_address"] = clean_ip(device_config["ip_address"])
             device_ip = device_config["ip_address"]
             try:
                 resolved_dest = await resolve_destination(

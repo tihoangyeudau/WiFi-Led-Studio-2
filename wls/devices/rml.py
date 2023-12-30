@@ -114,6 +114,11 @@ class RMLDevice(NetworkedDevice):
             self.subdevice.deactivate()
         super().deactivate()
 
+    async def resolve_address(self, success_callback=None):
+        await super().resolve_address(success_callback)
+        if self.subdevice is not None:
+            self.subdevice._destination = self._destination
+
     def flush(self, data):
         self.subdevice.flush(data)
 

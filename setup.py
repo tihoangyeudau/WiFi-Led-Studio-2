@@ -12,7 +12,7 @@ PROJECT_AUTHOR = "Rainbow Music Led"
 PROJECT_AUTHOR_EMAIL = "rainbowmusicled@gmail.com"
 PROJECT_MAINTAINER = "Rainbow Music Led Developers"
 PROJECT_MAINTAINER_EMAIL = "tuantrung2905@gmail.com"
-PROJECT_URL = "https://github.com/tihoangyeudau/WiFi-Led_Studio-2"
+PROJECT_URL = "https://github.com/tihoangyeudau/WiFi-Led-Studio-2"
 PROJECT_WEBSITE = "https://rainbowmusicled.com"
 PROJECT_DOCS = "https://rainbowmusicled.com"
 
@@ -44,6 +44,7 @@ INSTALL_REQUIRES = [
     "voluptuous~=0.12.1",
     "zeroconf~=0.39.4",
     "pillow>=8.4.0",
+    "stupidartnet==1.4.0",
     # Conditional Requirement
     # We need pywin32 for Windows
     'pywin32>=302; platform_system == "Windows"',
