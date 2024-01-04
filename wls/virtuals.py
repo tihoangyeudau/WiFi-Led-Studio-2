@@ -8,7 +8,6 @@ from functools import cached_property
 
 import numpy as np
 import voluptuous as vol
-import zeroconf
 
 from wls.color import parse_color
 from wls.effects import DummyEffect
@@ -838,7 +837,6 @@ class Virtuals:
 
         self._wls = wls
         self._wls.events.add_listener(cleanup_effects, Event.WLS_SHUTDOWN)
-        self._zeroconf = zeroconf.Zeroconf()
         self._virtuals = {}
 
     def create_from_config(self, config):

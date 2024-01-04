@@ -1232,3 +1232,18 @@ def clean_ip(ip_address):
         .replace("http://", "")
         .replace("/", "")
     )
+
+name_to_icon = {}
+
+
+def set_name_to_icon(new_dict):
+    global name_to_icon
+    name_to_icon = new_dict
+
+
+def get_icon_name(rml_name):
+    global name_to_icon
+    for name, icon in name_to_icon.items():
+        if name.lower() in rml_name.lower():
+            return icon
+    return "rml"

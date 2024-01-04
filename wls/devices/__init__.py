@@ -10,7 +10,6 @@ import numpy as np
 import serial
 import serial.tools.list_ports
 import voluptuous as vol
-import zeroconf
 
 from wls.config import save_config
 from wls.events import DeviceCreatedEvent, DeviceUpdateEvent, Event
@@ -621,11 +620,9 @@ class Devices(RegistryLoader):
         super().__init__(wls, Device, self.PACKAGE_NAME)
 
         def on_shutdown(e):
-            self._zeroconf.close()
             self.deactivate_devices()
 
         self._wls.events.add_listener(on_shutdown, Event.WLS_SHUTDOWN)
-        self._zeroconf = zeroconf.Zeroconf()
 
     def create_from_config(self, config):
         for device in config:
@@ -838,49 +835,3 @@ class Devices(RegistryLoader):
                 device.rml.set_sync_mode(mode)
                 await device.rml.flush_sync_settings()
                 device.update_config({"sync_mode": mode})
-
-    async def find_rml_devices(self):
-        # Scan the LAN network that match RML using zeroconf - Multicast DNS
-        # Service Discovery Library
-        _LOGGER.info("Đang tìm đèn...")
-        rml_listener = RMLListener(self._wls)
-        rmlbrowser = self._zeroconf.add_service_listener(
-            "_rml._tcp.local.", rml_listener
-        )
-        try:
-            await asyncio.sleep(30)
-        finally:
-            _LOGGER.info("Đã tìm xong")
-            self._zeroconf.remove_service_listener(rml_listener)
-
-
-class RMLListener(zeroconf.ServiceBrowser):
-    def __init__(self, _wls):
-        self._wls = _wls
-
-    def remove_service(self, zeroconf_obj, type, name):
-        _LOGGER.info(f"Dịch vụ {name} đã bị loại bỏ")
-
-    def add_service(self, zeroconf_obj, type, name):
-        info = zeroconf_obj.get_service_info(type, name)
-
-        if info:
-            hostname = str(info.server).rstrip(".")
-            _LOGGER.info(f"Đã tìm thấy đèn: {hostname}")
-
-            device_type = "rml"
-            device_config = {"ip_address": hostname}
-
-            def handle_exception(future):
-                # Ignore exceptions, these will be raised when a device is found that already exists
-                exc = future.exception()
-
-            async_fire_and_forget(
-                self._wls.devices.add_new_device(device_type, device_config),
-                loop=self._wls.loop,
-                exc_handler=handle_exception,
-            )
-
-    def update_service(self, zeroconf_obj, type, name):
-        """Callback when a service is updated."""
-        pass

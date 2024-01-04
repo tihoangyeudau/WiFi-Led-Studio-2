@@ -28,6 +28,7 @@ from wls.events import (
 )
 from wls.http_manager import HttpServer
 from wls.integrations import Integrations
+from wls.mdns_manager import ZeroConfRunner
 from wls.presets import wls_presets
 from wls.scenes import Scenes
 from wls.utils import (
@@ -273,17 +274,14 @@ class WlsCore:
         self.devices.create_from_config(self.config["devices"])
         await self.devices.async_initialize_devices()
 
-        # sync_mode = RML_CONFIG_SCHEMA(self.config["rml_preferences"])[
-        #     "rml_preferred_mode"
-        # ]
-        # if sync_mode:
-        #     await self.devices.set_rmls_sync_mode(sync_mode)
-
+        self.zeroconf = ZeroConfRunner(wls=self)
         self.virtuals.create_from_config(self.config["virtuals"])
         self.integrations.create_from_config(self.config["integrations"])
 
         if self.config["scan_on_startup"]:
-            async_fire_and_forget(self.devices.find_rml_devices(), self.loop)
+            async_fire_and_forget(
+                self.zeroconf.discover_rml_devices(), self.loop
+            )
 
         async_fire_and_forget(
             self.integrations.activate_integrations(), self.loop
@@ -320,7 +318,7 @@ class WlsCore:
         # Fire a shutdown event and flush the loop
         self.events.fire_event(WlsShutdownEvent())
         await asyncio.sleep(0)
-
+        await self.zeroconf.async_close()
         _LOGGER.info("Dừng HttpServer...")
         await self.http.stop()
 
