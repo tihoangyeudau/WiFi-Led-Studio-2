@@ -21,6 +21,7 @@ a = Analysis([f'{spec_root}\\wls\\__main__.py'],
              datas=datas,
              hiddenimports=[
                            "sacn",
+                           "stupidArtnet",
                            "aubio",
                            "numpy",
                            "math",

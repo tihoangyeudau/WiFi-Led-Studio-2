@@ -492,6 +492,36 @@ wls_presets = {
     },
     "melt": {
         "reset": {"config": {}, "name": "Đặt lại"},
+        "bladesmooth": {
+            "config": {
+                "background_brightness": 0.27,
+                "flip": False,
+                "background_color": "#0000ff",
+                "brightness": 1,
+                "gradient": "linear-gradient(90deg, #ff00b2 0.00%,#ffa500 50.00%,#ffc800 100.00%)",
+                "reactivity": 0.3,
+                "blur": 0,
+                "mirror": False,
+                "gradient_roll": 0,
+                "speed": 0.2,
+            },
+            "name": "Xanh hồng",
+        },
+        "purple-red": {
+            "config": {
+                "blur": 0,
+                "flip": False,
+                "speed": 0.2,
+                "mirror": False,
+                "gradient": "linear-gradient(90deg, #ff00b2 0.00%,#ffa500 50.00%,#ffc800 100.00%)",
+                "brightness": 1,
+                "reactivity": 0.3,
+                "gradient_roll": 0,
+                "background_color": "#ff0000",
+                "background_brightness": 0.3,
+            },
+            "name": "Tím đỏ",
+        },
         "happa-light": {
             "config": {
                 "background_brightness": 1.0,
@@ -1702,6 +1732,28 @@ wls_presets = {
             },
             "name": "Trầm đại dương",
         },
+        "purplered-bass": {
+            "config": {
+                "blur": 2,
+                "flip": False,
+                "color": "#00ffff",
+                "decay": 0.7,
+                "mirror": False,
+                "gradient": "#ff00b2",
+                "brightness": 1,
+                "multiplier": 0.5,
+                "invert_roll": False,
+                "solid_color": False,
+                "gradient_name": "Ocean",
+                "gradient_roll": 0,
+                "frequency_range": "Thấp (nhịp+trầm)",
+                "gradient_repeat": 1,
+                "background_color": "#ff0000",
+                "color_correction": True,
+                "background_brightness": 0.1,
+            },
+            "name": "Tím đỏ",
+        },
         "happa-light": {
             "config": {
                 "background_brightness": 1.0,
@@ -1747,10 +1799,10 @@ wls_presets = {
     "energy2": {"reset": {"config": {}, "name": "Đặt lại"}},
     "equalizer": {"reset": {"config": {}, "name": "Đặt lại"}},
     "glitch": {"reset": {"config": {}, "name": "Đặt lại"}},
-    "hue_fix_demo": {"reset": {"config": {}, "name": "Đặt lại"}},
     "lava_lamp": {"reset": {"config": {}, "name": "Đặt lại"}},
     "marching": {"reset": {"config": {}, "name": "Đặt lại"}},
     "power": {"reset": {"config": {}, "name": "Đặt lại"}},
     "melt_and_sparkle": {"reset": {"config": {}, "name": "Đặt lại"}},
     "water": {"reset": {"config": {}, "name": "Đặt lại"}},
+    "twinklefox": {"reset": {"config": {}, "name": "Đặt lại"}},
 }

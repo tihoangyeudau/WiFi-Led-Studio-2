@@ -46,8 +46,6 @@ INSTALL_REQUIRES = [
     "pillow>=8.4.0",
     "stupidartnet==1.4.0",
     # Conditional Requirement
-    # We need pywin32 for Windows
-    'pywin32>=302; platform_system == "Windows"',
     # uvloop doesn't work on Windows yet, but should be a good speedup for low power linux devices
     'uvloop>=0.16.0; platform_system != "Windows"',
     # We can install this on all linux devices, it just won't work for anything other than a Pi
