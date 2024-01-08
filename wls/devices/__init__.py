@@ -720,7 +720,7 @@ class Devices(RegistryLoader):
 
             if rml_support_DDP(rml_build):
                 _LOGGER.info(f"RML build Supports DDP: {rml_build}")
-                sync_mode = "DDP"
+                sync_mode = "UDP"
             else:
                 _LOGGER.info(
                     f"RML build pre DDP, default to UDP: {rml_build}"

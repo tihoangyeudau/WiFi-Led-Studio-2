@@ -24,7 +24,7 @@ class RMLDevice(NetworkedDevice):
             vol.Optional(
                 "sync_mode",
                 description="Giao thức truyền trực tuyến tới thiết bị RML. Khuyến nghị: DDP cho v0.13 trở lên. Sử dụng UDP cho các phiên bản cũ hơn.",
-                default="DDP",
+                default="UDP",
             ): vol.In(["DDP", "UDP", "E131"]),
             vol.Optional(
                 "timeout",
