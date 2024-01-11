@@ -47,11 +47,11 @@ class AmbilightUSBDevice(SerialDevice):
         try:
             if self.version == 115200:
                 self.serial.write(
-                    packets.build_ambilightusb_packet(data, self.color_order)
+                    packets.build_ambilightusb_rainbowmusicled_dot_com_0981373223_packet(data, self.color_order)
                 )
             else:
                 self.serial.write(
-                    packets.build_ambilightusbpro_packet(data, self.color_order)
+                    packets.build_ambilightusbpro_rainbowmusicled_dot_com_0981373223_packet(data, self.color_order)
                 )
         except serial.SerialException as e:
             print("Không thể gửi dữ liệu: USB bị mất kết nối, hãy thử lại")

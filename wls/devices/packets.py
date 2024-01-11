@@ -107,7 +107,7 @@ def build_dnrgb_packet(
     return packet
 
 
-def build_ambilightusb_packet(data: np.ndarray, color_order: str):
+def build_ambilightusb_rainbowmusicled_dot_com_0981373223_packet(data: np.ndarray, color_order: str):
     """
     Generic AmbilightUSB serial packet encoding
 
@@ -147,7 +147,7 @@ def build_ambilightusb_packet(data: np.ndarray, color_order: str):
     return packet
 
 
-def build_ambilightusbpro_packet(data: np.ndarray, color_order: str):
+def build_ambilightusbpro_rainbowmusicled_dot_com_0981373223_packet(data: np.ndarray, color_order: str):
     """
     Generic Ambilight USB Pro serial packet encoding
     """
