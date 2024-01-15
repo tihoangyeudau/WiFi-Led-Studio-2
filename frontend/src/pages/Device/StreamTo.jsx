@@ -116,32 +116,6 @@ const StreamToCard = ({ virtual, virtuals, style }) => {
           </Select>
         </FormControl>
 
-        {/* <List
-          sx={{ width: '100%' }}
-        >
-          {Object.keys(virtuals).map(v =>
-            <ListItem style={{ color: 'fff' }}>
-              <ListItemIcon >
-                <BladeIcon
-                  style={{ position: 'relative' }}
-                  colorIndicator={true}
-                  name={virtuals && virtuals[v] && virtuals[v].config && virtuals[v].config.icon_name && virtuals[v].config.icon_name} 
-                />
-              </ListItemIcon>
-              <ListItemText id="switch-list-label-wifi" primary={v} />
-              <Switch
-                color={"primary"}
-                edge="end"
-                onChange={handleToggle(v)}
-                streamingTo={streamingTo.indexOf(v) !== -1}
-                inputProps={{
-                  'aria-labelledby': `switch-list-label-${v}`,
-                }}
-              />
-            </ListItem>
-          )}
-
-        </List> */}
         <Button variant={"outlined"} onClick={()=>handleCopy()} style={{
           alignSelf: "flex-start",
           margin: "10px 0"
