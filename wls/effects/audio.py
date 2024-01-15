@@ -1,4 +1,5 @@
 import logging
+import threading
 import time
 import sys
 from collections import deque
@@ -35,6 +36,7 @@ class AudioInputSource:
     _volume = -90
     _volume_filter = ExpFilter(-90, alpha_decay=0.99, alpha_rise=0.99)
     _subscriber_threshold = 0
+    _timer = None
 
     @staticmethod
     def update_default_loopback_index():
@@ -137,10 +139,14 @@ class AudioInputSource:
         self._wls = wls
         self.update_config(config)
 
-        def deactivate(e):
-            self.deactivate()
+        def shutdown_event(e):
+            # We give the rest of WiFi Led Studio a second to shutdown before we deactivate the audio subsystem.
+            # This is to prevent WiFi Led Studio hanging on shutdown if the audio subsystem is still running while
+            # effects are being unloaded. This is a bit hacky but it works.
+            self._timer = threading.Timer(0.5, self.check_and_deactivate)
+            self._timer.start()
 
-        self._wls.events.add_listener(deactivate, Event.WLS_SHUTDOWN)
+        self._wls.events.add_listener(shutdown_event, Event.WLS_SHUTDOWN)
 
     def update_config(self, config):
         """Deactivate the audio, update the config, the reactivate"""
@@ -287,16 +293,33 @@ class AudioInputSource:
     def subscribe(self, callback):
         """Registers a callback with the input source"""
         self._callbacks.append(callback)
-
         if len(self._callbacks) > 0 and not self._is_activated:
             self.activate()
+        if self._timer is not None:
+            self._timer.cancel()
+            self._timer = None
 
     def unsubscribe(self, callback):
         """Unregisters a callback with the input source"""
         if callback in self._callbacks:
             self._callbacks.remove(callback)
+        if (
+            len(self._callbacks) <= self._subscriber_threshold
+            and self._is_activated
+        ):
+            if self._timer is not None:
+                self._timer.cancel()
+            self._timer = threading.Timer(5.0, self.check_and_deactivate)
+            self._timer.start()
 
-        if len(self._callbacks) <= self._subscriber_threshold:
+    def check_and_deactivate(self):
+        if self._timer is not None:
+            self._timer.cancel()
+        self._timer = None
+        if (
+            len(self._callbacks) <= self._subscriber_threshold
+            and self._is_activated
+        ):
             self.deactivate()
 
     def get_device_index_by_name(self, device_name: str):

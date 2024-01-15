@@ -46,7 +46,7 @@ class Virtual:
             ): str,
             vol.Required(
                 "mapping",
-                description="Span: Hiệu ứng kéo dài tất cả các phân đoạn. Sao chép: Hiệu ứng được sao chép trên mỗi phân đoạn",
+                description="Span: Hiệu ứng kéo dài tất cả các phân đoạn. Đồng bộ: Hiệu ứng được đồng bộ trên mỗi phân đoạn",
                 default="span",
             ): vol.In(["span", "copy"]),
             vol.Optional(
@@ -542,7 +542,9 @@ class Virtual:
 
         # self.thread_function()
 
-        self._thread = threading.Thread(target=self.thread_function)
+        self._thread = threading.Thread(
+            name=f"Virtual: {self.id}", target=self.thread_function
+        )
         self._thread.start()
         self._wls.events.fire_event(VirtualPauseEvent(self.id))
         # self._task = self._wls.loop.create_task(self.thread_function())
