@@ -79,7 +79,12 @@ const StreamToCard = ({ virtual, virtuals, style }) => {
   };
 
   const handleCopy = () => {
-    streamingTo.map(e=>handleEffectConfig(e, virtuals[virtual.id]?.effect.config, virtuals[virtual.id]?.effect.type))
+    streamingTo.map(e=>
+      handleEffectConfig(e,
+        virtuals[virtual.id]?.effect.config,
+        virtuals[virtual.id]?.effect.type
+      )
+    )
   }
 
   return (
@@ -98,7 +103,7 @@ const StreamToCard = ({ virtual, virtuals, style }) => {
             renderValue={(selected) => (
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                 {selected.map((value) => (
-                  <Chip key={value} label={value} />
+                  <Chip key={value} label={virtuals[value].name} /> // Sử dụng virtuals[value].name để lấy tên
                 ))}
               </Box>
             )}
