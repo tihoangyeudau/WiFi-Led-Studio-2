@@ -64,14 +64,15 @@ def mix_colors(color_1, color_2, ratio):
 
 
 def fill_rainbow(pixels, initial_hue, delta_hue):
-    hue = initial_hue
     sat = 0.95
     val = 1.0
-    for i in range(0, len(pixels)):
-        pixels[i, :] = tuple(
-            int(i * 255) for i in colorsys.hsv_to_rgb(hue, sat, val)
-        )
-        hue = hue + delta_hue
+    hues = np.arange(
+        initial_hue, initial_hue + len(pixels) * delta_hue, delta_hue
+    )
+    hues = hues[: len(pixels)]  # Ensure hues has the same length as pixels
+    pixels = (
+        np.array([colorsys.hsv_to_rgb(hue, sat, val) for hue in hues]) * 255
+    )  # the array is 0-1, we need 0-255
     return pixels
 
 

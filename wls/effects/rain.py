@@ -9,7 +9,6 @@ from wls.effects.droplets import DROPLET_NAMES, load_droplet
 
 
 class RainAudioEffect(AudioReactiveEffect):
-
     NAME = "Mưa"
     CATEGORY = "Cổ điển"
 
@@ -17,7 +16,7 @@ class RainAudioEffect(AudioReactiveEffect):
         {
             vol.Optional(
                 "mirror",
-                description="Phản chiếU",
+                description="Phản chiếu",
                 default=True,
             ): bool,
             # TODO drops should be controlled by some sort of effectlet class,
@@ -28,6 +27,11 @@ class RainAudioEffect(AudioReactiveEffect):
                 description="Màu âm trầm",
                 default="white",
             ): validate_color,
+            vol.Optional(
+                "pulse_strip",
+                description="Xung toàn bộ dải theo nhịp",
+                default="Tắt",
+            ): vol.In(["Tắt", "Trầm", "Trung", "Cao"]),
             vol.Optional(
                 "mids_color",
                 description="Màu của âm trung",
@@ -64,6 +68,7 @@ class RainAudioEffect(AudioReactiveEffect):
     def on_activate(self, pixel_count):
         self.drop_frames = np.zeros(self.pixel_count, dtype=int)
         self.drop_colors = np.zeros((3, self.pixel_count))
+        self.pulse_pixels = np.zeros((self.pixel_count, 3))
 
     def config_updated(self, config):
         self.drop_animation = load_droplet(config["raindrop_animation"])
@@ -102,30 +107,39 @@ class RainAudioEffect(AudioReactiveEffect):
         overlaid_frames = np.zeros((3, self.pixel_count + self.frame_width))
         # Indexes of active drop animations
         drop_indices = np.flatnonzero(self.drop_frames)
-
         # TODO vectorize this to remove for loop
         for index in drop_indices:
-            frame_index = self.drop_frames[index]
-            # Ensure frame_index is within the bounds of drop_animation
-            if frame_index >= self.n_frames:
+            if self.drop_frames[index] >= len(self.drop_animation):
                 continue
-
             colored_frame = [
-                self.drop_animation[frame_index] * self.drop_colors[color, index]
+                self.drop_animation[self.drop_frames[index]]
+                * self.drop_colors[color, index]
                 for color in range(3)
             ]
             overlaid_frames[
                 :, index : index + self.frame_width
             ] += colored_frame
 
-        np.clip(overlaid_frames, 0, 255, out=overlaid_frames)
         self.pixels = overlaid_frames[
             :,
-            self.frame_side_lengths : self.frame_side_lengths + self.pixel_count,
+            self.frame_side_lengths : self.frame_side_lengths
+            + self.pixel_count,
         ].T
+        self.pixels += self.pulse_pixels
+        # Decay the pulse pixels
+        self.pulse_pixels = (self.pulse_pixels * 9) // 10
+
+    def strip_pulse(self, color):
+        """
+        Set the pulse pixels to a color
+        This color decays over time in render()
+
+        Args:
+            color: The color to pulse the strip
+        """
+        self.pulse_pixels = np.array([color])
 
     def audio_data_updated(self, data):
-
         # Calculate the low, mids, and high indexes scaling based on the pixel
         # count
         intensities = np.fromiter(
@@ -138,25 +152,34 @@ class RainAudioEffect(AudioReactiveEffect):
             intensities[0] - self.filtered_intensities[0]
             > self._config["lows_sensitivity"]
         ):
-            self.new_drop(
-                randint(0, self.pixel_count - 1),
-                parse_color(self._config["lows_color"]),
-            )
+            if self._config["pulse_strip"] == "Trầm":
+                self.strip_pulse(parse_color(self._config["lows_color"]))
+            else:
+                self.new_drop(
+                    randint(0, self.pixel_count - 1),
+                    parse_color(self._config["lows_color"]),
+                )
         if (
             intensities[1] - self.filtered_intensities[1]
             > self._config["mids_sensitivity"]
         ):
-            self.new_drop(
-                randint(0, self.pixel_count - 1),
-                parse_color(self._config["mids_color"]),
-            )
+            if self._config["pulse_strip"] == "Trung":
+                self.strip_pulse(parse_color(self._config["mids_color"]))
+            else:
+                self.new_drop(
+                    randint(0, self.pixel_count - 1),
+                    parse_color(self._config["mids_color"]),
+                )
         if (
             intensities[2] - self.filtered_intensities[2]
             > self._config["high_sensitivity"]
         ):
-            self.new_drop(
-                randint(0, self.pixel_count - 1),
-                parse_color(self._config["high_color"]),
-            )
+            if self._config["pulse_strip"] == "Bổng":
+                self.strip_pulse(parse_color(self._config["high_color"]))
+            else:
+                self.new_drop(
+                    randint(0, self.pixel_count - 1),
+                    parse_color(self._config["high_color"]),
+                )
 
         self.filtered_intensities = self.intensity_filter.update(intensities)
