@@ -14,7 +14,9 @@ import FormControl from '@material-ui/core/FormControl';
 import Switch from '@material-ui/core/Switch';
 import MenuItem from '@material-ui/core/MenuItem';
 import InputLabel from '@material-ui/core/InputLabel';
+import { useEffect, useRef, useState } from 'react'
 import useStore from '../../utils/apiStore';
+import { deepEqual } from '../../utils/helpers'
 import BladeFrame from '../../components/SchemaForm/components/BladeFrame';
 import BladeIcon from '../../components/Icons/BladeIcon/BladeIcon';
 import { Button, CardActions, Chip, OutlinedInput, Select } from '@material-ui/core';
@@ -45,42 +47,40 @@ const useStyles = makeStyles((theme) => ({
 
 const StreamToCard = ({ virtual, virtuals, style }) => {
   const classes = useStyles();
+  const cref = useRef(null);
   const streamingToDevices = useStore((state) => state.streamingToDevices);
   const setStreamingToDevices = useStore((state) => state.setStreamingToDevices);
 
   const [streamingTo, setStreamingTo] = React.useState(streamingToDevices.indexOf(virtual.id) === -1 ? [virtual.id] : streamingToDevices);
-  const setVirtualEffect = useStore((state) => state.setVirtualEffect);
+  const streaming = useStore((state) => state.streaming);
+  const setStreaming = useStore((state) => state.setStreaming);
   const getVirtuals = useStore((state) => state.getVirtuals);
 
-  const handleEffectConfig = (virtual_id, config, selectedType) =>   setVirtualEffect(
-    virtual_id,
-    {
-      virtId: virtual_id,
-      type: selectedType,
-      config: config,
-      active: true
-    }
-  ).then(() => getVirtuals());
-
-
+  const copyTo = useStore((state) => state.copyTo);
 
   const handleToggle = (value) => {
     const currentIndex = streamingTo.indexOf(value);
     const newStreamingDevices = [...streamingTo];
-
     if (currentIndex === -1) {
       newStreamingDevices.push(value);
     } else {
       newStreamingDevices.splice(currentIndex, 1);
     }
-
     setStreamingTo(newStreamingDevices);
     setStreamingToDevices(newStreamingDevices)
   };
 
-  const handleCopy = () => {
-    streamingTo.map(e=>handleEffectConfig(e, virtuals[virtual.id]?.effect.config, virtuals[virtual.id]?.effect.type))
-  }
+  const handleCopy = () =>
+    copyTo(virtual.id, streamingTo).then(() => getVirtuals())
+
+  useEffect(() => {
+    if (streaming) {
+      if (!deepEqual(cref.current, virtuals[virtual.id]?.effect)) {
+        if (cref.current !== null) handleCopy()
+        cref.current = virtuals[virtual.id]?.effect
+      }
+    }
+  }, [virtuals[virtual.id]?.effect]);
 
   return (
     <Card variant="outlined" className={`${classes.card} step-device-two`} style={style}>
@@ -115,16 +115,24 @@ const StreamToCard = ({ virtual, virtuals, style }) => {
             ))}
           </Select>
         </FormControl>
-
-        <Button variant={"outlined"} onClick={()=>handleCopy()} style={{
-          alignSelf: "flex-start",
-          margin: "10px 0"
-        }}>
-          Đồng bộ
-        </Button>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <Button
+            style={{ marginBottom: '10px', border: '1px solid #61666c', fontSize: '9px' }}
+            size="medium"
+            onClick={() => handleCopy()}
+          >
+            Đồng bộ<br />1 lần
+          </Button>
+          <Button
+            style={{ marginBottom: '10px', border: '1px solid #61666c', fontSize: '9px' }}
+            size="medium"
+            onClick={() => setStreaming(!streaming)}
+            color={streaming ? 'primary' : 'inherit'}
+          >
+            Luôn<br />đồng bộ
+          </Button>
+        </div>
       </CardContent>
-
-
     </Card>
   );
 };

@@ -1,5 +1,5 @@
 export const drawerWidth = 240;
-export const frontendConfig = 4;
+export const frontendConfig = 5;
 
 
 export const camelToSnake = (str) => str[0].toLowerCase()
@@ -72,4 +72,29 @@ export const log = (...props) => {
     if (typeof props[0] === 'string') {
         console.log(`%c ${props[0].replace("success", '').replace("warning", '').replace("info", '')} `, `padding: 3px 5px; border-radius: 5px; background: #${props[0].indexOf("success") !== -1 ? '1db954; color: #fff; font-weight: 700;' : props[0].indexOf("info") !== -1 ? '0dbedc; color: #fff; font-weight: 700;' : props[0].indexOf("warning") !== -1 ? 'FF7514; color: #fff; font-weight: 700;' : '800000; color: #fff;'}`, ...props.slice(1, props.length))
     }
+}
+
+export function deepEqual(obj1, obj2) {
+    if (obj1 === obj2) {
+      return true;
+    }
+  
+    if (typeof obj1 !== 'object' || obj1 === null || typeof obj2 !== 'object' || obj2 === null) {
+      return false;
+    }
+  
+    let keys1 = Object.keys(obj1).sort();
+    let keys2 = Object.keys(obj2).sort();
+  
+    if (keys1.length !== keys2.length) {
+      return false;
+    }
+  
+    for (let i = 0; i < keys1.length; i++) {
+      if (keys1[i] !== keys2[i] || !deepEqual(obj1[keys1[i]], obj2[keys2[i]])) {
+        return false;
+      }
+    }
+  
+    return true;
 }

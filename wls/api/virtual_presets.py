@@ -6,6 +6,7 @@ from aiohttp import web
 from wls.api import RestEndpoint
 from wls.config import save_config
 from wls.utils import generate_id
+from wls.virtuals import update_effect_config
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -54,27 +55,6 @@ class VirtualPresetsEndpoint(RestEndpoint):
         }
 
         return web.json_response(data=response, status=200)
-
-    def update_effect_config(self, virtual_id, effect):
-        # Store as both the active effect to protect existing code, and one of effects
-        virtual = next(
-            (
-                item
-                for item in self._wls.config["virtuals"]
-                if item["id"] == virtual_id
-            ),
-            None,
-        )
-        if virtual:
-            if not ("effects" in virtual):
-                virtual["effects"] = {}
-            virtual["effects"][effect.type] = {}
-            virtual["effects"][effect.type]["type"] = effect.type
-            virtual["effects"][effect.type]["config"] = effect.config
-            if not ("effect" in virtual):
-                virtual["effect"] = {}
-            virtual["effect"]["type"] = effect.type
-            virtual["effect"]["config"] = effect.config
 
     async def put(self, virtual_id, request) -> web.Response:
         """Set active effect of virtual to a preset"""
@@ -163,7 +143,7 @@ class VirtualPresetsEndpoint(RestEndpoint):
             }
             return web.json_response(data=response, status=202)
 
-        self.update_effect_config(virtual_id, effect)
+        update_effect_config(self._wls.config, virtual_id, effect)
 
         save_config(
             config=self._wls.config,

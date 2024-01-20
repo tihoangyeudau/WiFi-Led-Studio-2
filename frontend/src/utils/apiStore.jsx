@@ -232,6 +232,11 @@ const useStore = create(
         streamingToDevices: devices
       })),
 
+      streaming: false,
+      setStreaming: (streaming) => {
+        set((state) => ({ streaming: streaming }))
+      },
+
       // graphs: !!isElectron(),
       graphs: true,
       toggleGraphs: () => {
@@ -385,6 +390,21 @@ const useStore = create(
           }
         }
       },
+      copyTo: async (virtId, target) => {
+        const resp = await Wls(
+          `/api/virtuals_tools/${virtId}`,
+          set,
+          'PUT',
+          {
+            tool: 'copy',
+            target
+          }
+        );
+        if (resp && resp.status && resp.status === 'success') {
+          return true;
+        }
+        return false;
+      },         
       updateVirtualSegments: async ({ virtId, segments }) => {
         const resp = await Wls(
           `/api/virtuals/${virtId}`,
