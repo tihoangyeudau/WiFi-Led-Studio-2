@@ -19,7 +19,7 @@ const useStore = create(
   persist(
     devtools((set, get) => ({
 
-      host: 'http://localhost:8888',
+      host: 'http://localhost:2905',
       setHost: (host) => {
         window.localStorage.setItem('wls-host', host.title ? host.title : host);
         return set((state) => ({

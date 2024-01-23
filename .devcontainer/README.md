@@ -37,6 +37,6 @@ The available tasks are:
 
 Task | Description
 -- | --
-Run Wls in devmode on port 8888 | Backend
+Run Wls in devmode on port 2905 | Backend
 Run Wls Frontend in devmode on port 3000 | Frontend
 

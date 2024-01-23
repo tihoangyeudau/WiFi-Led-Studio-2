@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { SetState } from 'zustand';
 
-const baseURL = 'http://localhost:8888';
+const baseURL = 'http://localhost:2905';
 const storedURL = window.localStorage.getItem('wls-host');
 
 const api = axios.create({
