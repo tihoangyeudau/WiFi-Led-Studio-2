@@ -33,7 +33,7 @@ class GradientEffect(Effect):
             ): vol.All(vol.Coerce(float), vol.Range(min=0, max=10)),
             vol.Optional(
                 "beat_speed",
-                description="Gradient Roll speed is adjusted based on audio beat magnitude",
+                description="Tốc độ cuộn chuyển màu được điều chỉnh dựa trên cường độ nhịp âm thanh",
                 default=False,
             ): bool,
         }

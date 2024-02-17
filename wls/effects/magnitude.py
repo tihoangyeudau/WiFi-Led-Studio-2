@@ -24,6 +24,21 @@ class MagnitudeAudioEffect(AudioReactiveEffect, GradientEffect):
                 description="Dải tần số để phát hiện nhịp",
                 default="Thấp (nhịp+trầm)",
             ): vol.In(list(_power_funcs.keys())),
+            vol.Optional(
+                "gradient_roll",
+                description="Tốc độ dải mầu",
+                default=0.3,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0, max=10)),
+            vol.Optional(
+                "beat_speed",
+                description="Tốc độ cuộn chuyển màu được điều chỉnh dựa trên cường độ nhịp âm thanh",
+                default=True,
+            ): bool,
+            vol.Optional(
+                "blur",
+                description="Làm mờ",
+                default=3.6,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=10)),
         }
     )
 

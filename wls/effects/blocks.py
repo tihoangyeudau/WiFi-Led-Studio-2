@@ -21,7 +21,12 @@ class BlocksAudioEffect(AudioReactiveEffect, GradientEffect):
                 "mirror",
                 description="Phản chiếu",
                 default=True,
-            ): bool
+            ): bool,
+            vol.Optional(
+                "gradient_roll",
+                description="Tốc độ dải mầu",
+                default=0.4,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0, max=10)),
         }
     )
 
@@ -44,3 +49,4 @@ class BlocksAudioEffect(AudioReactiveEffect, GradientEffect):
             )
 
         self.pixels = np.hstack(out_split).T
+        self._roll_gradient()

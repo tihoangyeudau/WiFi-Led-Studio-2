@@ -25,6 +25,11 @@ class BandsAudioEffect(AudioReactiveEffect, GradientEffect):
                 description="Phản chiếu",
                 default=False,
             ): bool,
+            vol.Optional(
+                "gradient_roll",
+                description="Tốc độ dải mầu",
+                default=0.4,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0, max=10)),
         }
     )
 
@@ -62,3 +67,4 @@ class BandsAudioEffect(AudioReactiveEffect, GradientEffect):
                 pass
 
         self.pixels = np.vstack(out_split)
+        self._roll_gradient()
