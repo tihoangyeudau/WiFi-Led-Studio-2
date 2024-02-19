@@ -33,8 +33,18 @@ class PitchSpectrumAudioEffect(AudioReactiveEffect, GradientEffect):
                 description="Khả năng phản ứng với sự thay đổi của các nốt",
                 default=0.15,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=1.0)),
+            vol.Optional(
+                "gradient_roll",
+                description="Tốc độ dải mầu",
+                default=0.5,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0, max=10)),
         }
     )
+
+    def on_activate(self, pixel_count):
+        # protect from changes to the pixel count during segment edits
+        self.avg_midi = None
+        self.filtered_melbank = None
 
     def config_updated(self, config):
         self.avg_midi = None
@@ -85,3 +95,4 @@ class PitchSpectrumAudioEffect(AudioReactiveEffect, GradientEffect):
         )
         # Assign new_colors back to self.pixels
         self.pixels = new_colors
+        self._roll_gradient()

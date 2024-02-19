@@ -49,6 +49,7 @@ class DDPDevice(UDPDevice):
         super().__init__(wls, config)
         self._device_type = "DDP"
         self.frame_count = 0
+        self.connection_warning = False
 
     def flush(self, data):
         self.frame_count += 1
@@ -60,8 +61,16 @@ class DDPDevice(UDPDevice):
                 data,
                 self.frame_count,
             )
+            if self.connection_warning:
+                _LOGGER.info(f"DDP connection reestablished to {self.config['name']}")
+                self.connection_warning = False
         except AttributeError:
             self.activate()
+        except OSError as e:
+            # print warning only once until it clears
+            if not self.connection_warning:
+                _LOGGER.warning(f"Error in DDP connection to {self.config['name']}: {e}")
+                self.connection_warning = True
 
     @staticmethod
     def send_out(sock, dest, port, data, frame_count):

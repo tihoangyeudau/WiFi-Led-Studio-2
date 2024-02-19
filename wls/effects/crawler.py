@@ -39,6 +39,16 @@ class Crawler(AudioReactiveEffect, HSVEffect):
                 description="Độ giãn nở",
                 default=0.01,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.01, max=10)),
+            vol.Optional(
+                "blur",
+                description="Làm mờ",
+                default=1,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=10)),
+            vol.Optional(
+                "gradient_roll",
+                description="Tốc độ dải mầu",
+                default=0.2,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0, max=4)),
         }
     )
 
@@ -99,3 +109,4 @@ class Crawler(AudioReactiveEffect, HSVEffect):
         self.hsv_array[:, 0] = h
         self.hsv_array[:, 1] = 1
         self.hsv_array[:, 2] = v
+        self._roll_gradient()

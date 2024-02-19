@@ -1768,27 +1768,52 @@ wls_presets = {
             "name": "happa light"
         },
     },
-    "bands_matrix": {
-        "reset": {
+    "crawler": {
+        "reset": {"config": {}, "name": "Đặt lại"},
+        "du-soc": {
             "config": {
-                "blur": 0,
-                "flip_gradient": False,
-                "flip_horizontal": False,
-                "background_brightness": 1,
+                "background_brightness": 1.0,
                 "background_color": "#000000",
-                "gradient": "linear-gradient(90deg, rgb(255, 0, 0) 0%, rgb(255, 120, 0) 14%, rgb(255, 200, 0) 28%, rgb(0, 255, 0) 42%, rgb(0, 199, 140) 56%, rgb(0, 0, 255) 70%, rgb(128, 0, 128) 84%, rgb(255, 0, 178) 98%)",
-                "brightness": 1,
-                "gradient_roll": 0,
-                "mirror": False,
+                "beat_speed": False,
+                "blur": 0,
+                "brightness": 1.0,
+                "chop": 30.0,
+                "fix_hues": True,
                 "flip": False,
-                "band_count": 6,
+                "gradient": "linear-gradient(90deg, rgb(255, 0, 0) 0%, rgb(255, 120, 0) 14%, rgb(255, 200, 0) 28%, rgb(0, 255, 0) 42%, rgb(0, 199, 140) 56%, rgb(0, 0, 255) 70%, rgb(128, 0, 128) 84%, rgb(255, 0, 178) 98%)",
+                "gradient_roll": 0.2,
+                "mirror": False,
+                "reactivity": 0.5,
+                "speed": 0.4,
+                "stretch": 2.5,
+                "sway": 20.0
             },
-            "name": "Reset",
-        }
+            "name": "Đu sọc"
+        },
+        "du-doi": {
+            "config": {
+                "background_brightness": 1.0,
+                "background_color": "#000000",
+                "beat_speed": False,
+                "blur": 0.7,
+                "brightness": 1.0,
+                "chop": 30.0,
+                "fix_hues": True,
+                "flip": False,
+                "gradient": "linear-gradient(90deg, rgb(255, 0, 0) 0%, rgb(255, 120, 0) 14%, rgb(255, 200, 0) 28%, rgb(0, 255, 0) 42%, rgb(0, 199, 140) 56%, rgb(0, 0, 255) 70%, rgb(128, 0, 128) 84%, rgb(255, 0, 178) 98%)",
+                "gradient_roll": 0.1,
+                "mirror": True,
+                "reactivity": 0.5,
+                "speed": 0.4,
+                "stretch": 0.01,
+                "sway": 20.0
+            },
+            "name": "Đu đôi"
+        },
     },
+    "bands_matrix": {"reset": {"config": {}, "name": "Đặt lại"}},
     "bands": {"reset": {"config": {}, "name": "Đặt lại"}},
     "block_reflections": {"reset": {"config": {}, "name": "Đặt lại"}},
-    "crawler": {"reset": {"config": {}, "name": "Đặt lại"}},
     "blocks": {"reset": {"config": {}, "name": "Đặt lại"}},
     "energy2": {"reset": {"config": {}, "name": "Đặt lại"}},
     "equalizer": {"reset": {"config": {}, "name": "Đặt lại"}},

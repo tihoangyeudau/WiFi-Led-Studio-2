@@ -24,7 +24,7 @@ class Melt(AudioReactiveEffect, HSVEffect):
                 description="Độ nhậy",
                 default=0.4,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.1, max=1)),
-             vol.Optional(
+            vol.Optional(
                 "blur",
                 description="Làm mờ",
                 default=2,
