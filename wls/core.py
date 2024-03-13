@@ -123,28 +123,15 @@ class WlsCore:
 
     def open_app(self):
         if sys.platform == "win32":
-            path1 = os.path.join(os.environ["ProgramFiles"], "Ambilight WiFi-USB\\bin", "_ambilightwifi_.exe")
-            path2 = os.path.join(os.environ["ProgramFiles"], "AmbilightWiFi\\bin", "ambilightwifi.exe")
-            
-            if os.path.exists(path1):
-                subprocess.call(path1)
-            elif os.path.exists(path2):
-                subprocess.call(path2)
-            else:
-                print("Neither path1 nor path2 exists.")
+            path1 = os.path.join(os.environ["ProgramFiles"], "Ambilight WiFi-USB\\bin", "ambilightwifi.exe")
+            subprocess.call(path1)
+
         elif sys.platform == "darwin":
-            subprocess.run(['open', '/Applications/Ambilight WiFi-USB.app'], check=True)
-        else:
             subprocess.run(['open', '/Applications/Ambilight WiFi-USB.app'], check=True)
 
     def restart_wls(self):
         if sys.platform == "win32":
-            path = os.path.join(os.environ["ProgramFiles"], "WiFi Led Studio", "wifiledstudio.exe")
-            subprocess.call(path)
-        elif sys.platform == "darwin":
-            subprocess.run(['open', '/Applications/WiFi Led Studio.app'], check=True)
-        else:
-            subprocess.run(['open', '/Applications/WiFi Led Studio.app'], check=True)
+            self.stop(exit_code=4)
 
     def setup_icon_menu(self):
         import pystray
