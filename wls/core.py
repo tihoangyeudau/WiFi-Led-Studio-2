@@ -130,8 +130,7 @@ class WlsCore:
             subprocess.run(['open', '/Applications/Ambilight WiFi-USB.app'], check=True)
 
     def restart_wls(self):
-        if sys.platform == "win32":
-            self.stop(exit_code=4)
+        self.stop(exit_code=4)
 
     def setup_icon_menu(self):
         import pystray
