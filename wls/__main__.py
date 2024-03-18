@@ -33,12 +33,20 @@ from wls.consts import (
 from wls.core import WlsCore
 from wls.utils import currently_frozen, get_icon_path
 
-for process in psutil.process_iter():
-    try:
-        if process.name() == "ambilightwifi.exe":
-            process.terminate()
-    except psutil.NoSuchProcess:
-        pass
+if sys.platform == "win32":
+    for process in psutil.process_iter():
+        try:
+            if process.name() == "ambilightwifi.exe":
+                process.terminate()
+        except psutil.NoSuchProcess:
+            pass
+elif sys.platform == "darwin":
+    for process in psutil.process_iter():
+        try:
+            if process.name() == "Ambilight WiFi-USB.app":
+                process.terminate()
+        except psutil.NoSuchProcess:
+            pass
 
 def validate_python() -> None:
     """Validate the python version for when manually running"""
