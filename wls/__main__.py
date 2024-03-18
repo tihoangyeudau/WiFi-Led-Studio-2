@@ -43,7 +43,7 @@ if sys.platform == "win32":
 elif sys.platform == "darwin":
     for process in psutil.process_iter():
         try:
-            if process.name() == "Ambilight WiFi-USB.app":
+            if process.name() == "ambilightwifi":
                 process.terminate()
         except psutil.NoSuchProcess:
             pass
