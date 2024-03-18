@@ -146,11 +146,13 @@ class GradientEffect(Effect):
             pixels_to_roll = np.floor(self._gradient_roll_counter)
             self._gradient_roll_counter -= pixels_to_roll
 
-            self._gradient_curve = np.roll(
-                self._gradient_curve,
-                int(pixels_to_roll),
-                axis=1,
-            )
+            # Kiểm tra self._gradient_curve có là None hay không
+            if self._gradient_curve is not None and len(self._gradient_curve) > 1:
+                self._gradient_curve = np.roll(
+                    self._gradient_curve,
+                    int(pixels_to_roll),
+                    axis=1,
+                )
 
     def get_gradient_color(self, point):
         self._assert_gradient()
