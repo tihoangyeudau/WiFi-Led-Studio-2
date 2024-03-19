@@ -86,7 +86,7 @@ coll = COLLECT(exe,
                name='WiFi Led Studio',)
 app = BUNDLE(coll,
             name = 'WiFi Led Studio.app',
-            icon = '/Users/phamtuantrung/make setup/WiFi Led Studio.icns',
+            icon = '/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons/WiFi Led Studio.icns',
             bundle_identifier = 'com.rml.wls',
             info_plist = {
                 'NSHighResolutionCapable': 'True',
