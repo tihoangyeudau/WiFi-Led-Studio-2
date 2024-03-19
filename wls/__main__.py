@@ -253,7 +253,7 @@ def main():
     p = psutil.Process(os.getpid())
 
     # Check if open_ui flag is set to True
-    if args.open_ui or not args.no_ui:
+    if not args.no_tray:
         args.open_ui = True
 
     if psutil.WINDOWS:
