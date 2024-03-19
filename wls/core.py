@@ -127,7 +127,7 @@ class WlsCore:
             subprocess.call(path1)
 
         elif sys.platform == "darwin":
-            subprocess.run(['open', '/Applications/Ambilight WiFi-USB.app'], check=True)
+            subprocess.run(['open', '/Applications/ambilightwifi.app'], check=True)
 
     def restart_wls(self):
         self.stop(exit_code=4)

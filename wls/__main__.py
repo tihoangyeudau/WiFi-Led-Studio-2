@@ -252,6 +252,11 @@ def main():
     # Set some process priority optimisations
     p = psutil.Process(os.getpid())
 
+    if sys.platform == "darwin":
+        # Check if open_ui flag is set to True
+        if args.open_ui or not args.no_ui:
+            args.open_ui = True
+
     if psutil.WINDOWS:
         try:
             p.nice(psutil.HIGH_PRIORITY_CLASS)
