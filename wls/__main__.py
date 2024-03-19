@@ -252,10 +252,6 @@ def main():
     # Set some process priority optimisations
     p = psutil.Process(os.getpid())
 
-    # Check if open_ui flag is set to True
-    if not args.no_tray:
-        args.open_ui = True
-
     if psutil.WINDOWS:
         try:
             p.nice(psutil.HIGH_PRIORITY_CLASS)
