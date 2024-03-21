@@ -279,7 +279,10 @@ class WlsCore:
         await self.flush_loop()
 
     def stop(self, exit_code):
-        async_fire_and_forget(self.async_stop(exit_code), self.loop)
+        if self.loop and self.loop.is_running():
+            asyncio.run_coroutine_threadsafe(self.async_stop(exit_code), self.loop)
+        else:
+            self.exit_code = exit_code
 
     async def async_stop(self, exit_code):
         if not self.loop:
