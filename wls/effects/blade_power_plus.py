@@ -90,10 +90,15 @@ class BladePowerPlus(AudioReactiveEffect, HSVEffect, GradientEffect):
         self.power_func = self._power_funcs[self._config["frequency_range"]]
 
     def audio_data_updated(self, data):
-        # Get filtered bar power
-        self.bar = (
-            getattr(data, self.power_func)() * self._config["multiplier"] * 4
-        )
+        try:
+            bar_power = getattr(data, self.power_func)()
+            if isinstance(bar_power, (int, float)):
+                self.bar = bar_power * self._config["multiplier"] * 4
+            else:
+                self.bar = 0
+        except (ValueError, AttributeError):
+            # Xử lý trường hợp dữ liệu âm thanh đầu vào không hợp lệ
+            self.bar = 0
 
     def render_hsv(self):
         # Must be zeroed every cycle to clear the previous frame
