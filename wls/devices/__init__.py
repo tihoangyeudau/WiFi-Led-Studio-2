@@ -408,14 +408,12 @@ VERSION_ORDERS = ["Pro Max", "Pro", "Thường"]
 LED_ID_ORDERS = ["_Auto_"]
 MAX_RETRIES = 1  # Maximum number of reconnection attempts
 MANUFACTURERS = ['wch.cn', 'FTDI', 'Microsoft', 'Silicon Labs']
-if sys.platform == 'darwin':
-    undesired_port_names = ["tty", "modem"]
 
 def find_available_com_ports():
     if sys.platform == 'win32':
         return [port.device for port in serial.tools.list_ports.comports() if port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description]
     elif sys.platform == "darwin":
-        return [port.device for port in serial.tools.list_ports.comports() if all(name not in port.device for name in undesired_port_names)]
+        return [port.device for port in serial.tools.list_ports.comports() if port.name.startswith("/dev/cu.usbserial")]
 
 
 class AvailableCOMPorts:
