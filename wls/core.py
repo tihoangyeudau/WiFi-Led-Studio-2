@@ -6,6 +6,7 @@ import time
 import warnings
 import webbrowser
 import subprocess
+
 from concurrent.futures import ThreadPoolExecutor
 
 from wls.color import (
@@ -131,6 +132,10 @@ class WlsCore:
 
     def restart_wls(self):
         self.stop(exit_code=4)
+        # Gọi một tiến trình Python khác để khởi động lại ứng dụng
+        subprocess.Popen([sys.executable] + sys.argv)
+        # Kết thúc tiến trình hiện tại
+        sys.exit()
 
     def setup_icon_menu(self):
         import pystray

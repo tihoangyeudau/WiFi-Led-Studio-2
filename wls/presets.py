@@ -1824,4 +1824,5 @@ wls_presets = {
     "melt_and_sparkle": {"reset": {"config": {}, "name": "Đặt lại"}},
     "water": {"reset": {"config": {}, "name": "Đặt lại"}},
     "twinklefox": {"reset": {"config": {}, "name": "Đặt lại"}},
+    "vumetter": {"reset": {"config": {}, "name": "Đặt lại"}},
 }
