@@ -133,7 +133,7 @@ class WlsCore:
     def restart_wls(self):
         self.stop(exit_code=4)
         # Gọi một tiến trình Python khác để khởi động lại ứng dụng
-        subprocess.Popen([sys.executable] + sys.argv)
+        subprocess.Popen([sys.executable] + sys.argv[0:])
         # Kết thúc tiến trình hiện tại
         sys.exit()
 
