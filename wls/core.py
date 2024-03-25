@@ -154,7 +154,14 @@ class WlsCore:
     def restart_wls(self):
         if sys.platform == "win32":
             path2 = os.path.join(os.environ["ProgramFiles"], "WiFi Led Studio\\_internal\\", "restart.exe")
-            subprocess.call(path2)
+            
+            # Thiết lập STARTUPINFO để ẩn cửa sổ cmd
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            startupinfo.wShowWindow = subprocess.SW_HIDE  # SW_HIDE = 0
+            
+            # Chạy lệnh với STARTUPINFO
+            subprocess.Popen([path2, '--open-ui'], startupinfo=startupinfo)
         elif sys.platform == "darwin":
             self.stop(exit_code=4)
 
