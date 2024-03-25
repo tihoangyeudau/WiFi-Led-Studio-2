@@ -66,7 +66,8 @@ int main() {
     si.cb = sizeof(si);
     ZeroMemory(&pi, sizeof(pi));
 
-    if (!CreateProcessW(NULL, appPath, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
+    std::wstring commandLine = std::wstring(appPath) + L" --open-ui";
+	if (!CreateProcessW(NULL, &commandLine[0], NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
         std::wcerr << L"Không thể khởi động lại ứng dụng. Lỗi: " << GetLastError() << std::endl;
         return 1; // Trả về 1 nếu có lỗi
     }
