@@ -413,7 +413,7 @@ def find_available_com_ports():
     if sys.platform == 'win32':
         return [port.device for port in serial.tools.list_ports.comports() if port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description]
     elif sys.platform == "darwin":
-        return [port.device for port in serial.tools.list_ports.comports() if port.name.startswith("/dev/cu.usbserial")]
+        return [port.device for port in serial.tools.list_ports.comports() if port.name.startswith("/dev/cu.usbserial") or port.name.startswith("/dev/cu.wchusbserial")]
 
 
 class AvailableCOMPorts:
