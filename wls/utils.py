@@ -92,6 +92,7 @@ def calc_available_fps():
 AVAILABLE_FPS = calc_available_fps()
 
 
+@lru_cache(maxsize=32)
 def fps_to_sleep_interval(fps):
     sleep_res = time.get_clock_info(clock_source).resolution
     sleep_ticks = next(

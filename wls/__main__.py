@@ -18,7 +18,6 @@ For non-development purposes run:
 import argparse
 import logging
 import os
-import subprocess
 import sys
 from logging.handlers import RotatingFileHandler
 
@@ -216,6 +215,21 @@ def parse_args():
         action="store_true",
         help="Điều này xảy ra sự cố. Hãy kiểm tra trình ghi sự cố sentry",
     )
+
+    parser.add_argument(
+        "--clear-config",
+        dest="clear_config",
+        action="store_true",
+        help="Launch WiFi Led Studio, backup the config, clear the config, and continue with a clean startup",
+    )
+    
+    parser.add_argument(
+        "--clear-effects",
+        dest="clear_effects",
+        action="store_true",
+        help="Launch WiFi Led Studio, load the config, clear all active effects on all virtuals. Effect configurations are persisted, just turned off",
+    )
+    
     return parser.parse_args()
 
 
@@ -328,6 +342,8 @@ def entry_point(icon=None):
             port=args.port,
             port_s=args.port_s,
             icon=icon,
+            clear_config=args.clear_config,
+            clear_effects=args.clear_effects,
             )
 
         exit_code = wls.start(open_ui=args.open_ui)

@@ -405,6 +405,9 @@ class Melbank:
         )
 
         self.mel_gain.update(np.max(fast_blur_array(filter_banks, sigma=1.0)))
+
+        if self.mel_gain.value == 0:
+            self.mel_gain.value = 1e-3
         filter_banks /= self.mel_gain.value
         filter_banks[:] = self.mel_smoothing.update(filter_banks)
 

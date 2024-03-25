@@ -5,10 +5,11 @@ spec_root = os.path.abspath(SPECPATH)
 datas = [
          (f'C:/Users/tuant/AppData/Local/Programs/Python/Python311/Scripts/build/exe.win-amd64-3.11/lib/wls','wls/'),
          (f'C:/Users/tuant/AppData/Local/Programs/Python/Python311/Scripts/build/exe.win-amd64-3.11/lib/wls_frontend','wls_frontend/'),
-         (f'C:/Users/tuant/AppData/Local/Programs/Python/Python311/Scripts/build/exe.win-amd64-3.11/lib/samplerate','samplerate/'),
+         (f'F:/Documents/GitHub/WiFi-Led-Studio-2/restart.exe','.'),
          (f'C:/Users/tuant/AppData/Local/Programs/Python/Python311/Scripts/build/exe.win-amd64-3.11/lib/xyzservices','xyzservices/'),
          (f'C:/Users/tuant/AppData/Local/Programs/Python/Python311/Scripts/build/exe.win-amd64-3.11/lib/stupidArtnet','stupidArtnet/'),
-         (f'{spec_root}/icons','icons/'), (f'{spec_root}/icons/tray.png','.')
+         (f'{spec_root}/icons','icons/'),
+         (f'{spec_root}/icons/tray.png','.')
       ]
 datas += copy_metadata('bokeh')
 
@@ -36,8 +37,6 @@ a = Analysis([f'{spec_root}\\wls\\__main__.py'],
                            "openrgb",
                            "paho.mqtt.client",
                            "samplerate",
-                           "samplerate._src",
-                           "samplerate._samplerate_data",
                            "sounddevice",
                            "_sounddevice_data",
                            "sentry_sdk",

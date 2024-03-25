@@ -17,7 +17,7 @@ from wls.color import (
     validate_color,
     validate_gradient,
 )
-from wls.config import get_ssl_certs, load_config, save_config
+from wls.config import get_ssl_certs, create_backup, load_config, remove_virtuals_active_effects, save_config
 from wls.devices import Devices
 from wls.effects import Effects
 from wls.effects.math import interpolate_pixels
@@ -46,6 +46,15 @@ if currently_frozen():
 
 
 class WlsCore:
+
+    EXIT_CODES = {
+        1: "WiFi Led Studio encountered an error - Shutting down.",
+        2: "Keyboard interrupt - Shutting down.",
+        3: "Shutdown request via API - Shutting down.",
+        4: "Restart request via API - Restarting.",
+        5: "Shutdown request via CI testing flag - Shutting down.",
+    }
+
     def __init__(
         self,
         config_dir,
@@ -53,10 +62,22 @@ class WlsCore:
         port=None,
         port_s=None,
         icon=None,
+        clear_config=False,
+        clear_effects=False,
     ):
         self.icon = icon
         self.config_dir = config_dir
+
+        if clear_config:
+            _LOGGER.warning("Clearing WiFi Led Studio config.")
+            create_backup(config_dir, "DELETE")
+
         self.config = load_config(config_dir)
+
+        if clear_effects:
+            _LOGGER.warning("Clearing active effects.")
+            remove_virtuals_active_effects(self.config)
+
         self.config["wls_presets"] = wls_presets
         self.host = host if host else self.config["host"]
         self.port = port if port else self.config["port"]
@@ -131,16 +152,20 @@ class WlsCore:
             subprocess.run(['open', '/Applications/ambilightwifi.app'], check=True)
 
     def restart_wls(self):
-        self.stop(exit_code=4)
+        if sys.platform == "win32":
+            path2 = os.path.join(os.environ["ProgramFiles"], "WiFi Led Studio\\_internal\\", "restart.exe")
+            subprocess.call(path2)
+        elif sys.platform == "darwin":
+            self.stop(exit_code=4)
 
     def setup_icon_menu(self):
         import pystray
 
         self.icon.menu = pystray.Menu(
-            pystray.MenuItem("Mở", self.open_ui, default=True),
-            pystray.MenuItem("Theo màu màn hình", self.open_app),
-            pystray.MenuItem("Khởi động lại", self.restart_wls),
-            pystray.MenuItem("Thoát", self.stop),
+            pystray.MenuItem("Mở trang điều khiển | Open Web-App", self.open_ui, default=True),
+            pystray.MenuItem("Theo màu màn hình | Screen capture", self.open_app),
+            pystray.MenuItem("Khởi động lại | Restart", self.restart_wls),
+            pystray.MenuItem("Thoát | Quit", self.stop),
         )
 
 
@@ -286,44 +311,44 @@ class WlsCore:
         if not self.loop:
             return
 
-        print("Dừng WiFi Led Studio.")
+        print("Stopping WiFi Led Studio.")
+        try:
+            _LOGGER.info(self.EXIT_CODES.get(exit_code, "Unknown exit code."))
+            # Fire a shutdown event
+            self.events.fire_event(WlsShutdownEvent())
+            _LOGGER.info("Stopping HTTP Server...")
+            await self.http.stop()
 
-        # 1 = Error
-        # 2 = Direct User Input
-        # 3 = API Request (shutdown)
-        # 4 = Restart (stop then restart wls core)
+            # Cancel all the remaining task and wait
+            tasks = [
+                task
+                for task in asyncio.all_tasks()
+                if task is not asyncio.current_task()
+            ]
+            if tasks:
+                _LOGGER.debug(
+                    f"Killing {len(tasks)} tasks prior to shutdown..."
+                )
+                # Cancel all tasks concurrently
+                group = asyncio.gather(*tasks, return_exceptions=True)
+                group.cancel()
+                # Wait for all tasks to be cancelled
+                try:
+                    await group
+                except asyncio.CancelledError:
+                    pass
+                _LOGGER.debug("All tasks killed.")
+            # Save the configuration before shutting down
+            save_config(config=self.config, config_dir=self.config_dir)
 
-        if exit_code == 1:
-            _LOGGER.info("Đã gặp lỗi. Đang Tắt.")
-        if exit_code == 2:
-            _LOGGER.info("Bàn phím WiFi Led Studio bị gián đoạn. Đang Tắt.")
-        if exit_code == 3:
-            _LOGGER.info("Yêu cầu tắt WiFi Led Studio thông qua API. Đang Tắt.")
-        if exit_code == 4:
-            _LOGGER.info("WiFi Led Studio đang khởi động lại.")
+        except Exception as e:
+            _LOGGER.error(f"An error occurred while stopping: {e}")
+            self.exit_code = 1
 
-        # Fire a shutdown event and flush the loop
-        self.events.fire_event(WlsShutdownEvent())
-        await asyncio.sleep(0)
-        await self.zeroconf.async_close()
-        _LOGGER.info("Dừng HttpServer...")
-        await self.http.stop()
-
-        # Cancel all the remaining task and wait
-        _LOGGER.info("Buộc tắt các nhiệm vụ còn lại...")
-        tasks = [
-            task
-            for task in asyncio.all_tasks()
-            if task is not asyncio.current_task()
-        ]
-        list(map(lambda task: task.cancel(), tasks))
-
-        # Save the configuration before shutting down
-        save_config(config=self.config, config_dir=self.config_dir)
-
-        _LOGGER.info("Flushing loop...")
-        await self.flush_loop()
-        self.thread_executor.shutdown()
-        self.exit_code = exit_code
-        self.loop.stop()
-        return exit_code
+        finally:
+            self.thread_executor.shutdown()
+            # Don't overwrite error exit code
+            if self.exit_code != 1:
+                self.exit_code = exit_code
+            self.loop.stop()
+            return exit_code 
