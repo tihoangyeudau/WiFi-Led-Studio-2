@@ -146,7 +146,11 @@ class WlsCore:
     def open_app(self):
         if sys.platform == "win32":
             path1 = os.path.join(os.environ["ProgramFiles"], "Ambilight WiFi-USB\\bin", "ambilightwifi.exe")
-            subprocess.call(path1)
+            # Thiết lập STARTUPINFO để ẩn cửa sổ cmd
+            startupinfo = subprocess.STARTUPINFO()
+            
+            # Chạy lệnh với STARTUPINFO
+            subprocess.Popen([path1], startupinfo=startupinfo)
 
         elif sys.platform == "darwin":
             subprocess.run(['open', '/Applications/ambilightwifi.app'], check=True)
@@ -161,7 +165,7 @@ class WlsCore:
             startupinfo.wShowWindow = subprocess.SW_HIDE  # SW_HIDE = 0
             
             # Chạy lệnh với STARTUPINFO
-            subprocess.Popen([path2, '--open-ui'], startupinfo=startupinfo)
+            subprocess.Popen([path2], startupinfo=startupinfo)
         elif sys.platform == "darwin":
             self.stop(exit_code=4)
 
