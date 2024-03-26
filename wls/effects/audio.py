@@ -41,12 +41,19 @@ class AudioInputSource:
     @staticmethod
     def update_default_loopback_index():
         global default_loopback_index
+
+        sd._terminate()
+        sd._initialize()
+
         default_output = sd.query_devices(sd.default.device[1])['name']
-        for i in range(0, len(sd.query_devices())):
-            device_name = sd.query_devices(i)['name']
+        for i, device in enumerate(sd.query_devices()):
+            device_name = device['name']
             if (default_output in device_name) and (default_output != device_name):
                 default_loopback_index = i
-        print(f"Đã tìm được thiết bị thu âm loopback mặc định số: {default_loopback_index}")
+                break  # Thoát khỏi vòng lặp sau khi tìm thấy thiết bị phù hợp
+        else:
+            # Nếu không tìm thấy thiết bị nào phù hợp, có thể cần xử lý thêm
+            _LOGGER.warning("Không tìm thấy thiết bị loopback mặc định phù hợp.")
     
     @staticmethod
     def device_index_validator(val):

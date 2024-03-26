@@ -156,18 +156,7 @@ class WlsCore:
             subprocess.run(['open', '/Applications/ambilightwifi.app'], check=True)
 
     def restart_wls(self):
-        if sys.platform == "win32":
-            path2 = os.path.join(os.environ["ProgramFiles"], "WiFi Led Studio\\_internal\\", "restart.exe")
-            
-            # Thiết lập STARTUPINFO để ẩn cửa sổ cmd
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-            startupinfo.wShowWindow = subprocess.SW_HIDE  # SW_HIDE = 0
-            
-            # Chạy lệnh với STARTUPINFO
-            subprocess.Popen([path2], startupinfo=startupinfo)
-        elif sys.platform == "darwin":
-            self.stop(exit_code=4)
+        self.stop(exit_code=4)
 
     def setup_icon_menu(self):
         import pystray
