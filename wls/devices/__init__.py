@@ -411,9 +411,9 @@ MANUFACTURERS = ['wch.cn', 'FTDI', 'Microsoft', 'Silicon Labs']
 
 def find_available_com_ports():
     if sys.platform == 'win32':
-        return [port.device for port in serial.tools.list_ports.comports() if port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description]
+        return [port.device for port in serial.tools.list_ports.comports() if (port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description)]
     elif sys.platform == "darwin":
-        return [port.device for port in serial.tools.list_ports.comports() if port.name.startswith("/dev/cu.usbserial") or port.name.startswith("/dev/cu.wchusbserial")]
+        return [port.device for port in serial.tools.list_ports.comports() if ("cu.usbserial" in port.name or "cu.wchusbserial" in port.name)]
 
 
 class AvailableCOMPorts:
@@ -493,7 +493,7 @@ class SerialDevice(Device):
                 if sys.platform == 'win32':
                     available_ports = [port for port in serial.tools.list_ports.comports() if (port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description)]
                 else:
-                    available_ports = [port for port in serial.tools.list_ports.comports() if all(name not in port.device for name in undesired_port_names)]
+                    available_ports = [port for port in serial.tools.list_ports.comports() if ("cu.usbserial" in port.name or "cu.wchusbserial" in port.name)]
                 for port in available_ports:
                     if port.device:  # Bỏ qua giá trị None
                         self.com_port = port.device
@@ -529,7 +529,7 @@ class SerialDevice(Device):
         if sys.platform == 'win32':
             available_ports = [port for port in serial.tools.list_ports.comports() if (port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description)]
         else:
-            available_ports = [port for port in serial.tools.list_ports.comports() if all(name not in port.device for name in undesired_port_names)]
+            available_ports = [port for port in serial.tools.list_ports.comports() if ("cu.usbserial" in port.name or "cu.wchusbserial" in port.name)]
         for port in available_ports:
             connected = self.try_connect_to_com_port(port.device)
             if connected:
