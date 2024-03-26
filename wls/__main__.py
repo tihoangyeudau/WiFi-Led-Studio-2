@@ -22,6 +22,7 @@ import sys
 from logging.handlers import RotatingFileHandler
 
 import psutil
+import sounddevice as sd
 
 import wls.config as config_helpers
 from wls.consts import (
@@ -335,6 +336,9 @@ def entry_point(icon=None):
     exit_code = 4
     while exit_code == 4:
         _LOGGER.info("Lõi WiFi Led Studio đang khởi tạo")
+               
+        sd._terminate()
+        sd._initialize()
 
         wls = WlsCore(
             config_dir=args.config,

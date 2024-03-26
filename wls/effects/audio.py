@@ -41,10 +41,6 @@ class AudioInputSource:
     @staticmethod
     def update_default_loopback_index():
         global default_loopback_index
-
-        sd._terminate()
-        sd._initialize()
-
         default_output = sd.query_devices(sd.default.device[1])['name']
         for i, device in enumerate(sd.query_devices()):
             device_name = device['name']
