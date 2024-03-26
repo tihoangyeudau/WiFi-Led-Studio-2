@@ -41,12 +41,12 @@ class AudioInputSource:
     @staticmethod
     def update_default_loopback_index():
         global default_loopback_index
-        if sys.platform == 'win32':
-            default_output = sd.query_devices(sd.default.device[1])['name']
-            for i in range(0, len(sd.query_devices())):
-                device_name = sd.query_devices(i)['name']
-                if (default_output in device_name) and (default_output != device_name):
-                    default_loopback_index = i
+        default_output = sd.query_devices(sd.default.device[1])['name']
+        for i in range(0, len(sd.query_devices())):
+            device_name = sd.query_devices(i)['name']
+            if (default_output in device_name) and (default_output != device_name):
+                default_loopback_index = i
+        print(f"Đã tìm được thiết bị thu âm loopback mặc định số: {default_loopback_index}")
     
     @staticmethod
     def device_index_validator(val):
@@ -72,10 +72,28 @@ class AudioInputSource:
             raise Exception(msg)
         else:
             # Gọi phương thức để cập nhật default_loopback_index
-            AudioInputSource.update_default_loopback_index()
-            
             if sys.platform == 'win32':
+                AudioInputSource.update_default_loopback_index()
                 return default_loopback_index
+            elif sys.platform == 'darwin':
+                # Logic mới cho macOS sử dụng regex để tìm kiếm dựa trên tên
+                devices = sd.query_devices()
+                matching_devices = []
+                # Chuẩn bị mẫu regex cho "microphone" và "built-in"
+                microphone_pattern = re.compile(r'microphone', re.IGNORECASE)
+
+                for i, device in enumerate(devices):
+                    if (device['max_input_channels'] > 0 and microphone_pattern.search(device['name'])):
+                        matching_devices.append(i)
+                
+                if matching_devices:
+                    # Chọn thiết bị cuối cùng trong danh sách các thiết bị phù hợp
+                    default_device_index = matching_devices[-1]
+                else:
+                    _LOGGER.warning("Không tìm thấy microphone built-in. Đầu vào âm thanh sẽ không khả dụng.")
+                    default_device_index = None
+
+                return default_device_index
             else:
                 return len(AudioInputSource.query_devices()) - 1
 
@@ -111,26 +129,21 @@ class AudioInputSource:
     @staticmethod
     @property
     def AUDIO_CONFIG_SCHEMA():
-        default_device_index = AudioInputSource.default_device_index()
         if sys.platform == 'win32':
             return vol.Schema(
                 {
                     vol.Optional("sample_rate", default=60): int,
                     vol.Optional("fft_size", default=FFT_SIZE): int,
-                    vol.Optional(
-                        "audio_device", default=default_device_index
-                    ): int,
                 },
                 extra=vol.ALLOW_EXTRA,
             )
-        else:
+        elif sys.platform == 'darwin':
+            default_device_index = AudioInputSource.default_device_index()
             return vol.Schema(
                 {
                     vol.Optional("sample_rate", default=60): int,
                     vol.Optional("fft_size", default=FFT_SIZE): int,
-                    vol.Optional(
-                        "audio_device", default=default_device_index
-                    ): AudioInputSource.device_index_validator,
+                    vol.Optional("audio_device", default=default_device_index): AudioInputSource.device_index_validator,
                 },
                 extra=vol.ALLOW_EXTRA,
             )
@@ -150,24 +163,26 @@ class AudioInputSource:
 
     def update_config(self, config):
         """Deactivate the audio, update the config, the reactivate"""
-        old_input_device = False
-        if hasattr(self, "_config"):
-            old_input_device = self._config["audio_device"]
-
+        if not sys.platform == 'win32':
+            old_input_device = False
+            if hasattr(self, "_config"):
+                old_input_device = self._config["audio_device"]
         if self._is_activated:
             self.deactivate()
         self._config = self.AUDIO_CONFIG_SCHEMA.fget()(config)
         if len(self._callbacks) != 0:
             self.activate()
-        if (
-            old_input_device
-            and self._config["audio_device"] is not old_input_device
-        ):
-            self._wls.events.fire_event(
-                AudioDeviceChangeEvent(
-                    self.input_devices()[self._config["audio_device"]]
+        if not sys.platform == 'win32':
+            if (
+                old_input_device
+                and self._config["audio_device"] is not old_input_device
+            ):
+                self._wls.events.fire_event(
+                    AudioDeviceChangeEvent(
+                        self.input_devices()[self._config["audio_device"]]
+                    )
                 )
-            )
+        self._wls.config["audio"] = self._config
 
     def activate(self):
 
@@ -184,12 +199,12 @@ class AudioInputSource:
         hostapis = self.query_hostapis()
         default_device = self.default_device_index()
         valid_device_indexes = self.valid_device_indexes()
-        device_idx = self._config["audio_device"]
+
         
         if sys.platform == 'win32':
-            if max(valid_device_indexes) is not max(valid_device_indexes):
-                device_idx = default_device
+            device_idx = default_device
         else:
+            device_idx = self._config["audio_device"]
             if device_idx > max(valid_device_indexes):
                 _LOGGER.warning(
                     f"Chỉ mục thiết bị âm thanh không hợp lệ: {device_idx}. Hoàn nguyên về thiết bị đầu vào mặc định."

@@ -336,9 +336,10 @@ def migrate_config(old_config):
 
     new_config = copy.deepcopy(old_config)
 
-    # if not using new config "audio_device", delete audio config
-    if not old_config.get("audio", {}).get("audio_device", None):
-        new_config.pop("audio", None)
+    if not sys.platform == 'win32':
+        # if not using new config "audio_device", delete audio config
+        if not old_config.get("audio", {}).get("audio_device", None):
+            new_config.pop("audio", None)
 
     # remove old transition things
     new_config.pop("crossfade", None)

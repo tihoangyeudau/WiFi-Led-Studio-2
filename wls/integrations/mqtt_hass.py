@@ -1,6 +1,7 @@
 import json
 import logging
 import socket
+import sys
 
 import paho.mqtt.client as mqtt
 import voluptuous as vol
@@ -450,15 +451,16 @@ class MQTT_HASS(Integration):
                     f"{self._config['topic']}/switch/wlsplay/state",
                     paused_state,
                 )
-                # AudioSelector
-                client.publish(
-                    f"{self._config['topic']}/select/wlsaudio/state",
-                    AudioInputSource.input_devices()[
-                        self._wls.config.get("audio", {}).get(
-                            "audio_device", {}
-                        )
-                    ],
-                )
+                if not sys.platform == 'win32':
+                    # AudioSelector
+                    client.publish(
+                        f"{self._config['topic']}/select/wlsaudio/state",
+                        AudioInputSource.input_devices()[
+                            self._wls.config.get("audio", {}).get(
+                                "audio_device", {}
+                            )
+                        ],
+                    )
                 # Pixel-Sensor
                 client.publish(
                     f"{self._config['topic']}/sensor/wlspixelsensor/state",
@@ -526,7 +528,8 @@ class MQTT_HASS(Integration):
                         index = key
 
                 new_config = self._wls.config.get("audio", {})
-                new_config["audio_device"] = int(index)
+                if not sys.platform == 'win32':
+                    new_config["audio_device"] = int(index)
                 self._wls.config["audio"] = new_config
                 save_config(
                     config=self._wls.config,
