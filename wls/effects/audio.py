@@ -2,6 +2,7 @@ import logging
 import threading
 import time
 import sys
+import re
 from collections import deque
 from functools import cached_property, lru_cache
 
@@ -93,7 +94,7 @@ class AudioInputSource:
                     # Chọn thiết bị cuối cùng trong danh sách các thiết bị phù hợp
                     default_device_index = matching_devices[-1]
                 else:
-                    _LOGGER.warning("Không tìm thấy microphone built-in. Đầu vào âm thanh sẽ không khả dụng.")
+                    _LOGGER.warning("Không tìm thấy microphone. Đầu vào âm thanh sẽ không khả dụng.")
                     default_device_index = None
 
                 return default_device_index
