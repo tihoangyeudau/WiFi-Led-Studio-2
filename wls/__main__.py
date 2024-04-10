@@ -21,6 +21,8 @@ import os
 import sys
 from logging.handlers import RotatingFileHandler
 
+from wls.effects.audio import AudioAnalysisSource
+
 import psutil
 import sounddevice as sd
 
@@ -210,11 +212,19 @@ def parse_args():
         action="store_true",
         help="Tắt cập nhật tự động và trình ghi sự cố sentry",
     )
+
     parser.add_argument(
         "--sentry-crash-test",
         dest="sentry_test",
         action="store_true",
         help="Điều này xảy ra sự cố. Hãy kiểm tra trình ghi sự cố sentry",
+    )
+
+    parser.add_argument(
+        "--ci-smoke-test",
+        dest="ci_smoke_test",
+        action="store_true",
+        help="Launch WiFi Led Studio and then exit after 5 seconds to sanity check the install",
     )
 
     parser.add_argument(
@@ -296,15 +306,32 @@ def main():
         """This will crash Wls and submit a Sentry error if Sentry is configured"""
         _LOGGER.warning("Chỉ đạo WiFi Led Studio vào một bức tường gạch")
         div_by_zero = 1 / 0
+
+    # Check if there are any audio input devices and quit if there are none.
+    # TODO: Review the sentry hits for this logger statement and see if it's worth supporting without a mic.
+    # NOTE: We don't do this in CI - some runners don't have audio devices.
+    if (
+        (sd.default.device[1] == -1
+        or AudioAnalysisSource.audio_input_device_exists() is False)
+        and args.ci_smoke_test is False
+    ):
+        _LOGGER.critical(
+            "Không tìm thấy loa. Vui lòng kết nối loa và khởi động lại ứng dụng."
+        )
+        # Exit with code 2 to indicate that there are no audio input devices.
+        sys.exit(2)
+
     if (args.tray or currently_frozen()) and not args.no_tray:
         # If pystray is imported on a device that can't display it, it explodes. Catch it
         try:
             import pystray
         except Exception as Error:
-            msg = f"Lỗi: Không thể biểu tượng khay. Đang Tắt. Lỗi: {Error}"
+            msg = f"Error: Unable to virtual tray icon. Shutting down. Error: {Error}"
+            msg = f"Unable to create tray icon. Error: {Error}. Try launching LedFx via --no-tray option."
             _LOGGER.critical(msg)
-            raise Exception(msg)
             sys.exit(0)
+            # Exit with code 3 to indicate that there was an error creating the tray icon.
+            sys.exit(3)
 
         from PIL import Image
 
@@ -346,6 +373,7 @@ def entry_point(icon=None):
             port=args.port,
             port_s=args.port_s,
             icon=icon,
+            ci_testing=args.ci_smoke_test,
             clear_config=args.clear_config,
             clear_effects=args.clear_effects,
             )

@@ -2,7 +2,6 @@ import logging
 import threading
 import time
 import sys
-import re
 from collections import deque
 from functools import cached_property, lru_cache
 
@@ -50,7 +49,7 @@ class AudioInputSource:
                 break  # Thoát khỏi vòng lặp sau khi tìm thấy thiết bị phù hợp
         else:
             # Nếu không tìm thấy thiết bị nào phù hợp, có thể cần xử lý thêm
-            _LOGGER.warning("Không tìm thấy thiết bị loopback mặc định phù hợp.")
+            _LOGGER.warning("Không tìm thấy thiết bị loopback")
     
     @staticmethod
     def device_index_validator(val):
@@ -68,38 +67,61 @@ class AudioInputSource:
         A list of integers corresponding to valid input devices
         """
         return tuple(AudioInputSource.input_devices().keys())
+    
+    @staticmethod
+    def audio_input_device_exists():
+        """
+        Returns True if there are valid input devices
+        """
+        return len(AudioInputSource.valid_device_indexes()) > 0
   
     @staticmethod
     def default_device_index():
-        if (sd.default.device[1] == -1):
-            msg = f"Không tìm thấy loa, hãy đảm bảo bạn đã kết nối loa với máy tính hoặc ko vô hiệu hoá soundcard!"
-            raise Exception(msg)
-        else:
-            # Gọi phương thức để cập nhật default_loopback_index
-            if sys.platform == 'win32':
-                AudioInputSource.update_default_loopback_index()
-                return default_loopback_index
-            elif sys.platform == 'darwin':
-                # Logic mới cho macOS sử dụng regex để tìm kiếm dựa trên tên
-                devices = sd.query_devices()
-                matching_devices = []
-                # Chuẩn bị mẫu regex cho "microphone" và "built-in"
-                microphone_pattern = re.compile(r'microphone', re.IGNORECASE)
-
-                for i, device in enumerate(devices):
-                    if (device['max_input_channels'] > 0 and microphone_pattern.search(device['name'])):
-                        matching_devices.append(i)
-                
-                if matching_devices:
-                    # Chọn thiết bị cuối cùng trong danh sách các thiết bị phù hợp
-                    default_device_index = matching_devices[-1]
-                else:
-                    _LOGGER.warning("Không tìm thấy microphone. Đầu vào âm thanh sẽ không khả dụng.")
-                    default_device_index = None
-
-                return default_device_index
+        if sys.platform == 'win32':
+            AudioInputSource.update_default_loopback_index()
+            return default_loopback_index
+        elif sys.platform == 'darwin':
+            """
+            Finds the WASAPI loopback device index of the default output device if it exists
+            If it does not exist, return the default input device index
+            Returns:
+                integer: the sounddevice device index to use for audio input
+            """
+            device_list = sd.query_devices()
+            default_output_device = sd.default.device["output"]
+            # target device should be the name of the default_output device plus " [Loopback]"
+            target_device = (
+                f"{device_list[default_output_device]['name']} [Loopback]"
+            )
+            # We need to run over the device list looking for the target device
+            # NOTE: Some sound drivers truncate the device name, so we may not find a match
+            for device_index, device in enumerate(device_list):
+                if device["name"] == target_device:
+                    # Return the loopback device index
+                    _LOGGER.debug(
+                        f"Default audio loopback device found: {device['name']}"
+                    )
+                    return device_index
+            # If we don't match a Loopback device matching output found - return the default input device index
+            default_input_device_idx = sd.default.device["input"]
+            # The default input device index is not always valid (i.e no default input devices)
+            if default_input_device_idx in AudioInputSource.valid_device_indexes():
+                _LOGGER.debug(
+                    "No default audio loopback device found. Using default input device."
+                )
+                return default_input_device_idx
             else:
-                return len(AudioInputSource.query_devices()) - 1
+                # Return the first valid input device index if we can't find a valid default input device
+                if len(AudioInputSource.valid_device_indexes()) > 0:
+                    _LOGGER.debug(
+                        "No valid default audio input device found. Using first valid input device."
+                    )
+                    return next(iter(AudioInputSource.valid_device_indexes()))
+                else:
+                    _LOGGER.warning(
+                        "No valid audio input devices found. Unable to use audio reactive effects."
+                    )
+                    return None
 
     @staticmethod
     def query_hostapis():
@@ -202,6 +224,15 @@ class AudioInputSource:
         input_devices = self.query_devices()
         hostapis = self.query_hostapis()
         default_device = self.default_device_index()
+        if default_device is None:
+            # There are no valid audio input devices, so we can't activate the audio source.
+            # We should never get here, as we check for devices on start-up.
+            # This likely just captures if a device is removed after start-up.
+            _LOGGER.warning(
+                "Không tìm thấy loa. Không thể kích hoạt nguồn âm thanh. Đang vô hiệu hoá."
+            )
+            self.deactivate()
+            return
         valid_device_indexes = self.valid_device_indexes()
 
         

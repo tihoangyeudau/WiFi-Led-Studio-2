@@ -62,6 +62,7 @@ class WlsCore:
         port=None,
         port_s=None,
         icon=None,
+        ci_testing=False,
         clear_config=False,
         clear_effects=False,
     ):
@@ -82,7 +83,7 @@ class WlsCore:
         self.host = host if host else self.config["host"]
         self.port = port if port else self.config["port"]
         self.port_s = port_s if port_s else self.config["port_s"]
-
+        self.ci_testing = ci_testing
         if sys.platform == "win32":
             self.loop = asyncio.ProactorEventLoop()
         else:
@@ -301,6 +302,10 @@ class WlsCore:
 
         if open_ui:
             self.open_ui()
+
+        if self.ci_testing:
+            await asyncio.sleep(5)
+            self.stop(5)
 
         await self.flush_loop()
 

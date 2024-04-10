@@ -215,6 +215,7 @@ def ensure_config_directory(config_dir: str) -> None:
                     config_dir
                 )
             )
+            # Exit with code 1 to indicate that there was an error creating the configuration directory.
             sys.exit(1)
 
 
