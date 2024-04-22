@@ -854,13 +854,14 @@ class AudioReactiveEffect(Effect):
     @cached_property
     def _melbank_min_idx(self):
         return next(
-            idx
-            for idx, freq in enumerate(
+            (idx
+             for idx, freq in enumerate(
                 self.audio.melbanks.melbank_processors[
                     self._selected_melbank
                 ].melbank_frequencies
             )
-            if freq >= self._virtual.frequency_range.min
+            if freq >= self._virtual.frequency_range.min),
+            None
         )
 
     @cached_property
