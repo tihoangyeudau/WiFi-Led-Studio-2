@@ -8,7 +8,7 @@ from wls.effects.hsv_effect import HSVEffect
 class Energy2(AudioReactiveEffect, HSVEffect):
 
     NAME = "Năng lượng 2"
-    CATEGORY = "Áp suất"
+    CATEGORY = "2. Hiệu ứng nháy theo nhạc"
 
     CONFIG_SCHEMA = vol.Schema(
         {

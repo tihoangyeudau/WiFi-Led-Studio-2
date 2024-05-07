@@ -7,7 +7,7 @@ from wls.effects.temporal import TemporalEffect
 class RainbowEffect(TemporalEffect):
 
     NAME = "Cầu vồng"
-    CATEGORY = "Không nháy theo nhạc"
+    CATEGORY = "1. Hiệu ứng màu"
 
     CONFIG_SCHEMA = vol.Schema(
         {

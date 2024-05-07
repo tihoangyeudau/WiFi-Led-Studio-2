@@ -10,7 +10,7 @@ from wls.effects.hsv_effect import HSVEffect
 class Fire(AudioReactiveEffect, HSVEffect):
 
     NAME = "Lửa"
-    CATEGORY = "Dạng áp suất"
+    CATEGORY = "2. Hiệu ứng nháy theo nhạc"
 
     CONFIG_SCHEMA = vol.Schema(
         {

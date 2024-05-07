@@ -7,7 +7,7 @@ from wls.effects.gradient import GradientEffect
 class MagnitudeAudioEffect(AudioReactiveEffect, GradientEffect):
 
     NAME = "Độ lớn"
-    CATEGORY = "Cổ điển"
+    CATEGORY = "2. Hiệu ứng nháy theo nhạc"
 
     _power_funcs = {
         "Nhịp": "beat_power",

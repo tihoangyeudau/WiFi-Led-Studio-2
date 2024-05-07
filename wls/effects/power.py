@@ -9,7 +9,7 @@ from wls.effects.gradient import GradientEffect
 class PowerAudioEffect(AudioReactiveEffect, GradientEffect):
 
     NAME = "Sức mạnh"
-    CATEGORY = "Cổ điển"
+    CATEGORY = "2. Hiệu ứng nháy theo nhạc"
 
     CONFIG_SCHEMA = vol.Schema(
         {

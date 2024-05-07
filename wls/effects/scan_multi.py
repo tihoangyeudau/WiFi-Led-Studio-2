@@ -40,7 +40,7 @@ class Scan:
 
 class ScanMultiAudioEffect(AudioReactiveEffect, GradientEffect):
     NAME = "Đa quét"
-    CATEGORY = "Cổ điển"
+    CATEGORY = "2. Hiệu ứng nháy theo nhạc"
     HIDDEN_KEYS = ["gradient_roll"]
     ADVANCED_KEYS = ["input_source", "attack", "decay", "filter"]
 

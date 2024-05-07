@@ -11,7 +11,7 @@ from wls.effects.hsv_effect import HSVEffect
 # rewritten in a manner suited to a machine with numpy and more RAM and CPU than a microcontroller
 class Twinklefox(AudioReactiveEffect, HSVEffect):
     NAME = "Lấp lánh"
-    CATEGORY = "Dạng áp suất"
+    CATEGORY = "2. Hiệu ứng nháy theo nhạc"
 
     _power_funcs = {
         "Nhịp": "beat_power",

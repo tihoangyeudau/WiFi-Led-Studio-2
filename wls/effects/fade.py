@@ -11,7 +11,7 @@ class FadeEffect(TemporalEffect, GradientEffect):
     """
 
     NAME = "Phai màu"
-    CATEGORY = "Không nháy theo nhạc"
+    CATEGORY = "1. Hiệu ứng màu"
 
     CONFIG_SCHEMA = vol.Schema(
         {

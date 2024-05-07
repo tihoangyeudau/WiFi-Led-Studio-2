@@ -9,7 +9,7 @@ from wls.effects.gradient import GradientEffect
 class PitchSpectrumAudioEffect(AudioReactiveEffect, GradientEffect):
 
     NAME = "Tần số quang phổ"
-    CATEGORY = "Cổ điển"
+    CATEGORY = "2. Hiệu ứng nháy theo nhạc"
 
     CONFIG_SCHEMA = vol.Schema(
         {

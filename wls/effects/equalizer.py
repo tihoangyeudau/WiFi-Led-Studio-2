@@ -8,7 +8,7 @@ from wls.effects.gradient import GradientEffect
 class EQAudioEffect(AudioReactiveEffect, GradientEffect):
 
     NAME = "Bộ chỉnh âm"
-    CATEGORY = "2D"
+    CATEGORY = "2. Hiệu ứng nháy theo nhạc"
 
     CONFIG_SCHEMA = vol.Schema(
         {

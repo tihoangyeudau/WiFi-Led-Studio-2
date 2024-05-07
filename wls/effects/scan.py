@@ -11,7 +11,7 @@ from wls.effects.modulate import ModulateEffect
 
 class ScanAudioEffect(AudioReactiveEffect, GradientEffect, ModulateEffect):
     NAME = "Đơn quét"
-    CATEGORY = "Cổ điển"
+    CATEGORY = "2. Hiệu ứng nháy theo nhạc"
     ADVANCED_KEYS = [
         "count",
         "gradient_roll",

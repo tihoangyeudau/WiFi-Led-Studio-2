@@ -7,7 +7,7 @@ from wls.effects.audio import AudioReactiveEffect
 
 class VuMeterAudioEffect(AudioReactiveEffect):
     NAME = "Cột âm lượng"
-    CATEGORY = "Chuẩn đoán"
+    CATEGORY = "2. Hiệu ứng nháy theo nhạc"
     HIDDEN_KEYS = ["background_color", "background_brightness", "blur"]
 
     CONFIG_SCHEMA = vol.Schema(

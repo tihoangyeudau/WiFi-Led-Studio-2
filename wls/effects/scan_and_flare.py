@@ -44,7 +44,7 @@ class Sparkle:
 
 class ScanAndFlareAudioEffect(AudioReactiveEffect, GradientEffect):
     NAME = "Quét lóe sáng"
-    CATEGORY = "Cổ điển"
+    CATEGORY = "2. Hiệu ứng nháy theo nhạc"
     HIDDEN_KEYS = ["gradient_roll"]
 
     _power_funcs = {

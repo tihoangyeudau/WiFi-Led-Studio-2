@@ -14,7 +14,7 @@ from wls.utils import empty_queue
 class MeltSparkle(AudioReactiveEffect, HSVEffect):
 
     NAME = "Tan chảy lấp lánh"
-    CATEGORY = "Dạng áp suất"
+    CATEGORY = "2. Hiệu ứng nháy theo nhạc"
 
     CONFIG_SCHEMA = vol.Schema(
         {

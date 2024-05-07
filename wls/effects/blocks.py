@@ -8,7 +8,7 @@ from wls.effects.gradient import GradientEffect
 class BlocksAudioEffect(AudioReactiveEffect, GradientEffect):
 
     NAME = "Khối"
-    CATEGORY = "2D"
+    CATEGORY = "2. Hiệu ứng nháy theo nhạc"
 
     CONFIG_SCHEMA = vol.Schema(
         {

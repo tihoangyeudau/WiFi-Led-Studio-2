@@ -183,7 +183,7 @@ class TemporalGradientEffect(TemporalEffect, GradientEffect, ModulateEffect):
     """
 
     NAME = "Dải mầu"
-    CATEGORY = "Không nháy theo nhạc"
+    CATEGORY = "1. Hiệu ứng màu"
 
     CONFIG_SCHEMA = vol.Schema(
         {

@@ -8,7 +8,7 @@ from wls.effects.gradient import GradientEffect
 class WavelengthAudioEffect(AudioReactiveEffect, GradientEffect):
 
     NAME = "Bước sóng"
-    CATEGORY = "Cổ điển"
+    CATEGORY = "2. Hiệu ứng nháy theo nhạc"
 
     # There is no additional configuration here, but override the blur
     # default to be 3.0 so blurring is enabled.

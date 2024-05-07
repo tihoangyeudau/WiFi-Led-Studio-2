@@ -9,7 +9,7 @@ from wls.effects.temporal import TemporalEffect
 class SingleColorEffect(TemporalEffect, ModulateEffect):
 
     NAME = "Màu đơn"
-    CATEGORY = "Không nháy theo nhạc"
+    CATEGORY = "1. Hiệu ứng màu"
 
     CONFIG_SCHEMA = vol.Schema(
         {

@@ -8,7 +8,7 @@ from wls.effects.audio import AudioReactiveEffect
 class ScrollAudioEffect(AudioReactiveEffect):
 
     NAME = "Cuộn"
-    CATEGORY = "Cổ điển"
+    CATEGORY = "2. Hiệu ứng nháy theo nhạc"
 
     CONFIG_SCHEMA = vol.Schema(
         {

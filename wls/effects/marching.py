@@ -8,7 +8,7 @@ from wls.effects.hsv_effect import HSVEffect
 class Marching(AudioReactiveEffect, HSVEffect):
 
     NAME = "Diễu hành"
-    CATEGORY = "Dạng áp suất"
+    CATEGORY = "2. Hiệu ứng nháy theo nhạc"
 
     CONFIG_SCHEMA = vol.Schema(
         {

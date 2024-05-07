@@ -9,7 +9,7 @@ from wls.effects.hsv_effect import HSVEffect
 
 class Glitch(AudioReactiveEffect, HSVEffect):
     NAME = "Nhiễu sọc"
-    CATEGORY = "Dạng áp suất"
+    CATEGORY = "2. Hiệu ứng nháy theo nhạc"
 
     CONFIG_SCHEMA = vol.Schema(
         {

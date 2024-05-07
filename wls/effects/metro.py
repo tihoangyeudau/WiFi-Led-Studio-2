@@ -17,7 +17,7 @@ from wls.utils import Graph, bokeh_available
 
 class MetroEffect(AudioReactiveEffect):
     NAME = "Tàu điện"
-    CATEGORY = "Chuẩn đoán"
+    CATEGORY = "2. Hiệu ứng nháy theo nhạc"
     HIDDEN_KEYS = ["speed", "background_brightness", "blur", "mirror"]
     if not bokeh_available:
         HIDDEN_KEYS.append("capture")

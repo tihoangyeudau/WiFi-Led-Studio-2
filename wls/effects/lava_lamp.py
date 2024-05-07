@@ -8,7 +8,7 @@ from wls.effects.hsv_effect import HSVEffect
 class Lavalamp(AudioReactiveEffect, HSVEffect):
 
     NAME = "Đèn Lava"
-    CATEGORY = "Áp suất"
+    CATEGORY = "2. Hiệu ứng nháy theo nhạc"
 
     CONFIG_SCHEMA = vol.Schema(
         {

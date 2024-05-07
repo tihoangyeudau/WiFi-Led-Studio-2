@@ -8,7 +8,7 @@ from wls.effects.gradient import GradientEffect
 class MultiBarAudioEffect(AudioReactiveEffect, GradientEffect):
 
     NAME = "Thanh mầu"
-    CATEGORY = "BPM"
+    CATEGORY = "2. Hiệu ứng nháy theo nhạc"
 
     CONFIG_SCHEMA = vol.Schema(
         {

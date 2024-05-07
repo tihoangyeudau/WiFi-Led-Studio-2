@@ -10,7 +10,7 @@ from wls.effects.droplets import DROPLET_NAMES, load_droplet
 
 class RainAudioEffect(AudioReactiveEffect):
     NAME = "Mưa"
-    CATEGORY = "Cổ điển"
+    CATEGORY = "2. Hiệu ứng nháy theo nhạc"
 
     CONFIG_SCHEMA = vol.Schema(
         {

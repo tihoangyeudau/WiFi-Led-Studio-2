@@ -18,7 +18,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class PixelsEffect(TemporalEffect):
     NAME = "Điểm ảnh"
-    CATEGORY = "Chuẩn đoán"
+    CATEGORY = "2. Hiệu ứng nháy theo nhạc"
     HIDDEN_KEYS = ["speed", "background_brightness", "blur", "mirror"]
 
     start_time = timeit.default_timer()
