@@ -6,7 +6,6 @@ import time
 import warnings
 import webbrowser
 import subprocess
-import winreg
 
 from concurrent.futures import ThreadPoolExecutor
 
@@ -148,30 +147,11 @@ class WlsCore:
     def open_app(self):
         if sys.platform == "win32":
             path1 = os.path.join(os.environ["ProgramFiles"], "Ambilight WiFi-USB\\bin", "ambilightwifi.exe")
-            path2 = '"' + path1 + '"'
             # Thiết lập STARTUPINFO để ẩn cửa sổ cmd
             startupinfo = subprocess.STARTUPINFO()
             
             # Chạy lệnh với STARTUPINFO
             subprocess.Popen([path1], startupinfo=startupinfo)
-
-            # Xóa khóa "WiFi Led Studio"
-            try:
-                key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_ALL_ACCESS)
-                winreg.DeleteValue(key, "WiFi Led Studio")
-                print("Khóa 'WiFi Led Studio' đã được xóa thành công.")
-            except WindowsError:
-                print("Không tìm thấy khóa 'WiFi Led Studio'.")
-
-            # Thêm khóa "Ambilight WiFi-USB"
-            try:
-                key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_ALL_ACCESS)
-                winreg.SetValueEx(key, "Ambilight WiFi-USB", 0, winreg.REG_SZ, path2)
-                print("Khóa 'Ambilight WiFi-USB' đã được thêm thành công.")
-            except WindowsError:
-                print("Không thể thêm khóa 'Ambilight WiFi-USB'.")
-            finally:
-                winreg.CloseKey(key)
 
         elif sys.platform == "darwin":
             subprocess.run(['open', '/Applications/ambilightwifi.app'], check=True)
