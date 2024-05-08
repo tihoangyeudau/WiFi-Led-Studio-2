@@ -6,7 +6,9 @@ import time
 import warnings
 import webbrowser
 import subprocess
+import winreg
 
+from pystray import Menu, MenuItem
 from concurrent.futures import ThreadPoolExecutor
 
 from wls.color import (
@@ -102,7 +104,10 @@ class WlsCore:
         self.loop.set_default_executor(self.thread_executor)
         self.loop.set_exception_handler(self.loop_exception_handler)
         if self.icon:
-            self.setup_icon_menu()
+            if self.check_ambilight_run_key():
+                self.setup_icon_menu_aw()
+            else:
+                self.setup_icon_menu_wls()
 
         self.setup_logqueue()
         self.events = Events(self)
@@ -159,16 +164,103 @@ class WlsCore:
     def restart_wls(self):
         self.stop(exit_code=4)
 
-    def setup_icon_menu(self):
-        import pystray
+    def check_ambilight_run_key(self):
+        try:
+            # Mở key HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run")
+            
+            # Lấy số lượng giá trị trong key
+            num_values = winreg.QueryInfoKey(key)[1]
+            
+            # Duyệt qua từng giá trị trong key
+            for i in range(num_values):
+                value_name, _, _ = winreg.EnumValue(key, i)
+                if value_name == "Ambilight WiFi-USB":
+                    # Tìm thấy key "Ambilight WiFi-USB"
+                    winreg.CloseKey(key)
+                    return True
+            
+            # Không tìm thấy key "Ambilight WiFi-USB"
+            winreg.CloseKey(key)
+            return False
+        
+        except WindowsError:
+            # Xảy ra lỗi khi mở key hoặc truy cập vào Registry
+            return False
+        
+    def delete_wls_key(self):
+        try:
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_ALL_ACCESS)
+            winreg.DeleteValue(key, "WiFi Led Studio")
+            print("Khóa 'WiFi Led Studio' đã được xóa thành công.")
+        except WindowsError:
+            print("Không tìm thấy khóa 'WiFi Led Studio'.")
 
-        self.icon.menu = pystray.Menu(
-            pystray.MenuItem("Mở trang điều khiển | Open Web-App", self.open_ui, default=True),
-            pystray.MenuItem("Theo màu màn hình | Screen capture", self.open_app),
-            pystray.MenuItem("Khởi động lại | Restart", self.restart_wls),
-            pystray.MenuItem("Thoát | Quit", self.stop),
+    def delete_aw_key(self):
+        try:
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_ALL_ACCESS)
+            winreg.DeleteValue(key, "Ambilight WiFi-USB")
+            print("Khóa 'Ambilight WiFi-USB' đã được xóa thành công.")
+        except WindowsError:
+            print("Không tìm thấy khóa 'Ambilight WiFi-USB'.")
+
+    def add_wls_key(self):
+        path1 = os.path.join(os.environ["ProgramFiles"], "WiFi Led Studio", "WiFi Led Studio.exe")
+        path2 = '"' + path1 + '"'
+        try:
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_ALL_ACCESS)
+            winreg.SetValueEx(key, "WiFi Led Studio", 0, winreg.REG_SZ, path2)
+            print("Khóa 'WiFi Led Studio' đã được thêm thành công.")
+        except WindowsError:
+            print("Không thể thêm khóa 'WiFi Led Studio'.")
+        finally:
+            winreg.CloseKey(key)
+    
+    def add_aw_key(self):
+        path1 = os.path.join(os.environ["ProgramFiles"], "Ambilight WiFi-USB\\bin", "ambilightwifi.exe")
+        path2 = '"' + path1 + '"'
+        try:
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_ALL_ACCESS)
+            winreg.SetValueEx(key, "Ambilight WiFi-USB", 0, winreg.REG_SZ, path2)
+            print("Khóa 'Ambilight WiFi-USB' đã được thêm thành công.")
+        except WindowsError:
+            print("Không thể thêm khóa 'Ambilight WiFi-USB'.")
+        finally:
+            winreg.CloseKey(key)
+
+    global adapter
+
+    def setup_icon_menu_aw(self):
+        adapter = "Bấm để sáng 'hiệu ứng màu' khi khởi động | Enable autostart 'Effect / Color'"
+        if not self.check_ambilight_run_key():
+            self.delete_wls_key()
+            self.add_aw_key()
+
+        self.icon.menu = Menu(
+            MenuItem(lambda text: adapter, self.setup_icon_menu_wls),
+            Menu.SEPARATOR,
+            MenuItem("Mở trang điều khiển | Open Web-App", self.open_ui, default=True),
+            MenuItem("Theo màu màn hình | Screen capture", self.open_app),
+            Menu.SEPARATOR,
+            MenuItem("Khởi động lại | Restart", self.restart_wls),
+            MenuItem("Thoát | Quit", self.stop),
         )
 
+    def setup_icon_menu_wls(self):
+        adapter = "Bấm để 'theo màu màn hình' khi khởi động | Enable autostart 'Screen capture'"
+        if self.check_ambilight_run_key():
+            self.delete_aw_key()
+            self.add_wls_key()
+
+        self.icon.menu = Menu(
+            MenuItem(lambda text: adapter, self.setup_icon_menu_aw),
+            Menu.SEPARATOR,
+            MenuItem("Mở trang điều khiển | Open Web-App", self.open_ui, default=True),
+            MenuItem("Theo màu màn hình | Screen capture", self.open_app),
+            Menu.SEPARATOR,
+            MenuItem("Khởi động lại | Restart", self.restart_wls),
+            MenuItem("Thoát | Quit", self.stop),
+        )
 
     def setup_visualisation_events(self):
         """
