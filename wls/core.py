@@ -7,6 +7,7 @@ import warnings
 import webbrowser
 import subprocess
 import winreg
+import shutil
 
 from pystray import Menu, MenuItem
 from concurrent.futures import ThreadPoolExecutor
@@ -165,7 +166,7 @@ class WlsCore:
         self.stop(exit_code=4)
 
     def check_ambilight_run_key(self):
-        try:
+        if sys.platform == "win32":
             # Mở key HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run")
             
@@ -183,50 +184,55 @@ class WlsCore:
             # Không tìm thấy key "Ambilight WiFi-USB"
             winreg.CloseKey(key)
             return False
-        
-        except WindowsError:
-            # Xảy ra lỗi khi mở key hoặc truy cập vào Registry
-            return False
+        elif sys.platform == "darwin":
+            file_path = os.path.expanduser('~/Library/LaunchAgents/com.ambilightwifi.startup.plist')
+            # Kiểm tra hàm
+            if os.path.isfile(file_path):
+                return True
+            else:
+                return False
         
     def delete_wls_key(self):
-        try:
+        if sys.platform == "win32":
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_ALL_ACCESS)
             winreg.DeleteValue(key, "WiFi Led Studio")
-            print("Khóa 'WiFi Led Studio' đã được xóa thành công.")
-        except WindowsError:
-            print("Không tìm thấy khóa 'WiFi Led Studio'.")
+        elif sys.platform == "darwin":
+            wls_destination_path = os.path.expanduser('~/Library/LaunchAgents/com.wls.startup.plist')
+            os.remove(wls_destination_path)
 
     def delete_aw_key(self):
-        try:
+        if sys.platform == "win32":
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_ALL_ACCESS)
             winreg.DeleteValue(key, "Ambilight WiFi-USB")
-            print("Khóa 'Ambilight WiFi-USB' đã được xóa thành công.")
-        except WindowsError:
-            print("Không tìm thấy khóa 'Ambilight WiFi-USB'.")
+        elif sys.platform == "darwin":
+            aw_wls_destination_path = os.path.expanduser("~/Library/LaunchAgents/com.ambilightwifi.startup.plist")
+            os.remove(aw_wls_destination_path)
 
     def add_wls_key(self):
-        path1 = os.path.join(os.environ["ProgramFiles"], "WiFi Led Studio", "WiFi Led Studio.exe")
-        path2 = '"' + path1 + '"'
-        try:
+        if sys.platform == "win32":
+            path1 = os.path.join(os.environ["ProgramFiles"], "WiFi Led Studio", "WiFi Led Studio.exe")
+            path2 = '"' + path1 + '"'
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_ALL_ACCESS)
             winreg.SetValueEx(key, "WiFi Led Studio", 0, winreg.REG_SZ, path2)
-            print("Khóa 'WiFi Led Studio' đã được thêm thành công.")
-        except WindowsError:
-            print("Không thể thêm khóa 'WiFi Led Studio'.")
-        finally:
             winreg.CloseKey(key)
+        elif sys.platform == "darwin":
+            wls_source_path = "/Applications/WiFi Led Studio.app/Contents/Resources/com.wls.startup.plist"
+            wls_destination_path = os.path.expanduser("~/Library/LaunchAgents/com.wls.startup.plist")
+            
+            shutil.copy(wls_source_path, wls_destination_path)
     
     def add_aw_key(self):
-        path1 = os.path.join(os.environ["ProgramFiles"], "Ambilight WiFi-USB\\bin", "ambilightwifi.exe")
-        path2 = '"' + path1 + '"'
-        try:
+        if sys.platform == "win32":
+            path1 = os.path.join(os.environ["ProgramFiles"], "Ambilight WiFi-USB\\bin", "ambilightwifi.exe")
+            path2 = '"' + path1 + '"'
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_ALL_ACCESS)
             winreg.SetValueEx(key, "Ambilight WiFi-USB", 0, winreg.REG_SZ, path2)
-            print("Khóa 'Ambilight WiFi-USB' đã được thêm thành công.")
-        except WindowsError:
-            print("Không thể thêm khóa 'Ambilight WiFi-USB'.")
-        finally:
             winreg.CloseKey(key)
+        elif sys.platform == "darwin":
+            aw_source_path = "/Applications/ambilightwifi.app/Contents/Resources/com.wls.startup.plist"
+            aw_wls_destination_path = os.path.expanduser("~/Library/LaunchAgents/com.ambilightwifi.startup.plist")
+
+            shutil.copy(aw_source_path, aw_wls_destination_path)
 
     global adapter
 
