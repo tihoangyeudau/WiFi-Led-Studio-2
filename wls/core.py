@@ -205,8 +205,8 @@ class WlsCore:
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_ALL_ACCESS)
             winreg.DeleteValue(key, "Ambilight WiFi-USB")
         elif sys.platform == "darwin":
-            aw_wls_destination_path = os.path.expanduser("~/Library/LaunchAgents/com.ambilightwifi.startup.plist")
-            os.remove(aw_wls_destination_path)
+            aw_destination_path = os.path.expanduser("~/Library/LaunchAgents/com.ambilightwifi.startup.plist")
+            os.remove(aw_destination_path)
 
     def add_wls_key(self):
         if sys.platform == "win32":
@@ -229,10 +229,10 @@ class WlsCore:
             winreg.SetValueEx(key, "Ambilight WiFi-USB", 0, winreg.REG_SZ, path2)
             winreg.CloseKey(key)
         elif sys.platform == "darwin":
-            aw_source_path = "/Applications/ambilightwifi.app/Contents/Resources/com.wls.startup.plist"
-            aw_wls_destination_path = os.path.expanduser("~/Library/LaunchAgents/com.ambilightwifi.startup.plist")
+            aw_source_path = "/Applications/ambilightwifi.app/Contents/Resources/com.ambilightwifi.startup.plist"
+            aw_destination_path = os.path.expanduser("~/Library/LaunchAgents/com.ambilightwifi.startup.plist")
 
-            shutil.copy(aw_source_path, aw_wls_destination_path)
+            shutil.copy(aw_source_path, aw_destination_path)
 
     global adapter
 
