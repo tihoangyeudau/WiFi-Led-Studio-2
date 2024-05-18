@@ -6,8 +6,10 @@ import time
 import warnings
 import webbrowser
 import subprocess
-import winreg
-import shutil
+if sys.platform == "win32":
+    import winreg
+elif sys.platform == "darwin":
+    import shutil
 
 from pystray import Menu, MenuItem
 from concurrent.futures import ThreadPoolExecutor
