@@ -35,14 +35,7 @@ from wls.consts import (
 from wls.core import WlsCore
 from wls.utils import currently_frozen, get_icon_path
 
-if sys.platform == "win32":
-    for process in psutil.process_iter():
-        try:
-            if process.name() == "ambilightwifi.exe":
-                process.terminate()
-        except psutil.NoSuchProcess:
-            pass
-elif sys.platform == "darwin":
+if sys.platform == "darwin":
     for process in psutil.process_iter():
         try:
             if process.name() == "ambilightwifi":

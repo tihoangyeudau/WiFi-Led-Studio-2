@@ -8,7 +8,8 @@ datas = [
          (f'C:/Users/tuant/AppData/Local/Programs/Python/Python311/Scripts/build/exe.win-amd64-3.11/lib/xyzservices','xyzservices/'),
          (f'C:/Users/tuant/AppData/Local/Programs/Python/Python311/Scripts/build/exe.win-amd64-3.11/lib/stupidArtnet','stupidArtnet/'),
          (f'{spec_root}/icons','icons/'),
-         (f'{spec_root}/icons/tray.png','.')
+         (f'{spec_root}/icons/tray.png','.'),
+         (f'{spec_root}/switch.exe','.')
       ]
 datas += copy_metadata('bokeh')
 
