@@ -154,16 +154,7 @@ class WlsCore:
 
     def open_app(self):
         if sys.platform == "win32":
-            path1 = os.path.join(os.environ["ProgramFiles"], "WiFi Led Studio\\_internal", "switch.exe")
-            # Thiết lập STARTUPINFO để ẩn cửa sổ cmd
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-            startupinfo.wShowWindow = subprocess.SW_HIDE
-            
-            # Chạy lệnh với STARTUPINFO
-            subprocess.Popen([path1], startupinfo=startupinfo)
-
-            self.stop(exit_code=0)
+            self.stop_aw(exit_code=0)
         elif sys.platform == "darwin":
             subprocess.run(['open', '/Applications/ambilightwifi.app'], check=True)
 
@@ -415,6 +406,9 @@ class WlsCore:
     def stop(self, exit_code):
         async_fire_and_forget(self.async_stop(exit_code), self.loop)
 
+    def stop_aw(self, exit_code):
+        async_fire_and_forget(self.async_stop_aw(exit_code), self.loop)
+
     async def async_stop(self, exit_code):
         if not self.loop:
             return
@@ -459,4 +453,62 @@ class WlsCore:
             if self.exit_code != 1:
                 self.exit_code = exit_code
             self.loop.stop()
-            return exit_code 
+
+            path1 = os.path.join(os.environ["ProgramFiles"], "Ambilight WiFi-USB\\bin", "ambilightwifi.exe")
+            # Thiết lập STARTUPINFO để ẩn cửa sổ cmd
+            startupinfo = subprocess.STARTUPINFO()
+            subprocess.Popen([path1], startupinfo=startupinfo)
+
+            return exit_code
+        
+    async def async_stop_aw(self, exit_code):
+        if not self.loop:
+            return
+
+        print("Stopping WiFi Led Studio.")
+        try:
+            _LOGGER.info(self.EXIT_CODES.get(exit_code, "Unknown exit code."))
+            # Fire a shutdown event
+            self.events.fire_event(WlsShutdownEvent())
+            _LOGGER.info("Stopping HTTP Server...")
+            await self.http.stop()
+
+            # Cancel all the remaining task and wait
+            tasks = [
+                task
+                for task in asyncio.all_tasks()
+                if task is not asyncio.current_task()
+            ]
+            if tasks:
+                _LOGGER.debug(
+                    f"Killing {len(tasks)} tasks prior to shutdown..."
+                )
+                # Cancel all tasks concurrently
+                group = asyncio.gather(*tasks, return_exceptions=True)
+                group.cancel()
+                # Wait for all tasks to be cancelled
+                try:
+                    await group
+                except asyncio.CancelledError:
+                    pass
+                _LOGGER.debug("All tasks killed.")
+            # Save the configuration before shutting down
+            save_config(config=self.config, config_dir=self.config_dir)
+
+        except Exception as e:
+            _LOGGER.error(f"An error occurred while stopping: {e}")
+            self.exit_code = 1
+
+        finally:
+            self.thread_executor.shutdown()
+            # Don't overwrite error exit code
+            if self.exit_code != 1:
+                self.exit_code = exit_code
+            self.loop.stop()
+
+            path1 = os.path.join(os.environ["ProgramFiles"], "Ambilight WiFi-USB\\bin", "ambilightwifi.exe")
+            # Thiết lập STARTUPINFO để ẩn cửa sổ cmd
+            startupinfo = subprocess.STARTUPINFO()
+            subprocess.Popen([path1], startupinfo=startupinfo)
+
+            return exit_code
