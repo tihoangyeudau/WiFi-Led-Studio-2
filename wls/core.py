@@ -454,11 +454,6 @@ class WlsCore:
                 self.exit_code = exit_code
             self.loop.stop()
 
-            path1 = os.path.join(os.environ["ProgramFiles"], "Ambilight WiFi-USB\\bin", "ambilightwifi.exe")
-            # Thiết lập STARTUPINFO để ẩn cửa sổ cmd
-            startupinfo = subprocess.STARTUPINFO()
-            subprocess.Popen([path1], startupinfo=startupinfo)
-
             return exit_code
         
     async def async_stop_aw(self, exit_code):
