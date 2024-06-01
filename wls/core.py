@@ -152,12 +152,6 @@ class WlsCore:
                 f"Không mở được trình duyệt web mặc định. Để truy cập giao diện web của WiFi Led Studio, hãy mở {url} trong trình duyệt. Để tránh lỗi này trong tương lai, hãy cài mặc định trình duyệt cho hệ thống của bạn."
             )
 
-    def open_app(self):
-        if sys.platform == "win32":
-            self.stop_aw(exit_code=0)
-        elif sys.platform == "darwin":
-            subprocess.run(['open', '/Applications/ambilightwifi.app'], check=True)
-
     def restart_wls(self):
         self.stop(exit_code=4)
 
@@ -242,7 +236,7 @@ class WlsCore:
             MenuItem(lambda text: adapter, self.setup_icon_menu_wls),
             Menu.SEPARATOR,
             MenuItem("Mở trang điều khiển | Open Web-App", self.open_ui, default=True),
-            MenuItem("Theo màu màn hình | Screen capture", self.open_app),
+            MenuItem("Theo màu màn hình | Screen capture", self.stop_aw),
             Menu.SEPARATOR,
             MenuItem("Khởi động lại | Restart", self.restart_wls),
             MenuItem("Thoát | Quit", self.stop),
@@ -258,7 +252,7 @@ class WlsCore:
             MenuItem(lambda text: adapter, self.setup_icon_menu_aw),
             Menu.SEPARATOR,
             MenuItem("Mở trang điều khiển | Open Web-App", self.open_ui, default=True),
-            MenuItem("Theo màu màn hình | Screen capture", self.open_app),
+            MenuItem("Theo màu màn hình | Screen capture", self.stop_aw),
             Menu.SEPARATOR,
             MenuItem("Khởi động lại | Restart", self.restart_wls),
             MenuItem("Thoát | Quit", self.stop),
@@ -501,9 +495,12 @@ class WlsCore:
                 self.exit_code = exit_code
             self.loop.stop()
 
-            path1 = os.path.join(os.environ["ProgramFiles"], "Ambilight WiFi-USB\\bin", "ambilightwifi.exe")
-            # Thiết lập STARTUPINFO để ẩn cửa sổ cmd
-            startupinfo = subprocess.STARTUPINFO()
-            subprocess.Popen([path1], startupinfo=startupinfo)
+            if sys.platform == "win32":
+                path1 = os.path.join(os.environ["ProgramFiles"], "Ambilight WiFi-USB\\bin", "ambilightwifi.exe")
+                # Thiết lập STARTUPINFO để ẩn cửa sổ cmd
+                startupinfo = subprocess.STARTUPINFO()
+                subprocess.Popen([path1], startupinfo=startupinfo)
+            elif sys.platform == "darwin":
+                subprocess.run(['open', '/Applications/ambilightwifi.app'], check=True)
 
             return exit_code
