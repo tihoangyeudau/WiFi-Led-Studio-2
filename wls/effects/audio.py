@@ -853,9 +853,9 @@ class AudioReactiveEffect(Effect):
 
     @cached_property
     def _melbank_min_idx(self):
-        return next(
+        min_idx = next(
             (idx
-             for idx, freq in enumerate(
+            for idx, freq in enumerate(
                 self.audio.melbanks.melbank_processors[
                     self._selected_melbank
                 ].melbank_frequencies
@@ -863,10 +863,13 @@ class AudioReactiveEffect(Effect):
             if freq >= self._virtual.frequency_range.min),
             None
         )
+        if min_idx is None:
+            raise ValueError("Không tìm thấy giá trị _melbank_min_idx phù hợp")
+        return min_idx
 
     @cached_property
     def _melbank_max_idx(self):
-        return next(
+        max_idx = next(
             (
                 idx
                 for idx, freq in enumerate(
@@ -882,9 +885,14 @@ class AudioReactiveEffect(Effect):
                 ].melbank_frequencies
             ),
         )
+        if max_idx is None:
+            raise ValueError("Không tìm thấy giá trị _melbank_max_idx phù hợp")
+        return max_idx
 
     @cached_property
     def _input_mel_length(self):
+        if self._melbank_max_idx is None or self._melbank_min_idx is None:
+            raise ValueError("_melbank_max_idx và _melbank_min_idx không được là None")
         return self._melbank_max_idx - self._melbank_min_idx
 
     @lru_cache(maxsize=16)
