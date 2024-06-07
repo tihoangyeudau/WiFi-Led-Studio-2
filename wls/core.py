@@ -347,7 +347,7 @@ class WlsCore:
             and self.icon.HAS_NOTIFICATION
         ):
             self.icon.notify(
-                "Tôi ở dưới đây!\nClick vào biểu tượng 'Trái tim' ở tray taskbar để mở giao diện.", "Ứng dụng nháy theo nhạc của Rainbow Music Led"
+                "Bạn ơi, tôi ở dưới đây!\nBấm vào biểu tượng ở khay hệ thống để chọn hiệu ứng nhé", "Nháy theo nhạc, màu đơn, hiệu ứng màu"
             )
         self.devices = Devices(self)
         self.effects = Effects(self)
