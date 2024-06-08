@@ -194,21 +194,23 @@ class Virtual:
         if device is None:
             msg = f"Đèn {device_id} không hợp lệ"
             valid = False
+        else:
+            max_pixel_count = device.pixel_count
 
-        if (
-            (start_pixel < 0)
-            or (end_pixel < 0)
-            or (start_pixel > end_pixel)
-            or (end_pixel >= device.pixel_count)
-        ):
-            msg = f"Pixel phân đoạn ({start_pixel} không hợp lệ, {end_pixel}). Đèn '{self.name}' có pixel hợp lệ giữa (0, {self.pixel_count-1})"
-            valid = False
+            # Điều chỉnh start_pixel và end_pixel để đảm bảo chúng nằm trong phạm vi hợp lệ
+            start_pixel = max(0, min(start_pixel, max_pixel_count - 1))
+            end_pixel = max(0, min(end_pixel, max_pixel_count - 1))
+
+            if start_pixel > end_pixel:
+                msg = f"Pixel phân đoạn ({start_pixel} không hợp lệ, {end_pixel}). Đèn '{self.name}' có pixel hợp lệ giữa (0, {max_pixel_count - 1})"
+                valid = False
 
         if not valid:
             _LOGGER.error(msg)
             raise ValueError(msg)
         else:
-            return segment
+            return (device_id, start_pixel, end_pixel, invert)
+
 
     def invalidate_cached_props(self):
         # invalidate cached properties
