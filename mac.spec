@@ -4,7 +4,7 @@ import sys
 from PyInstaller.utils.hooks import copy_metadata
 datas = [   ('/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons', 'icons/'),
             ('/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons/tray.png', '.'),
-            ('/Users/phamtuantrung/make setup/www.com.wls.plist', '.'),
+            ('/Users/phamtuantrung/make setup/com.autorml.startup.plist', '.'),
             ('/usr/local/bin/build/WiFi Led Studio-3.2.5.app/Contents/MacOS/lib/wls', 'wls/'),
             ('/usr/local/bin/build/WiFi Led Studio-3.2.5.app/Contents/MacOS/lib/wls_frontend', 'wls_frontend/'),
             ('/usr/local/bin/build/WiFi Led Studio-3.2.5.app/Contents/MacOS/lib/xyzservices', 'xyzservices/'),
