@@ -6,16 +6,16 @@ import Sockette from 'sockette';
 import isElectron from 'is-electron';
 
 
-// const ws = new WebSocket(`${window.location.protocol === 'https' ? 'wss' : 'ws'}://${window.localStorage.getItem('wls-host')?.split('https://')[0].split('http://')[0] || 'localhost:2905'}/api/websocket`);
-// const ws = new WebSocket(`${(window.localStorage.getItem('wls-host') && window.localStorage.getItem('wls-host').startsWith('https')) ? 'wss' : 'ws'}://${window.localStorage.getItem('wls-host')?.split('https://')[0].split('http://')[0] || 'localhost:2905'}/api/websocket`);
-// const ws = new WebSocket(`wss://${window.localStorage.getItem('wls-host')?.split('https://')[0].split('http://')[0].split(':')[0] || 'localhost:2905'}/api/websocket`);
-// const ws = new WebSocket(`${window.localStorage.getItem('wls-ws') ? window.localStorage.getItem('wls-ws') : 'ws://localhost:2905'}/api/websocket`, (window.localStorage.getItem('wls-ws') && window.localStorage.getItem('wls-ws').startsWith('wss')) ? 'https' : 'http');
+// const ws = new WebSocket(`${window.location.protocol === 'https' ? 'wss' : 'ws'}://${window.localStorage.getItem('wls-host')?.split('https://')[0].split('http://')[0] || 'localhost:8090'}/api/websocket`);
+// const ws = new WebSocket(`${(window.localStorage.getItem('wls-host') && window.localStorage.getItem('wls-host').startsWith('https')) ? 'wss' : 'ws'}://${window.localStorage.getItem('wls-host')?.split('https://')[0].split('http://')[0] || 'localhost:8090'}/api/websocket`);
+// const ws = new WebSocket(`wss://${window.localStorage.getItem('wls-host')?.split('https://')[0].split('http://')[0].split(':')[0] || 'localhost:8090'}/api/websocket`);
+// const ws = new WebSocket(`${window.localStorage.getItem('wls-ws') ? window.localStorage.getItem('wls-ws') : 'ws://localhost:8090'}/api/websocket`, (window.localStorage.getItem('wls-ws') && window.localStorage.getItem('wls-ws').startsWith('wss')) ? 'https' : 'http');
 // const ws = new WebSocket(`wss://127.0.0.1/api/websocket`, 'wss');
 
 function createSocket() {
 
   if (!window.localStorage.getItem('wls-newbase')) {
-    const _ws = new Sockette(`${(window.localStorage.getItem('wls-host') || (isElectron() ? 'http://localhost:2905' : window.location.href.split('/#')[0])).replace('https://', 'wss://').replace('http://', 'ws://')}/api/websocket`, {
+    const _ws = new Sockette(`${(window.localStorage.getItem('wls-host') || (isElectron() ? 'http://localhost:8090' : window.location.href.split('/#')[0])).replace('https://', 'wss://').replace('http://', 'ws://')}/api/websocket`, {
       timeout: 5e3,
       maxAttempts: 10,
       onopen: e => {

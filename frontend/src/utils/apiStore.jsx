@@ -7,7 +7,7 @@ const useStore = create(
   persist(
     devtools((set, get) => ({
 
-      host: isElectron() ? 'http://localhost:2905' : window.location.href.split('#')[0],
+      host: isElectron() ? 'http://localhost:8090' : window.location.href.split('#')[0],
       setHost: (host) => {
         window.localStorage.setItem('wls-host', host.title ? host.title : host);
         return set((state) => ({

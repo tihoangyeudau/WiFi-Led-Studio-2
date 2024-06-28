@@ -17,9 +17,9 @@ export default function NoHostDialog() {
   const setDisconnected = useStore((state) => state.setDisconnected);
   const setHost = useStore((state) => state.setHost);
   const storedURL = window.localStorage.getItem('wls-host');
-  const storedURLs = JSON.parse(window.localStorage.getItem('wls-hosts')) || [{ title: 'http://localhost:2905' }];
-  const [hosts, setHosts] = useState([{ title: 'http://localhost:2905' }]);
-  const [hostvalue, setHostvalue] = useState({ title: 'http://localhost:2905' });
+  const storedURLs = JSON.parse(window.localStorage.getItem('wls-hosts')) || [{ title: 'http://localhost:8090' }];
+  const [hosts, setHosts] = useState([{ title: 'http://localhost:8090' }]);
+  const [hostvalue, setHostvalue] = useState({ title: 'http://localhost:8090' });
   const [progress, setProgress] = useState(0);
 
   const handleClose = () => {
@@ -64,8 +64,8 @@ export default function NoHostDialog() {
 
   useEffect(() => {
     if (!storedURL){
-      setHost(isElectron() ? 'http://localhost:2905' : window.localStorage.getItem('wls-newbase') === '1' ? 'http://localhost:8080' : window.location.href.split('/#')[0])
-      window.localStorage.setItem('wls-host', isElectron() ? 'http://localhost:2905' : window.localStorage.getItem('wls-newbase') === '1' ? 'http://localhost:8080' : window.location.href.split('/#')[0]);
+      setHost(isElectron() ? 'http://localhost:8090' : window.localStorage.getItem('wls-newbase') === '1' ? 'http://localhost:8080' : window.location.href.split('/#')[0])
+      window.localStorage.setItem('wls-host', isElectron() ? 'http://localhost:8090' : window.localStorage.getItem('wls-newbase') === '1' ? 'http://localhost:8080' : window.location.href.split('/#')[0]);
       window.location.href = window.location.href
     }
   }, []);

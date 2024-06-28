@@ -35,7 +35,7 @@ RUN python -m pip install -U pip setuptools wheel \
 #        -r docs/requirements-docs.txt \
 #     && python setup.py develop
 
-EXPOSE 2905/tcp
+EXPOSE 8090/tcp
 EXPOSE 5353/udp
 ENTRYPOINT [ "wls"]
 

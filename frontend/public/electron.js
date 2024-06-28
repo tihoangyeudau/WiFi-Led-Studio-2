@@ -84,7 +84,7 @@ app.whenReady().then(async () => {
     const integratedCore = wlsCore && fs.existsSync(`${thePath}/${wlsCore}`)
 
     if (integratedCore) {
-        subpy = require("child_process").spawn(`./${wlsCore}`, ["-p", "2905"]);
+        subpy = require("child_process").spawn(`./${wlsCore}`, ["-p", "8090"]);
     }
     wind = (integratedCore) ? createWindow({additionalArguments: ["integratedCore"]}) : createWindow();
     // require('@treverix/remote/main').initialize()

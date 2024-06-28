@@ -40,11 +40,11 @@ RUN useradd --create-home wls
 WORKDIR /home/wls
 USER wls
 
-# Expose port 2905 for web server and 5353 for mDNS discovery
-EXPOSE 2905/tcp
+# Expose port 8090 for web server and 5353 for mDNS discovery
+EXPOSE 8090/tcp
 EXPOSE 5353/udp
 ENTRYPOINT [ "wls"]
-CMD ["--host 0.0.0.0","--port 2905"]
+CMD ["--host 0.0.0.0","--port 8090"]
 
 # RUN frontend/npm install && npm start
 
