@@ -679,8 +679,8 @@ class Devices(RegistryLoader):
                     existing_device.config["ip_address"] == device_ip
                     or existing_device.config["ip_address"] == resolved_dest
                 ):
-                    if device_type == "e131":
-                        # check the universes for e131, it might still be okay at a shared ip_address
+                    if device_type in ["e131", "artnet"]:
+                        # check the universes for e131 and artnet, it might still be okay at a shared ip_address
                         # eg. for multi output controllers
                         if (
                             device_config["universe"]
