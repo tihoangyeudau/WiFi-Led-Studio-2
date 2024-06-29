@@ -327,7 +327,7 @@ def main():
             import pystray
         except Exception as Error:
             msg = f"Error: Unable to virtual tray icon. Shutting down. Error: {Error}"
-            msg = f"Unable to create tray icon. Error: {Error}. Try launching WiFi Led Studio via --no-tray option."
+            msg = f"Unable to create tray icon. Error: {Error}. Try launching LedFx via --no-tray option."
             _LOGGER.critical(msg)
             sys.exit(0)
             # Exit with code 3 to indicate that there was an error creating the tray icon.

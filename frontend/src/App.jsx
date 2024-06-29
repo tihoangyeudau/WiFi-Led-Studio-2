@@ -1,7 +1,7 @@
 import { useEffect, useState, createRef } from 'react';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import { ThemeProvider } from '@mui/styles';
-import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
+import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 import clsx from 'clsx';
 import { CssBaseline } from '@material-ui/core';
 import useStore from './utils/apiStore';
@@ -198,7 +198,6 @@ export default function App() {
                       <Route path="/scenes" component={Scenes} />
                       <Route path="/integrations" component={Integrations} />
                       <Route path="/settings" component={Settings} />
-                      <Redirect to="/devices" />
                     </Switch>
                     <NoHostDialog />
                     <SmartBar open={open} setOpen={setOpen} />
@@ -251,7 +250,6 @@ export default function App() {
                       <Route path="/scenes" component={Scenes} />
                       <Route path="/integrations" component={Integrations} />
                       <Route path="/settings" component={Settings} />
-                      <Redirect to="/devices" />
                     </Switch>
                     <NoHostDialog />
                     <SmartBar open={open} setOpen={setOpen} />

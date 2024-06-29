@@ -13,11 +13,13 @@ import isElectron from 'is-electron';
 // const ws = new WebSocket(`wss://127.0.0.1/api/websocket`, 'wss');
 
 function createSocket() {
+
   if (!window.localStorage.getItem('wls-newbase')) {
     const _ws = new Sockette(`${(window.localStorage.getItem('wls-host') || (isElectron() ? 'http://localhost:8090' : window.location.href.split('/#')[0])).replace('https://', 'wss://').replace('http://', 'ws://')}/api/websocket`, {
       timeout: 5e3,
       maxAttempts: 10,
       onopen: e => {
+        // console.log('Connected!', e)
         document.dispatchEvent(
           new CustomEvent("disconnected", {
             detail: {
@@ -31,6 +33,7 @@ function createSocket() {
           id: 1,
           type: "subscribe_event",
         };
+        // console.log("Send");
         ws.send(JSON.stringify(++req.id && req));
       },
       onmessage: (event) => {
@@ -52,7 +55,10 @@ function createSocket() {
           );
         }
       },
+      // onreconnect: e => console.log('Reconnecting...', e),
+      // onmaximum: e => console.log('Stop Attempting!', e),
       onclose: e => {
+        // console.log('Closed!', e)
         window.localStorage.removeItem("core-init")
         if (window.localStorage.getItem('wls-newbase') !== '1') {        
           document.dispatchEvent(
@@ -64,10 +70,11 @@ function createSocket() {
           );
         }
       },
+      // onerror: e => console.log('Error:', e)
     });
-    return _ws;
+    return _ws
   }
-  return;
+  return
 }
 const ws = !window.localStorage.getItem('wls-newbase') && createSocket();
 export default ws;
@@ -79,8 +86,7 @@ export const HandleWs = () => {
   const pixelGraphs = useStore((state) => state.pixelGraphs);
   const setPixelGraphs = useStore((state) => state.setPixelGraphs);
   const graphs = useStore((state) => state.graphs);
-  const [wsReady, setWsReady] = useState(false);
-  const [wasDisconnected, setWasDisconnected] = useState(false);
+  const [wsReady, setWsReady] = useState(false)
 
   useLayoutEffect(() => {
     if (!(pathname.startsWith("/Devices") || pathname.startsWith("/device"))) {
@@ -107,10 +113,11 @@ export const HandleWs = () => {
             id: i,
             type: "subscribe_event",
           };
-          ws.send(JSON.stringify(++request.id && request));
+          // console.log("Send");
+          ws.send(JSON.stringify(++request.id && request));          
         };
         getWs();
-      });
+      })
 
       return () => {
         pixelGraphs.map((d, i) => {
@@ -122,33 +129,18 @@ export const HandleWs = () => {
             };
             ws.send(JSON.stringify(++request.id && request));
           };
+          // console.log("Clean Up");
           removeGetWs();
-        });
-      };
+        })
+      }
     }
   }, [wsReady, pixelGraphs]);
 
-  useEffect(() => {
+  if (!wsReady) {
     if (ws && ws.ws) {
-      setWsReady(true);
+      setWsReady(true)
     }
-  }, [ws]);
-
-  useEffect(() => {
-    const handleDisconnected = (e) => {
-      if (e.detail.isDisconnected) {
-        setWasDisconnected(true);
-      } else if (wasDisconnected) {
-        window.location.reload();
-      }
-    };
-
-    document.addEventListener('disconnected', handleDisconnected);
-
-    return () => {
-      document.removeEventListener('disconnected', handleDisconnected);
-    };
-  }, [wasDisconnected]);
+  }
 
   return null;
-};
+}

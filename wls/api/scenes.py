@@ -5,7 +5,6 @@ from aiohttp import web
 
 from wls.api import RestEndpoint
 from wls.config import save_config
-from wls.effects import DummyEffect
 from wls.events import SceneActivatedEvent
 from wls.utils import generate_id
 
@@ -248,16 +247,9 @@ class ScenesEndpoint(RestEndpoint):
             for virtual in self._wls.virtuals.values():
                 effect = {}
                 if virtual.active_effect:
-                    # prevent crash from trying to save copy / span transitions
-                    # which appear active even when the virtual is not!!!
-                    if not isinstance(virtual.active_effect, DummyEffect):
-                        effect["type"] = virtual.active_effect.type
-                        effect["config"] = virtual.active_effect.config
-                        # effect['name'] = virtual.active_effect.name
-                    else:
-                        _LOGGER.debug(
-                            f"Skipping DummyEffect for virtual {virtual.id}"
-                        )
+                    effect["type"] = virtual.active_effect.type
+                    effect["config"] = virtual.active_effect.config
+                    # effect['name'] = virtual.active_effect.name
                 scene_config["virtuals"][virtual.id] = effect
         else:
             virtuals = data.get("virtuals")
