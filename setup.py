@@ -23,7 +23,7 @@ SETUP_REQUIRES = [
 ]
 
 INSTALL_REQUIRES = [
-    "aiohttp~=3.8.3",
+    "aiohttp~=3.9.1",
     "aiohttp_cors>=0.7.0",
     "aubio>=0.4.9",
     "bokeh~=3.1.0",
