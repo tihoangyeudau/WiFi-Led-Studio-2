@@ -23,7 +23,7 @@ const ButtonBar = () => {
       <IconButton
         aria-label="Shopee"
         color="inherit"
-        href="https://shopee.vn/ambilight.vn"
+        href="https://shopee.vn/skydimo.nd"
         target="_blank"
         title="Shopee"
       >

@@ -62,9 +62,7 @@ export default function Home(props) {
           RAINBOW MUSIC LED © 2023
           <ul style={{ listStyleType: 'none', padding: 0, textAlign: 'left' }}>
             <li>Website chính thức: <a href="https://rainbowmusicled.com" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>https://rainbowmusicled.com</a></li>
-            <li>Website phụ: <a href="https://ambilight.vn" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>https://ambilight.vn</a></li>
             <li>Fanpage: <a href="https://facebook.com/rainbowmusicled/" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>https://facebook.com/rainbowmusicled/</a></li>
-            <li>Shopee: <a href="https://shopee.vn/ambilight.vn" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>https://shopee.vn/ambilight.vn</a></li>
             <li>Zalo/SĐT: <a href="tel:0981373223" style={{ color: 'white' }}>0981373223</a></li>
           </ul>
         </CardContent>
