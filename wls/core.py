@@ -317,8 +317,10 @@ class WlsCore:
     async def flush_loop(self):
         await asyncio.sleep(0)
 
-    def start(self, open_ui=False):
-        async_fire_and_forget(self.async_start(open_ui=open_ui), self.loop)
+    def start(self, open_ui=False, pause_all=False):
+        async_fire_and_forget(
+            self.async_start(open_ui=open_ui, pause_all=pause_all), self.loop
+        )
 
         try:
             self.loop.run_forever()
@@ -338,7 +340,7 @@ class WlsCore:
 
         return self.exit_code
 
-    async def async_start(self, open_ui=False):
+    async def async_start(self, open_ui=False, pause_all=False):
         _LOGGER.info("Khởi động WiFi Led Studio")
         await self.http.start(get_ssl_certs(config_dir=self.config_dir))
         if (
@@ -376,7 +378,9 @@ class WlsCore:
         await self.devices.async_initialize_devices()
 
         self.zeroconf = ZeroConfRunner(wls=self)
-        self.virtuals.create_from_config(self.config["virtuals"])
+        self.virtuals.create_from_config(
+            self.config["virtuals"], pause_all=pause_all
+        )
         self.integrations.create_from_config(self.config["integrations"])
 
         if self.config["scan_on_startup"]:
@@ -394,6 +398,10 @@ class WlsCore:
         if self.ci_testing:
             await asyncio.sleep(5)
             self.stop(5)
+
+        if pause_all:
+            # pause at the virtuals level
+            self.virtuals.pause_all()
 
         await self.flush_loop()
 

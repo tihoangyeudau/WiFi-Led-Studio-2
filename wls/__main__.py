@@ -240,6 +240,13 @@ def parse_args():
         action="store_true",
         help="Launch WiFi Led Studio, load the config, clear all active effects on all virtuals. Effect configurations are persisted, just turned off",
     )
+
+    parser.add_argument(
+        "--pause-all",
+        dest="pause_all",
+        action="store_true",
+        help="Start WiFi Led Studio with all virtuals paused",
+    )
     
     return parser.parse_args()
 
@@ -378,7 +385,7 @@ def entry_point(icon=None):
             clear_effects=args.clear_effects,
             )
 
-        exit_code = wls.start(open_ui=args.open_ui)
+        exit_code = wls.start(open_ui=args.open_ui, pause_all=args.pause_all)
 
     if icon:
         icon.stop()

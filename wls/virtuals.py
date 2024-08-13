@@ -843,7 +843,7 @@ class Virtuals:
         self._wls.events.add_listener(cleanup_effects, Event.WLS_SHUTDOWN)
         self._virtuals = {}
 
-    def create_from_config(self, config):
+    def create_from_config(self, config, pause_all=False):
         for virtual in config:
             _LOGGER.debug(f"Đang tải ảo từ cấu hình: {virtual}")
             self._wls.virtuals.create(
@@ -884,6 +884,10 @@ class Virtuals:
             # via the active key if it exists. Let the setter deal with it
             if "active" in virtual and not virtual["active"]:
                 self._wls.virtuals.get(virtual["id"]).active = False
+
+            # global pause is handled differently to virtual pause
+            if pause_all:
+                self._wls.virtuals.get(virtual["id"])._paused = True
 
             self._wls.events.fire_event(
                 VirtualConfigUpdateEvent(virtual["id"], virtual["config"])
@@ -935,6 +939,12 @@ class Virtuals:
     def clear_all_effects(self):
         for virtual in self.values():
             virtual.clear_frame()
+
+    def pause_all(self):
+        self._paused = not self._paused
+        for virtual in self.values():
+            virtual._paused = self._paused
+        self._wls.events.fire_event(GlobalPauseEvent())
 
     def pause_all(self):
         self._paused = not self._paused
