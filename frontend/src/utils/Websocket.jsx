@@ -133,7 +133,7 @@ export const HandleWs = () => {
       if (e.detail.isDisconnected) {
         setWasDisconnected(true);
       } else if (wasDisconnected) {
-        window.location.reload(true);
+        window.location.reload();
       }
     };
 

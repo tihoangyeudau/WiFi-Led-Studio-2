@@ -42,7 +42,7 @@ INSTALL_REQUIRES = [
     "samplerate>=0.2.1",
     "icmplib>=3.0.4",
     "voluptuous>=0.14.1",
-    "zeroconf~=0.39.4",
+    "zeroconf~=0.119.0",
     "pillow>=10.1.0",
     "stupidartnet~=1.4.0",
     # Conditional Requirement
