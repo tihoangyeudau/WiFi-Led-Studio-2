@@ -141,7 +141,7 @@ class WlsCore:
     def open_ui(self):
         # Check if we're binding to all adaptors
         if str(self.config["host"]) == "0.0.0.0":
-            url = f"http://127.0.0.1:{str(self.port)}"
+            url = f"http://localhost:{str(self.port)}"
         else:
             # If the user has specified an adaptor, launch its address
             url = self.http.base_url
@@ -185,7 +185,7 @@ class WlsCore:
     def delete_wls_key(self):
         if sys.platform == "win32":
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_ALL_ACCESS)
-            winreg.DeleteValue(key, "WiFi Led Studio")
+            winreg.DeleteValue(key, "A-WiFi Led Studio")
         elif sys.platform == "darwin":
             wls_destination_path = os.path.expanduser('~/Library/LaunchAgents/com.wls.startup.plist')
             os.remove(wls_destination_path)
@@ -203,7 +203,7 @@ class WlsCore:
             path1 = os.path.join(os.environ["ProgramFiles"], "WiFi Led Studio", "WiFi Led Studio.exe")
             path2 = '"' + path1 + '"'
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_ALL_ACCESS)
-            winreg.SetValueEx(key, "WiFi Led Studio", 0, winreg.REG_SZ, path2)
+            winreg.SetValueEx(key, "A-WiFi Led Studio", 0, winreg.REG_SZ, path2)
             winreg.CloseKey(key)
         elif sys.platform == "darwin":
             wls_source_path = "/Applications/WiFi Led Studio.app/Contents/Resources/com.wls.startup.plist"
