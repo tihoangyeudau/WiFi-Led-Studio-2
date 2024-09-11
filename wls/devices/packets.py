@@ -107,9 +107,9 @@ def build_dnrgb_packet(
     return packet
 
 
-def build_ambilightusb_rainbowmusicled_dot_com_0981373223_packet(data: np.ndarray, color_order: str):
+def build_skydimondusb_rainbowmusicled_dot_com_0981373223_packet(data: np.ndarray, color_order: str):
     """
-    Generic AmbilightUSB serial packet encoding
+    Generic SkydimondUSB serial packet encoding
 
     Header: [A, d, a, pixel count high byte, pixel count low byte, pixel count checksum]
     Byte 	Description
@@ -147,9 +147,9 @@ def build_ambilightusb_rainbowmusicled_dot_com_0981373223_packet(data: np.ndarra
     return packet
 
 
-def build_ambilightusbpro_rainbowmusicled_dot_com_0981373223_packet(data: np.ndarray, color_order: str):
+def build_skydimondusbpro_rainbowmusicled_dot_com_0981373223_packet(data: np.ndarray, color_order: str):
     """
-    Generic Ambilight USB Pro serial packet encoding
+    Generic Skydimond USB serial packet encoding
     """
     pixel_length = len(data)
     led_count = pixel_length - 1 

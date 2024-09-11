@@ -85,7 +85,7 @@ class DeviceEndpoint(RestEndpoint):
             return web.json_response(data=response, status=404)
 
         try:
-            if device.type == "rml":
+            if device.type == "skydimond-wifi":
                 await device.resolve_address()
             status = 200
 

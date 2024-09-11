@@ -31,9 +31,9 @@ What's new?
   - *EQ-Like Effects:* Blocks, Equalizer
   - *Other Effects:* Power, Magnitude
 
-- **AmbilightUSB Compatability**
+- **SkydimondUSB Compatability**
 
-  - *AmbilightUSB Device:* Use a COM port to communicate with your ambilightusb-compatible device.
+  - *SkydimondUSB Device:* Use a COM port to communicate with your skydimondusb-compatible device.
 
 - **Scenes & Presets**
 

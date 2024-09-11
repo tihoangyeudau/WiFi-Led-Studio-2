@@ -33,8 +33,8 @@ export default {
 // eslint-disable-next-line
 const Template: ComponentStory<typeof BladeSchemaForm> = (args) => <BladeSchemaForm {...args} />;
 
-export const AddDeviceAmbilightUSB = Template.bind({});
-AddDeviceAmbilightUSB.args = {
+export const AddDeviceSkydimondUSB = Template.bind({});
+AddDeviceSkydimondUSB.args = {
   schema: {
     properties: {
       name: {
@@ -65,7 +65,7 @@ AddDeviceAmbilightUSB.args = {
         type: 'string',
         enum: ['COM1'],
         title: 'Cổng COM',
-        description: 'Cổng COM cho đèn AmbilightUSB',
+        description: 'Cổng COM cho đèn SkydimondUSB',
       },
       baudrate: {
         type: 'integer',

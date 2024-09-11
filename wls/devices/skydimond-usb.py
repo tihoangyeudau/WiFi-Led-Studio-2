@@ -11,8 +11,8 @@ COLOR_ORDERS = [
     "BGR",
 ]
 
-class AmbilightUSBDevice(SerialDevice):
-    """Ambilight USB device support"""
+class SkydimondUSBDevice(SerialDevice):
+    """Skydimond USB device support"""
 
     @staticmethod
     @property
@@ -35,7 +35,7 @@ class AmbilightUSBDevice(SerialDevice):
 
     def __init__(self, wls, config):
         super().__init__(wls, config)
-        self._device_type = "Ambilight USB"
+        self._device_type = "Skydimond USB"
         self.color_order = self._config["color_order"]
 
     def flush(self, data):
@@ -47,11 +47,11 @@ class AmbilightUSBDevice(SerialDevice):
         try:
             if self.version == 115200:
                 self.serial.write(
-                    packets.build_ambilightusb_rainbowmusicled_dot_com_0981373223_packet(data, self.color_order)
+                    packets.build_skydimondusb_rainbowmusicled_dot_com_0981373223_packet(data, self.color_order)
                 )
             else:
                 self.serial.write(
-                    packets.build_ambilightusbpro_rainbowmusicled_dot_com_0981373223_packet(data, self.color_order)
+                    packets.build_skydimondusbpro_rainbowmusicled_dot_com_0981373223_packet(data, self.color_order)
                 )
         except serial.SerialException as e:
             print("Không thể gửi dữ liệu: USB bị mất kết nối, hãy thử lại")

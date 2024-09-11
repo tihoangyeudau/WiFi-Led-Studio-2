@@ -107,7 +107,7 @@ class WlsCore:
         self.loop.set_default_executor(self.thread_executor)
         self.loop.set_exception_handler(self.loop_exception_handler)
         if self.icon:
-            if self.check_ambilight_run_key():
+            if self.check_rmlapp_run_key():
                 self.setup_icon_menu_aw()
             else:
                 self.setup_icon_menu_wls()
@@ -155,7 +155,7 @@ class WlsCore:
     def restart_wls(self):
         self.stop(exit_code=4)
 
-    def check_ambilight_run_key(self):
+    def check_rmlapp_run_key(self):
         if sys.platform == "win32":
             # Mở key HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run")
@@ -166,16 +166,16 @@ class WlsCore:
             # Duyệt qua từng giá trị trong key
             for i in range(num_values):
                 value_name, _, _ = winreg.EnumValue(key, i)
-                if value_name == "Ambilight WiFi-USB":
-                    # Tìm thấy key "Ambilight WiFi-USB"
+                if value_name == "A-Rainbow Music Led":
+                    # Tìm thấy key "A-Rainbow Music Led"
                     winreg.CloseKey(key)
                     return True
             
-            # Không tìm thấy key "Ambilight WiFi-USB"
+            # Không tìm thấy key "A-Rainbow Music Led"
             winreg.CloseKey(key)
             return False
         elif sys.platform == "darwin":
-            file_path = os.path.expanduser('~/Library/LaunchAgents/com.ambilightwifi.startup.plist')
+            file_path = os.path.expanduser('~/Library/LaunchAgents/com.rmlapp.startup.plist')
             # Kiểm tra hàm
             if os.path.isfile(file_path):
                 return True
@@ -193,9 +193,9 @@ class WlsCore:
     def delete_aw_key(self):
         if sys.platform == "win32":
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_ALL_ACCESS)
-            winreg.DeleteValue(key, "Ambilight WiFi-USB")
+            winreg.DeleteValue(key, "A-Rainbow Music Led")
         elif sys.platform == "darwin":
-            aw_destination_path = os.path.expanduser("~/Library/LaunchAgents/com.ambilightwifi.startup.plist")
+            aw_destination_path = os.path.expanduser("~/Library/LaunchAgents/com.rmlapp.startup.plist")
             os.remove(aw_destination_path)
 
     def add_wls_key(self):
@@ -213,14 +213,14 @@ class WlsCore:
     
     def add_aw_key(self):
         if sys.platform == "win32":
-            path1 = os.path.join(os.environ["ProgramFiles"], "Ambilight WiFi-USB\\bin", "ambilightwifi.exe")
+            path1 = os.path.join(os.environ["ProgramFiles"], "A-Rainbow Music Led\\bin", "rmlapp.exe")
             path2 = '"' + path1 + '"'
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_ALL_ACCESS)
-            winreg.SetValueEx(key, "Ambilight WiFi-USB", 0, winreg.REG_SZ, path2)
+            winreg.SetValueEx(key, "A-Rainbow Music Led", 0, winreg.REG_SZ, path2)
             winreg.CloseKey(key)
         elif sys.platform == "darwin":
-            aw_source_path = "/Applications/ambilightwifi.app/Contents/Resources/com.ambilightwifi.startup.plist"
-            aw_destination_path = os.path.expanduser("~/Library/LaunchAgents/com.ambilightwifi.startup.plist")
+            aw_source_path = "/Applications/rmlapp.app/Contents/Resources/com.rmlapp.startup.plist"
+            aw_destination_path = os.path.expanduser("~/Library/LaunchAgents/com.rmlapp.startup.plist")
 
             shutil.copy(aw_source_path, aw_destination_path)
 
@@ -228,7 +228,7 @@ class WlsCore:
 
     def setup_icon_menu_aw(self):
         adapter = "Bấm để sáng 'hiệu ứng màu' khi khởi động | Enable autostart 'Effect / Color'"
-        if not self.check_ambilight_run_key():
+        if not self.check_rmlapp_run_key():
             self.delete_wls_key()
             self.add_aw_key()
 
@@ -244,7 +244,7 @@ class WlsCore:
 
     def setup_icon_menu_wls(self):
         adapter = "Bấm để 'theo màu màn hình' khi khởi động | Enable autostart 'Screen capture'"
-        if self.check_ambilight_run_key():
+        if self.check_rmlapp_run_key():
             self.delete_aw_key()
             self.add_wls_key()
 
@@ -451,10 +451,10 @@ class WlsCore:
         exit_code = await self._common_async_stop(exit_code)
         
         if sys.platform == "win32":
-            path1 = os.path.join(os.environ["ProgramFiles"], "Ambilight WiFi-USB\\bin", "ambilightwifi.exe")
+            path1 = os.path.join(os.environ["ProgramFiles"], "Rainbow Music Led\\bin", "rmlapp.exe")
             startupinfo = subprocess.STARTUPINFO()
             subprocess.Popen([path1], startupinfo=startupinfo)
         elif sys.platform == "darwin":
-            subprocess.run(['open', '/Applications/ambilightwifi.app'], check=True)
+            subprocess.run(['open', '/Applications/rmlapp.app'], check=True)
 
         return exit_code

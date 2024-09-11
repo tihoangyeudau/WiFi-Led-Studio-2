@@ -404,7 +404,7 @@ class UDPDevice(NetworkedDevice):
         self._sock = None
 
 # Constants
-VERSION_ORDERS = ["Pro Max", "Pro", "Thường"]
+VERSION_ORDERS = ["Pro Max", "Thường"]
 LED_ID_ORDERS = ["_Auto_"]
 MAX_RETRIES = 1  # Maximum number of reconnection attempts
 MANUFACTURERS = ['wch.cn', 'FTDI', 'Microsoft', 'Silicon Labs']
@@ -454,7 +454,6 @@ class SerialDevice(Device):
     def _get_version_baudrate(self):
         version_mapping = {
             "Pro Max": 1000000,
-            "Pro": 1500000,
             "Thường": 115200
         }
         return version_mapping.get(self._config["version"], 115200)
@@ -705,7 +704,7 @@ class Devices(RegistryLoader):
                         raise ValueError(msg)
 
         # If RML device, get all the necessary config from the device itself
-        if device_type == "rml":
+        if device_type == "skydimond-wifi":
             rml = RML(resolved_dest)
             rml_config = await rml.get_config()
 
@@ -772,7 +771,7 @@ class Devices(RegistryLoader):
             await device.async_initialize()
 
         device_config = device.config
-        if device_type == "rml" and rml_name is not None:
+        if device_type == "skydimond-wifi" and rml_name is not None:
             device_config["name"] = rml_name
         # Update and save the configuration
         self._wls.config["devices"].append(
@@ -826,7 +825,7 @@ class Devices(RegistryLoader):
     async def set_rmls_sync_mode(self, mode):
         for device in self.values():
             if (
-                device.type == "rml"
+                device.type == "skydimond-wifi"
                 and device.pixel_count > 480
                 and device.config["sync_mode"] != mode
             ):

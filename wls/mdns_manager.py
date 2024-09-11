@@ -101,7 +101,7 @@ class ZeroConfRunner:
             hostname = str(info.server).rstrip(".")
             _LOGGER.info(f"Found RML device: {hostname}")
 
-            device_type = "rml"
+            device_type = "skydimond-wifi"
             device_config = {"ip_address": hostname}
 
             def handle_exception(future):

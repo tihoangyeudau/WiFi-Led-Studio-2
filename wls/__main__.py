@@ -38,14 +38,14 @@ from wls.utils import currently_frozen, get_icon_path
 if sys.platform == "win32":
     for process in psutil.process_iter():
         try:
-            if process.name() == "ambilightwifi.exe":
+            if process.name() == "rmlapp.exe":
                 process.terminate()
         except psutil.NoSuchProcess:
             pass
 elif sys.platform == "darwin":
     for process in psutil.process_iter():
         try:
-            if process.name() == "ambilightwifi":
+            if process.name() == "rmlapp":
                 process.terminate()
         except psutil.NoSuchProcess:
             pass
