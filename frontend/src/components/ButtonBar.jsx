@@ -32,7 +32,7 @@ const ButtonBar = () => {
       <IconButton
         aria-label="Youtube"
         color="inherit"
-        href="https://www.youtube.com/channel/UCATBTjpcc1HHLexbgE5ZCdw"
+        href="https://www.youtube.com/@rainbowmusicled"
         target="_blank"
         title="Youtube"
       >

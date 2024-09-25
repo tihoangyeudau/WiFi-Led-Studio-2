@@ -59,7 +59,7 @@ export default function Home(props) {
       >
         <CardHeader style={{ textAlign: 'center' }} title="WIFI LED STUDIO" />
         <CardContent style={{ textAlign: 'center' }}>
-          RAINBOW MUSIC LED © 2023
+          RAINBOW MUSIC LED © 2024
           <ul style={{ listStyleType: 'none', padding: 0, textAlign: 'left' }}>
             <li>Website chính thức: <a href="https://rainbowmusicled.com" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>https://rainbowmusicled.com</a></li>
             <li>Fanpage: <a href="https://facebook.com/rainbowmusicled/" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>https://facebook.com/rainbowmusicled/</a></li>
