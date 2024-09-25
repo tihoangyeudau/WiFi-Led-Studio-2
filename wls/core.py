@@ -8,6 +8,9 @@ import webbrowser
 import subprocess
 if sys.platform == "win32":
     import winreg
+    from pycaw.pycaw import AudioUtilities, IMMNotificationClient
+    from pycaw.callbacks import MMNotificationClient
+    import comtypes
 elif sys.platform == "darwin":
     import shutil
 
@@ -49,6 +52,29 @@ _LOGGER = logging.getLogger(__name__)
 if currently_frozen():
     warnings.filterwarnings("ignore")
 
+class MyAudioNotificationClient(MMNotificationClient):
+    def __init__(self, wls_core):
+        self.wls_core = wls_core
+        self.last_device_id = None
+
+    def on_default_device_changed(self, flow, flow_id, role, role_id, default_device_id):
+        if flow == "eRender":  # Only listen for changes in playback devices (speakers)
+            if default_device_id == self.last_device_id:
+                return
+            try:
+                comtypes.CoInitialize()
+                devices = AudioUtilities.GetAllDevices()
+                for device in devices:
+                    if device.id == default_device_id:
+                        _LOGGER.info(f"Default speaker changed: {device.FriendlyName}")
+                        self.last_device_id = default_device_id
+                        self.wls_core.restart_wls()
+                        return
+                _LOGGER.warning(f"Device not found with ID: {default_device_id}")
+            except Exception as e:
+                _LOGGER.error(f"Error occurred while getting audio device: {str(e)}")
+            finally:
+                comtypes.CoUninitialize()
 
 class WlsCore:
 
@@ -73,6 +99,11 @@ class WlsCore:
     ):
         self.icon = icon
         self.config_dir = config_dir
+
+        if sys.platform == "win32":
+            self.audio_notification_client = MyAudioNotificationClient(self)
+            self.device_enumerator = AudioUtilities.GetDeviceEnumerator()
+            self.device_enumerator.RegisterEndpointNotificationCallback(self.audio_notification_client)
 
         if clear_config:
             _LOGGER.warning("Clearing WiFi Led Studio config.")
@@ -402,6 +433,9 @@ class WlsCore:
         if pause_all:
             # pause at the virtuals level
             self.virtuals.pause_all()
+        
+        if sys.platform == "win32":
+            comtypes.CoInitialize()
 
         await self.flush_loop()
 
@@ -433,6 +467,10 @@ class WlsCore:
                     pass
                 _LOGGER.debug("All tasks killed.")
             save_config(config=self.config, config_dir=self.config_dir)
+
+            if sys.platform == "win32":
+                self.device_enumerator.UnregisterEndpointNotificationCallback(self.audio_notification_client)
+                comtypes.CoUninitialize()
 
         except Exception as e:
             _LOGGER.error(f"An error occurred while stopping: {e}")
