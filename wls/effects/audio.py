@@ -215,7 +215,7 @@ class AudioInputSource:
                         self.input_devices()[self._config["audio_device"]]
                     )
                 )
-        self._wls.config["audio"] = self._config
+            self._wls.config["audio"] = self._config
 
     def activate(self):
 
