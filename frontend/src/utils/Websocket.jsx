@@ -15,8 +15,8 @@ import isElectron from 'is-electron';
 function createSocket() {
   if (!window.localStorage.getItem('wls-newbase')) {
     const _ws = new Sockette(`${(window.localStorage.getItem('wls-host') || (isElectron() ? 'http://localhost:8090' : window.location.href.split('/#')[0])).replace('https://', 'wss://').replace('http://', 'ws://')}/api/websocket`, {
-      timeout: 5e3,
-      maxAttempts: 10,
+      timeout: 1e3,
+      maxAttempts: 10000,
       onopen: e => {
         document.dispatchEvent(
           new CustomEvent("disconnected", {

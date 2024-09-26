@@ -9,8 +9,8 @@ function createSocket() {
   
   if (!!window.localStorage.getItem('wls-newbase')) {
     const _wsNew = new Sockette(`${(window.localStorage.getItem('wls-host') || (isElectron() ? 'http://localhost:8080' : window.location.href.split('/#')[0])).replace('https://', 'wss://').replace('http://', 'ws://')}/ws`, {
-      timeout: 5e3,
-      maxAttempts: 10,
+      timeout: 1e3,
+      maxAttempts: 10000,
       onopen: e => {
         console.log('NEW BASE Connected!', e)
         // document.dispatchEvent(
@@ -91,6 +91,22 @@ export const HandleWsNew = () => {
       }
     }
   }, [wsReady]);
+
+  useEffect(() => {
+    const handleDisconnected = (e) => {
+      if (e.detail.isDisconnected) {
+        setWasDisconnected(true);
+      } else if (wasDisconnected) {
+        window.location.reload();
+      }
+    };
+
+    document.addEventListener('disconnected', handleDisconnected);
+
+    return () => {
+      document.removeEventListener('disconnected', handleDisconnected);
+    };
+  }, [wasDisconnected]);
 
   useEffect(() => {
     if (!wsReady) {
