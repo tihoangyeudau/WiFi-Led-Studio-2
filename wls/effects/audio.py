@@ -265,77 +265,69 @@ class AudioInputSource:
             self._wls.config["audio"] = self._config
 
     def activate(self):
-
         if self._audio is None:
             try:
                 self._audio = sd
             except OSError as Error:
-                _LOGGER.critical(f"Lỗi: {Error}. Đang Tắt.")
+                _LOGGER.critical(f"Lỗi: {Error}. Đang tắt hệ thống.")
                 self._wls.stop()
+                return
 
         if sys.platform == 'win32':
-            # Register the notification client
-            comtypes.CoInitialize()
-            device_enumerator = AudioUtilities.GetDeviceEnumerator()
-            device_enumerator.RegisterEndpointNotificationCallback(self.notification_client)
+            try:
+                # Khởi tạo COM và đăng ký notification client
+                comtypes.CoInitialize()
+                device_enumerator = AudioUtilities.GetDeviceEnumerator()
+                device_enumerator.RegisterEndpointNotificationCallback(self.notification_client)
+            except OSError as e:
+                _LOGGER.critical(f"Lỗi khi đăng ký notification client: {e}")
+                self.deactivate()
+                return
+            except Exception as e:
+                _LOGGER.critical(f"Lỗi COM không xác định: {e}")
+                self.deactivate()
+                return
 
-        # Enumerate all of the input devices and find the one matching the
-        # configured host api and device name
+        # Liệt kê tất cả thiết bị đầu vào và tìm thiết bị khớp với cấu hình
         input_devices = self.query_devices()
         hostapis = self.query_hostapis()
         default_device = self.default_device_index()
+
         if default_device is None:
-            # There are no valid audio input devices, so we can't activate the audio source.
-            # We should never get here, as we check for devices on start-up.
-            # This likely just captures if a device is removed after start-up.
-            _LOGGER.warning(
-                "Không tìm thấy loa. Không thể kích hoạt nguồn âm thanh. Đang vô hiệu hoá."
-            )
+            # Không có thiết bị âm thanh hợp lệ, không thể kích hoạt nguồn âm thanh
+            _LOGGER.warning("Không tìm thấy loa. Không thể kích hoạt nguồn âm thanh. Đang vô hiệu hoá.")
             self.deactivate()
             return
+
         valid_device_indexes = self.valid_device_indexes()
 
-        
+        # Lựa chọn chỉ mục thiết bị
         if sys.platform == 'win32':
             device_idx = default_device
         else:
             device_idx = self._config["audio_device"]
             if device_idx > max(valid_device_indexes):
-                _LOGGER.warning(
-                    f"Chỉ mục thiết bị âm thanh không hợp lệ: {device_idx}. Hoàn nguyên về thiết bị đầu vào mặc định."
-                )
+                _LOGGER.warning(f"Chỉ mục thiết bị âm thanh không hợp lệ: {device_idx}. Hoàn nguyên về thiết bị đầu vào mặc định.")
+                device_idx = default_device
+            elif device_idx not in valid_device_indexes:
+                _LOGGER.warning(f"Thiết bị âm thanh {input_devices[device_idx]['name']} không có kênh đầu vào. Hoàn nguyên về thiết bị đầu vào mặc định.")
                 device_idx = default_device
 
-            elif device_idx not in valid_device_indexes:
-                _LOGGER.warning(
-                    f"Thiết bị âm thanh {input_devices[device_idx]['name']} không có kênh đầu vào. Hoàn nguyên về thiết bị đầu vào mặc định."
-                )
-
-        # Setup a pre-emphasis filter to balance the input volume of lows to highs
+        # Cài đặt bộ lọc tiền nhấn mạnh âm thanh (pre-emphasis filter)
         self.pre_emphasis = aubio.digital_filter(3)
         self.pre_emphasis.set_biquad(0.8268, -1.6536, 0.8268, -1.6536, 0.6536)
 
-        # self.pre_emphasis = None,
+        # Tạo ra mẫu FFT (tần số)
         freq_domain_length = (self._config["fft_size"] // 2) + 1
+        self._raw_audio_sample = np.zeros(MIC_RATE // self._config["sample_rate"], dtype=np.float32)
 
-        self._raw_audio_sample = np.zeros(
-            MIC_RATE // self._config["sample_rate"],
-            dtype=np.float32,
-        )
-
-        # Setup the phase vocoder to perform a windowed FFT
-        self._phase_vocoder = aubio.pvoc(
-            self._config["fft_size"],
-            MIC_RATE // self._config["sample_rate"],
-        )
+        # Thiết lập bộ phân tích pha vocoder
+        self._phase_vocoder = aubio.pvoc(self._config["fft_size"], MIC_RATE // self._config["sample_rate"])
         self._frequency_domain_null = aubio.cvec(self._config["fft_size"])
         self._frequency_domain = self._frequency_domain_null
-        self._frequency_domain_x = np.linspace(
-            0,
-            MIC_RATE,
-            freq_domain_length,
-        )
+        self._frequency_domain_x = np.linspace(0, MIC_RATE, freq_domain_length)
 
+        # Hàm mở stream âm thanh
         def open_audio_stream(device_idx):
             device = input_devices[device_idx]
             ch = 1
@@ -343,58 +335,52 @@ class AudioInputSource:
                 if "Loopback" in device["name"]:
                     ch = 2
 
-            if hostapis[device["hostapi"]]["name"] == "WEB AUDIO":
-                wls.api.websocket.ACTIVE_AUDIO_STREAM = (
-                    self._stream
-                ) = WebAudioStream(
-                    device["client"], self._audio_sample_callback
-                )
-            else:
-                if sys.platform == 'win32':
-                    self._stream = self._audio.InputStream(
-                        samplerate=int(device["default_samplerate"]),
-                        device=device_idx,
-                        channels=ch,
-                        callback=self._audio_sample_callback,
-                        dtype=np.float32,
-                        latency="low",
-                        blocksize=int(
-                        device["default_samplerate"]
-                        / self._config["sample_rate"]
-                        ),
-                    )
+            try:
+                if hostapis[device["hostapi"]]["name"] == "WEB AUDIO":
+                    wls.api.websocket.ACTIVE_AUDIO_STREAM = (
+                        self._stream
+                    ) = WebAudioStream(device["client"], self._audio_sample_callback)
                 else:
-                    self._stream = self._audio.InputStream(
-                        samplerate=MIC_RATE,
-                        device=device_idx,
-                        channels=1,
-                        callback=self._audio_sample_callback,
-                        dtype=np.float32,
-                        latency="low",
-                        blocksize=MIC_RATE
-                        // self._config["sample_rate"],
-                    )
+                    if sys.platform == 'win32':
+                        self._stream = self._audio.InputStream(
+                            samplerate=int(device["default_samplerate"]),
+                            device=device_idx,
+                            channels=ch,
+                            callback=self._audio_sample_callback,
+                            dtype=np.float32,
+                            latency="low",
+                            blocksize=int(device["default_samplerate"] / self._config["sample_rate"]),
+                        )
+                    else:
+                        self._stream = self._audio.InputStream(
+                            samplerate=MIC_RATE,
+                            device=device_idx,
+                            channels=1,
+                            callback=self._audio_sample_callback,
+                            dtype=np.float32,
+                            latency="low",
+                            blocksize=MIC_RATE // self._config["sample_rate"],
+                        )
 
-            if sys.platform == 'win32':
-                self.resampler = samplerate.Resampler("sinc_fastest", channels=1)
+                if sys.platform == 'win32':
+                    self.resampler = samplerate.Resampler("sinc_fastest", channels=1)
 
-            _LOGGER.info(
-                f"Nguồn âm thanh đã mở: {hostapis[device['hostapi']]['name']}: {device.get('name', device.get('client'))}"
-            )
+                _LOGGER.info(f"Nguồn âm thanh đã mở: {hostapis[device['hostapi']]['name']}: {device.get('name', device.get('client'))}")
+                self._stream.start()
 
-            self._stream.start()
+            except OSError as e:
+                _LOGGER.critical(f"Không thể mở Thiết bị Âm thanh: {e}. Đang vô hiệu hóa.")
+                self.deactivate()
+            except sd.PortAudioError as e:
+                _LOGGER.error(f"Lỗi PortAudio: {e}. Đang trả về thiết bị đầu vào mặc định.")
+                open_audio_stream(default_device)
 
         try:
             open_audio_stream(device_idx)
             self._is_activated = True
-        except OSError as e:
-            _LOGGER.critical(
-                f"Không thể mở Thiết bị Âm thanh: {e} - xin hãy thử lại."
-            )
+        except Exception as e:
+            _LOGGER.error(f"Lỗi khi kích hoạt âm thanh: {e}. Đang vô hiệu hoá.")
             self.deactivate()
-        except sd.PortAudioError as e:
-            _LOGGER.error(f"{e}, Đang trả về thiết bị đầu vào mặc định")
-            open_audio_stream(default_device)
 
     def deactivate(self):
         if self._stream:
@@ -405,11 +391,20 @@ class AudioInputSource:
         _LOGGER.info("Đã đóng nguồn âm thanh.")
 
         if sys.platform == 'win32':
-            # Unregister the notification client
-            comtypes.CoInitialize()
-            device_enumerator = AudioUtilities.GetDeviceEnumerator()
-            device_enumerator.UnregisterEndpointNotificationCallback(self.notification_client)
-            comtypes.CoUninitialize()
+            # Unregister the notification client if initialized
+            if self.notification_client:
+                try:
+                    device_enumerator = AudioUtilities.GetDeviceEnumerator()
+                    device_enumerator.UnregisterEndpointNotificationCallback(self.notification_client)
+                    _LOGGER.info("Đã hủy đăng ký notification client.")
+                except Exception as e:
+                    _LOGGER.error(f"Lỗi khi hủy đăng ký notification client: {e}")
+            
+            try:
+                comtypes.CoUninitialize()  # Chỉ giải phóng COM, không cần gọi CoInitialize
+                _LOGGER.info("COM đã được giải phóng.")
+            except Exception as e:
+                _LOGGER.error(f"Lỗi khi giải phóng COM: {e}")
 
         _LOGGER.warning("Đã đóng nguồn âm thanh.")
 
