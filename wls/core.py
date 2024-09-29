@@ -8,7 +8,7 @@ import webbrowser
 import subprocess
 if sys.platform == "win32":
     import winreg
-    from pycaw.pycaw import AudioUtilities
+    from pycaw.pycaw import AudioUtilities, IMMNotificationClient
     from pycaw.callbacks import MMNotificationClient
     import comtypes
 elif sys.platform == "darwin":
