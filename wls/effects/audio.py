@@ -9,6 +9,9 @@ import aubio
 import numpy as np
 if sys.platform == 'win32':
     import samplerate
+    from pycaw.pycaw import AudioUtilities
+    from pycaw.callbacks import MMNotificationClient
+    import comtypes
 import sounddevice as sd
 import voluptuous as vol
 
@@ -17,12 +20,45 @@ from wls.api.websocket import WEB_AUDIO_CLIENTS, WebAudioStream
 from wls.effects import Effect
 from wls.effects.math import ExpFilter
 from wls.effects.melbank import FFT_SIZE, MIC_RATE, Melbanks
-from wls.events import AudioDeviceChangeEvent, Event
+from wls.events import RestartAudioInputSourceEvent, AudioDeviceChangeEvent, Event
 
 _LOGGER = logging.getLogger(__name__)
 
 MIN_MIDI = 21
 MAX_MIDI = 108
+
+if sys.platform == 'win32':
+    class MyAudioNotificationClient(MMNotificationClient):
+        last_device_id = None
+
+        def __init__(self, events):
+            super().__init__()
+            self.events = events  # Store the events manager
+
+        def on_default_device_changed(self, flow, flow_id, role, role_id, default_device_id):
+            if flow == "eRender":  # Chỉ lắng nghe sự thay đổi của thiết bị phát (loa)
+                if default_device_id == self.last_device_id:
+                    # Bỏ qua sự kiện nếu thiết bị không thay đổi
+                    return
+                try:
+                    comtypes.CoInitialize()  # Khởi tạo COM cho thread hiện tại
+
+                    devices = AudioUtilities.GetAllDevices()
+                    for device in devices:
+                        if device.id == default_device_id:
+                            _LOGGER.info(f"Loa mặc định đã thay đổi: {device.FriendlyName}")
+                            self.last_device_id = default_device_id  # Cập nhật ID thiết bị cuối cùng
+                            
+                            self.events.fire_event(
+                                RestartAudioInputSourceEvent()
+                            )
+
+                            return
+                    _LOGGER.warning(f"Không tìm thấy thiết bị có ID: {default_device_id}")
+                except Exception as e:
+                    _LOGGER.error(f"Đã xảy ra lỗi khi lấy thiết bị âm thanh: {str(e)}")
+                finally:
+                    comtypes.CoUninitialize()
 
 
 class AudioInputSource:
@@ -37,6 +73,7 @@ class AudioInputSource:
     _volume_filter = ExpFilter(-90, alpha_decay=0.99, alpha_rise=0.99)
     _subscriber_threshold = 0
     _timer = None
+    notification_client = None  # To store the audio device change listener
 
     @staticmethod
     def update_default_loopback_index():
@@ -181,8 +218,9 @@ class AudioInputSource:
                 extra=vol.ALLOW_EXTRA,
             )
 
-    def __init__(self, wls, config):
+    def __init__(self, wls, config, events):
         self._wls = wls
+        self.events = events  # Store the events manager
         self.update_config(config)
 
         def shutdown_event(e):
@@ -193,6 +231,15 @@ class AudioInputSource:
             self._timer.start()
 
         self._wls.events.add_listener(shutdown_event, Event.WLS_SHUTDOWN)
+
+        if sys.platform == 'win32':
+            # Initialize the notification client for audio device changes
+            self.notification_client = MyAudioNotificationClient(self.events)
+
+            def restart_audio_input_source_event(e):
+                self.restart_audio_input_source()
+
+            self._wls.events.add_listener(restart_audio_input_source_event, Event.RESTART_AUDIO_INPUT_SOURCE)
 
     def update_config(self, config):
         """Deactivate the audio, update the config, the reactivate"""
@@ -225,6 +272,12 @@ class AudioInputSource:
             except OSError as Error:
                 _LOGGER.critical(f"Lỗi: {Error}. Đang Tắt.")
                 self._wls.stop()
+
+        if sys.platform == 'win32':
+            # Register the notification client
+            comtypes.CoInitialize()
+            device_enumerator = AudioUtilities.GetDeviceEnumerator()
+            device_enumerator.RegisterEndpointNotificationCallback(self.notification_client)
 
         # Enumerate all of the input devices and find the one matching the
         # configured host api and device name
@@ -351,6 +404,15 @@ class AudioInputSource:
         self._is_activated = False
         _LOGGER.info("Đã đóng nguồn âm thanh.")
 
+        if sys.platform == 'win32':
+            # Unregister the notification client
+            comtypes.CoInitialize()
+            device_enumerator = AudioUtilities.GetDeviceEnumerator()
+            device_enumerator.UnregisterEndpointNotificationCallback(self.notification_client)
+            comtypes.CoUninitialize()
+
+        _LOGGER.warning("Đã đóng nguồn âm thanh.")
+
     def subscribe(self, callback):
         """Registers a callback with the input source"""
         self._callbacks.append(callback)
@@ -382,6 +444,13 @@ class AudioInputSource:
             and self._is_activated
         ):
             self.deactivate()
+
+    if sys.platform == 'win32':
+        def restart_audio_input_source(self):
+            self.deactivate()
+            sd._terminate()
+            sd._initialize()
+            self.activate()
 
     def get_device_index_by_name(self, device_name: str):
         for key, value in self.input_devices().items():
@@ -501,9 +570,9 @@ class AudioAnalysisSource(AudioInputSource):
         10000,
     ]
 
-    def __init__(self, wls, config):
+    def __init__(self, wls, config, events):
         config = self.CONFIG_SCHEMA(config)
-        super().__init__(wls, config)
+        super().__init__(wls, config, events)
         self.initialise_analysis()
 
         # Subscribe functions to be run on every frame of audio
@@ -798,7 +867,7 @@ class AudioReactiveEffect(Effect):
             self._wls.audio.__class__
         ):
             self._wls.audio = AudioAnalysisSource(
-                self._wls, self._wls.config.get("audio", {})
+                self._wls, self._wls.config.get("audio", {}), self._wls.events
             )
 
         self.audio = self._wls.audio

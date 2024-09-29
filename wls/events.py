@@ -25,6 +25,7 @@ class Event:
     GLOBAL_PAUSE = "global_pause"
     VIRTUAL_PAUSE = "virtual_pause"
     AUDIO_INPUT_DEVICE_CHANGED = "audio_input_device_changed"
+    RESTART_AUDIO_INPUT_SOURCE = "restart_audio_input_source"
 
     def __init__(self, type: str):
         self.event_type = type
@@ -170,6 +171,13 @@ class WlsShutdownEvent(Event):
 
     def __init__(self):
         super().__init__(Event.WLS_SHUTDOWN)
+
+
+class RestartAudioInputSourceEvent(Event):
+    """Restart Audio"""
+
+    def __init__(self):
+        super().__init__(Event.RESTART_AUDIO_INPUT_SOURCE)
 
 
 class EventListener:
