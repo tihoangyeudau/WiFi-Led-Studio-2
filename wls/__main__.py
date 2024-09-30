@@ -325,8 +325,6 @@ def main():
         _LOGGER.critical(
             "Không tìm thấy loa. Vui lòng kết nối loa và khởi động lại ứng dụng."
         )
-        # Exit with code 2 to indicate that there are no audio input devices.
-        sys.exit(2)
 
     if (args.tray or currently_frozen()) and not args.no_tray:
         # If pystray is imported on a device that can't display it, it explodes. Catch it

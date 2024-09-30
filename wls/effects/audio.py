@@ -40,6 +40,13 @@ if sys.platform == 'win32':
                 if default_device_id == self.last_device_id:
                     # Bỏ qua sự kiện nếu thiết bị không thay đổi
                     return
+                
+                # Kiểm tra nếu default_device_id là None hoặc không hợp lệ
+                if default_device_id is None:
+                    _LOGGER.warning("Thiết bị đầu ra mặc định bị vô hiệu hóa hoặc không tồn tại.")
+                    self.last_device_id = None
+                    return
+
                 try:
                     comtypes.CoInitialize()  # Khởi tạo COM cho thread hiện tại
 
@@ -49,11 +56,14 @@ if sys.platform == 'win32':
                             _LOGGER.info(f"Loa mặc định đã thay đổi: {device.FriendlyName}")
                             self.last_device_id = default_device_id  # Cập nhật ID thiết bị cuối cùng
                             
+                            # Phát sự kiện khởi động lại nguồn âm thanh
                             self.events.fire_event(
                                 RestartAudioInputSourceEvent()
                             )
 
                             return
+                    
+                    # Nếu không tìm thấy thiết bị với ID, cảnh báo
                     _LOGGER.warning(f"Không tìm thấy thiết bị có ID: {default_device_id}")
                 except Exception as e:
                     _LOGGER.error(f"Đã xảy ra lỗi khi lấy thiết bị âm thanh: {str(e)}")
@@ -78,15 +88,28 @@ class AudioInputSource:
     @staticmethod
     def update_default_loopback_index():
         global default_loopback_index
-        default_output = sd.query_devices(sd.default.device[1])['name']
-        for i, device in enumerate(sd.query_devices()):
-            device_name = device['name']
-            if (default_output in device_name) and (default_output != device_name):
-                default_loopback_index = i
-                break  # Thoát khỏi vòng lặp sau khi tìm thấy thiết bị phù hợp
-        else:
-            # Nếu không tìm thấy thiết bị nào phù hợp, có thể cần xử lý thêm
-            _LOGGER.warning("Không tìm thấy thiết bị loopback")
+        try:
+            # Kiểm tra xem thiết bị mặc định có tồn tại hay không
+            if sd.default.device[1] == -1:
+                _LOGGER.warning("Không có thiết bị đầu ra mặc định.")
+                default_loopback_index = None
+                return
+
+            # Lấy tên thiết bị đầu ra mặc định
+            default_output = sd.query_devices(sd.default.device[1])['name']
+
+            for i, device in enumerate(sd.query_devices()):
+                device_name = device['name']
+                if (default_output in device_name) and (default_output != device_name):
+                    default_loopback_index = i
+                    break  # Thoát khỏi vòng lặp sau khi tìm thấy thiết bị phù hợp
+            else:
+                _LOGGER.warning("Không tìm thấy thiết bị loopback")
+                default_loopback_index = None
+
+        except Exception as e:
+            _LOGGER.error(f"Lỗi khi truy vấn thiết bị âm thanh: {str(e)}")
+            default_loopback_index = None
     
     @staticmethod
     def device_index_validator(val):
@@ -296,7 +319,7 @@ class AudioInputSource:
         if default_device is None:
             # Không có thiết bị âm thanh hợp lệ, không thể kích hoạt nguồn âm thanh
             _LOGGER.warning("Không tìm thấy loa. Không thể kích hoạt nguồn âm thanh. Đang vô hiệu hoá.")
-            self.deactivate()
+            self._is_activated = False
             return
 
         valid_device_indexes = self.valid_device_indexes()
@@ -329,6 +352,10 @@ class AudioInputSource:
 
         # Hàm mở stream âm thanh
         def open_audio_stream(device_idx):
+            if device_idx is None:
+                _LOGGER.warning("Không có thiết bị âm thanh để mở luồng âm thanh.")
+                return
+
             device = input_devices[device_idx]
             ch = 1
             if hostapis[device["hostapi"]]["name"] == "Windows WASAPI":
@@ -502,6 +529,10 @@ class AudioInputSource:
         should be done here. Everything else should be deferred until
         queried by an effect.
         """
+        if not self._is_activated:
+            # Bỏ qua xử lý âm thanh nếu không có thiết bị âm thanh
+            return
+
         # clean up nans that have been mysteriously appearing..
         self._raw_audio_sample[np.isnan(self._raw_audio_sample)] = 0
 
