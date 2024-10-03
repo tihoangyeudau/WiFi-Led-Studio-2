@@ -73,7 +73,7 @@ if sys.platform == 'win32':
 
 class AudioInputSource:
 
-    _is_activated = False
+    _audio_stream_active = False
     _audio = None
     _stream = None
     _callbacks = []
@@ -148,25 +148,29 @@ class AudioInputSource:
                 integer: the sounddevice device index to use for audio input
             """
             device_list = sd.query_devices()
-            default_output_device = sd.default.device["output"]
-            if len(device_list) == 0 or default_output_device == -1:
+            default_output_device_idx = sd.default.device["output"]
+            default_input_device_idx = sd.default.device["input"]
+            if len(device_list) == 0 or default_output_device_idx == -1:
                 _LOGGER.warn("No audio output devices found.")
             else:
-                # target device should be the name of the default_output device plus " [Loopback]"
-                target_device = (
-                    f"{device_list[default_output_device]['name']} [Loopback]"
+                default_output_device_name = device_list[
+                    default_output_device_idx
+                ]["name"]
+
+                _LOGGER.debug(
+                    f"Looking for audio loopback device for default output device at index {default_output_device_idx}: {default_output_device_name}"
                 )
-                # We need to run over the device list looking for the target device
-                # NOTE: Some sound drivers truncate the device name, so we may not find a match
                 for device_index, device in enumerate(device_list):
-                    if device["name"] == target_device:
+                    # sometimes the audio device name string is truncated, so we need to match what we have and Loopback but otherwise be sloppy
+                    if (
+                        default_output_device_name in device["name"]
+                        and "[Loopback]" in device["name"]
+                    ):
                         # Return the loopback device index
                         _LOGGER.debug(
-                            f"Default audio loopback device found: {device['name']}"
+                            f"Found audio loopback device for default output device at index {device_index}: {device['name']}"
                         )
                         return device_index
-                # If we don't match a Loopback device matching output found - return the default input device index
-                default_input_device_idx = sd.default.device["input"]
 
             # The default input device index is not always valid (i.e no default input devices)
             valid_device_indexes = AudioInputSource.valid_device_indexes()
@@ -179,16 +183,17 @@ class AudioInputSource:
                 if default_input_device_idx in valid_device_indexes:
 
                     _LOGGER.debug(
-                        "No default audio loopback device found. Using default input device."
+                        f"No audio loopback device found for default output device. Using default input device at index {default_input_device_idx}: {device_list[default_input_device_idx]['name']}"
                     )
                     return default_input_device_idx
                 else:
                     # Return the first valid input device index if we can't find a valid default input device
                     if len(valid_device_indexes) > 0:
+                        first_valid_idx = next(iter(valid_device_indexes))
                         _LOGGER.debug(
-                            "No valid default audio input device found. Using first valid input device."
+                            f"No valid default audio input device found. Using first valid input device at index {first_valid_idx}: {device_list[first_valid_idx]['name']}"
                         )
-                        return next(iter(valid_device_indexes))
+                        return first_valid_idx
 
     @staticmethod
     def query_hostapis():
@@ -244,6 +249,9 @@ class AudioInputSource:
     def __init__(self, wls, config, events):
         self._wls = wls
         self.events = events  # Store the events manager
+        self.lock = threading.Lock()
+        # We must not inherit legacy _callbacks from prior instances
+        self._callbacks = []
         self.update_config(config)
 
         def shutdown_event(e):
@@ -270,7 +278,7 @@ class AudioInputSource:
             old_input_device = False
             if hasattr(self, "_config"):
                 old_input_device = self._config["audio_device"]
-        if self._is_activated:
+        if self._audio_stream_active:
             self.deactivate()
         self._config = self.AUDIO_CONFIG_SCHEMA.fget()(config)
         if len(self._callbacks) != 0:
@@ -313,16 +321,27 @@ class AudioInputSource:
 
         # Liệt kê tất cả thiết bị đầu vào và tìm thiết bị khớp với cấu hình
         input_devices = self.query_devices()
+
         hostapis = self.query_hostapis()
         default_device = self.default_device_index()
 
         if default_device is None:
             # Không có thiết bị âm thanh hợp lệ, không thể kích hoạt nguồn âm thanh
             _LOGGER.warning("Không tìm thấy loa. Không thể kích hoạt nguồn âm thanh. Đang vô hiệu hoá.")
-            self._is_activated = False
+            self._audio_stream_active = False
             return
 
         valid_device_indexes = self.valid_device_indexes()
+        _LOGGER.debug("********************************************")
+        _LOGGER.debug("Valid audio input devices:")
+        for index in valid_device_indexes:
+            hostapi_name = hostapis[input_devices[index]["hostapi"]]["name"]
+            device_name = input_devices[index]["name"]
+            input_channels = input_devices[index]["max_input_channels"]
+            _LOGGER.debug(
+                f"Audio Device {index}\t{hostapi_name}\t{device_name}\tinput_channels: {input_channels}"
+            )
+        _LOGGER.debug("********************************************")
 
         # Lựa chọn chỉ mục thiết bị
         if sys.platform == 'win32':
@@ -330,10 +349,14 @@ class AudioInputSource:
         else:
             device_idx = self._config["audio_device"]
             if device_idx > max(valid_device_indexes):
-                _LOGGER.warning(f"Chỉ mục thiết bị âm thanh không hợp lệ: {device_idx}. Hoàn nguyên về thiết bị đầu vào mặc định.")
+                _LOGGER.warning(
+                    f"Audio device out of range: {device_idx}. Reverting to default input device: {default_device}"
+                )
                 device_idx = default_device
             elif device_idx not in valid_device_indexes:
-                _LOGGER.warning(f"Thiết bị âm thanh {input_devices[device_idx]['name']} không có kênh đầu vào. Hoàn nguyên về thiết bị đầu vào mặc định.")
+                _LOGGER.warning(
+                    f"Audio device {input_devices[device_idx]['name']} not in valid_device_indexes. Reverting to default input device: {default_device}"
+                )
                 device_idx = default_device
 
         # Cài đặt bộ lọc tiền nhấn mạnh âm thanh (pre-emphasis filter)
@@ -352,15 +375,28 @@ class AudioInputSource:
 
         # Hàm mở stream âm thanh
         def open_audio_stream(device_idx):
+            """
+            Opens an audio stream for the specified input device.
+            Parameters:
+            device_idx (int): The index of the input device to open the audio stream for.
+            Behavior:
+            - Detects if the device is a Windows WASAPI Loopback device and logs its name and channel count.
+            - If the device is a WEB AUDIO device, initializes a WebAudioStream and sets it as the active audio stream.
+            - For other devices, initializes an InputStream with the device's default sample rate and other parameters.
+            - Initializes a resampler with the "sinc_fastest" algorithm that downmixes the source to a single-channel.
+            - Logs the name of the opened audio source.
+            - Starts the audio stream and sets the audio stream active flag to True.
+            """
             if device_idx is None:
                 _LOGGER.warning("Không có thiết bị âm thanh để mở luồng âm thanh.")
                 return
 
             device = input_devices[device_idx]
-            ch = 1
             if hostapis[device["hostapi"]]["name"] == "Windows WASAPI":
                 if "Loopback" in device["name"]:
-                    ch = 2
+                    _LOGGER.info(
+                        f"Loopback device detected: {device['name']} with {device['max_input_channels']} channels"
+                    )
 
             try:
                 if hostapis[device["hostapi"]]["name"] == "WEB AUDIO":
@@ -372,17 +408,14 @@ class AudioInputSource:
                         self._stream = self._audio.InputStream(
                             samplerate=int(device["default_samplerate"]),
                             device=device_idx,
-                            channels=ch,
                             callback=self._audio_sample_callback,
                             dtype=np.float32,
                             latency="low",
-                            blocksize=int(device["default_samplerate"] / self._config["sample_rate"]),
                         )
                     else:
                         self._stream = self._audio.InputStream(
                             samplerate=MIC_RATE,
                             device=device_idx,
-                            channels=1,
                             callback=self._audio_sample_callback,
                             dtype=np.float32,
                             latency="low",
@@ -394,6 +427,7 @@ class AudioInputSource:
 
                 _LOGGER.info(f"Nguồn âm thanh đã mở: {hostapis[device['hostapi']]['name']}: {device.get('name', device.get('client'))}")
                 self._stream.start()
+                self._audio_stream_active = True
 
             except OSError as e:
                 _LOGGER.critical(f"Không thể mở Thiết bị Âm thanh: {e}. Đang vô hiệu hóa.")
@@ -404,7 +438,6 @@ class AudioInputSource:
 
         try:
             open_audio_stream(device_idx)
-            self._is_activated = True
         except Exception as e:
             _LOGGER.error(f"Lỗi khi kích hoạt âm thanh: {e}. Đang vô hiệu hoá.")
             self.deactivate()
@@ -414,7 +447,7 @@ class AudioInputSource:
             self._stream.stop()
             self._stream.close()
             self._stream = None
-        self._is_activated = False
+        self._audio_stream_active = False
         _LOGGER.info("Đã đóng nguồn âm thanh.")
 
         if sys.platform == 'win32':
@@ -438,7 +471,7 @@ class AudioInputSource:
     def subscribe(self, callback):
         """Registers a callback with the input source"""
         self._callbacks.append(callback)
-        if len(self._callbacks) > 0 and not self._is_activated:
+        if len(self._callbacks) > 0 and not self._audio_stream_active:
             self.activate()
         if self._timer is not None:
             self._timer.cancel()
@@ -450,7 +483,7 @@ class AudioInputSource:
             self._callbacks.remove(callback)
         if (
             len(self._callbacks) <= self._subscriber_threshold
-            and self._is_activated
+            and self._audio_stream_active
         ):
             if self._timer is not None:
                 self._timer.cancel()
@@ -463,7 +496,7 @@ class AudioInputSource:
         self._timer = None
         if (
             len(self._callbacks) <= self._subscriber_threshold
-            and self._is_activated
+            and self._audio_stream_active
         ):
             self.deactivate()
 
@@ -529,7 +562,7 @@ class AudioInputSource:
         should be done here. Everything else should be deferred until
         queried by an effect.
         """
-        if not self._is_activated:
+        if not self._audio_stream_active:
             # Bỏ qua xử lý âm thanh nếu không có thiết bị âm thanh
             return
 
@@ -858,9 +891,8 @@ class AudioAnalysisSource(AudioInputSource):
             oscillator = (
                 1 - (self.beat_period - time_since_beat) / self.beat_period
             ) + self.beat_counter
-            # ensure it's between 0 and 1. useful when audio cuts
-            oscillator = min(4, oscillator)
-            oscillator = max(0, oscillator)
+            # ensure it's between [0 and 4). useful when audio cuts
+            oscillator = oscillator % 4
         return oscillator
 
     def beat_oscillator(self):

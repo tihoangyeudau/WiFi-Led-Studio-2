@@ -1252,6 +1252,13 @@ def get_icon_name(rml_name):
     return "rml"
 
 
+def extract_uint8_seq(s):
+    # Use regular expression to find all sequences of digits
+    numbers = re.findall(r"\d+", s)
+    # discard anything outside of uint8 range
+    return [int(num) for num in numbers if 0 <= int(num) <= 255]
+
+
 class PerformanceAnalysis:
     """
     A class for comparing the performance of two functions.
