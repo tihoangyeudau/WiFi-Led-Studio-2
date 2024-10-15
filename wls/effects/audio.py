@@ -392,11 +392,19 @@ class AudioInputSource:
                 return
 
             device = input_devices[device_idx]
-            if hostapis[device["hostapi"]]["name"] == "Windows WASAPI":
-                if "Loopback" in device["name"]:
-                    _LOGGER.info(
-                        f"Loopback device detected: {device['name']} with {device['max_input_channels']} channels"
-                    )
+            channels = None
+            if (
+                hostapis[device["hostapi"]]["name"] == "Windows WASAPI"
+                and "Loopback" in device["name"]
+            ):
+                _LOGGER.info(
+                    f"Loopback device detected: {device['name']} with {device['max_input_channels']} channels"
+                )
+            else:
+                # if are not a windows loopback device, we will downmix to mono
+                # issue seen with poor audio behaviour on Mac and Linux
+                # this is similar to the long standing prior implementation
+                channels = 1
 
             try:
                 if hostapis[device["hostapi"]]["name"] == "WEB AUDIO":
@@ -411,6 +419,12 @@ class AudioInputSource:
                             callback=self._audio_sample_callback,
                             dtype=np.float32,
                             latency="low",
+                            blocksize=int(
+                            device["default_samplerate"]
+                            / self._config["sample_rate"]
+                            ),
+                            # only pass channels if we set it to something other than None
+                            **({"channels": channels} if channels is not None else {}),
                         )
                     else:
                         self._stream = self._audio.InputStream(
