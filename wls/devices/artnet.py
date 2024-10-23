@@ -59,6 +59,7 @@ class ArtNetDevice(NetworkedDevice):
     def __init__(self, wls, config):
         super().__init__(wls, config)
         self._artnet = None
+        self._device_type = "ArtNet"
         self.config_use(config)
 
     def config_updated(self, config):
