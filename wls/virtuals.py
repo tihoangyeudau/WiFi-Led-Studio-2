@@ -263,6 +263,16 @@ class Virtual:
 
             mode = self._config["transition_mode"]
             self.frame_transitions = self.transitions[mode]
+        # Update internal config with new segment
+        for idx, item in enumerate(self._wls.config["virtuals"]):
+            if item["id"] == self.id:
+                item["segments"] = self._segments
+                self._wls.config["virtuals"][idx] = item
+                break
+        _LOGGER.debug(
+            f"Virtual {self.id}: updated with {len(self._segments)} segments, totalling {self.pixel_count} pixels"
+        )
+        self._wls.virtuals.check_and_deactivate_devices()
 
     def set_preset(self, preset_info):
         category, effect_id, preset_id = preset_info
@@ -561,6 +571,7 @@ class Virtual:
             self._thread.join()
         self.deactivate_segments()
         self._wls.events.fire_event(VirtualPauseEvent(self.id))
+        self._wls.virtuals.check_and_deactivate_devices()
 
     # @lru_cache(maxsize=32)
     # def _normalized_linspace(self, size):
@@ -958,6 +969,29 @@ class Virtuals:
     def get(self, *args):
         return self._virtuals.get(*args)
     
+    def check_and_deactivate_devices(self):
+        """
+        Checks all active virtuals and segments to compile a list of active devices,
+        then deactivates any active devices not in that list.
+        This process ensures that devices are only deactivated if no virtual or segment
+        is using them, which is especially relevant during virtual or segment deactivation
+        or reconfiguration.
+        Note: This is a relatively expensive operation but only runs when a virtual
+        is deactivated or segments are modified.
+        """
+
+        active_devices = set()
+        for virtual in self.values():
+            if virtual.active:
+                for device_id, _, _, _ in virtual.segments:
+                    active_devices.add(device_id)
+        for device in self._wls.devices.values():
+            if device.id not in active_devices and device.is_active():
+                _LOGGER.info(
+                    f"Deactivating device {device.id} as it is not in use by any active virtuals"
+                )
+                device.deactivate()
+
 def update_effect_config(config, virtual_id, effect):
     """
     Update the configuration of a virtual effect.
