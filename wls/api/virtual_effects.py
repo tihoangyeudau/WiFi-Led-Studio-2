@@ -286,10 +286,10 @@ class EffectsEndpoint(RestEndpoint):
         # Clear the effect
         virtual.clear_effect()
 
-        for virtual in self._wls.config["virtuals"]:
-            if virtual["id"] == virtual_id:
-                if "effect" in virtual:
-                    del virtual["effect"]
+        for virtual_cfg in self._wls.config["virtuals"]:
+            if virtual_cfg["id"] == virtual_id:
+                if "effect" in virtual_cfg:
+                    del virtual_cfg["effect"]
                     break
         save_config(
             config=self._wls.config,
