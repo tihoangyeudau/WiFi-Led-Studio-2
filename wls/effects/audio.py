@@ -7,8 +7,8 @@ from functools import cached_property, lru_cache
 
 import aubio
 import numpy as np
+import samplerate
 if sys.platform == 'win32':
-    import samplerate
     from pycaw.pycaw import AudioUtilities
     from pycaw.callbacks import MMNotificationClient
     import comtypes
@@ -412,32 +412,20 @@ class AudioInputSource:
                         self._stream
                     ) = WebAudioStream(device["client"], self._audio_sample_callback)
                 else:
-                    if sys.platform == 'win32':
-                        self._stream = self._audio.InputStream(
-                            samplerate=int(device["default_samplerate"]),
-                            device=device_idx,
-                            callback=self._audio_sample_callback,
-                            dtype=np.float32,
-                            latency="low",
-                            blocksize=int(
-                            device["default_samplerate"]
-                            / self._config["sample_rate"]
-                            ),
-                            # only pass channels if we set it to something other than None
-                            **({"channels": channels} if channels is not None else {}),
-                        )
-                    else:
-                        self._stream = self._audio.InputStream(
-                            samplerate=MIC_RATE,
-                            device=device_idx,
-                            callback=self._audio_sample_callback,
-                            dtype=np.float32,
-                            latency="low",
-                            blocksize=MIC_RATE // self._config["sample_rate"],
-                        )
+                    self._stream = self._audio.InputStream(
+                        samplerate=int(device["default_samplerate"]),
+                        device=device_idx,
+                        callback=self._audio_sample_callback,
+                        dtype=np.float32,
+                        latency="low",
+                        blocksize=int(
+                        device["default_samplerate"]
+                        / self._config["sample_rate"]
+                        ),
+                        # only pass channels if we set it to something other than None
+                        **({"channels": channels} if channels is not None else {}),
 
-                if sys.platform == 'win32':
-                    self.resampler = samplerate.Resampler("sinc_fastest", channels=1)
+                self.resampler = samplerate.Resampler("sinc_fastest", channels=1)
 
                 _LOGGER.info(f"Nguồn âm thanh đã mở: {hostapis[device['hostapi']]['name']}: {device.get('name', device.get('client'))}")
                 self._stream.start()
@@ -530,23 +518,20 @@ class AudioInputSource:
     def _audio_sample_callback(self, in_data, frame_count, time_info, status):
         """Callback for when a new audio sample is acquired"""
         # time_start = time.time()
-        if sys.platform == 'win32':
-            # self._raw_audio_sample = np.frombuffer(in_data, dtype=np.float32)
-            raw_sample = np.frombuffer(in_data, dtype=np.float32)
+        # self._raw_audio_sample = np.frombuffer(in_data, dtype=np.float32)
+        raw_sample = np.frombuffer(in_data, dtype=np.float32)
 
-            in_sample_len = len(raw_sample)
-            out_sample_len = MIC_RATE // self._config["sample_rate"]
+        in_sample_len = len(raw_sample)
+        out_sample_len = MIC_RATE // self._config["sample_rate"]
 
-            if in_sample_len != out_sample_len:
-                # Simple resampling
-                self._raw_audio_sample = self.resampler.process(
-                    raw_sample,
-                    # MIC_RATE / self._stream.samplerate
-                    out_sample_len / in_sample_len
-                    # end_of_input=True
-                )
-            else:
-                self._raw_audio_sample = raw_sample
+        if in_sample_len != out_sample_len:
+            # Simple resampling
+            self._raw_audio_sample = self.resampler.process(
+                raw_sample,
+                # MIC_RATE / self._stream.samplerate
+                out_sample_len / in_sample_len
+                # end_of_input=True
+            )
 
             if len(self._raw_audio_sample) != out_sample_len:
                 _LOGGER.warning("Đã loại bỏ khung âm thanh không đúng định dạng")
