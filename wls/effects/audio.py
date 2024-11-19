@@ -424,6 +424,7 @@ class AudioInputSource:
                         ),
                         # only pass channels if we set it to something other than None
                         **({"channels": channels} if channels is not None else {}),
+                    )
 
                 self.resampler = samplerate.Resampler("sinc_fastest", channels=1)
 
