@@ -206,7 +206,7 @@ class WlsCore:
             winreg.SetValueEx(key, "A-WiFi Led Studio", 0, winreg.REG_SZ, path2)
             winreg.CloseKey(key)
         elif sys.platform == "darwin":
-            wls_source_path = "/Applications/WiFi Led Studio.app/Contents/Resources/com.wls.startup.plist"
+            wls_source_path = "/Applications/rmlapp.app/Contents/Resources/com.wls.startup.plist"
             wls_destination_path = os.path.expanduser("~/Library/LaunchAgents/com.wls.startup.plist")
             
             shutil.copy(wls_source_path, wls_destination_path)
