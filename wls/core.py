@@ -159,10 +159,10 @@ class WlsCore:
         if sys.platform == "win32":
             # Mở key HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run")
-            
+
             # Lấy số lượng giá trị trong key
             num_values = winreg.QueryInfoKey(key)[1]
-            
+
             # Duyệt qua từng giá trị trong key
             for i in range(num_values):
                 value_name, _, _ = winreg.EnumValue(key, i)
@@ -170,7 +170,7 @@ class WlsCore:
                     # Tìm thấy key "A-Rainbow Music Led"
                     winreg.CloseKey(key)
                     return True
-            
+
             # Không tìm thấy key "A-Rainbow Music Led"
             winreg.CloseKey(key)
             return False
@@ -181,7 +181,7 @@ class WlsCore:
                 return True
             else:
                 return False
-        
+
     def delete_wls_key(self):
         if sys.platform == "win32":
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_ALL_ACCESS)
@@ -200,7 +200,7 @@ class WlsCore:
 
     def add_wls_key(self):
         if sys.platform == "win32":
-            path1 = os.path.join(os.environ["ProgramFiles"], "WiFi Led Studio", "WiFi Led Studio.exe")
+            path1 = os.path.join(os.environ["ProgramFiles"], "Rainbow Music Led\\WiFi Led Studio", "WiFi Led Studio.exe")
             path2 = '"' + path1 + '"'
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_ALL_ACCESS)
             winreg.SetValueEx(key, "A-WiFi Led Studio", 0, winreg.REG_SZ, path2)
@@ -208,12 +208,12 @@ class WlsCore:
         elif sys.platform == "darwin":
             wls_source_path = "/Applications/rmlapp.app/Contents/Resources/com.wls.startup.plist"
             wls_destination_path = os.path.expanduser("~/Library/LaunchAgents/com.wls.startup.plist")
-            
+
             shutil.copy(wls_source_path, wls_destination_path)
-    
+
     def add_aw_key(self):
         if sys.platform == "win32":
-            path1 = os.path.join(os.environ["ProgramFiles"], "A-Rainbow Music Led\\bin", "rmlapp.exe")
+            path1 = os.path.join(os.environ["ProgramFiles"], "Rainbow Music Led\\bin", "rmlapp.exe")
             path2 = '"' + path1 + '"'
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_ALL_ACCESS)
             winreg.SetValueEx(key, "A-Rainbow Music Led", 0, winreg.REG_SZ, path2)
@@ -449,7 +449,7 @@ class WlsCore:
 
     async def async_stop_aw(self, exit_code):
         exit_code = await self._common_async_stop(exit_code)
-        
+
         if sys.platform == "win32":
             path1 = os.path.join(os.environ["ProgramFiles"], "Rainbow Music Led\\bin", "rmlapp.exe")
             startupinfo = subprocess.STARTUPINFO()
