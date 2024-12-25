@@ -43,7 +43,7 @@ class DummyEffect:
 
     def _deactivate(self):
         self.deactivate()
-    
+
     def deactivate(self):
         pass
 
@@ -286,7 +286,7 @@ class Effect(BaseRegistry):
         self.lock.acquire()
         self.deactivate()
         self.lock.release()
-    
+
     def deactivate(self):
         """Detaches an output channel from the effect"""
         self.pixels = None
@@ -365,9 +365,18 @@ class Effect(BaseRegistry):
                 if config["flip"]:
                     pixels = np.flipud(pixels)
                 if config["mirror"]:
-                    pixels = np.concatenate(
-                        (pixels[-1 + len(pixels) % -2 :: -2], pixels[::2])
-                    )
+                    # different composition for odd vs even which is not easy to formulate so, just if else...
+                        # preserve symmetrical mirroring so
+                        # [1,2,3,4,5,6] becomes [5,3,1,1,3,5]
+                        # [1,2,3,4,5] becomes [5,3,1,3,4]
+                        if self.pixel_count % 2 == 0:
+                            pixels = np.concatenate(
+                                (pixels[-2::-2], pixels[::2])
+                            )
+                        else:
+                            pixels = np.concatenate(
+                                (pixels[-1:1:-2], pixels[::2])
+                            )
                 if config["background_color"]:
                     pixels += self._bg_color
                 if config["brightness"] is not None:
