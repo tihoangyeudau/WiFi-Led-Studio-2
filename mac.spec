@@ -2,8 +2,8 @@
 import os
 import sys
 from PyInstaller.utils.hooks import copy_metadata
-datas = [   ('/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons', 'icons/'),
-            ('/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons/tray.png', '.'),
+datas = [   ('/Users/rainbowmusicled/Documents/GitHub/WiFi-Led-Studio-2/icons', 'icons/'),
+            ('/Users/rainbowmusicled/Documents/GitHub/WiFi-Led-Studio-2/icons/tray.png', '.'),
             ('/usr/local/bin/build/WiFi Led Studio-3.3.4.app/Contents/MacOS/lib/wls', 'wls/'),
             ('/usr/local/bin/build/WiFi Led Studio-3.3.4.app/Contents/MacOS/lib/wls_frontend', 'wls_frontend/'),
             ('/usr/local/bin/build/WiFi Led Studio-3.3.4.app/Contents/MacOS/lib/xyzservices', 'xyzservices/'),
@@ -86,7 +86,7 @@ coll = COLLECT(exe,
                name='WiFi Led Studio',)
 app = BUNDLE(coll,
             name = 'WiFi Led Studio.app',
-            icon = '/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons/WiFi Led Studio.icns',
+            icon = '/Users/rainbowmusicled/Documents/GitHub/WiFi-Led-Studio-2/icons/WiFi Led Studio.icns',
             bundle_identifier = 'com.rml.wls',
             info_plist = {
                 'NSHighResolutionCapable': 'True',
