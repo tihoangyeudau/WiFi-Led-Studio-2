@@ -2,6 +2,7 @@ import logging
 
 import numpy as np
 import voluptuous as vol
+import threading
 from stupidArtnet import StupidArtnet
 
 from wls.devices import NetworkedDevice
@@ -60,6 +61,7 @@ class ArtNetDevice(NetworkedDevice):
         super().__init__(wls, config)
         self._artnet = None
         self._device_type = "ArtNet"
+        self.lock = threading.Lock()
         self.config_use(config)
 
     def config_updated(self, config):

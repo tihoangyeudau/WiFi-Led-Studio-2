@@ -40,7 +40,7 @@ if sys.platform == 'win32':
                 if default_device_id == self.last_device_id:
                     # Bỏ qua sự kiện nếu thiết bị không thay đổi
                     return
-                
+
                 # Kiểm tra nếu default_device_id là None hoặc không hợp lệ
                 if default_device_id is None:
                     _LOGGER.warning("Thiết bị đầu ra mặc định bị vô hiệu hóa hoặc không tồn tại.")
@@ -55,14 +55,14 @@ if sys.platform == 'win32':
                         if device.id == default_device_id:
                             _LOGGER.info(f"Loa mặc định đã thay đổi: {device.FriendlyName}")
                             self.last_device_id = default_device_id  # Cập nhật ID thiết bị cuối cùng
-                            
+
                             # Phát sự kiện khởi động lại nguồn âm thanh
                             self.events.fire_event(
                                 RestartAudioInputSourceEvent()
                             )
 
                             return
-                    
+
                     # Nếu không tìm thấy thiết bị với ID, cảnh báo
                     _LOGGER.warning(f"Không tìm thấy thiết bị có ID: {default_device_id}")
                 except Exception as e:
@@ -110,7 +110,7 @@ class AudioInputSource:
         except Exception as e:
             _LOGGER.error(f"Lỗi khi truy vấn thiết bị âm thanh: {str(e)}")
             default_loopback_index = None
-    
+
     @staticmethod
     def device_index_validator(val):
         """
@@ -127,14 +127,14 @@ class AudioInputSource:
         A list of integers corresponding to valid input devices
         """
         return tuple(AudioInputSource.input_devices().keys())
-    
+
     @staticmethod
     def audio_input_device_exists():
         """
         Returns True if there are valid input devices
         """
         return len(AudioInputSource.valid_device_indexes()) > 0
-  
+
     @staticmethod
     def default_device_index():
         if sys.platform == 'win32':
@@ -451,7 +451,6 @@ class AudioInputSource:
             self._stream.close()
             self._stream = None
         self._audio_stream_active = False
-        _LOGGER.info("Đã đóng nguồn âm thanh.")
 
         if sys.platform == 'win32':
             # Unregister the notification client if initialized
@@ -462,14 +461,12 @@ class AudioInputSource:
                     _LOGGER.info("Đã hủy đăng ký notification client.")
                 except Exception as e:
                     _LOGGER.error(f"Lỗi khi hủy đăng ký notification client: {e}")
-            
+
             try:
                 comtypes.CoUninitialize()  # Chỉ giải phóng COM, không cần gọi CoInitialize
                 _LOGGER.info("COM đã được giải phóng.")
             except Exception as e:
                 _LOGGER.error(f"Lỗi khi giải phóng COM: {e}")
-
-        _LOGGER.warning("Đã đóng nguồn âm thanh.")
 
     def subscribe(self, callback):
         """Registers a callback with the input source"""
@@ -978,53 +975,39 @@ class AudioReactiveEffect(Effect):
 
     @cached_property
     def _selected_melbank(self):
-        return next(
-            (
-                i
-                for i, x in enumerate(
-                    self.audio.melbanks._config["max_frequencies"]
-                )
-                if x >= self._virtual.frequency_range.max
-            ),
-            len(self.audio.melbanks._config["max_frequencies"]),
-        )
+        max_frequencies = self.audio.melbanks._config["max_frequencies"]
+        target_max = self._virtual.frequency_range.max
+        for i, max_freq in enumerate(max_frequencies):
+            if max_freq >= target_max:
+                return i
+        # Trả về index cuối cùng nếu không tìm thấy
+        return len(max_frequencies) - 1
 
     @cached_property
     def _melbank_min_idx(self):
+        processor = self.audio.melbanks.melbank_processors[self._selected_melbank]
+        frequencies = processor.melbank_frequencies
+        min_freq = self._virtual.frequency_range.min
         min_idx = next(
-            (idx
-            for idx, freq in enumerate(
-                self.audio.melbanks.melbank_processors[
-                    self._selected_melbank
-                ].melbank_frequencies
-            )
-            if freq >= self._virtual.frequency_range.min),
+            (idx for idx, freq in enumerate(frequencies) if freq >= min_freq),
             None
         )
         if min_idx is None:
-            raise ValueError("Không tìm thấy giá trị _melbank_min_idx phù hợp")
+            min_idx = len(frequencies) - 1
         return min_idx
 
     @cached_property
     def _melbank_max_idx(self):
+        processor = self.audio.melbanks.melbank_processors[self._selected_melbank]
+        frequencies = processor.melbank_frequencies
+        max_freq = self._virtual.frequency_range.max
         max_idx = next(
-            (
-                idx
-                for idx, freq in enumerate(
-                    self.audio.melbanks.melbank_processors[
-                        self._selected_melbank
-                    ].melbank_frequencies
-                )
-                if freq >= self._virtual.frequency_range.max
-            ),
-            len(
-                self.audio.melbanks.melbank_processors[
-                    self._selected_melbank
-                ].melbank_frequencies
-            ),
+            (idx for idx, freq in enumerate(frequencies) if freq >= max_freq),
+            len(frequencies)  # Mặc định là độ dài mảng
         )
-        if max_idx is None:
-            raise ValueError("Không tìm thấy giá trị _melbank_max_idx phù hợp")
+        # Đảm bảo không vượt quá chỉ số cuối cùng
+        if max_idx >= len(frequencies):
+            max_idx = len(frequencies) - 1
         return max_idx
 
     @cached_property
@@ -1038,7 +1021,7 @@ class AudioReactiveEffect(Effect):
         old = np.linspace(0, 1, self._input_mel_length)
         new = np.linspace(0, 1, size)
         return (new, old)
-    
+
     def melbank_no_nan(self, melbank):
         # Check for NaN values in the melbank array, replace with 0 in place
         # Difficult to determine why this happens, but it seems to be related to
