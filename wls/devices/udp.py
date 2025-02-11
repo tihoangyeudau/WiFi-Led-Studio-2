@@ -49,14 +49,24 @@ class UDPRealtimeDevice(UDPDevice):
         self.last_frame_sent_time = 0
 
     def flush(self, data):
+        """Override flush method để xử lý lỗi tốt hơn"""
         try:
+            if self._destination is None:
+                # Thử kích hoạt lại nếu chưa có kết nối
+                self.activate()
+                if self._destination is None:
+                    # Nếu vẫn không kết nối được, bỏ qua
+                    return
+
             self.choose_and_send_packet(
                 data,
                 self._config["timeout"],
             )
             self.last_frame = np.copy(data)
-        except AttributeError:
-            self.activate()
+        except Exception as e:
+            _LOGGER.error(f"Lỗi trong quá trình flush: {str(e)}")
+            # Không raise exception để tránh crash
+            return
 
     def choose_and_send_packet(
         self,
@@ -128,21 +138,35 @@ class UDPRealtimeDevice(UDPDevice):
                     self.transmit_packet(udpData, frame_is_equal_to_last)
 
     def transmit_packet(self, packet, frame_is_equal_to_last: bool):
+        if self._destination is None:
+            return
+
         timestamp = time.time()
-        if frame_is_equal_to_last:
-            half_of_timeout = (
-                ((self._config["timeout"] * self._config["refresh_rate"]) - 1)
-                // 2
-            ) / self._config["refresh_rate"]
-            if timestamp > self.last_frame_sent_time + half_of_timeout:
-                if self._destination is not None:
-                    self._sock.sendto(
-                        bytes(packet), (self.destination, 7778)
-                    )
-                    self.last_frame_sent_time = timestamp
-        else:
-            if self._destination is not None:
-                self._sock.sendto(
-                    bytes(packet), (self.destination, 7778)
-                )
+        should_send = (
+            not frame_is_equal_to_last or
+            (frame_is_equal_to_last and
+             timestamp > self.last_frame_sent_time +
+             ((self._config["timeout"] * self._config["refresh_rate"]) - 1) // 2 /
+             self._config["refresh_rate"])
+        )
+
+        if should_send:
+            try:
+                self._sock.sendto(bytes(packet), (self.destination, 7778))
                 self.last_frame_sent_time = timestamp
+            except OSError as e:
+                if e.errno in [64, 65]:  # Host is down hoặc No route to host
+                    _LOGGER.warning(
+                        f"Không thể kết nối đến thiết bị LED tại {self.destination}. "
+                        f"Lỗi: {str(e)}. "
+                        "Thiết bị có thể đã tắt hoặc không kết nối mạng. "
+                        "Đang tạm dừng gửi gói tin..."
+                    )
+                    # Đánh dấu thiết bị cần được kích hoạt lại
+                    self._destination = None
+                    # Không raise exception để tránh crash chương trình
+                    return
+                else:
+                    # Log lỗi nhưng không làm crash chương trình
+                    _LOGGER.error(f"Lỗi khi gửi gói UDP: {str(e)}")
+                    return
