@@ -532,7 +532,6 @@ class AudioInputSource:
             )
 
             if len(self._raw_audio_sample) != out_sample_len:
-                _LOGGER.warning("Đã loại bỏ khung âm thanh không đúng định dạng")
                 return
         else:
             self._raw_audio_sample = np.frombuffer(in_data, dtype=np.float32)

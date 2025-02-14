@@ -22,7 +22,6 @@ from wls.utils import (
     clean_ip,
     generate_id,
     resolve_destination,
-    rml_support_DDP,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -464,7 +463,7 @@ class SerialDevice(Device):
         try:
             if self.version != 1000000:
                 self.serial = serial.Serial(self.com_port, self.version, timeout=1)
-            
+
             if self.serial and self.serial.isOpen():
                 super().activate()
                 return True
@@ -523,7 +522,7 @@ class SerialDevice(Device):
         if connected:
             print(f"Đã kích hoạt cổng {self.com_port} đã lưu trước đó")
             return True
-        
+
         # Nếu không thể kết nối đến com_port đã lưu, thử kết nối đến các cổng COM khác
         if sys.platform == 'win32':
             available_ports = [port for port in serial.tools.list_ports.comports() if (port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description)]
@@ -713,23 +712,13 @@ class Devices(RegistryLoader):
 
             rml_count = led_info["count"]
             rml_rgbmode = led_info["rgbw"]
-            rml_build = rml_config["vid"]
-
-            if rml_support_DDP(rml_build):
-                _LOGGER.info(f"RML build Supports DDP: {rml_build}")
-                sync_mode = "UDP"
-            else:
-                _LOGGER.info(
-                    f"RML build pre DDP, default to UDP: {rml_build}"
-                )
-                sync_mode = "UDP"
 
             rml_config = {
                 "name": rml_name,
                 "pixel_count": rml_count,
                 "icon_name": "rml",
                 "rgbw_led": rml_rgbmode,
-                "sync_mode": sync_mode,
+                "sync_mode": "UDP",
             }
 
             device_config.update(rml_config)
@@ -755,7 +744,7 @@ class Devices(RegistryLoader):
             # Cố gắng tạo một đối tượng của class SerialDevice
             serial_device = SerialDevice(self._wls, device.config)
         except TypeError:
-            # Nếu xảy ra lỗi (không thể tạo instance của lớp trừu tượng), 
+            # Nếu xảy ra lỗi (không thể tạo instance của lớp trừu tượng),
             # lấy giá trị mặc định từ schema của SerialDevice class
             serial_device = {
                 "led_id": "_Auto_"  # Đây là giá trị mặc định từ schema của bạn

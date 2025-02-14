@@ -1,5 +1,4 @@
 import logging
-import sys
 
 import voluptuous as vol
 
@@ -7,7 +6,7 @@ from wls.devices import NetworkedDevice
 from wls.devices.ddp import DDPDevice
 from wls.devices.e131 import E131Device
 from wls.devices.udp import UDPRealtimeDevice
-from wls.utils import RML, RML2, rml_support_DDP
+from wls.utils import RML
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -91,27 +90,49 @@ class RMLDevice(NetworkedDevice):
         self.subdevice._destination = self._destination
 
     def activate(self):
-        self.RMLReceiver = False
-        self.device_ip = RML2.resolve_destination(self._config["ip_address"])
-        if not self.device_ip:
-            _LOGGER.warning(
-                f"Không thể giải quyết điểm đến {self._config['ip_address']}, Huỷ kích hoạt đèn {self.name}. Hãy đảm bảo IP/hostname chính xác và đèn đang được kết nối."
-            )
-            return
-            # If the device is a RML device, turn it on
-        if RML2.rml_identifier(self.device_ip, self.name):
-            self.RMLReceiver = True
-            self.rml_state = RML2.rml_power_state(self.device_ip, self.name)
-            if self.rml_state is False:
-                RML2.turn_rml_on(self.device_ip, self.name)
+        """Activate the device and its subdevice"""
+        try:
+            import asyncio
+            if hasattr(self, 'rml'):
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    async def check_and_activate():
+                        # Kiểm tra trạng thái hiện tại
+                        current_state = await self.rml.get_power_state()
+                        # Chỉ bật nếu đang tắt
+                        if not current_state:
+                            await self.rml.set_power_state(True)
+                    loop.create_task(check_and_activate())
+                else:
+                    loop.run_until_complete(self.rml.set_power_state(True))
+        except Exception as e:
+            _LOGGER.error(f"Error activating RML device: {e}")
+
         if self.subdevice is None:
             self.setup_subdevice()
         self.subdevice.activate()
         super().activate()
 
     def deactivate(self):
+        """Deactivate the device and its subdevice"""
+        try:
+            import asyncio
+            if hasattr(self, 'rml'):
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    async def check_and_deactivate():
+                        current_state = await self.rml.get_power_state()
+                        if current_state:
+                            await self.rml.set_power_state(False)
+                    loop.create_task(check_and_deactivate())
+                else:
+                    loop.run_until_complete(self.rml.set_power_state(False))
+        except Exception as e:
+            _LOGGER.error(f"Error deactivating RML device: {e}")
+
         if self.subdevice is not None:
             self.subdevice.deactivate()
+
         super().deactivate()
 
     async def resolve_address(self, success_callback=None):
@@ -144,16 +165,3 @@ class RMLDevice(NetworkedDevice):
 
         self._config.update(rml_config)
         self.setup_subdevice()
-
-        # Currently *assuming* that this PR gets released in 0.13
-        # https://github.com/Aircoookie/RML/pull/1944
-        if rml_support_DDP(rml_build):
-            _LOGGER.info(f"RML Build Supports Sync Setting API: {rml_build}")
-            rml_sync_settings = await self.rml.get_sync_settings()
-        # self.rml.enable_realtime_gamma()
-        # self.rml.set_inactivity_timeout(self._config["timeout"])
-        # self.rml.first_universe()
-        # self.rml.first_dmx_address()
-        # self.rml.multirgb_dmx_mode()
-
-        # await self.rml.flush_sync_settings()

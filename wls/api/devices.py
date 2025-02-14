@@ -77,4 +77,10 @@ class DevicesEndpoint(RestEndpoint):
                 "virtuals": device.virtuals,
             },
         }
+
+        if device.type == "skydimond-wifi":
+            nodes = await device.rml.get_nodes()
+            if "nodes" in nodes:
+                response["nodes"] = nodes["nodes"]
+
         return web.json_response(data=response, status=200)
