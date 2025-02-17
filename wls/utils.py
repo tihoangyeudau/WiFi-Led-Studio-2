@@ -365,29 +365,46 @@ class RML:
         else:
             return res["seg"]
 
-    async def set_power_state(self, state):
+    async def set_power_state(self, state, max_retries=5, delay=2):
         """
-        Set power state for RML device using JSON API
+        Set power state for RML device using JSON API.
 
         Args:
             state (bool): True to turn on, False to turn off
         """
+        async def send_requests():
+            """Helper function to send both requests in parallel."""
+            power = {"on": state}
+            live = {"live": state}
+            await asyncio.gather(
+                RML._rml_request(requests.post, self.ip_address, "/json/state", json=power),
+                RML._rml_request(requests.post, self.ip_address, "/json/info", json=live),
+            )
+
         try:
-            # Format dữ liệu JSON đúng định dạng API RML
-            power = {"on": state, "transition": 0}
+            for attempt in range(max_retries):
+                await send_requests()
 
-            await RML._rml_request(
-                requests.post,
-                self.ip_address,
-                "/json/state",
-                json=power  # Sử dụng json thay vì data
-            )
+                # Kiểm tra lại trạng thái thực tế của thiết bị
+                current_state = await self.get_power_state()
 
-            _LOGGER.info(
-                f"RML {self.ip_address}: Đã {'bật' if state else 'tắt'}."
-            )
+                if current_state is None:
+                    _LOGGER.error(f"Không thể xác định trạng thái RML {self.ip_address}. Thử lại lần {attempt + 1}.")
+                elif current_state == state:
+                    _LOGGER.info(f"RML {self.ip_address}: Đã {'bật' if state else 'tắt'} thành công.")
+                    return  # Nếu trạng thái đúng, thoát khỏi vòng lặp
+                else:
+                    _LOGGER.warning(f"RML {self.ip_address}: Trạng thái không đồng bộ. Mong đợi {state}, nhưng hiện tại là {current_state}. Thử lại lần {attempt + 1}.")
+
+                # Nếu chưa thành công, đợi một thời gian rồi thử lại
+                if attempt < max_retries - 1:  # Không delay sau lần thử cuối
+                    await asyncio.sleep(delay)
+
+            # Nếu không thành công sau max_retries lần thử
+            _LOGGER.error(f"Không thể thay đổi trạng thái RML {self.ip_address} sau {max_retries} lần thử.")
+
         except Exception as e:
-            _LOGGER.error(f"Error setting power state for {self.ip_address}: {e}")
+            _LOGGER.error(f"Lỗi khi đặt trạng thái nguồn cho RML {self.ip_address}: {e}")
 
     async def set_brightness(self, brightness):
         """

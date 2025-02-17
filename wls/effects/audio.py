@@ -452,22 +452,6 @@ class AudioInputSource:
             self._stream = None
         self._audio_stream_active = False
 
-        if sys.platform == 'win32':
-            # Unregister the notification client if initialized
-            if self.notification_client:
-                try:
-                    device_enumerator = AudioUtilities.GetDeviceEnumerator()
-                    device_enumerator.UnregisterEndpointNotificationCallback(self.notification_client)
-                    _LOGGER.info("Đã hủy đăng ký notification client.")
-                except Exception as e:
-                    _LOGGER.error(f"Lỗi khi hủy đăng ký notification client: {e}")
-
-            try:
-                comtypes.CoUninitialize()  # Chỉ giải phóng COM, không cần gọi CoInitialize
-                _LOGGER.info("COM đã được giải phóng.")
-            except Exception as e:
-                _LOGGER.error(f"Lỗi khi giải phóng COM: {e}")
-
     def subscribe(self, callback):
         """Registers a callback with the input source"""
         self._callbacks.append(callback)

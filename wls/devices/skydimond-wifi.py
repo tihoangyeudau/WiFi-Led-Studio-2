@@ -96,13 +96,7 @@ class RMLDevice(NetworkedDevice):
             if hasattr(self, 'rml'):
                 loop = asyncio.get_event_loop()
                 if loop.is_running():
-                    async def check_and_activate():
-                        # Kiểm tra trạng thái hiện tại
-                        current_state = await self.rml.get_power_state()
-                        # Chỉ bật nếu đang tắt
-                        if not current_state:
-                            await self.rml.set_power_state(True)
-                    loop.create_task(check_and_activate())
+                    loop.create_task(self.rml.set_power_state(True))
                 else:
                     loop.run_until_complete(self.rml.set_power_state(True))
         except Exception as e:
@@ -120,11 +114,7 @@ class RMLDevice(NetworkedDevice):
             if hasattr(self, 'rml'):
                 loop = asyncio.get_event_loop()
                 if loop.is_running():
-                    async def check_and_deactivate():
-                        current_state = await self.rml.get_power_state()
-                        if current_state:
-                            await self.rml.set_power_state(False)
-                    loop.create_task(check_and_deactivate())
+                    loop.create_task(self.rml.set_power_state(False))
                 else:
                     loop.run_until_complete(self.rml.set_power_state(False))
         except Exception as e:
@@ -155,7 +145,6 @@ class RMLDevice(NetworkedDevice):
         rml_name = rml_config["name"]
         rml_count = led_info["count"]
         rml_rgbmode = led_info["rgbw"]
-        rml_build = rml_config["vid"]
 
         rml_config = {
             "name": rml_name,

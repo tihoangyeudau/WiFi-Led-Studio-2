@@ -10,6 +10,7 @@ class Event:
     """Base for events"""
 
     WLS_SHUTDOWN = "shutdown"
+    FAST_SHUTDOWN = "fast_shutdown"
     DEVICE_CREATED = "device_created"
     DEVICE_UPDATE = "device_update"
     DEVICES_UPDATED = "devices_updated"
@@ -23,6 +24,7 @@ class Event:
     PRESET_ACTIVATED = "preset_activated"
     VIRTUAL_CONFIG_UPDATE = "virtual_config_update"
     GLOBAL_PAUSE = "global_pause"
+    GLOBAL_RESUME = "global_resume"
     VIRTUAL_PAUSE = "virtual_pause"
     AUDIO_INPUT_DEVICE_CHANGED = "audio_input_device_changed"
     RESTART_AUDIO_INPUT_SOURCE = "restart_audio_input_source"
@@ -75,6 +77,11 @@ class GlobalPauseEvent(Event):
     def __init__(self):
         super().__init__(Event.GLOBAL_PAUSE)
 
+class GlobalResumeEvent(Event):
+    """Event emitted when all virtuals are resumed"""
+
+    def __init__(self):
+        super().__init__(Event.GLOBAL_RESUME)
 
 class VirtualPauseEvent(Event):
     """Event emitted when virtual updated paused"""

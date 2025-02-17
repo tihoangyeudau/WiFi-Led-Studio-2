@@ -135,7 +135,15 @@ class Virtual:
         _min_time = time.get_clock_info("monotonic").resolution
 
     def __init__(self, wls, config):
+        def pause_effects(e):
+            self.deactivate()
+
+        def resume_effects(e):
+            self.activate()
+
         self._wls = wls
+        self._wls.events.add_listener(pause_effects, Event.GLOBAL_PAUSE)
+        self._wls.events.add_listener(resume_effects, Event.GLOBAL_RESUME)
         self._config = config
         # the multiplier to fade in/out of an effect. -ve values mean fading
         # in, +ve mean fading out
@@ -415,7 +423,7 @@ class Virtual:
             return f"Highlight must be between -1 (off) and {len(self._segments) - 1} inclusive"
         self._highlight = highlight
         return None
-    
+
     @property
     def active_effect(self):
         return self._active_effect
@@ -960,15 +968,9 @@ class Virtuals:
             virtual._paused = self._paused
         self._wls.events.fire_event(GlobalPauseEvent())
 
-    def pause_all(self):
-        self._paused = not self._paused
-        for virtual in self.values():
-            virtual._paused = self._paused
-        self._wls.events.fire_event(GlobalPauseEvent())
-
     def get(self, *args):
         return self._virtuals.get(*args)
-    
+
     def check_and_deactivate_devices(self):
         """
         Checks all active virtuals and segments to compile a list of active devices,

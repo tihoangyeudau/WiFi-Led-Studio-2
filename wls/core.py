@@ -7,6 +7,9 @@ import warnings
 import webbrowser
 import subprocess
 if sys.platform == "win32":
+    import threading
+    import ctypes
+    from ctypes import wintypes
     import winreg
 elif sys.platform == "darwin":
     import shutil
@@ -30,6 +33,8 @@ from wls.events import (
     Event,
     Events,
     WlsShutdownEvent,
+    GlobalPauseEvent,
+    GlobalResumeEvent,
     VisualisationUpdateEvent,
 )
 from wls.http_manager import HttpServer
@@ -48,6 +53,139 @@ from wls.virtuals import Virtuals
 _LOGGER = logging.getLogger(__name__)
 if currently_frozen():
     warnings.filterwarnings("ignore")
+
+if sys.platform == "win32":
+    WM_QUERYENDSESSION = 0x0011
+    WM_ENDSESSION = 0x0016
+    WM_POWERBROADCAST = 0x0218
+    PBT_APMSUSPEND = 0x0004
+    PBT_APMRESUMEAUTOMATIC = 0x0012
+    # PBT_APMRESUMESUSPEND = 0x0007
+    # PBT_APMRESUMESTANDBY = 0x0008
+
+    class WNDCLASS(ctypes.Structure):
+        _fields_ = [
+            ("style", ctypes.c_uint),
+            ("lpfnWndProc", ctypes.c_void_p),
+            ("cbClsExtra", ctypes.c_int),
+            ("cbWndExtra", ctypes.c_int),
+            ("hInstance", ctypes.c_void_p),
+            ("hIcon", ctypes.c_void_p),
+            ("hCursor", ctypes.c_void_p),
+            ("hbrBackground", ctypes.c_void_p),
+            ("lpszMenuName", ctypes.c_wchar_p),
+            ("lpszClassName", ctypes.c_wchar_p)
+        ]
+
+    class WindowsEventHandler:
+        def __init__(self, wls_core):
+            self.wls_core = wls_core
+            self.loop = wls_core.loop
+            self.hwnd = None
+            self.running = True
+
+            # Setup Windows message thread
+            self.win_thread = threading.Thread(target=self._windows_message_loop, daemon=True)
+
+        def start(self):
+            """Start the Windows event handler"""
+            self.win_thread.start()
+            _LOGGER.debug("Lắng nghe sự kiện Windows đã bật")
+
+        def stop(self):
+            """Stop the Windows event handler"""
+            self.running = False
+            if self.hwnd:
+                ctypes.windll.user32.PostQuitMessage(0)
+            _LOGGER.debug("Lắng nghe sự kiện Windows đã tắt")
+
+        def _windows_message_loop(self):
+            """Windows message loop running in separate thread"""
+            try:
+                # Register window class
+                wc = self._create_window_class()
+                ctypes.windll.user32.RegisterClassW(ctypes.byref(wc))
+
+                # Create window
+                self.hwnd = ctypes.windll.user32.CreateWindowExW(
+                    0, wc.lpszClassName, "Event Window",
+                    0, 0, 0, 0, 0, None, None, None, None
+                )
+
+                if self.hwnd:
+                    _LOGGER.debug("Cửa sổ đã được tạo thành công")
+
+                # Message loop
+                msg = wintypes.MSG()
+                while self.running:
+                    result = ctypes.windll.user32.GetMessageW(ctypes.byref(msg), self.hwnd, 0, 0)
+                    if result == 0:  # WM_QUIT
+                        break
+
+                    ctypes.windll.user32.TranslateMessage(ctypes.byref(msg))
+                    ctypes.windll.user32.DispatchMessageW(ctypes.byref(msg))
+
+            except Exception as e:
+                _LOGGER.error(f"Error in Windows message loop: {e}")
+
+        def _create_window_class(self):
+            """Create Windows class structure"""
+            wc = WNDCLASS()
+            wc.lpfnWndProc = ctypes.cast(
+                ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_int, ctypes.c_uint, ctypes.c_long, ctypes.c_long)(
+                    self._window_proc
+                ),
+                ctypes.c_void_p
+            )
+            wc.lpszClassName = "EventHandler"
+            return wc
+
+        def _window_proc(self, hwnd, msg, wparam, lparam):
+            """Window procedure callback"""
+            try:
+                if msg == WM_QUERYENDSESSION:
+                    _LOGGER.debug("Hệ thống đang tắt hoặc đăng xuất")
+
+                    # Tạo một event để chờ hoàn tất xử lý
+                    event_done = threading.Event()
+
+                    def process_pause():
+                        _LOGGER.debug("Bắt đầu xử lý GlobalPauseEvent()")
+                        self.wls_core.events.fire_event(GlobalPauseEvent())
+
+                        # Giả lập chờ cho đến khi quá trình fire_event thực sự hoàn tất
+                        time.sleep(2)  # Chờ 2 giây hoặc điều chỉnh theo yêu cầu
+
+                        _LOGGER.debug("Đã xử lý xong GlobalPauseEvent()")
+                        event_done.set()  # Đánh dấu hoàn thành
+
+                    # Khởi chạy thread nhưng phải đảm bảo xử lý xong trước khi tiếp tục
+                    thread = threading.Thread(target=process_pause, daemon=True)
+                    thread.start()
+
+                    # Chờ tối đa 5 giây để đảm bảo `fire_event()` hoàn tất
+                    event_done.wait(timeout=5)
+
+                    return 0  # Chấp nhận thoát ứng dụng sau khi xử lý xong
+
+                elif msg == WM_ENDSESSION:
+                    if wparam:  # Session đang kết thúc
+                        _LOGGER.debug("Chấp nhận thoát ứng dụng")
+                        return 0
+
+                elif msg == WM_POWERBROADCAST:
+                    if wparam == PBT_APMSUSPEND:
+                        _LOGGER.debug("Hệ thống đang vào chế độ ngủ.")
+                        self.wls_core.events.fire_event(GlobalPauseEvent())
+                    elif wparam == PBT_APMRESUMEAUTOMATIC:
+                        self.wls_core.events.fire_event(GlobalResumeEvent())
+                        _LOGGER.debug("Hệ thống đã thức dậy từ chế độ ngủ.")
+
+            except Exception as e:
+                _LOGGER.error(f"Error in window procedure: {e}")
+
+            return ctypes.windll.user32.DefWindowProcW(hwnd, msg, wparam, lparam)
+
 
 
 class WlsCore:
@@ -119,6 +257,9 @@ class WlsCore:
             wls=self, host=self.host, port=self.port, port_s=self.port_s
         )
         self.exit_code = None
+
+        if sys.platform == "win32":
+            self.win_handler = WindowsEventHandler(self)
 
     def dev_enabled(self):
         return self.config["dev_mode"]
@@ -342,6 +483,11 @@ class WlsCore:
 
     async def async_start(self, open_ui=False, pause_all=False):
         _LOGGER.info("Khởi động WiFi Led Studio")
+
+        if sys.platform == "win32":
+            if self.win_handler:
+                self.win_handler.start()
+
         await self.http.start(get_ssl_certs(config_dir=self.config_dir))
         if (
             self.icon is not None
@@ -419,8 +565,6 @@ class WlsCore:
         try:
             _LOGGER.info(self.EXIT_CODES.get(exit_code, "Unknown exit code."))
             self.events.fire_event(WlsShutdownEvent())
-            _LOGGER.info("Stopping HTTP Server...")
-            await self.http.stop()
 
             tasks = [task for task in asyncio.all_tasks() if task is not asyncio.current_task()]
             if tasks:
@@ -434,6 +578,9 @@ class WlsCore:
                 _LOGGER.debug("All tasks killed.")
             save_config(config=self.config, config_dir=self.config_dir)
 
+            _LOGGER.info("Stopping HTTP Server...")
+            await self.http.stop()
+
         except Exception as e:
             _LOGGER.error(f"An error occurred while stopping: {e}")
             self.exit_code = 1
@@ -445,6 +592,10 @@ class WlsCore:
             self.loop.stop()
 
     async def async_stop(self, exit_code):
+        if sys.platform == "win32":
+            if self.win_handler:
+                self.win_handler.stop()
+
         return await self._common_async_stop(exit_code)
 
     async def async_stop_aw(self, exit_code):
