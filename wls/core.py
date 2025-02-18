@@ -2,17 +2,18 @@ import asyncio
 import logging
 import sys
 import os
+import threading
 import time
 import warnings
 import webbrowser
 import subprocess
 if sys.platform == "win32":
-    import threading
     import ctypes
     from ctypes import wintypes
     import winreg
 elif sys.platform == "darwin":
     import shutil
+    from AppKit import NSWorkspace, NSObject, NSDistributedNotificationCenter
 
 from pystray import Menu, MenuItem
 from concurrent.futures import ThreadPoolExecutor
@@ -185,7 +186,169 @@ if sys.platform == "win32":
                 _LOGGER.error(f"Error in window procedure: {e}")
 
             return ctypes.windll.user32.DefWindowProcW(hwnd, msg, wparam, lparam)
+else:
+    class MacOSEventHandler:
+        def __init__(self, wls_core):
+            self.wls_core = wls_core
+            self.loop = wls_core.loop
+            self.running = True
 
+            # Workspace notifications
+            self.workspace = NSWorkspace.sharedWorkspace()
+            self.ws_notification_center = self.workspace.notificationCenter()
+
+            # Distributed notifications for lock/unlock
+            self.dist_notification_center = NSDistributedNotificationCenter.defaultCenter()
+
+            # Create observer object
+            self.observer = MacOSEventObserver.alloc().initWithHandler_(self)
+
+            # For cleanup
+            self.registered_notifications = []
+
+        def start(self):
+            """Start the MacOS event handler"""
+            try:
+                # Workspace notifications
+                self._register_notification(
+                    self.ws_notification_center,
+                    'handleSleepNotification:',
+                    'NSWorkspaceWillSleepNotification'
+                )
+
+                self._register_notification(
+                    self.ws_notification_center,
+                    'handleWakeNotification:',
+                    'NSWorkspaceDidWakeNotification'
+                )
+
+                self._register_notification(
+                    self.ws_notification_center,
+                    'handleShutdownNotification:',
+                    'NSWorkspaceWillPowerOffNotification'
+                )
+
+                # Distributed notifications
+                self._register_notification(
+                    self.dist_notification_center,
+                    'handleLogOffNotification:',
+                    'com.apple.sessionDidLogout'
+                )
+
+                # self._register_notification(
+                    # self.dist_notification_center,
+                    # 'handleScreenLockNotification:',
+                    # 'com.apple.screenIsLocked'
+                # )
+
+                # self._register_notification(
+                    # self.dist_notification_center,
+                    # 'handleScreenUnlockNotification:',
+                    # 'com.apple.screenIsUnlocked'
+                # )
+
+                _LOGGER.debug("MacOS event listener started successfully")
+
+            except Exception as e:
+                _LOGGER.error(f"Failed to start MacOS event listener: {e}")
+
+        def _register_notification(self, center, selector, name):
+            """Helper to register notifications and track them for cleanup"""
+            center.addObserver_selector_name_object_(
+                self.observer,
+                selector,
+                name,
+                None
+            )
+            self.registered_notifications.append((center, name))
+
+        def stop(self):
+            """Stop the MacOS event handler"""
+            try:
+                self.running = False
+
+                # Clean up all registered notifications
+                for center, name in self.registered_notifications:
+                    center.removeObserver_name_object_(self.observer, name, None)
+
+                self.registered_notifications.clear()
+
+                _LOGGER.debug("MacOS event listener stopped successfully")
+
+            except Exception as e:
+                _LOGGER.error(f"Error stopping MacOS event listener: {e}")
+
+        def _handle_event(self, pause, component="THREAD"):
+            """Common event handling with timeout"""
+            try:
+                if component == "THREAD":
+                    event = threading.Event()
+
+                    def process_event():
+                        _LOGGER.debug(f"Processing {'pause' if pause else 'resume'} event")
+                        if pause:
+                            self.wls_core.events.fire_event(GlobalPauseEvent())
+                        else:
+                            self.wls_core.events.fire_event(GlobalResumeEvent())
+                        time.sleep(2.0)  # Allow time for event processing
+                        _LOGGER.debug("Event processed")
+                        event.set()
+
+                    # Run in thread to avoid blocking
+                    thread = threading.Thread(target=process_event, daemon=True)
+                    thread.start()
+
+                    # Wait with timeout
+                    if not event.wait(timeout=5.0):
+                        _LOGGER.warning("Event processing timed out")
+                else:
+                    _LOGGER.debug(f"Processing {'pause' if pause else 'resume'} event for {component}")
+                    if pause:
+                        self.wls_core.events.fire_event(GlobalPauseEvent())
+                    else:
+                        self.wls_core.events.fire_event(GlobalResumeEvent())
+                    _LOGGER.debug("Event processed")
+
+            except Exception as e:
+                _LOGGER.error(f"Error handling event: {e}")
+
+    class MacOSEventObserver(NSObject):
+        """Observer class to handle MacOS notifications"""
+
+        def initWithHandler_(self, handler):
+            self = self.init()
+            self.handler = handler
+            return self
+
+        def handleSleepNotification_(self, notification):
+            _LOGGER.debug("Sleep notification received")
+            if self.handler:
+                self.handler._handle_event(pause=True)
+
+        def handleWakeNotification_(self, notification):
+            _LOGGER.debug("Wake notification received")
+            if self.handler:
+                self.handler._handle_event(pause=False)
+
+        def handleShutdownNotification_(self, notification):
+            _LOGGER.debug("Shutdown notification received")
+            if self.handler:
+                self.handler._handle_event(pause=True, component="THREAD")
+
+        def handleLogOffNotification_(self, notification):
+            _LOGGER.debug("Log Off notification received")
+            if self.handler:
+                self.handler._handle_event(pause=True, component="THREAD")
+
+        # def handleScreenLockNotification_(self, notification):
+            # _LOGGER.debug("Screen lock notification received")
+            # if self.handler:
+                # self.handler._handle_event(pause=True)
+
+        # def handleScreenUnlockNotification_(self, notification):
+            # _LOGGER.debug("Screen unlock notification received")
+            # if self.handler:
+                # self.handler._handle_event(pause=False)
 
 
 class WlsCore:
@@ -259,7 +422,9 @@ class WlsCore:
         self.exit_code = None
 
         if sys.platform == "win32":
-            self.win_handler = WindowsEventHandler(self)
+            self.event_handler = WindowsEventHandler(self)
+        else:
+            self.event_handler = MacOSEventHandler(self)
 
     def dev_enabled(self):
         return self.config["dev_mode"]
@@ -484,9 +649,8 @@ class WlsCore:
     async def async_start(self, open_ui=False, pause_all=False):
         _LOGGER.info("Khởi động WiFi Led Studio")
 
-        if sys.platform == "win32":
-            if self.win_handler:
-                self.win_handler.start()
+        if self.event_handler:
+            self.event_handler.start()
 
         await self.http.start(get_ssl_certs(config_dir=self.config_dir))
         if (
@@ -592,9 +756,8 @@ class WlsCore:
             self.loop.stop()
 
     async def async_stop(self, exit_code):
-        if sys.platform == "win32":
-            if self.win_handler:
-                self.win_handler.stop()
+        if self.event_handler:
+            self.event_handler.stop()
 
         return await self._common_async_stop(exit_code)
 
