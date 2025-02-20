@@ -240,13 +240,15 @@ class RML:
         try:
             response = method(url, timeout=timeout, **kwargs)
 
-            if not response.ok:
-                return None
+        except requests.exceptions.RequestException:
+            msg = f"Không kết nối được với đèn có IP {ip_address} "
+            raise ValueError(msg)
 
-            return response
+        if not response.ok:
+            msg = f"Đèn có IP {ip_address} bị Lỗi API - {response.status_code}"
+            raise ValueError(msg)
 
-        except requests.exceptions.RequestException as e:
-            return None
+        return response
 
     @staticmethod
     async def _get_sync_settings(ip_address):
