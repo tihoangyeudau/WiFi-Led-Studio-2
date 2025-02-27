@@ -36,6 +36,7 @@ from wls.events import (
     WlsShutdownEvent,
     GlobalPauseEvent,
     GlobalResumeEvent,
+    EffectClearedEvent,
     VisualisationUpdateEvent,
 )
 from wls.http_manager import HttpServer
@@ -530,6 +531,12 @@ class WlsCore:
 
             shutil.copy(aw_source_path, aw_destination_path)
 
+    def pause(self):
+        self.events.fire_event(GlobalPauseEvent())
+
+    def resume(self):
+        self.events.fire_event(GlobalResumeEvent())
+
     global adapter
 
     def setup_icon_menu_aw(self):
@@ -543,6 +550,9 @@ class WlsCore:
             Menu.SEPARATOR,
             MenuItem("Mở trang điều khiển | Open Web-App", self.open_ui, default=True),
             MenuItem("Theo màu màn hình | Screen capture", self.stop_aw),
+            Menu.SEPARATOR,
+            MenuItem("Tạm dừng | Pause", self.pause),
+            MenuItem("Tiếp tục | Resume", self.resume),
             Menu.SEPARATOR,
             MenuItem("Khởi động lại | Restart", self.restart_wls),
             MenuItem("Thoát | Quit", self.stop),
@@ -559,6 +569,9 @@ class WlsCore:
             Menu.SEPARATOR,
             MenuItem("Mở trang điều khiển | Open Web-App", self.open_ui, default=True),
             MenuItem("Theo màu màn hình | Screen capture", self.stop_aw),
+            Menu.SEPARATOR,
+            MenuItem("Tạm dừng | Pause", self.pause),
+            MenuItem("Tiếp tục | Resume", self.resume),
             Menu.SEPARATOR,
             MenuItem("Khởi động lại | Restart", self.restart_wls),
             MenuItem("Thoát | Quit", self.stop),
