@@ -1,4 +1,5 @@
 import asyncio
+import threading
 import logging
 import socket
 import time
@@ -412,7 +413,7 @@ def find_available_com_ports():
     if sys.platform == 'win32':
         return [port.device for port in serial.tools.list_ports.comports() if (port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description)]
     elif sys.platform == "darwin":
-        return [port.device for port in serial.tools.list_ports.comports() if ("cu.usbserial" in port.name or "cu.wchusbserial" in port.name)]
+        return [port.device for port in serial.tools.list_ports.comports() if ("tty.usbserial" in port.name or "tty.wchusbserial" in port.name)]
 
 
 class AvailableCOMPorts:
@@ -441,14 +442,14 @@ class SerialDevice(Device):
         }
     )
 
-    MAX_RETRIES = 1  # Maximum number of reconnection attempts
-
     def __init__(self, wls, config):
         super().__init__(wls, config)
         self.serial = None
         self.version = self._get_version_baudrate()
         self.com_port = self._config["com_port"]
         self.led_id = self._config["led_id"]
+        self._reconnect_lock = threading.Lock()  # Thêm lock để đồng bộ hóa
+        self._reconnect_scheduled = False  # Cờ để kiểm tra xem đã lên lịch reconnect chưa
 
     def _get_version_baudrate(self):
         version_mapping = {
@@ -458,7 +459,8 @@ class SerialDevice(Device):
         return version_mapping.get(self._config["version"], 115200)
 
     def establish_connection(self):
-        if self.com_port is None:
+        if self.com_port is None or self.com_port == "_Auto_":
+            _LOGGER.warning("Không có cổng COM được chỉ định hoặc không tìm thấy")
             return False
         try:
             if self.version != 1000000:
@@ -468,73 +470,129 @@ class SerialDevice(Device):
                 super().activate()
                 return True
         except serial.SerialException as e:
-            pass
+            _LOGGER.error(f"Không truy cập được cổng {self.com_port}: {str(e)}")
+            self.serial = None
+
         return False
 
     def is_serial_open(self):
         return self.serial and self.serial.isOpen()
 
+    def _get_available_ports(self):
+        if sys.platform == 'win32':
+            return [port for port in serial.tools.list_ports.comports() if (port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description)]
+        else:
+            return [port for port in serial.tools.list_ports.comports() if ("tty.usbserial" in port.name or "tty.wchusbserial" in port.name)]
+
     def reconnect(self):
-        for retries in range(self.MAX_RETRIES):
+        with self._reconnect_lock:  # Đảm bảo chỉ một luồng thực hiện reconnect
+
             if self.is_serial_open():
                 self.serial.close()
 
             if self.version == 1000000:
-                self.serial_check_id_method()
+                if self.serial_check_id_method():
+                    return
             else:
-                # Ưu tiên thử kết nối đến com_port đã lưu trong config trước
                 if self.establish_connection():
-                    print(f"Đã kích hoạt cổng {self.com_port} đã lưu trước đó")
+                    _LOGGER.debug(f"Đã kích hoạt cổng {self.com_port} đã lưu trước đó")
                     return
 
-                # Nếu không thể kết nối đến com_port đã lưu, thử kết nối đến các cổng COM khác
-                if sys.platform == 'win32':
-                    available_ports = [port for port in serial.tools.list_ports.comports() if (port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description)]
-                else:
-                    available_ports = [port for port in serial.tools.list_ports.comports() if ("cu.usbserial" in port.name or "cu.wchusbserial" in port.name)]
+                available_ports = self._get_available_ports()
                 for port in available_ports:
-                    if port.device:  # Bỏ qua giá trị None
+                    if port.device:
                         self.com_port = port.device
                         if self.establish_connection():
-                            print(f"Đã tìm và kích hoạt cổng mới là {self.com_port}")
+                            _LOGGER.debug(f"Đã tìm và kích hoạt cổng mới là {self.com_port}")
                             if self.com_port != self._config["com_port"]:
                                 self.save_com_port_to_config()
-                                print(f"Đã lưu {self.com_port} vào cau_hinh.json")
-
                             return
 
-            time.sleep(2 ** retries)
-        return
+            _LOGGER.warning(f"Không tìm thấy thiết bị USB. Sẽ tiếp tục thử trong nền.")
+            self._online = False
 
-    def send_and_receive(self, command):
-        try:
-            time.sleep(0.05)
-            self.serial.write(command)
-            time.sleep(0.05)
-            return self.serial.readline().decode("ascii").strip()
-        except Exception as e:
-            print(f"Không gửi được tín hiệu đến cổng {self.com_port}: {e}")
-            return None
+            if not self._reconnect_scheduled:  # Kiểm tra xem đã lên lịch reconnect chưa
+                self._reconnect_scheduled = True
+                self._wls.loop.call_later(1, self._schedule_reconnect)
+
+    def _schedule_reconnect(self):
+        """Schedule a reconnection attempt without blocking the main thread"""
+        if not self.is_serial_open():
+            _LOGGER.debug("Đang thử kết nối lại với thiết bị USB...")
+            success = False
+
+            if self.version == 1000000:
+                success = self.serial_check_id_method()
+            else:
+                success = self.establish_connection()
+
+                if not success:
+                    available_ports = self._get_available_ports()
+                    for port in available_ports:
+                        if port.device:
+                            self.com_port = port.device
+                            if self.establish_connection():
+                                _LOGGER.debug(f"Đã tìm và kích hoạt cổng mới là {self.com_port}")
+                                if self.com_port != self._config["com_port"]:
+                                    self.save_com_port_to_config()
+                                success = True
+                                break
+
+            if success:
+                _LOGGER.info("Đã kết nối lại thành công với thiết bị USB")
+                self._reconnect_scheduled = False  # Đặt lại cờ khi kết nối thành công
+                self._online = True
+            else:
+                self._wls.loop.call_later(2, self._schedule_reconnect)
+        else:
+            self._reconnect_scheduled = False  # Đặt lại cờ nếu kết nối đã được thiết lập
+
+    def reset_serial_port(self):
+        """
+        Reset the serial port to defaults and perform a device reset.
+
+        :param serial_port: The serial port object (pySerial Serial instance).
+        """
+        # Reset to defaults
+        self.serial.dtr = True  # Set Data Terminal Ready (DTR) to True
+        self.serial.rts = False  # Set Request To Send (RTS) to False
+        time.sleep(0.05)  # Sleep for 50 milliseconds
+
+        # Reset device
+        self.serial.dtr = False  # Set Data Terminal Ready (DTR) to False
+        self.serial.rts = True  # Set Request To Send (RTS) to True
+        time.sleep(0.15)  # Sleep for 150 milliseconds
+
+        # Close the serial port if it is open
+        self.serial.close()
+        time.sleep(0.15)  # Sleep for 150 milliseconds
+
+        self.serial = serial.Serial(self.com_port, self.version, timeout=1)
 
     def serial_check_id_method(self):
         # Ưu tiên thử kết nối đến com_port đã lưu trong config trước
         connected = self.try_connect_to_com_port(self.com_port)
         if connected:
-            print(f"Đã kích hoạt cổng {self.com_port} đã lưu trước đó")
+            _LOGGER.debug(f"Đã kích hoạt cổng {self.com_port} đã lưu trước đó")
             return True
 
         # Nếu không thể kết nối đến com_port đã lưu, thử kết nối đến các cổng COM khác
-        if sys.platform == 'win32':
-            available_ports = [port for port in serial.tools.list_ports.comports() if (port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description)]
-        else:
-            available_ports = [port for port in serial.tools.list_ports.comports() if ("cu.usbserial" in port.name or "cu.wchusbserial" in port.name)]
+        available_ports = self._get_available_ports()
         for port in available_ports:
             connected = self.try_connect_to_com_port(port.device)
             if connected:
-                print(f"Đã kích hoạt cổng mới là: {port.device}")
+                _LOGGER.debug(f"Đã kích hoạt cổng mới là: {port.device}")
                 return True
 
         return False
+
+    def send_and_receive(self, command):
+        try:
+            self.serial.write(command)
+            return self.serial.readline().decode("ascii").strip()
+        except Exception as e:
+            _LOGGER.error(f"Không gửi/nhận được tín hiệu đến cổng {self.com_port}: {e}")
+            return None
 
     def try_connect_to_com_port(self, com_port):
         self.com_port = com_port
@@ -543,50 +601,46 @@ class SerialDevice(Device):
         try:
             self.serial = serial.Serial(self.com_port, self.version, timeout=1)
         except serial.SerialException:
-            print(f"Không truy cập được cổng {self.com_port}")
+            _LOGGER.error(f"Không truy cập được cổng {self.com_port}")
             self.serial = None
             return False
 
-        max_retries = 3
-        for attempt in range(max_retries):
-            response = self.send_and_receive(b"CheckID")
-            print(f"Đã gửi yêu cầu kích hoạt lại chế độ check ID {self.com_port}")
-            response = self.send_and_receive(b"r\n")
-            if response:
-                response = response.strip().replace("\n", "").replace("\r", "")
-            print(f"Đã gửi yêu cầu kích hoạt chế độ Ambilight cho cổng {self.com_port}")
+        self.reset_serial_port()
 
-            if response and response.startswith("R") and len(response) == 4:
-                check_id = self.led_id
-                self.com_port = com_port
-                if check_id == "_Auto_" or check_id == response:  # Kiểm tra phản hồi ID có khớp với ID cũ không hoặc nếu ID cũ là _Auto_ thì lưu ID phản hồi
-                    if check_id == "_Auto_":
-                        self.led_id = response                  # Cập nhật led_id từ _Auto_ thành ID mới tìm được
-                        self.save_check_id_to_config()          # Lưu ID mới tìm được vào cấu hình thay thế cho _Auto_
-                        print(f"Đã lưu ID: {response} vào cau_hinh.json")
-                    if self.com_port != self._config["com_port"]:
-                        self.save_com_port_to_config()
-                        print(f"Đã lưu {self.com_port} vào cau_hinh.json")
-                    m_response = self.send_and_receive(b"m\n")
-                    if m_response:
-                        m_response = m_response.strip().replace("\n", "").replace("\r", "")
-                    if m_response == "ok":
-                        print(f"Chế độ Ambilight cho cổng {self.com_port} đã được kích hoạt")
-                        self.establish_connection()
-                        return True
-                    else:
-                        print("Không nhận được ký tự ok")
-                else:                                           # Nếu ID phản hồi không khớp với ID mới
-                    print("ID mới không khớp với ID đã lưu, thử cổng COM khác")
-                if self.serial:
-                    self.serial.close()
-                break
+        response = self.send_and_receive(b"r\n")
+        if response:
+            response = response.strip().replace("\n", "").replace("\r", "")
+        _LOGGER.debug(f"Đã gửi yêu cầu kích hoạt chế độ Ambilight cho cổng {self.com_port}")
+
+        if response and len(response) == 4 and response.startswith("R"):
+            check_id = self.led_id
+            self.com_port = com_port
+            if check_id == "_Auto_" or check_id == response:
+                if check_id == "_Auto_":
+                    self.led_id = response
+                    self.save_check_id_to_config()
+                    _LOGGER.debug(f"Đã lưu ID: {response} vào cau_hinh.json")
+                if self.com_port != self._config["com_port"]:
+                    self.save_com_port_to_config()
+                    _LOGGER.debug(f"Đã lưu {self.com_port} vào cau_hinh.json")
+                m_response = self.send_and_receive(b"m\n")
+                if m_response:
+                    m_response = m_response.strip().replace("\n", "").replace("\r", "")
+                if m_response == "ok":
+                    _LOGGER.debug(f"Chế độ Ambilight cho cổng {self.com_port} đã được kích hoạt")
+                    self.establish_connection()
+                    return True
+                else:
+                    _LOGGER.warning("Không nhận được ký tự ok")
             else:
-                print(f"Không nhận được ID. Cổng {self.com_port} không phản hồi (Lần thử {attempt + 1}/{max_retries})")
-                if attempt < max_retries - 1:
-                    time.sleep(0.05)
+                _LOGGER.warning("ID mới không khớp với ID đã lưu, thử cổng COM khác")
+            if self.serial:
+                self.serial.close()
+        else:
+            _LOGGER.warning(f"Không nhận được ID. Cổng {self.com_port} không phản hồi")
 
         return False
+
 
     def save_check_id_to_config(self):
         self._config["led_id"] = self.led_id

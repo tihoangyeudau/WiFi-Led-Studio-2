@@ -1,22 +1,14 @@
-import React from 'react';
-import { useEffect, useLayoutEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import useStore from './apiStore';
 import Sockette from 'sockette';
 import isElectron from 'is-electron';
 
-
-// const ws = new WebSocket(`${window.location.protocol === 'https' ? 'wss' : 'ws'}://${window.localStorage.getItem('wls-host')?.split('https://')[0].split('http://')[0] || 'localhost:8090'}/api/websocket`);
-// const ws = new WebSocket(`${(window.localStorage.getItem('wls-host') && window.localStorage.getItem('wls-host').startsWith('https')) ? 'wss' : 'ws'}://${window.localStorage.getItem('wls-host')?.split('https://')[0].split('http://')[0] || 'localhost:8090'}/api/websocket`);
-// const ws = new WebSocket(`wss://${window.localStorage.getItem('wls-host')?.split('https://')[0].split('http://')[0].split(':')[0] || 'localhost:8090'}/api/websocket`);
-// const ws = new WebSocket(`${window.localStorage.getItem('wls-ws') ? window.localStorage.getItem('wls-ws') : 'ws://localhost:8090'}/api/websocket`, (window.localStorage.getItem('wls-ws') && window.localStorage.getItem('wls-ws').startsWith('wss')) ? 'https' : 'http');
-// const ws = new WebSocket(`wss://127.0.0.1/api/websocket`, 'wss');
-
 function createSocket() {
   if (!window.localStorage.getItem('wls-newbase')) {
     const _ws = new Sockette(`${(window.localStorage.getItem('wls-host') || (isElectron() ? 'http://localhost:8090' : window.location.href.split('/#')[0])).replace('https://', 'wss://').replace('http://', 'ws://')}/api/websocket`, {
       timeout: 1e3,
-      maxAttempts: 10000,
+      maxAttempts: Infinity,
       onopen: e => {
         document.dispatchEvent(
           new CustomEvent("disconnected", {
@@ -26,6 +18,14 @@ function createSocket() {
           })
         );
         _ws.ws = e.target;
+
+        // Cập nhật wsReady ngay khi kết nối được mở
+        document.dispatchEvent(
+          new CustomEvent("wsReady", {
+            detail: true
+          })
+        );
+
         const req = {
           event_type: "devices_updated",
           id: 1,
@@ -54,7 +54,7 @@ function createSocket() {
       },
       onclose: e => {
         window.localStorage.removeItem("core-init")
-        if (window.localStorage.getItem('wls-newbase') !== '1') {        
+        if (window.localStorage.getItem('wls-newbase') !== '1') {
           document.dispatchEvent(
             new CustomEvent("disconnected", {
               detail: {
@@ -81,6 +81,7 @@ export const HandleWs = () => {
   const graphs = useStore((state) => state.graphs);
   const [wsReady, setWsReady] = useState(false);
   const [wasDisconnected, setWasDisconnected] = useState(false);
+  const [isReconnecting, setIsReconnecting] = useState(false);
 
   useLayoutEffect(() => {
     if (!(pathname.startsWith("/Devices") || pathname.startsWith("/device"))) {
@@ -95,34 +96,40 @@ export const HandleWs = () => {
   }, [graphs]);
 
   useEffect(() => {
+    const handleWsReady = (e) => {
+      setWsReady(e.detail); // Cập nhật wsReady khi kết nối WebSocket sẵn sàng
+    };
+
+    document.addEventListener('wsReady', handleWsReady);
+
+    return () => {
+      document.removeEventListener('wsReady', handleWsReady);
+    };
+  }, []);
+
+  useEffect(() => {
     if (pixelGraphs.length > 0 && wsReady) {
-      pixelGraphs.map((d, i) => {
-        const getWs = async () => {
-          const request = {
-            event_filter: {
-              vis_id: d,
-              is_device: !!virtuals[d]?.is_device,
-            },
-            event_type: "visualisation_update",
-            id: i,
-            type: "subscribe_event",
-          };
-          ws.send(JSON.stringify(++request.id && request));
+      pixelGraphs.forEach((d, i) => {
+        const request = {
+          event_filter: {
+            vis_id: d,
+            is_device: !!virtuals[d]?.is_device,
+          },
+          event_type: "visualisation_update",
+          id: i,
+          type: "subscribe_event",
         };
-        getWs();
+        ws.send(JSON.stringify(++request.id && request));
       });
 
       return () => {
-        pixelGraphs.map((d, i) => {
-          const removeGetWs = async () => {
-            const request = {
-              id: i,
-              type: "unsubscribe_event",
-              event_type: "visualisation_update",
-            };
-            ws.send(JSON.stringify(++request.id && request));
+        pixelGraphs.forEach((d, i) => {
+          const request = {
+            id: i,
+            type: "unsubscribe_event",
+            event_type: "visualisation_update",
           };
-          removeGetWs();
+          ws.send(JSON.stringify(++request.id && request));
         });
       };
     }
@@ -132,7 +139,9 @@ export const HandleWs = () => {
     const handleDisconnected = (e) => {
       if (e.detail.isDisconnected) {
         setWasDisconnected(true);
+        setIsReconnecting(true);
       } else if (wasDisconnected) {
+        setIsReconnecting(false);
         window.location.reload();
       }
     };
@@ -144,11 +153,25 @@ export const HandleWs = () => {
     };
   }, [wasDisconnected]);
 
-  if (!wsReady) {
-    if (ws && ws.ws) {
-      setWsReady(true)
-    }
-  }
-
-  return null;
+  return (
+    <>
+      {isReconnecting && (
+        <div style={{
+          position: 'fixed',
+          bottom: '100px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          padding: '10px 20px',
+          backgroundColor: '#ffcc00',
+          color: '#000',
+          borderRadius: '5px',
+          zIndex: 1000,
+          textAlign: 'center',
+          boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+        }}>
+          Đang kết nối lại...
+        </div>
+      )}
+    </>
+  );
 };

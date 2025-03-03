@@ -1,6 +1,10 @@
+import logging
+import time
 import serial
 import voluptuous as vol
 from wls.devices import SerialDevice, packets
+
+_LOGGER = logging.getLogger(__name__)
 
 COLOR_ORDERS = [
     "RGB",
@@ -40,8 +44,8 @@ class SkydimondUSBDevice(SerialDevice):
 
     def flush(self, data):
         if self.serial is None or not self.serial.isOpen():
-            print("Không thể gửi dữ liệu: Kiểm tra lại kết nối USB")
-            self.reconnect()
+            _LOGGER.error("Không thể gửi dữ liệu: Kiểm tra lại kết nối USB")
+            time.sleep(2)
             return
 
         try:
@@ -54,5 +58,6 @@ class SkydimondUSBDevice(SerialDevice):
                     packets.build_skydimondusbpro_rainbowmusicled_dot_com_0981373223_packet(data, self.color_order)
                 )
         except serial.SerialException as e:
-            print("Không thể gửi dữ liệu: USB bị mất kết nối, hãy thử lại")
+            _LOGGER.error(f"Không thể gửi dữ liệu: {str(e)}")
+            time.sleep(2)
             self.reconnect()

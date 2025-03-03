@@ -4,10 +4,10 @@ import sys
 from PyInstaller.utils.hooks import copy_metadata
 datas = [   ('/Users/rainbowmusicled/Documents/GitHub/WiFi-Led-Studio-2/icons', 'icons/'),
             ('/Users/rainbowmusicled/Documents/GitHub/WiFi-Led-Studio-2/icons/tray.png', '.'),
-            ('/usr/local/bin/build/WiFi Led Studio-3.3.6.app/Contents/MacOS/lib/wls', 'wls/'),
-            ('/usr/local/bin/build/WiFi Led Studio-3.3.6.app/Contents/MacOS/lib/wls_frontend', 'wls_frontend/'),
-            ('/usr/local/bin/build/WiFi Led Studio-3.3.6.app/Contents/MacOS/lib/xyzservices', 'xyzservices/'),
-            ('/usr/local/bin/build/WiFi Led Studio-3.3.6.app/Contents/MacOS/lib/stupidArtnet', 'stupidArtnet/'),]
+            ('/usr/local/bin/build/WiFi Led Studio-3.3.7.app/Contents/MacOS/lib/wls', 'wls/'),
+            ('/usr/local/bin/build/WiFi Led Studio-3.3.7.app/Contents/MacOS/lib/wls_frontend', 'wls_frontend/'),
+            ('/usr/local/bin/build/WiFi Led Studio-3.3.7.app/Contents/MacOS/lib/xyzservices', 'xyzservices/'),
+            ('/usr/local/bin/build/WiFi Led Studio-3.3.7.app/Contents/MacOS/lib/stupidArtnet', 'stupidArtnet/'),]
 datas += copy_metadata('bokeh')
 
 
