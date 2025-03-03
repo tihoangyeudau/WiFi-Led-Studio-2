@@ -482,7 +482,7 @@ class SerialDevice(Device):
         if sys.platform == 'win32':
             return [port for port in serial.tools.list_ports.comports() if (port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description)]
         else:
-            return [port for port in serial.tools.list_ports.comports() if ("tty.usbserial" in port.name or "tty.wchusbserial" in port.name)]
+            return [port for port in serial.tools.list_ports.comports() if ("usbserial" in port.name or "wchusbserial" in port.name)]
 
     def reconnect(self):
         with self._reconnect_lock:  # Đảm bảo chỉ một luồng thực hiện reconnect
@@ -595,6 +595,10 @@ class SerialDevice(Device):
             return None
 
     def try_connect_to_com_port(self, com_port):
+        if sys.platform != 'win32':
+            if com_port.startswith("/dev/cu."):
+                com_port = com_port.replace("/dev/cu.", "/dev/tty.")
+
         self.com_port = com_port
         if self.com_port is None:
             return False
@@ -605,7 +609,11 @@ class SerialDevice(Device):
             self.serial = None
             return False
 
-        self.reset_serial_port()
+        if sys.platform == "win32":
+            self.reset_serial_port()
+        else:
+            self.serial.write(b"CheckID")
+            time.sleep(0.06)
 
         response = self.send_and_receive(b"r\n")
         if response:
