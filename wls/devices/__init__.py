@@ -595,6 +595,10 @@ class SerialDevice(Device):
             return None
 
     def try_connect_to_com_port(self, com_port):
+        if sys.platform != 'win32':
+            if com_port.startswith("/dev/cu."):
+                com_port = com_port.replace("/dev/cu.", "/dev/tty.")
+
         self.com_port = com_port
         if self.com_port is None:
             return False
