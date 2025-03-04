@@ -413,7 +413,7 @@ def find_available_com_ports():
     if sys.platform == 'win32':
         return [port.device for port in serial.tools.list_ports.comports() if (port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description)]
     elif sys.platform == "darwin":
-        return [port.device for port in serial.tools.list_ports.comports() if ("tty.usbserial" in port.name or "tty.wchusbserial" in port.name)]
+        return [port.device for port in serial.tools.list_ports.comports() if ("usbserial" in port.name or "wchusbserial" in port.name)]
 
 
 class AvailableCOMPorts:
@@ -459,7 +459,7 @@ class SerialDevice(Device):
         return version_mapping.get(self._config["version"], 115200)
 
     def establish_connection(self):
-        if self.com_port is None or self.com_port == "_Auto_":
+        if self.com_port is None:
             _LOGGER.warning("Không có cổng COM được chỉ định hoặc không tìm thấy")
             return False
         try:
@@ -479,10 +479,23 @@ class SerialDevice(Device):
         return self.serial and self.serial.isOpen()
 
     def _get_available_ports(self):
-        if sys.platform == 'win32':
-            return [port for port in serial.tools.list_ports.comports() if (port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description)]
-        else:
-            return [port for port in serial.tools.list_ports.comports() if ("usbserial" in port.name or "wchusbserial" in port.name)]
+        ports = serial.tools.list_ports.comports()
+        available_ports = []
+
+        for port in ports:
+            if sys.platform == 'win32':
+                if self.version != 1000000:
+                    if port.manufacturer and "wch.cn" in port.manufacturer:
+                        available_ports.append(port)
+                else:
+                    if port.manufacturer and port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description:
+                        available_ports.append(port)
+            else:
+                port_name = port.name.replace("/dev/cu.", "/dev/tty.") if port.name else port.name
+                if port_name and ("usbserial" in port_name or "wchusbserial" in port_name):
+                    available_ports.append(port)
+
+        return available_ports
 
     def reconnect(self):
         with self._reconnect_lock:  # Đảm bảo chỉ một luồng thực hiện reconnect
@@ -502,6 +515,7 @@ class SerialDevice(Device):
                 for port in available_ports:
                     if port.device:
                         self.com_port = port.device
+                        time.sleep(1)
                         if self.establish_connection():
                             _LOGGER.debug(f"Đã tìm và kích hoạt cổng mới là {self.com_port}")
                             if self.com_port != self._config["com_port"]:
@@ -531,6 +545,7 @@ class SerialDevice(Device):
                     for port in available_ports:
                         if port.device:
                             self.com_port = port.device
+                            time.sleep(1)
                             if self.establish_connection():
                                 _LOGGER.debug(f"Đã tìm và kích hoạt cổng mới là {self.com_port}")
                                 if self.com_port != self._config["com_port"]:
@@ -553,21 +568,31 @@ class SerialDevice(Device):
 
         :param serial_port: The serial port object (pySerial Serial instance).
         """
-        # Reset to defaults
-        self.serial.dtr = True  # Set Data Terminal Ready (DTR) to True
-        self.serial.rts = False  # Set Request To Send (RTS) to False
-        time.sleep(0.05)  # Sleep for 50 milliseconds
+        if self.serial is None:
+            _LOGGER.error("Không có kết nối USB.")
+            return False
 
-        # Reset device
-        self.serial.dtr = False  # Set Data Terminal Ready (DTR) to False
-        self.serial.rts = True  # Set Request To Send (RTS) to True
-        time.sleep(0.15)  # Sleep for 150 milliseconds
+        try:
+            # Reset to defaults
+            self.serial.dtr = True  # Set Data Terminal Ready (DTR) to True
+            self.serial.rts = False  # Set Request To Send (RTS) to False
+            time.sleep(0.05)  # Sleep for 50 milliseconds
 
-        # Close the serial port if it is open
-        self.serial.close()
-        time.sleep(0.15)  # Sleep for 150 milliseconds
+            # Reset device
+            self.serial.dtr = False  # Set Data Terminal Ready (DTR) to False
+            self.serial.rts = True  # Set Request To Send (RTS) to True
+            time.sleep(0.15)  # Sleep for 150 milliseconds
 
-        self.serial = serial.Serial(self.com_port, self.version, timeout=1)
+            # Close the serial port if it is open
+            self.serial.close()
+            time.sleep(0.15)  # Sleep for 150 milliseconds
+
+            self.serial = serial.Serial(self.com_port, self.version, timeout=1)
+
+        except serial.SerialException:
+            _LOGGER.error(f"Không truy cập được cổng {self.com_port}")
+            self.serial = None
+            return False
 
     def serial_check_id_method(self):
         # Ưu tiên thử kết nối đến com_port đã lưu trong config trước
@@ -587,21 +612,23 @@ class SerialDevice(Device):
         return False
 
     def send_and_receive(self, command):
+        if self.serial is None:
+            _LOGGER.error("Không có kết nối USB.")
+            return False
+
         try:
             self.serial.write(command)
             return self.serial.readline().decode("ascii").strip()
-        except Exception as e:
+        except serial.SerialException as e:
             _LOGGER.error(f"Không gửi/nhận được tín hiệu đến cổng {self.com_port}: {e}")
-            return None
+            self.serial = None
+            return False
 
     def try_connect_to_com_port(self, com_port):
-        if sys.platform != 'win32':
-            if com_port.startswith("/dev/cu."):
-                com_port = com_port.replace("/dev/cu.", "/dev/tty.")
-
         self.com_port = com_port
         if self.com_port is None:
             return False
+
         try:
             self.serial = serial.Serial(self.com_port, self.version, timeout=1)
         except serial.SerialException:
@@ -612,7 +639,7 @@ class SerialDevice(Device):
         if sys.platform == "win32":
             self.reset_serial_port()
         else:
-            self.serial.write(b"CheckID")
+            self.send_and_receive(b"CheckID")
             time.sleep(0.06)
 
         response = self.send_and_receive(b"r\n")
