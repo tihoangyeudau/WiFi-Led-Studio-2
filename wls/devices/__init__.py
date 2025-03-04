@@ -479,29 +479,24 @@ class SerialDevice(Device):
         return self.serial and self.serial.isOpen()
 
     def _get_available_ports(self):
-        ports = serial.tools.list_ports.comports()
-        available_ports = []
-
-        for port in ports:
-            if sys.platform == 'win32':
-                if self.version != 1000000:
-                    if port.manufacturer and "wch.cn" in port.manufacturer:
-                        available_ports.append(port)
-                else:
-                    if port.manufacturer and port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description:
-                        available_ports.append(port)
+        if sys.platform == 'win32':
+            if self.version == 1000000:
+                return [port for port in serial.tools.list_ports.comports() if "wch.cn" in port.manufacturer]
             else:
-                port_name = port.name.replace("/dev/cu.", "/dev/tty.") if port.name else port.name
-                if port_name and ("usbserial" in port_name or "wchusbserial" in port_name):
-                    available_ports.append(port)
-
-        return available_ports
+                return [port for port in serial.tools.list_ports.comports() if (port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description)]
+        else:
+            return [port for port in serial.tools.list_ports.comports() if ("usbserial" in port.name or "wchusbserial" in port.name)]
 
     def reconnect(self):
         with self._reconnect_lock:  # Đảm bảo chỉ một luồng thực hiện reconnect
 
             if self.is_serial_open():
-                self.serial.close()
+                try:
+                    self.serial.close()
+                except OSError as e:
+                    _LOGGER.error(f"Lỗi hệ thống khi đóng cổng serial: {e}")
+                    self.serial = None
+                    return False
 
             if self.version == 1000000:
                 if self.serial_check_id_method():
@@ -593,6 +588,10 @@ class SerialDevice(Device):
             _LOGGER.error(f"Không truy cập được cổng {self.com_port}")
             self.serial = None
             return False
+        except OSError as e:
+            _LOGGER.error(f"Lỗi hệ thống khi đóng cổng serial: {e}")
+            self.serial = None
+            return False
 
     def serial_check_id_method(self):
         # Ưu tiên thử kết nối đến com_port đã lưu trong config trước
@@ -611,16 +610,23 @@ class SerialDevice(Device):
 
         return False
 
-    def send_and_receive(self, command):
+    def send_and_receive(self, command, read_response=True):
         if self.serial is None:
             _LOGGER.error("Không có kết nối USB.")
             return False
 
         try:
             self.serial.write(command)
-            return self.serial.readline().decode("ascii").strip()
+            if read_response:
+                return self.serial.readline().decode("ascii").strip()
+            else:
+                return True  # Trả về True nếu không cần đọc phản hồi
         except serial.SerialException as e:
             _LOGGER.error(f"Không gửi/nhận được tín hiệu đến cổng {self.com_port}: {e}")
+            self.serial = None
+            return False
+        except OSError as e:
+            _LOGGER.error(f"Lỗi hệ thống khi gửi dữ liệu serial: {e}")
             self.serial = None
             return False
 
@@ -639,17 +645,16 @@ class SerialDevice(Device):
         if sys.platform == "win32":
             self.reset_serial_port()
         else:
-            self.send_and_receive(b"CheckID")
+            self.send_and_receive(b"CheckID", read_response=False)
             time.sleep(0.06)
 
-        response = self.send_and_receive(b"r\n")
+        response = self.send_and_receive(b"r\n", read_response=True)
         if response:
             response = response.strip().replace("\n", "").replace("\r", "")
         _LOGGER.debug(f"Đã gửi yêu cầu kích hoạt chế độ Ambilight cho cổng {self.com_port}")
 
         if response and len(response) == 4 and response.startswith("R"):
             check_id = self.led_id
-            self.com_port = com_port
             if check_id == "_Auto_" or check_id == response:
                 if check_id == "_Auto_":
                     self.led_id = response
@@ -658,7 +663,7 @@ class SerialDevice(Device):
                 if self.com_port != self._config["com_port"]:
                     self.save_com_port_to_config()
                     _LOGGER.debug(f"Đã lưu {self.com_port} vào cau_hinh.json")
-                m_response = self.send_and_receive(b"m\n")
+                m_response = self.send_and_receive(b"m\n", read_response=True)
                 if m_response:
                     m_response = m_response.strip().replace("\n", "").replace("\r", "")
                 if m_response == "ok":
