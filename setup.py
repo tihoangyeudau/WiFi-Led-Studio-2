@@ -30,7 +30,6 @@ INSTALL_REQUIRES = [
     "cython>=3.0.7",
     "certifi>=2023.11.17",
     "multidict>=6.0.4",
-    "openrgb-python>=0.2.15",
     "paho-mqtt>=1.6.1",
     "psutil>=5.9.7",
     "pyserial>=3.5",
@@ -45,11 +44,12 @@ INSTALL_REQUIRES = [
     "zeroconf~=0.119.0",
     "pillow>=10.1.0",
     "stupidartnet~=1.4.0",
+    "pyinstaller~=6.1.0",
+    "cx-freeze~=7.2.2",
     # Conditional Requirement
     # uvloop doesn't work on Windows yet, but should be a good speedup for low power linux devices
     'uvloop>=0.16.0; platform_system != "Windows"',
     # We can install this on all linux devices, it just won't work for anything other than a Pi
-    'rpi-ws281x>=4.3.0; platform_system == "Linux"',
 ]
 
 

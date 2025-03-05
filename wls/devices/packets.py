@@ -152,7 +152,7 @@ def build_skydimondusbpro_rainbowmusicled_dot_com_0981373223_packet(data: np.nda
     Generic Skydimond USB serial packet encoding
     """
     pixel_length = len(data)
-    led_count = pixel_length - 1 
+    led_count = pixel_length - 1
     packet = bytearray(
         [
             ord("T"),
@@ -179,9 +179,9 @@ def build_skydimondusbpro_rainbowmusicled_dot_com_0981373223_packet(data: np.nda
         byteData[:, [1, 0]] = byteData[:, [0, 1]]
     packet.extend(byteData.flatten().tobytes())
 
-    length = pixel_length * 3 
+    length = pixel_length * 3
     fletcher1 = 0
-    fletcher2 = 0 
+    fletcher2 = 0
     fletcherExt = 0
     position = 0
     hasher = 6
@@ -199,42 +199,4 @@ def build_skydimondusbpro_rainbowmusicled_dot_com_0981373223_packet(data: np.nda
         packet.extend([fletcherExt & 0xFF])
     else:
         packet.extend([0xaa])
-    return packet
-
-
-def build_openrgb_packet(
-    data: np.ndarray,
-    device_id: int,
-):
-    """
-    openRGB packet encoding
-
-    Header: [O,R,G,B, openrgb device_id, RGBCONTROLLER_UPDATELEDS command (1050), total packet bytes length, length of payload, number of pixels]
-    Byte 	Description
-    23 + n*4 	Red Value
-    24 + n*4 	Green Value
-    25 + n*4 	Blue Value
-    26 + n*4 	White Value
-    """
-    frame_size = len(data)
-
-    # header
-    packet = bytearray(
-        # fmt: off
-        struct.pack(
-            "ccccIIIIH",
-            b"O", b"R", b"G", b"B",
-            device_id,
-            1050,  # RGBCONTROLLER_UPDATELEDS packet
-            struct.calcsize(f"IH{3*frame_size}b{frame_size}x"),   # total packet length
-            (frame_size * 4 + 2),  # body length
-            frame_size,  # number of pixels
-        )
-        # fmt: on
-    )
-
-    # body
-    out = np.zeros((frame_size, 4), dtype="B")
-    out[:, 0:3] = data.astype(np.dtype("B"))
-    packet.extend(out.flatten().tobytes())
     return packet

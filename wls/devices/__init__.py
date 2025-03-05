@@ -781,16 +781,6 @@ class Devices(RegistryLoader):
                             msg = f"Bỏ qua đèn {device_ip}: Chia sẻ IP và Universe đầu tiên với đèn hiện có là {existing_device.name}"
                             _LOGGER.info(msg)
                             raise ValueError(msg)
-                    elif device_type == "openrgb":
-                        # check the OpenRGB ID for OpenRGB device, it might still be okay at a shared ip_address
-                        # eg. for multi OpenRGB devices
-                        if (
-                            device_config["openrgb_id"]
-                            == existing_device.config["openrgb_id"]
-                        ):
-                            msg = f"Bỏ qua đèn {device_ip}: Chia sẻ IP và ID openrgb với đèn hiện có là {existing_device.name}"
-                            _LOGGER.info(msg)
-                            raise ValueError(msg)
                     else:
                         msg = f"Bỏ qua đèn {device_ip}: Chia sẻ điểm đến với đèn hiện có {existing_device.name}"
                         _LOGGER.info(msg)
