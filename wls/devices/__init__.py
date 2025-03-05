@@ -413,7 +413,7 @@ def find_available_com_ports():
     if sys.platform == 'win32':
         return [port.device for port in serial.tools.list_ports.comports() if (port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description)]
     elif sys.platform == "darwin":
-        return [port.device for port in serial.tools.list_ports.comports() if ("tty.usbserial" in port.name or "tty.wchusbserial" in port.name)]
+        return [port.device for port in serial.tools.list_ports.comports() if ("cu.usbserial" in port.name or "cu.wchusbserial" in port.name)]
 
 
 class AvailableCOMPorts:
@@ -485,7 +485,7 @@ class SerialDevice(Device):
             else:
                 return [port for port in serial.tools.list_ports.comports() if (port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description)]
         else:
-            return [port for port in serial.tools.list_ports.comports() if ("tty.usbserial" in port.name or "tty.wchusbserial" in port.name)]
+            return [port for port in serial.tools.list_ports.comports() if ("cu.usbserial" in port.name or "cu.wchusbserial" in port.name)]
 
     def reconnect(self):
         with self._reconnect_lock:  # Đảm bảo chỉ một luồng thực hiện reconnect
