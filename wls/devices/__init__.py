@@ -499,8 +499,6 @@ class SerialDevice(Device):
                     except serial.SerialException:
                         _LOGGER.error(f"Không truy cập được cổng {self.com_port}")
                         return
-                    except OSError as e:
-                        _LOGGER.error(f"Lỗi hệ thống khi đóng cổng serial: {e}")
 
                 if self.establish_connection():
                     _LOGGER.debug(f"Đã kích hoạt cổng {self.com_port} đã lưu trước đó")
@@ -588,8 +586,6 @@ class SerialDevice(Device):
             _LOGGER.error(f"Không truy cập được cổng {self.com_port}")
             self.serial = None
             return False
-        except OSError as e:
-            _LOGGER.error(f"Lỗi hệ thống khi đóng cổng serial: {e}")
 
     def serial_check_id_method(self):
         # Ưu tiên thử kết nối đến com_port đã lưu trong config trước
@@ -623,8 +619,6 @@ class SerialDevice(Device):
             _LOGGER.error(f"Không gửi/nhận được tín hiệu đến cổng {self.com_port}: {e}")
             self.serial = None
             return False
-        except OSError as e:
-            _LOGGER.error(f"Lỗi hệ thống khi gửi dữ liệu serial: {e}")
 
     def try_connect_to_com_port(self, com_port):
         self.com_port = com_port
@@ -681,8 +675,6 @@ class SerialDevice(Device):
             except serial.SerialException:
                 _LOGGER.error(f"Không truy cập được cổng {self.com_port}")
                 return
-            except OSError as e:
-                _LOGGER.error(f"Lỗi hệ thống khi đóng cổng serial: {e}")
         return False
 
     def save_check_id_to_config(self):
