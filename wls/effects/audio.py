@@ -1038,6 +1038,12 @@ class AudioReactiveEffect(Effect):
 
         self.melbank_no_nan(melbank)
 
+        if len(melbank) == 0:
+            _LOGGER.warning(
+                "Melbank array is empty. Returning zeros."
+            )
+            return np.zeros(size if size > 0 else self._input_mel_length)
+
         if size and (self._input_mel_length != size):
             return np.interp(*self._melbank_interp_linspaces(size), melbank)
         else:
