@@ -607,17 +607,27 @@ class SerialDevice(Device):
     def send_and_receive(self, command, read_response=True):
         if self.serial is None:
             _LOGGER.error("Không có kết nối USB.")
-            return False
+            return False  # Trả về None thay vì False để phân biệt rõ ràng
 
         try:
             self.serial.write(command)
-            if read_response:
-                return self.serial.readline().decode("ascii").strip()
-            else:
-                return True  # Trả về True nếu không cần đọc phản hồi
+            if not read_response:
+                return True
+
+            raw_data = self.serial.readline()
+
+            if not raw_data:
+                _LOGGER.debug("Không có dữ liệu phản hồi")
+                return ""  # Trả về chuỗi rỗng thay vì False
+
+            try:
+                return raw_data.decode("utf-8").strip()
+            except UnicodeDecodeError:
+                # Xử lý mọi byte theo cách an toàn
+                return raw_data.decode("latin-1").strip()
+
         except serial.SerialException as e:
-            _LOGGER.error(f"Không gửi/nhận được tín hiệu đến cổng {self.com_port}: {e}")
-            self.serial = None
+            _LOGGER.error(f"Lỗi cổng serial: {repr(e)}")
             return False
 
     def try_connect_to_com_port(self, com_port):
