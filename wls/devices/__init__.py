@@ -489,19 +489,19 @@ class SerialDevice(Device):
 
     def reconnect(self):
         with self._reconnect_lock:  # Đảm bảo chỉ một luồng thực hiện reconnect
-
-            if self.is_serial_open():
-                try:
-                    self.serial.close()
-                except OSError as e:
-                    _LOGGER.error(f"Lỗi hệ thống khi đóng cổng serial: {e}")
-                    self.serial = None
-                    return False
-
             if self.version == 1000000:
                 if self.serial_check_id_method():
                     return
             else:
+                if self.is_serial_open():
+                    try:
+                        self.serial.close()
+                    except serial.SerialException:
+                        _LOGGER.error(f"Không truy cập được cổng {self.com_port}")
+                        return
+                    except OSError as e:
+                        _LOGGER.error(f"Lỗi hệ thống khi đóng cổng serial: {e}")
+
                 if self.establish_connection():
                     _LOGGER.debug(f"Đã kích hoạt cổng {self.com_port} đã lưu trước đó")
                     return
@@ -549,7 +549,7 @@ class SerialDevice(Device):
                                 break
 
             if success:
-                _LOGGER.info("Đã kết nối lại thành công với thiết bị USB")
+                _LOGGER.info("Đã kết nối lại thành công")
                 self._reconnect_scheduled = False  # Đặt lại cờ khi kết nối thành công
                 self._online = True
             else:
@@ -590,8 +590,6 @@ class SerialDevice(Device):
             return False
         except OSError as e:
             _LOGGER.error(f"Lỗi hệ thống khi đóng cổng serial: {e}")
-            self.serial = None
-            return False
 
     def serial_check_id_method(self):
         # Ưu tiên thử kết nối đến com_port đã lưu trong config trước
@@ -627,8 +625,6 @@ class SerialDevice(Device):
             return False
         except OSError as e:
             _LOGGER.error(f"Lỗi hệ thống khi gửi dữ liệu serial: {e}")
-            self.serial = None
-            return False
 
     def try_connect_to_com_port(self, com_port):
         self.com_port = com_port
@@ -651,9 +647,10 @@ class SerialDevice(Device):
         response = self.send_and_receive(b"r\n", read_response=True)
         if response:
             response = response.strip().replace("\n", "").replace("\r", "")
-        _LOGGER.debug(f"Đã gửi yêu cầu kích hoạt chế độ Ambilight cho cổng {self.com_port}")
+        _LOGGER.debug(f"Đã gửi lệnh r tới cổng {self.com_port}")
 
         if response and len(response) == 4 and response.startswith("R"):
+            _LOGGER.debug(f"Đã nhận được ID: {response} từ cổng: {self.com_port}")
             check_id = self.led_id
             if check_id == "_Auto_" or check_id == response:
                 if check_id == "_Auto_":
@@ -664,23 +661,29 @@ class SerialDevice(Device):
                     self.save_com_port_to_config()
                     _LOGGER.debug(f"Đã lưu {self.com_port} vào cau_hinh.json")
                 m_response = self.send_and_receive(b"m\n", read_response=True)
+                _LOGGER.debug(f"Đã gửi lệnh m tới cổng {self.com_port}")
                 if m_response:
                     m_response = m_response.strip().replace("\n", "").replace("\r", "")
                 if m_response == "ok":
-                    _LOGGER.debug(f"Chế độ Ambilight cho cổng {self.com_port} đã được kích hoạt")
+                    _LOGGER.debug(f"Đã nhận tín hiệu: ok => Đã chuyển chế độ Ambilight cho cổng {self.com_port}")
                     self.establish_connection()
                     return True
                 else:
-                    _LOGGER.warning("Không nhận được ký tự ok")
+                    _LOGGER.warning("Không nhận được tín hiệu: ok")
             else:
-                _LOGGER.warning("ID mới không khớp với ID đã lưu, thử cổng COM khác")
-            if self.serial:
-                self.serial.close()
+                _LOGGER.warning("ID mới không khớp với ID đã lưu")
         else:
             _LOGGER.warning(f"Không nhận được ID. Cổng {self.com_port} không phản hồi")
 
+        if self.is_serial_open():
+            try:
+                self.serial.close()
+            except serial.SerialException:
+                _LOGGER.error(f"Không truy cập được cổng {self.com_port}")
+                return
+            except OSError as e:
+                _LOGGER.error(f"Lỗi hệ thống khi đóng cổng serial: {e}")
         return False
-
 
     def save_check_id_to_config(self):
         self._config["led_id"] = self.led_id
