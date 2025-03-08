@@ -90,13 +90,21 @@ class EnergyAudioEffect(AudioReactiveEffect):
         self._multiplier = 1.6 - self._config["blur"] / 17
 
     def audio_data_updated(self, data):
-        # Calculate the low, mids, and high indexes scaling based on the pixel
-        # count
+        # Calculate the low, mids, and high indexes scaling based on the pixel count
+        thirds = self.melbank_thirds(filtered=False)
 
+        # Kiểm tra và xử lý NaN trong dữ liệu
         self.lows_idx, self.mids_idx, self.highs_idx = (
-            int(self._multiplier * self.pixel_count * np.mean(i))
-            for i in self.melbank_thirds(filtered=False)
+            int(self._multiplier * self.pixel_count * np.nan_to_num(np.mean(i), nan=0.0))
+            for i in thirds
         )
+
+        # Đảm bảo các chỉ số không vượt quá giới hạn pixel_count
+        self.lows_idx = min(self.lows_idx, self.pixel_count)
+        self.mids_idx = min(self.mids_idx, self.pixel_count)
+        self.highs_idx = min(self.highs_idx, self.pixel_count)
+
+        # Cập nhật trạng thái beat
         self.beat_now = data.volume_beat_now()
 
     def render(self):
@@ -105,7 +113,7 @@ class EnergyAudioEffect(AudioReactiveEffect):
             if self.beat_now:
                 # Cycle between 0,1,2 for lows, mids and highs
                 self.color_cycler = (self.color_cycler + 1) % 3
-                
+
                 color_raw = self._wls.colors.get_all(merged=False)
                 if len(color_raw[1]) > 0:  # if there are user colors, use them
                     color_list = list(color_raw[1].values())

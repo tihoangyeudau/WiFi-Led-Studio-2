@@ -44,7 +44,7 @@ INSTALL_REQUIRES = [
     "zeroconf~=0.119.0",
     "pillow>=10.1.0",
     "stupidartnet~=1.4.0",
-    "pyinstaller==6.1.0",
+    "pyinstaller==6.9.0",
     "cx-freeze==7.2.2",
     # Conditional Requirement
     # uvloop doesn't work on Windows yet, but should be a good speedup for low power linux devices
