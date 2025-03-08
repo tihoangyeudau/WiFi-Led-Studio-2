@@ -576,12 +576,9 @@ class SerialDevice(Device):
             self.serial.rts = True  # Set Request To Send (RTS) to True
             time.sleep(0.15)  # Sleep for 150 milliseconds
 
-            self.serial.rts = False  # Set Request To Send (RTS) to True
-            time.sleep(0.15)  # Sleep for 150 milliseconds
-
             # Close the serial port if it is open
             self.serial.close()
-            time.sleep(0.15)  # Sleep for 150 milliseconds
+            time.sleep(0.3)  # Sleep for 150 milliseconds
 
             self.serial = serial.Serial(self.com_port, self.version, timeout=1)
 
