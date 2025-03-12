@@ -19,6 +19,9 @@ import argparse
 import logging
 import os
 import sys
+import psutil
+import time
+
 from logging.handlers import RotatingFileHandler
 
 from wls.effects.audio import AudioAnalysisSource
@@ -43,12 +46,30 @@ if sys.platform == "win32":
         except psutil.NoSuchProcess:
             pass
 elif sys.platform == "darwin":
-    for process in psutil.process_iter():
+    for proc in psutil.process_iter(['pid', 'name', 'status']):
         try:
-            if process.name() == "rmlapp":
-                process.terminate()
-        except psutil.NoSuchProcess:
-            pass
+            # Tìm process rmlapp đang hoạt động (không phải zombie)
+            if proc.info['name'] == 'rmlapp' and proc.status() != psutil.STATUS_ZOMBIE:
+
+                # Kill toàn bộ cây process con
+                for child in proc.children(recursive=True):
+                    try:
+                        child.kill()
+                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                        pass
+
+                # Force kill process cha
+                try:
+                    proc.kill()  # Gửi SIGKILL
+                except psutil.NoSuchProcess:
+                    pass
+
+                # Chờ xác nhận process đã dừng
+                time.sleep(0.2)
+                if proc.is_running():
+                    os.kill(proc.pid, 9)  # Fallback dùng OS kill
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            continue
 
 def validate_python() -> None:
     """Validate the python version for when manually running"""
@@ -233,7 +254,7 @@ def parse_args():
         action="store_true",
         help="Launch WiFi Led Studio, backup the config, clear the config, and continue with a clean startup",
     )
-    
+
     parser.add_argument(
         "--clear-effects",
         dest="clear_effects",
@@ -247,7 +268,7 @@ def parse_args():
         action="store_true",
         help="Start WiFi Led Studio with all virtuals paused",
     )
-    
+
     return parser.parse_args()
 
 
@@ -368,7 +389,7 @@ def entry_point(icon=None):
     exit_code = 4
     while exit_code == 4:
         _LOGGER.info("Lõi WiFi Led Studio đang khởi tạo")
-               
+
         sd._terminate()
         sd._initialize()
 
