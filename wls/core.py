@@ -11,6 +11,8 @@ if sys.platform == "win32":
     import ctypes
     from ctypes import wintypes
     import winreg
+    import tkinter as tk
+    from tkinter import messagebox
 elif sys.platform == "darwin":
     import shutil
     from AppKit import NSWorkspace, NSObject, NSDistributedNotificationCenter
@@ -530,6 +532,54 @@ class WlsCore:
 
             shutil.copy(aw_source_path, aw_destination_path)
 
+    def restore(self):
+        if sys.platform == "win32":
+            # Tạo cửa sổ gốc ẩn
+            root = tk.Tk()
+            root.withdraw()  # Ẩn cửa sổ gốc
+
+            # Hiển thị hộp thoại xác nhận với biểu tượng cảnh báo và các nút Yes/No
+            result = messagebox.askyesno(
+                title="Xác nhận",
+                message="Bạn có chắc chắn muốn khôi phục về mặc định không nếu mọi cài đặt trước đây của bạn sẽ bị xoá?",
+                icon='warning'
+            )
+
+            # Nếu người dùng nhấn Yes
+            if result:
+                path_restore = os.path.join(os.environ["ProgramFiles"], "Rainbow Music Led\\bin", "restore.exe")
+
+                try:
+                    # Chạy chương trình restore.exe với cửa sổ ẩn
+                    subprocess.Popen(
+                        [path_restore],
+                        shell=True,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        creationflags=subprocess.CREATE_NO_WINDOW  # Chỉ hoạt động trên Windows
+                    )
+
+                    self.stop(0)
+                except Exception as e:
+                    messagebox.showerror("Lỗi", f"Không thể chạy chương trình: {e}")
+
+            root.destroy()
+        else:
+            # Lấy thư mục home của người dùng
+            home_dir = os.path.expanduser("~")
+            aw_dest_path = os.path.join(home_dir, ".rmlapp")
+            wls_dest_path = os.path.join(home_dir, ".wls")
+
+            # Xóa thư mục .rmlapp nếu nó tồn tại
+            if os.path.exists(aw_dest_path) and os.path.isdir(aw_dest_path):
+                shutil.rmtree(aw_dest_path)
+
+            # Xóa thư mục .wls nếu nó tồn tại
+            if os.path.exists(wls_dest_path) and os.path.isdir(wls_dest_path):
+                shutil.rmtree(wls_dest_path)
+
+            self.stop_aw(0)
+
     global adapter
 
     def setup_icon_menu_aw(self):
@@ -543,6 +593,8 @@ class WlsCore:
             Menu.SEPARATOR,
             MenuItem("Mở trang điều khiển | Open Web-App", self.open_ui, default=True),
             MenuItem("Theo màu màn hình | Screen capture", self.stop_aw),
+            Menu.SEPARATOR,
+            MenuItem("Khôi phục về cài đặt gốc | Restore to default", self.restore),
             Menu.SEPARATOR,
             MenuItem("Khởi động lại | Restart", self.restart_wls),
             MenuItem("Thoát | Quit", self.stop),
@@ -559,6 +611,8 @@ class WlsCore:
             Menu.SEPARATOR,
             MenuItem("Mở trang điều khiển | Open Web-App", self.open_ui, default=True),
             MenuItem("Theo màu màn hình | Screen capture", self.stop_aw),
+            Menu.SEPARATOR,
+            MenuItem("Khôi phục về cài đặt gốc | Restore to default", self.restore),
             Menu.SEPARATOR,
             MenuItem("Khởi động lại | Restart", self.restart_wls),
             MenuItem("Thoát | Quit", self.stop),
@@ -765,9 +819,9 @@ class WlsCore:
         exit_code = await self._common_async_stop(exit_code)
 
         if sys.platform == "win32":
-            path1 = os.path.join(os.environ["ProgramFiles"], "Rainbow Music Led\\bin", "rmlapp.exe")
+            path_rmlapp = os.path.join(os.environ["ProgramFiles"], "Rainbow Music Led\\bin", "rmlapp.exe")
             startupinfo = subprocess.STARTUPINFO()
-            subprocess.Popen([path1], startupinfo=startupinfo)
+            subprocess.Popen([path_rmlapp], startupinfo=startupinfo)
         elif sys.platform == "darwin":
             subprocess.run(['open', '/Applications/rmlapp.app'], check=True)
 
