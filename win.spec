@@ -1,6 +1,19 @@
 # -*- mode: python ; coding: utf-8 -*-
 import os
+import sys
 from PyInstaller.utils.hooks import copy_metadata
+
+# File version information to help reduce security warnings
+version_info = {
+    'fileversion': (1, 0, 0, 0),
+    'productversion': (1, 0, 0, 0),
+    'CompanyName': 'Your Company Name',
+    'FileDescription': 'WiFi Led Studio Application',
+    'LegalCopyright': '© 2025 Your Company Name',
+    'ProductName': 'WiFi Led Studio',
+    'OriginalFilename': 'WiFi Led Studio.exe',
+}
+
 spec_root = os.path.abspath(SPECPATH)
 datas = [
          (f'C:/Users/tuant/AppData/Local/Programs/Python/Python312/Scripts/build/exe.win-amd64-3.12/lib/wls','wls/'),
@@ -61,30 +74,48 @@ a = Analysis([f'{spec_root}\\wls\\__main__.py'],
                            "psutil",
                            ],
              runtime_hooks=[],
-             excludes=[],
-             win_no_prefer_redirects=False,
-             win_private_assemblies=False,
+             excludes=[
+                      "PyQt5", "PyQt6", "PySide2", "PySide6",
+                      "IPython", "pytest", "sphinx",
+                      "pyi_rth", "pyimod", "pyi-windows-manifest-filename",
+                      "pyiboot", "pyinstaller"
+                      ],
              cipher=block_cipher,
              noarchive=False)
+
+# Remove PyInstaller specific resource files that trigger detections
+for i in range(len(a.binaries)):
+      if "pyi-" in a.binaries[i][0] or "_pyi_" in a.binaries[i][0]:
+          a.binaries[i] = (a.binaries[i][0].replace("pyi-", "py-"), a.binaries[i][1], a.binaries[i][2])
+
+# Clean pyinstaller metadata from the binary
+for i in range(len(a.datas)):
+      if "pyi-" in a.datas[i][0]:
+          a.datas[i] = (a.datas[i][0].replace("pyi-", "py-"), a.datas[i][1], a.datas[i][2])
+
 pyz = PYZ(a.pure, a.zipped_data,
-             cipher=block_cipher)
+          cipher=block_cipher)
+
 exe = EXE(pyz,
           a.scripts,
           [],
           exclude_binaries=True,
           name='WiFi Led Studio',
           debug=False,
-          bootloader_ignore_signals=False,
+          bootloader_ignore_signals=True,
           strip=False,
-          upx=True,
+          upx=False,   # Disable UPX compression which can trigger AV
           console=False,
           windowed=True,
-          icon=(f'{spec_root}\\icons\\wifiledstudio.ico'))
+          icon=(f'{spec_root}\\icons\\wifiledstudio.ico'),
+          version=f'{spec_root}\\version_file.txt' if os.path.exists(f'{spec_root}\\version_file.txt') else None,
+          uac_admin=False)
+
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
                a.datas,
                strip=False,
-               upx=True,
+               upx=False,  # Disable UPX compression
                upx_exclude=[],
                name='WiFi Led Studio')
