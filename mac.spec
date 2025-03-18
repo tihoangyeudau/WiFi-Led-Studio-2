@@ -57,30 +57,46 @@ a = Analysis(['./wls/__main__.py'],
                             "psutil",
                             ],
              runtime_hooks=[],
-             excludes=[],
-             win_no_prefer_redirects=False,
-             win_private_assemblies=False,
+             excludes=[
+                      "PyQt5", "PyQt6", "PySide2", "PySide6",
+                      "IPython", "pytest", "sphinx",
+                      "pyi_rth", "pyimod", "pyi-windows-manifest-filename",
+                      "pyiboot", "pyinstaller"
+                      ],
              cipher=block_cipher,
              noarchive=False)
+
+# Remove PyInstaller specific resource files that trigger detections
+for i in range(len(a.binaries)):
+      if "pyi-" in a.binaries[i][0] or "_pyi_" in a.binaries[i][0]:
+          a.binaries[i] = (a.binaries[i][0].replace("pyi-", "py-"), a.binaries[i][1], a.binaries[i][2])
+
+# Clean pyinstaller metadata from the binary
+for i in range(len(a.datas)):
+      if "pyi-" in a.datas[i][0]:
+          a.datas[i] = (a.datas[i][0].replace("pyi-", "py-"), a.datas[i][1], a.datas[i][2])
+
 pyz = PYZ(a.pure, a.zipped_data,
-             cipher=block_cipher)
+          cipher=block_cipher)
+
 exe = EXE(pyz,
           a.scripts,
           [],
           exclude_binaries=True,
           name = 'WiFi Led Studio',
           debug=False,
-          bootloader_ignore_signals=False,
+          bootloader_ignore_signals=True,
           strip=False,
-          upx=True,
+          upx=False,
           console=False,
-          windowed=True,)
+          windowed=True)
+
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
                a.datas,
                strip=False,
-               upx=True,
+               upx=False,
                upx_exclude=[],
                name='WiFi Led Studio',)
 app = BUNDLE(coll,
