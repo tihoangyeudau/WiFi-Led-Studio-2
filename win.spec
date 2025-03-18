@@ -3,17 +3,6 @@ import os
 import sys
 from PyInstaller.utils.hooks import copy_metadata
 
-# File version information to help reduce security warnings
-version_info = {
-    'fileversion': (1, 0, 0, 0),
-    'productversion': (1, 0, 0, 0),
-    'CompanyName': 'Your Company Name',
-    'FileDescription': 'WiFi Led Studio Application',
-    'LegalCopyright': '© 2025 Your Company Name',
-    'ProductName': 'WiFi Led Studio',
-    'OriginalFilename': 'WiFi Led Studio.exe',
-}
-
 spec_root = os.path.abspath(SPECPATH)
 datas = [
          (f'C:/Users/tuant/AppData/Local/Programs/Python/Python312/Scripts/build/exe.win-amd64-3.12/lib/wls','wls/'),
