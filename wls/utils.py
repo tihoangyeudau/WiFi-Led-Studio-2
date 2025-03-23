@@ -295,8 +295,8 @@ class RML:
 
         rml_config = response.json()
 
-        if not rml_config["brand"] in "RAINBOW MUSIC LED":
-            msg = f"Đèn có IP {self.ip_address}: Không phải đèn của RAINBOW MUSIC LED'{rml_config['brand']}'"
+        if rml_config["brand"] != "RAINBOW MUSIC LED" or rml_config["vid"] != 2110060:
+            msg = f"Đèn có IP {self.ip_address}: Không thể kết nối"
             raise ValueError(msg)
 
         _LOGGER.info(f"Đèn có IP {self.ip_address}: Đã nhận cấu hình")
