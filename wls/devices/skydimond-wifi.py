@@ -91,6 +91,10 @@ class RMLDevice(NetworkedDevice):
 
     def activate(self):
         """Activate the device and its subdevice"""
+        # Kiểm tra xem thiết bị có được hỗ trợ không
+        if hasattr(self, '_not_supported') and self._not_supported:
+            return  # Dừng việc kích hoạt tại đây
+
         try:
             import asyncio
             if hasattr(self, 'rml'):
@@ -135,22 +139,40 @@ class RMLDevice(NetworkedDevice):
 
     async def async_initialize(self):
         await super().async_initialize()
-        # if not self._destination:
-        #     self.setup_subdevice()
-        #     return
-        self.rml = RML(self._destination)
-        rml_config = await self.rml.get_config()
 
-        led_info = rml_config["leds"]
-        rml_name = rml_config["name"]
-        rml_count = led_info["count"]
-        rml_rgbmode = led_info["rgbw"]
+        # Nếu không có _destination, không thể tiếp tục
+        if not self._destination:
+            return
 
-        rml_config = {
-            "name": rml_name,
-            "pixel_count": rml_count,
-            "rgbw_led": rml_rgbmode,
-        }
+        try:
+            self.rml = RML(self._destination)
+            rml_config = await self.rml.get_config()
 
-        self._config.update(rml_config)
-        self.setup_subdevice()
+            # Kiểm tra kết quả từ get_config()
+            if rml_config is None:
+                # Đánh dấu thiết bị không trực tuyến để ngăn nó được kích hoạt
+                self._online = False
+                # Xóa _destination để ngăn mọi hoạt động mạng trong tương lai
+                self._destination = None
+                # Gán một cờ để đánh dấu rằng thiết bị không được hỗ trợ
+                self._not_supported = True
+                return
+
+            led_info = rml_config["leds"]
+            rml_name = rml_config["name"]
+            rml_count = led_info["count"]
+            rml_rgbmode = led_info["rgbw"]
+
+            rml_config = {
+                "name": rml_name,
+                "pixel_count": rml_count,
+                "rgbw_led": rml_rgbmode,
+            }
+
+            self._config.update(rml_config)
+            self._not_supported = False  # Đánh dấu thiết bị được hỗ trợ
+            self.setup_subdevice()
+        except Exception as e:
+            _LOGGER.error(f"Đèn có IP {self._destination}: Lỗi trong khi khởi tạo: {str(e)}")
+            self._online = False
+            self._destination = None

@@ -284,24 +284,26 @@ class RML:
             Specifically searches for "RML" in the brand json - currently all major
             branches/forks of RML contain RML in the branch data.
         Returns:
-            config: dict, with all rml configuration info
+            config: dict, with all rml configuration info or None if not compatible
         """
         _LOGGER.info(
             f"Đèn có IP {self.ip_address}: Đang cố gắng kết nối với đèn..."
         )
-        response = await RML._rml_request(
-            requests.get, self.ip_address, "json/info"
-        )
+        try:
+            response = await RML._rml_request(
+                requests.get, self.ip_address, "json/info"
+            )
 
-        rml_config = response.json()
+            rml_config = response.json()
 
-        if rml_config["brand"] != "RAINBOW MUSIC LED" or rml_config["vid"] != 2110060:
-            msg = f"Đèn có IP {self.ip_address}: Không thể kết nối"
-            raise ValueError(msg)
+            if rml_config["brand"] != "RAINBOW MUSIC LED" or rml_config["vid"] != 2110060:
+                return None  # Trả về None thay vì raise lỗi
 
-        _LOGGER.info(f"Đèn có IP {self.ip_address}: Đã nhận cấu hình")
-
-        return rml_config
+            _LOGGER.info(f"Đèn có IP {self.ip_address}: Đã nhận cấu hình")
+            return rml_config
+        except Exception as e:
+            _LOGGER.error(f"Đèn có IP {self.ip_address}: Lỗi khi lấy cấu hình: {str(e)}")
+            return None  # Trả về None nếu có bất kỳ lỗi nào khác
 
     async def get_nodes(self):
         """
@@ -1104,13 +1106,6 @@ class Graph:
                     color=next(colors),
                 )
             show(p)
-
-
-def rml_support_DDP(build) -> bool:
-    if build >= 2110060:
-        return True
-    else:
-        return False
 
 
 def clean_ip(ip_address):
