@@ -767,9 +767,10 @@ class Devices(RegistryLoader):
                 resolved_dest = await resolve_destination(
                     self._wls.loop, self._wls.thread_executor, device_ip
                 )
-            except ValueError:
-                _LOGGER.error(f"Loại bỏ thiết bị {device_ip}")
-                return
+            except ValueError as e:
+                msg = f"Không thể kết nối với đèn có IP : {device_ip}: {str(e)}"
+                _LOGGER.error(msg)
+                raise ValueError(msg)
 
             for existing_device in self._wls.devices.values():
                 if "ip_address" in existing_device.config.keys() and (
@@ -795,6 +796,12 @@ class Devices(RegistryLoader):
         if device_type == "skydimond-wifi":
             rml = RML(resolved_dest)
             rml_config = await rml.get_config()
+
+            # Kiểm tra xem rml_config có phải là None không
+            if rml_config is None:
+                msg = f"Không thể lấy cấu hình từ đèn có IP : {resolved_dest}. Nó có thể không trực tuyến."
+                _LOGGER.error(msg)
+                raise ValueError(msg)
 
             led_info = rml_config["leds"]
             rml_name = rml_config['name']
