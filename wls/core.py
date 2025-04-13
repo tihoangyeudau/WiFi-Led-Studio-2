@@ -376,6 +376,7 @@ class WlsCore:
     ):
         self.icon = icon
         self.config_dir = config_dir
+        self.led_active = True  # Trạng thái LED: True = bật, False = tắt
 
         if clear_config:
             _LOGGER.warning("Clearing WiFi Led Studio config.")
@@ -600,7 +601,26 @@ class WlsCore:
             menu_text = "Bấm để sáng 'hiệu ứng màu' khi khởi động | Enable autostart 'Effect / Color'"
 
         # Update menu
-        self.setup_icon_menu(menu_text)
+        self.setup_icon_menu(toggle_text=menu_text)
+
+    def toggle_led_state(self):
+        """
+        Toggle LED state between on and off.
+        Uses GlobalPauseEvent and GlobalResumeEvent to control all LEDs.
+        """
+        if self.led_active:
+            # Turn off LEDs
+            self.events.fire_event(GlobalPauseEvent())
+            self.led_active = False
+            _LOGGER.debug("Đã tắt tất cả đèn LED")
+        else:
+            # Turn on LEDs
+            self.events.fire_event(GlobalResumeEvent())
+            self.led_active = True
+            _LOGGER.debug("Đã bật tất cả đèn LED")
+
+        # Update menu to reflect new state
+        self.setup_icon_menu()
 
     def setup_icon_menu(self, toggle_text=None):
         """
@@ -617,9 +637,14 @@ class WlsCore:
             else:
                 toggle_text = "Bấm để 'theo màu màn hình' khi khởi động | Enable autostart 'Screen capture'"
 
+        # Determine LED toggle text based on current state
+        led_toggle_text = "Tắt LED | Turn OFF LED" if self.led_active else "Bật LED | Turn ON LED"
+
         # Create menu with current state
         self.icon.menu = Menu(
             MenuItem(lambda text: toggle_text, self.toggle_startup_mode),
+            Menu.SEPARATOR,
+            MenuItem(lambda text: led_toggle_text, self.toggle_led_state),
             Menu.SEPARATOR,
             MenuItem("Mở trang điều khiển | Open Web-App", self.open_ui, default=True),
             MenuItem("Theo màu màn hình | Screen capture", self.stop_aw),
