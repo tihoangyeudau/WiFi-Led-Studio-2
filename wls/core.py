@@ -410,10 +410,8 @@ class WlsCore:
         self.loop.set_default_executor(self.thread_executor)
         self.loop.set_exception_handler(self.loop_exception_handler)
         if self.icon:
-            if self.check_rmlapp_run_key():
-                self.setup_icon_menu_aw()
-            else:
-                self.setup_icon_menu_wls()
+            # Sử dụng phương thức mới để thiết lập menu icon
+            self.setup_icon_menu()
 
         self.setup_logqueue()
         self.events = Events(self)
@@ -580,34 +578,48 @@ class WlsCore:
 
             self.stop_aw(0)
 
-    global adapter
+    def toggle_startup_mode(self):
+        """
+        Toggle between 'Screen capture' and 'Effect / Color' startup modes.
+        This is a more professional approach that combines the functionality
+        of setup_icon_menu_aw and setup_icon_menu_wls into a single method.
+        """
+        # Check current state
+        is_rmlapp_enabled = self.check_rmlapp_run_key()
 
-    def setup_icon_menu_aw(self):
-        adapter = "Bấm để sáng 'hiệu ứng màu' khi khởi động | Enable autostart 'Effect / Color'"
-        if not self.check_rmlapp_run_key():
-            self.delete_wls_key()
-            self.add_aw_key()
-
-        self.icon.menu = Menu(
-            MenuItem(lambda text: adapter, self.setup_icon_menu_wls),
-            Menu.SEPARATOR,
-            MenuItem("Mở trang điều khiển | Open Web-App", self.open_ui, default=True),
-            MenuItem("Theo màu màn hình | Screen capture", self.stop_aw),
-            Menu.SEPARATOR,
-            MenuItem("Khôi phục về cài đặt gốc | Restore to default", self.restore),
-            Menu.SEPARATOR,
-            MenuItem("Khởi động lại | Restart", self.restart_wls),
-            MenuItem("Thoát | Quit", self.stop),
-        )
-
-    def setup_icon_menu_wls(self):
-        adapter = "Bấm để 'theo màu màn hình' khi khởi động | Enable autostart 'Screen capture'"
-        if self.check_rmlapp_run_key():
+        # Toggle state
+        if is_rmlapp_enabled:
+            # Switch to WLS mode
             self.delete_aw_key()
             self.add_wls_key()
+            menu_text = "Bấm để 'theo màu màn hình' khi khởi động | Enable autostart 'Screen capture'"
+        else:
+            # Switch to AW mode
+            self.delete_wls_key()
+            self.add_aw_key()
+            menu_text = "Bấm để sáng 'hiệu ứng màu' khi khởi động | Enable autostart 'Effect / Color'"
 
+        # Update menu
+        self.setup_icon_menu(menu_text)
+
+    def setup_icon_menu(self, toggle_text=None):
+        """
+        Setup the icon menu with the appropriate text based on current state.
+
+        Args:
+            toggle_text: Optional text override for the toggle menu item.
+                         If None, it will be determined based on current state.
+        """
+        if toggle_text is None:
+            # Determine appropriate text based on current state
+            if self.check_rmlapp_run_key():
+                toggle_text = "Bấm để sáng 'hiệu ứng màu' khi khởi động | Enable autostart 'Effect / Color'"
+            else:
+                toggle_text = "Bấm để 'theo màu màn hình' khi khởi động | Enable autostart 'Screen capture'"
+
+        # Create menu with current state
         self.icon.menu = Menu(
-            MenuItem(lambda text: adapter, self.setup_icon_menu_aw),
+            MenuItem(lambda text: toggle_text, self.toggle_startup_mode),
             Menu.SEPARATOR,
             MenuItem("Mở trang điều khiển | Open Web-App", self.open_ui, default=True),
             MenuItem("Theo màu màn hình | Screen capture", self.stop_aw),
@@ -617,6 +629,15 @@ class WlsCore:
             MenuItem("Khởi động lại | Restart", self.restart_wls),
             MenuItem("Thoát | Quit", self.stop),
         )
+
+    # Compatibility methods for backward compatibility
+    def setup_icon_menu_aw(self):
+        """Legacy method, redirects to toggle_startup_mode"""
+        self.toggle_startup_mode()
+
+    def setup_icon_menu_wls(self):
+        """Legacy method, redirects to toggle_startup_mode"""
+        self.toggle_startup_mode()
 
     def setup_visualisation_events(self):
         """
