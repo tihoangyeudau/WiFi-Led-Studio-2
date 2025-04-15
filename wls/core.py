@@ -593,12 +593,12 @@ class WlsCore:
             # Switch to WLS mode
             self.delete_aw_key()
             self.add_wls_key()
-            menu_text = "Bấm để 'theo màu màn hình' khi khởi động | Enable autostart 'Screen capture'"
+            menu_text = "Khởi động máy mở 'theo màu màn hình' | Enable autostart 'Screen capture'"
         else:
             # Switch to AW mode
             self.delete_wls_key()
             self.add_aw_key()
-            menu_text = "Bấm để sáng 'hiệu ứng màu' khi khởi động | Enable autostart 'Effect / Color'"
+            menu_text = "Khởi động máy mở 'hiệu ứng / màu'| Enable autostart 'Effect / Color'"
 
         # Update menu
         self.setup_icon_menu(toggle_text=menu_text)
@@ -649,7 +649,7 @@ class WlsCore:
             MenuItem("Cài đặt | Setting", self.open_ui, default=True),
             MenuItem("Theo màu màn hình | Screen capture", self.stop_aw),
             Menu.SEPARATOR,
-            MenuItem("Khôi phục về cài đặt gốc | Restore to default", self.restore),
+            MenuItem("Khôi phục mặc định | Restore default", self.restore),
             Menu.SEPARATOR,
             MenuItem("Khởi động lại | Restart", self.restart_wls),
             MenuItem("Thoát | Quit", self.stop),
