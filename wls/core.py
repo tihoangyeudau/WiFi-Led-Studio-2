@@ -633,12 +633,12 @@ class WlsCore:
         if toggle_text is None:
             # Determine appropriate text based on current state
             if self.check_rmlapp_run_key():
-                toggle_text = "Bấm để sáng 'hiệu ứng màu' khi khởi động | Enable autostart 'Effect / Color'"
+                toggle_text = "Khởi động máy mở 'hiệu ứng / màu'| Enable autostart 'Effect / Color'"
             else:
-                toggle_text = "Bấm để 'theo màu màn hình' khi khởi động | Enable autostart 'Screen capture'"
+                toggle_text = "Khởi động máy mở 'theo màu màn hình' | Enable autostart 'Screen capture'"
 
         # Determine LED toggle text based on current state
-        led_toggle_text = "Tắt LED | Turn OFF LED" if self.led_active else "Bật LED | Turn ON LED"
+        led_toggle_text = "Tạm dừng | Suspend" if self.led_active else "Tiếp tục | Resume"
 
         # Create menu with current state
         self.icon.menu = Menu(
@@ -646,7 +646,7 @@ class WlsCore:
             Menu.SEPARATOR,
             MenuItem(lambda text: led_toggle_text, self.toggle_led_state),
             Menu.SEPARATOR,
-            MenuItem("Mở trang điều khiển | Open Web-App", self.open_ui, default=True),
+            MenuItem("Cài đặt | Setting", self.open_ui, default=True),
             MenuItem("Theo màu màn hình | Screen capture", self.stop_aw),
             Menu.SEPARATOR,
             MenuItem("Khôi phục về cài đặt gốc | Restore to default", self.restore),
