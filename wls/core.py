@@ -609,12 +609,12 @@ class WlsCore:
             # Switch to WLS mode
             self.delete_aw_key()
             self.add_wls_key()
-            menu_text = "Khởi động máy mở 'theo màu màn hình' | Enable autostart 'Screen capture'"
+            menu_text = "Khởi động máy mở Theo màu màn | Enable autostart Screen capture"
         else:
             # Switch to AW mode
             self.delete_wls_key()
             self.add_aw_key()
-            menu_text = "Khởi động máy mở 'hiệu ứng / màu' | Enable autostart 'Effect / Color'"
+            menu_text = "Khởi động máy mở Nháy nhạc | Enable autostart Music effect"
 
         # Update menu
         self.setup_icon_menu(toggle_text=menu_text)
@@ -746,12 +746,12 @@ class WlsCore:
         if toggle_text is None:
             # Determine appropriate text based on current state
             if self.check_rmlapp_run_key():
-                toggle_text = "Khởi động máy mở 'hiệu ứng / màu' | Enable autostart 'Effect / Color'"
+                toggle_text = "Khởi động máy mở Nháy nhạc | Enable autostart Music effect"
             else:
-                toggle_text = "Khởi động máy mở 'theo màu màn hình' | Enable autostart 'Screen capture'"
+                toggle_text = "Khởi động máy mở Theo màu màn | Enable autostart Screen capture"
 
         # Determine LED toggle text based on current state
-        led_toggle_text = "Tạm dừng | Suspend" if self.led_active else "Tiếp tục | Resume"
+        led_toggle_text = "Tắt đèn | Suspend" if self.led_active else "Bật đèn | Resume"
 
         # Create submenu for advanced options
         advanced_submenu = Menu(
