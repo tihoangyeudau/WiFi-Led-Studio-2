@@ -755,8 +755,8 @@ class WlsCore:
 
         # Create submenu for advanced options
         advanced_submenu = Menu(
-            MenuItem("Khôi phục mặc định | Restore default", self.restore),
             MenuItem("Khởi động lại | Restart", self.restart_wls),
+            MenuItem("Khôi phục mặc định | Restore default", self.restore),
         )
 
         # Create submenu for brightness
@@ -881,7 +881,7 @@ class WlsCore:
             # Bản dịch tiếng Anh cho các danh mục
             category_translations = {
                 "1. Hiệu ứng màu": "1. Hiệu ứng màu | Color Effects",
-                "2. Hiệu ứng nháy theo nhạc": "2. Hiệu ứng nhạc | Music Effects",
+                "2. Hiệu ứng nháy theo nhạc": "2. Nháy nhạc | Music Effects",
             }
 
             # Sắp xếp các danh mục theo tên
