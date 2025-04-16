@@ -377,6 +377,7 @@ class WlsCore:
         self.icon = icon
         self.config_dir = config_dir
         self.led_active = True  # Trạng thái LED: True = bật, False = tắt
+        self.current_effect = None  # Hiệu ứng đang được chọn sẽ được cập nhật sau - sẽ được cập nhật sau khi tải cấu hình
 
         if clear_config:
             _LOGGER.warning("Clearing WiFi Led Studio config.")
@@ -388,10 +389,25 @@ class WlsCore:
             _LOGGER.warning("Clearing active effects.")
             remove_virtuals_active_effects(self.config)
 
+        # Đọc hiệu ứng đã lưu từ cấu hình
+        if "current_effect" in self.config:
+            self.current_effect = self.config["current_effect"]
+            _LOGGER.debug(f"Đã đọc hiệu ứng đã lưu từ cấu hình: {self.current_effect}")
+
+        # Đọc hiệu ứng đã lưu từ cấu hình
+        if "current_effect" in self.config:
+            self.current_effect = self.config["current_effect"]
+            _LOGGER.debug(f"Đã đọc hiệu ứng đã lưu từ cấu hình: {self.current_effect}")
+
         self.config["wls_presets"] = wls_presets
         self.host = host if host else self.config["host"]
         self.port = port if port else self.config["port"]
         self.port_s = port_s if port_s else self.config["port_s"]
+
+        # Khôi phục hiệu ứng hiện tại từ cấu hình (nếu có)
+        if "current_effect" in self.config:
+            self.current_effect = self.config["current_effect"]
+            _LOGGER.debug(f"Đã khôi phục hiệu ứng {self.current_effect} từ cấu hình")
         self.ci_testing = ci_testing
         if sys.platform == "win32":
             self.loop = asyncio.ProactorEventLoop()
@@ -598,7 +614,7 @@ class WlsCore:
             # Switch to AW mode
             self.delete_wls_key()
             self.add_aw_key()
-            menu_text = "Khởi động máy mở 'hiệu ứng / màu'| Enable autostart 'Effect / Color'"
+            menu_text = "Khởi động máy mở 'hiệu ứng / màu' | Enable autostart 'Effect / Color'"
 
         # Update menu
         self.setup_icon_menu(toggle_text=menu_text)
@@ -622,6 +638,103 @@ class WlsCore:
         # Update menu to reflect new state
         self.setup_icon_menu()
 
+    def set_global_brightness(self, brightness_value):
+        """
+        Set global brightness for all LED devices.
+
+        Args:
+            brightness_value (float): Brightness value between 0.0 and 1.0
+        """
+        # Ensure brightness is within valid range
+        brightness_value = max(0.0, min(brightness_value, 1.0))
+
+        # Update config
+        self.config["global_brightness"] = brightness_value
+
+        # Save config
+        from wls.config import save_config
+        save_config(self.config, self.config_dir)
+
+        _LOGGER.info(f"Đã đặt độ sáng toàn cục thành {int(brightness_value * 100)}%")
+
+        # Update menu to reflect new state
+        if self.icon:
+            try:
+                self.setup_icon_menu()
+                _LOGGER.debug(f"Đã cập nhật menu sau khi thay đổi độ sáng thành {int(brightness_value * 100)}%")
+            except Exception as e:
+                _LOGGER.error(f"Lỗi khi cập nhật menu độ sáng: {e}")
+
+    def apply_effect_to_all(self, effect_type):
+        """
+        Apply an effect to all virtual devices.
+
+        Args:
+            effect_type (str): The effect type to apply
+        """
+        _LOGGER.debug(f"Bắt đầu áp dụng hiệu ứng {effect_type} (type: {type(effect_type)}) cho tất cả thiết bị ảo")
+        try:
+            # Kiểm tra xem effect_type có trong registry không
+            registry = self.effects._cls.registry()
+            _LOGGER.debug(f"Registry có {len(registry)} hiệu ứng: {', '.join(registry.keys())}")
+
+            # Nếu effect_type không có trong registry, thử tìm kiếm không phân biệt chữ hoa/thường
+            if effect_type not in registry:
+                _LOGGER.debug(f"Hiệu ứng {effect_type} không có trong registry, thử tìm kiếm không phân biệt chữ hoa/thường")
+                for reg_effect in registry.keys():
+                    if effect_type.lower() == reg_effect.lower():
+                        effect_type = reg_effect
+                        _LOGGER.debug(f"Đã tìm thấy hiệu ứng {effect_type} trong registry")
+                        break
+
+            # Create a new effect instance using the effects registry
+            _LOGGER.debug(f"Tạo hiệu ứng {effect_type} từ registry")
+            effect = self.effects.create(
+                type=effect_type,
+                wls=self,
+                config={}  # Empty config to use defaults
+            )
+
+            # Apply to all virtuals
+            _LOGGER.debug(f"Áp dụng hiệu ứng cho tất cả thiết bị ảo")
+            for virtual in self.virtuals.values():
+                try:
+                    virtual.set_effect(effect)
+                    _LOGGER.debug(f"Đã áp dụng hiệu ứng {effect_type} cho thiết bị ảo {virtual.id}")
+                except Exception as e:
+                    _LOGGER.error(f"Lỗi khi áp dụng hiệu ứng {effect_type} cho thiết bị ảo {virtual.id}: {e}")
+                    import traceback
+                    _LOGGER.error(traceback.format_exc())
+
+            # Lưu hiệu ứng hiện tại
+            self.current_effect = effect_type
+
+            # Lưu hiệu ứng hiện tại vào cấu hình
+            try:
+                self.config["current_effect"] = effect_type
+                save_config(self.config, self.config_dir)
+                _LOGGER.debug(f"Đã lưu hiệu ứng {effect_type} vào cấu hình")
+            except Exception as e:
+                _LOGGER.error(f"Lỗi khi lưu hiệu ứng vào cấu hình: {e}")
+
+            _LOGGER.info(f"Đã áp dụng hiệu ứng {effect_type} cho tất cả thiết bị ảo")
+
+            # Cập nhật menu để hiển thị hiệu ứng đang chọn
+            if self.icon:
+                try:
+                    self.setup_icon_menu()
+                    _LOGGER.debug(f"Đã cập nhật menu sau khi chọn hiệu ứng {effect_type}")
+                except Exception as e:
+                    _LOGGER.error(f"Lỗi khi cập nhật menu: {e}")
+
+        except Exception as e:
+            _LOGGER.error(f"Lỗi khi áp dụng hiệu ứng {effect_type}: {e}")
+            import traceback
+            _LOGGER.error(traceback.format_exc())
+
+        # Update menu to reflect new state
+        self.setup_icon_menu()
+
     def setup_icon_menu(self, toggle_text=None):
         """
         Setup the icon menu with the appropriate text based on current state.
@@ -633,27 +746,224 @@ class WlsCore:
         if toggle_text is None:
             # Determine appropriate text based on current state
             if self.check_rmlapp_run_key():
-                toggle_text = "Khởi động máy mở 'hiệu ứng / màu'| Enable autostart 'Effect / Color'"
+                toggle_text = "Khởi động máy mở 'hiệu ứng / màu' | Enable autostart 'Effect / Color'"
             else:
                 toggle_text = "Khởi động máy mở 'theo màu màn hình' | Enable autostart 'Screen capture'"
 
         # Determine LED toggle text based on current state
         led_toggle_text = "Tạm dừng | Suspend" if self.led_active else "Tiếp tục | Resume"
 
-        # Create menu with current state
-        self.icon.menu = Menu(
+        # Create submenu for advanced options
+        advanced_submenu = Menu(
+            MenuItem("Khôi phục mặc định | Restore default", self.restore),
+            MenuItem("Khởi động lại | Restart", self.restart_wls),
+        )
+
+        # Create submenu for brightness
+        current_brightness = int(self.config.get("global_brightness", 1.0) * 100)
+
+        # Tạo danh sách các mục độ sáng với dấu tích cho mục được chọn
+        brightness_items = []
+        for brightness in [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
+            brightness_text = f"{brightness}%"
+            if brightness == current_brightness:
+                brightness_text = f"✓ {brightness_text}"
+            # Tạo một hàm closure để giữ giá trị brightness
+            def make_brightness_handler(value):
+                return lambda: self.set_global_brightness(value/100)
+
+            brightness_items.append(
+                MenuItem(brightness_text, make_brightness_handler(brightness))
+            )
+
+        brightness_submenu = Menu(*brightness_items)
+
+        # Create submenu for effects
+        effects_items = []
+
+        # Kiểm tra xem self.effects đã tồn tại chưa
+        if not hasattr(self, 'effects') or self.effects is None:
+            _LOGGER.debug("self.effects chưa được khởi tạo, bỏ qua menu hiệu ứng")
+            effect_types = []
+        else:
+            try:
+                # Get all available effects
+                _LOGGER.debug("Đang tải danh sách hiệu ứng...")
+                try:
+                    effect_types = self.effects.types()
+                    _LOGGER.debug(f"Đã tìm thấy {len(effect_types)} hiệu ứng")
+                except Exception as e:
+                    _LOGGER.error(f"Lỗi khi gọi self.effects.types(): {e}")
+                    # Thử cách khác
+                    _LOGGER.debug("Thử lấy danh sách hiệu ứng từ registry")
+                    try:
+                        effect_types = list(self.effects._cls.registry().keys())
+                        _LOGGER.debug(f"Đã tìm thấy {len(effect_types)} hiệu ứng từ registry")
+                    except Exception as e2:
+                        _LOGGER.error(f"Lỗi khi lấy registry: {e2}")
+                        # Không sử dụng danh sách cố định nữa
+                        _LOGGER.debug("Không thể lấy danh sách hiệu ứng")
+                        effect_types = []
+            except Exception as e:
+                _LOGGER.error(f"Lỗi khi tạo menu hiệu ứng: {e}")
+                effect_types = []
+
+            for effect_type in effect_types:
+                # Skip abstract base classes and internal effects
+                if effect_type.startswith('_') or effect_type == 'Effect':
+                    continue
+
+                # Add effect to menu
+                _LOGGER.debug(f"Thêm hiệu ứng {effect_type} vào menu")
+
+                # Lấy tên hiệu ứng thân thiện từ thuộc tính NAME của lớp hiệu ứng
+                try:
+                    # Lấy lớp hiệu ứng từ registry
+                    effect_class = self.effects._cls.registry().get(effect_type)
+                    # Lấy tên hiệu ứng từ thuộc tính NAME
+                    if effect_class and hasattr(effect_class, 'NAME'):
+                        display_name = effect_class.NAME
+                        _LOGGER.debug(f"Tên hiển thị cho {effect_type}: {display_name}")
+                    else:
+                        display_name = effect_type
+                        _LOGGER.debug(f"Không tìm thấy tên hiển thị cho {effect_type}, sử dụng tên mặc định")
+                except Exception as e:
+                    _LOGGER.error(f"Lỗi khi lấy tên hiển thị cho {effect_type}: {e}")
+                    display_name = effect_type
+
+                # Sử dụng một hàm đơn giản với tham số cố định
+                # Tạo một bản sao của effect_type để sử dụng trong hàm
+                current_effect = effect_type
+
+                def make_handler(effect_name):
+                    def handler(*args, **kwargs):
+                        _LOGGER.debug(f"Menu handler gọi apply_effect_to_all('{effect_name}')")
+                        self.apply_effect_to_all(effect_name)
+                    return handler
+
+                effects_items.append(
+                    MenuItem(display_name, make_handler(current_effect))
+                )
+
+            # Nhóm các hiệu ứng theo danh mục
+            _LOGGER.debug("Bắt đầu nhóm hiệu ứng theo danh mục")
+
+            # Dictionary để lưu trữ các hiệu ứng theo danh mục
+            categories = {}
+
+            # Sắp xếp lại danh sách effects_items
+            new_effects_items = []
+
+            # Duyệt qua tất cả các hiệu ứng đã tạo
+            for item in effects_items:
+                effect_name = item.text
+                # Tìm hiệu ứng trong registry
+                for effect_type, effect_class in self.effects._cls.registry().items():
+                    # Kiểm tra xem hiệu ứng có thuộc tính NAME khớp với tên hiển thị không
+                    if hasattr(effect_class, 'NAME') and effect_class.NAME == effect_name:
+                        # Lấy danh mục của hiệu ứng
+                        category = "Khác"
+                        if hasattr(effect_class, 'CATEGORY'):
+                            category = effect_class.CATEGORY
+
+                        # Thêm hiệu ứng vào danh mục tương ứng
+                        if category not in categories:
+                            categories[category] = []
+
+                        categories[category].append(item)
+                        break
+                else:
+                    # Nếu không tìm thấy hiệu ứng trong registry, thêm vào danh mục "Khác"
+                    if "Khác" not in categories:
+                        categories["Khác"] = []
+                    categories["Khác"].append(item)
+
+            # Bản dịch tiếng Anh cho các danh mục
+            category_translations = {
+                "1. Hiệu ứng màu": "1. Hiệu ứng màu | Color Effects",
+                "2. Hiệu ứng nháy theo nhạc": "2. Hiệu ứng nhạc | Music Effects",
+            }
+
+            # Sắp xếp các danh mục theo tên
+            sorted_categories = sorted(categories.keys())
+
+            # Tạo menu con cho từng danh mục
+            for category in sorted_categories:
+                # Sắp xếp các hiệu ứng trong danh mục theo tên
+                category_items = sorted(categories[category], key=lambda item: item.text)
+
+                # Thêm thông tin hiệu ứng đang chọn
+                if hasattr(self, 'current_effect') and self.current_effect:
+                    for i, item in enumerate(category_items):
+                        # Kiểm tra xem hiệu ứng này có phải là hiệu ứng đang chọn không
+                        for effect_type, effect_class in self.effects._cls.registry().items():
+                            if (hasattr(effect_class, 'NAME') and
+                                effect_class.NAME == item.text and
+                                effect_type == self.current_effect):
+                                # Đánh dấu hiệu ứng đang chọn
+                                # Sử dụng _action thay vì action
+                                if hasattr(item, '_action'):
+                                    category_items[i] = MenuItem(f"✓ {item.text}", item._action)
+                                break
+
+                # Tạo menu con cho danh mục
+                category_menu = Menu(*category_items)
+
+                # Thêm menu con vào danh sách hiệu ứng với tên đã dịch
+                display_category = category_translations.get(category, category)
+
+                # Kiểm tra xem có hiệu ứng nào trong danh mục này đang được chọn không
+                if hasattr(self, 'current_effect') and self.current_effect:
+                    for effect_type, effect_class in self.effects._cls.registry().items():
+                        if (effect_type == self.current_effect and
+                            hasattr(effect_class, 'CATEGORY') and
+                            effect_class.CATEGORY == category):
+                            # Thêm tên hiệu ứng đang chọn vào tên danh mục
+                            if hasattr(effect_class, 'NAME'):
+                                display_category = f"{display_category} :   {effect_class.NAME}"
+                            else:
+                                display_category = f"{display_category} :   {effect_type}"
+                            break
+
+                new_effects_items.append(MenuItem(display_category, category_menu))
+
+            # Thay thế danh sách hiệu ứng cũ bằng danh sách mới đã nhóm
+            effects_items = new_effects_items
+
+            _LOGGER.debug(f"Đã tạo menu với {len(effects_items)} danh mục hiệu ứng")
+
+        # Tạo danh sách các mục cho menu chính
+        main_menu_items = [
             MenuItem(lambda text: toggle_text, self.toggle_startup_mode),
             Menu.SEPARATOR,
             MenuItem(lambda text: led_toggle_text, self.toggle_led_state),
+            MenuItem(f"Độ sáng | Brightness :   {current_brightness}%", brightness_submenu),
+            Menu.SEPARATOR
+        ]
+
+        # Thêm các danh mục hiệu ứng vào menu chính
+        for effect_category_item in effects_items:
+            main_menu_items.append(effect_category_item)
+
+        # Thêm các mục còn lại
+        main_menu_items.extend([
+            MenuItem("3. Theo màu màn hình | Screen capture", self.stop_aw),
             Menu.SEPARATOR,
             MenuItem("Cài đặt | Setting", self.open_ui, default=True),
-            MenuItem("Theo màu màn hình | Screen capture", self.stop_aw),
+            MenuItem("Nâng cao | Advanced", advanced_submenu),
             Menu.SEPARATOR,
-            MenuItem("Khôi phục mặc định | Restore default", self.restore),
+            MenuItem("RAINBOW MUSIC LED", Menu(
+                MenuItem("Hướng dẫn | Guide", lambda: webbrowser.open("https://rainbowmusicled.com/huong-dan")),
+                MenuItem("Hỗ trợ | Support", lambda: webbrowser.open("https://rainbowmusicled.com/ho-tro")),
+                MenuItem("Bảo hành | Warranty", lambda: webbrowser.open("https://rainbowmusicled.com/bao-hanh")),
+                MenuItem("Cửa hàng | Shop", lambda: webbrowser.open("https://rainbowmusicled.com")),
+            )),
             Menu.SEPARATOR,
-            MenuItem("Khởi động lại | Restart", self.restart_wls),
-            MenuItem("Thoát | Quit", self.stop),
-        )
+            MenuItem("Thoát | Quit", lambda: self.stop(0)),
+        ])
+
+        # Tạo menu chính
+        self.icon.menu = Menu(*main_menu_items)
 
     # Compatibility methods for backward compatibility
     def setup_icon_menu_aw(self):
@@ -766,6 +1076,21 @@ class WlsCore:
         self.virtuals = Virtuals(self)
         self.integrations = Integrations(self)
         self.scenes = Scenes(self)
+
+        # Áp dụng hiệu ứng đã lưu (nếu có)
+        if hasattr(self, 'current_effect') and self.current_effect:
+            try:
+                _LOGGER.debug(f"Áp dụng hiệu ứng đã lưu: {self.current_effect}")
+                self.apply_effect_to_all(self.current_effect)
+            except Exception as e:
+                _LOGGER.error(f"Lỗi khi áp dụng hiệu ứng đã lưu: {e}")
+                # Nếu có lỗi, đặt lại hiệu ứng hiện tại
+                self.current_effect = None
+
+        # Cập nhật menu sau khi effects đã được khởi tạo
+        if self.icon:
+            _LOGGER.debug("Cập nhật menu sau khi effects đã được khởi tạo")
+            self.setup_icon_menu()
         self.colors = UserDefaultCollection(
             self,
             "Colors",
