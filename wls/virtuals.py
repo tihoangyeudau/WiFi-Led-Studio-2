@@ -372,6 +372,13 @@ class Virtual:
             return
 
         try:
+            # Cập nhật trạng thái LED trong cấu hình
+            update_led_state_off(self._wls.config)
+            # Lưu cấu hình
+            from wls.config import save_config
+            save_config(self._wls.config, self._wls.config_dir)
+
+            # Phát sự kiện EffectClearedEvent
             self._wls.events.fire_event(EffectClearedEvent())
             self.clear_transition_effect()
 
@@ -1020,6 +1027,19 @@ class Virtuals:
                 )
                 device.deactivate()
 
+def update_led_state_off(config):
+    """
+    Update the LED state to off in the configuration.
+
+    Args:
+        config (dict): The current config structure
+
+    Returns:
+        None
+    """
+    config["led_active"] = False
+    # Không xóa current_effect để có thể khôi phục khi bật lại
+
 def update_effect_config(config, virtual_id, effect):
     """
     Update the configuration of a virtual effect.
@@ -1047,3 +1067,9 @@ def update_effect_config(config, virtual_id, effect):
             virtual["effect"] = {}
         virtual["effect"]["type"] = effect.type
         virtual["effect"]["config"] = effect.config
+
+        # Cập nhật current_effect và led_active trong cấu hình chính
+        # Lấy loại hiệu ứng cơ bản (không có số phiên bản)
+        effect_type = effect.type
+        config["current_effect"] = effect_type
+        config["led_active"] = True

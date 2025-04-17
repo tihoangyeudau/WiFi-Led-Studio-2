@@ -636,33 +636,15 @@ class WlsCore:
             # Update config to remove effects
             remove_virtuals_active_effects(self.config)
 
-            # Lưu trạng thái LED vào cấu hình
-            self.led_active = False
-            self.config["led_active"] = False
-            save_config(self.config, self.config_dir)
-
             _LOGGER.debug("Đã xóa hiệu ứng và tắt tất cả đèn LED")
         else:
             # Turn on LEDs by applying the last used effect
-            if hasattr(self, 'current_effect') and self.current_effect:
                 try:
                     _LOGGER.debug(f"Áp dụng hiệu ứng đã lưu: {self.current_effect}")
                     self.apply_effect_to_all(self.current_effect)
                     _LOGGER.debug(f"Đã bật tất cả đèn LED với hiệu ứng: {self.current_effect}")
                 except Exception as e:
                     _LOGGER.error(f"Lỗi khi áp dụng hiệu ứng đã lưu: {e}")
-                    # Nếu có lỗi, sử dụng sự kiện GlobalResumeEvent
-                    self.events.fire_event(GlobalResumeEvent())
-                    _LOGGER.debug("Đã bật tất cả đèn LED bằng GlobalResumeEvent do lỗi khi áp dụng hiệu ứng")
-            else:
-                # Không có hiệu ứng đã lưu, sử dụng sự kiện GlobalResumeEvent
-                self.events.fire_event(GlobalResumeEvent())
-                _LOGGER.debug("Đã bật tất cả đèn LED bằng GlobalResumeEvent (không có hiệu ứng đã lưu)")
-
-            # Lưu trạng thái LED vào cấu hình
-            self.led_active = True
-            self.config["led_active"] = True
-            save_config(self.config, self.config_dir)
 
         # Update menu to reflect new state
         self.setup_icon_menu()
@@ -742,21 +724,11 @@ class WlsCore:
 
             # Lưu hiệu ứng hiện tại
             self.current_effect = effect_type
+            _LOGGER.info(f"Đã áp dụng hiệu ứng {effect_type} cho tất cả thiết bị ảo")
 
             # Cập nhật trạng thái LED thành bật
             self.led_active = True
             _LOGGER.debug("Đã cập nhật trạng thái LED thành bật")
-
-            # Lưu hiệu ứng hiện tại và trạng thái LED vào cấu hình
-            try:
-                self.config["current_effect"] = effect_type
-                self.config["led_active"] = True  # Đảm bảo trạng thái LED được đặt là bật
-                save_config(self.config, self.config_dir)
-                _LOGGER.debug(f"Đã lưu hiệu ứng {effect_type} và trạng thái LED vào cấu hình")
-            except Exception as e:
-                _LOGGER.error(f"Lỗi khi lưu hiệu ứng vào cấu hình: {e}")
-
-            _LOGGER.info(f"Đã áp dụng hiệu ứng {effect_type} cho tất cả thiết bị ảo")
 
             # Chỉ cập nhật menu một lần sau khi đã áp dụng hiệu ứng cho tất cả thiết bị
             if self.icon:
@@ -1068,6 +1040,33 @@ class WlsCore:
         self.events.add_listener(
             handle_visualisation_update,
             Event.DEVICE_UPDATE,
+        )
+
+        # Thêm listener cho sự kiện EffectClearedEvent
+        def handle_effect_cleared(event):
+            _LOGGER.debug("Nhận sự kiện EffectClearedEvent - cập nhật menu sang trạng thái 'Tắt đèn'")
+            # Cập nhật trạng thái LED
+            self.led_active = False
+            self.setup_icon_menu()
+
+        self.events.add_listener(
+            handle_effect_cleared,
+            Event.EFFECT_CLEARED,
+        )
+
+        # Thêm listener cho sự kiện EffectSetEvent
+        def handle_effect_set(event):
+            _LOGGER.debug(f"Nhận sự kiện EffectSetEvent - cập nhật menu sang trạng thái 'Bật đèn' với hiệu ứng {event.effect_id}")
+            try:
+                self.current_effect = self.config["current_effect"]
+                self.led_active = True
+                self.setup_icon_menu()
+            except Exception as e:
+                _LOGGER.error(f"Lỗi khi xử lý sự kiện EffectSetEvent: {e}")
+
+        self.events.add_listener(
+            handle_effect_set,
+            Event.EFFECT_SET,
         )
 
     def setup_logqueue(self):
