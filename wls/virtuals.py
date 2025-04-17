@@ -299,41 +299,55 @@ class Virtual:
         self.set_effect(effect)
 
     def set_effect(self, effect):
-        self.lock.acquire()
-        if not self._devices:
-            error = f"Đèn ảo {self.id}: Không thể kích hoạt, không có phân đoạn thiết bị được định cấu hình"
-            _LOGGER.warning(error)
-            raise ValueError(error)
+        # Thêm timeout cho khóa để tránh deadlock
+        lock_acquired = self.lock.acquire(timeout=3.0)  # Timeout 3 giây
+        if not lock_acquired:
+            error = f"Đèn ảo {self.id}: Không thể lấy khóa sau 3 giây, có thể có deadlock"
+            _LOGGER.error(error)
+            # Không raise exception ở đây để tránh crash ứng dụng
+            return
 
-        if (
-            self._config["transition_mode"] != "None"
-            and self._config["transition_time"] > 0
-        ):
-            self.transition_frame_total = (
-                self.refresh_rate * self._config["transition_time"]
-            )
-            self.transition_frame_counter = 0
-            self.clear_transition_effect()
+        try:
+            if not self._devices:
+                error = f"Đèn ảo {self.id}: Không thể kích hoạt, không có phân đoạn thiết bị được định cấu hình"
+                _LOGGER.warning(error)
+                raise ValueError(error)
 
-            if self._active_effect is None:
-                self._transition_effect = DummyEffect(self.pixel_count)
+            if (
+                self._config["transition_mode"] != "None"
+                and self._config["transition_time"] > 0
+            ):
+                self.transition_frame_total = (
+                    self.refresh_rate * self._config["transition_time"]
+                )
+                self.transition_frame_counter = 0
+                self.clear_transition_effect()
+
+                if self._active_effect is None:
+                    self._transition_effect = DummyEffect(self.pixel_count)
+                else:
+                    self._transition_effect = self._active_effect
             else:
-                self._transition_effect = self._active_effect
-        else:
-            # no transition effect to clean up, so clear the active effect now!
-            self.clear_active_effect()
+                # no transition effect to clean up, so clear the active effect now!
+                self.clear_active_effect()
 
-        self._active_effect = effect
-        self._active_effect.activate(self)
-        self._wls.events.fire_event(
-            EffectSetEvent(
-                self._active_effect.name,
-                self._active_effect.id,
-                self.active_effect.config,
-                self.id,
+            self._active_effect = effect
+            self._active_effect.activate(self)
+            self._wls.events.fire_event(
+                EffectSetEvent(
+                    self._active_effect.name,
+                    self._active_effect.id,
+                    self.active_effect.config,
+                    self.id,
+                )
             )
-        )
-        self.lock.release()
+        except Exception as e:
+            _LOGGER.error(f"Lỗi trong set_effect: {e}")
+            raise
+        finally:
+            # Đảm bảo luôn giải phóng khóa
+            self.lock.release()
+
         try:
             self.active = True
         except RuntimeError:
@@ -349,29 +363,41 @@ class Virtual:
         self._active_effect = None
 
     def clear_effect(self):
-        self.lock.acquire()
-        self._wls.events.fire_event(EffectClearedEvent())
-        self.clear_transition_effect()
+        # Thêm timeout cho khóa để tránh deadlock
+        lock_acquired = self.lock.acquire(timeout=3.0)  # Timeout 3 giây
+        if not lock_acquired:
+            error = f"Đèn ảo {self.id}: Không thể lấy khóa sau 3 giây khi clear_effect, có thể có deadlock"
+            _LOGGER.error(error)
+            # Không raise exception ở đây để tránh crash ứng dụng
+            return
 
-        if (
-            self._config["transition_mode"] != "None"
-            and self._config["transition_time"] > 0
-        ):
-            self._transition_effect = self._active_effect
-            self._active_effect = DummyEffect(self.pixel_count)
+        try:
+            self._wls.events.fire_event(EffectClearedEvent())
+            self.clear_transition_effect()
 
-            self.transition_frame_total = (
-                self.refresh_rate * self._config["transition_time"]
+            if (
+                self._config["transition_mode"] != "None"
+                and self._config["transition_time"] > 0
+            ):
+                self._transition_effect = self._active_effect
+                self._active_effect = DummyEffect(self.pixel_count)
+
+                self.transition_frame_total = (
+                    self.refresh_rate * self._config["transition_time"]
+                )
+                self.transition_frame_counter = 0
+            else:
+                # no transition effect to clean up, so clear the active effect now!
+                self.clear_active_effect()
+
+            self._wls.loop.call_later(
+                self._config["transition_time"], self.clear_frame
             )
-            self.transition_frame_counter = 0
-        else:
-            # no transition effect to clean up, so clear the active effect now!
-            self.clear_active_effect()
-
-        self._wls.loop.call_later(
-            self._config["transition_time"], self.clear_frame
-        )
-        self.lock.release()
+        except Exception as e:
+            _LOGGER.error(f"Lỗi trong clear_effect: {e}")
+        finally:
+            # Đảm bảo luôn giải phóng khóa
+            self.lock.release()
 
     def clear_transition_effect(self):
         if self._transition_effect is not None:
