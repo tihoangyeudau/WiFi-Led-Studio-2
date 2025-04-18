@@ -397,11 +397,6 @@ class WlsCore:
             self.current_effect = self.config["current_effect"]
             _LOGGER.debug(f"Đã đọc hiệu ứng đã lưu từ cấu hình: {self.current_effect}")
 
-        # Đọc hiệu ứng đã lưu từ cấu hình
-        if "current_effect" in self.config:
-            self.current_effect = self.config["current_effect"]
-            _LOGGER.debug(f"Đã đọc hiệu ứng đã lưu từ cấu hình: {self.current_effect}")
-
         self.config["wls_presets"] = wls_presets
         self.host = host if host else self.config["host"]
         self.port = port if port else self.config["port"]
