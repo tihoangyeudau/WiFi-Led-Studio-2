@@ -411,6 +411,21 @@ class Virtual:
             self._transition_effect._deactivate()
         self._transition_effect = None
 
+    def set_brightness(self, brightness_value):
+        """
+        Set brightness for this virtual device.
+
+        Args:
+            brightness_value (float): Brightness value between 0.0 and 1.0
+        """
+        # Ensure brightness is within valid range
+        brightness_value = max(0.0, min(brightness_value, 1.0))
+
+        # Update max_brightness in config
+        self._config["max_brightness"] = brightness_value
+
+        _LOGGER.debug(f"Đèn ảo {self.id}: Đã đặt độ sáng thành {int(brightness_value * 100)}%")
+
     def clear_active_effect(self):
         if self._active_effect is not None:
             self._active_effect._deactivate()
@@ -568,8 +583,8 @@ class Virtual:
             if self.transition_frame_counter == self.transition_frame_total:
                 self.clear_transition_effect()
 
+        # Áp dụng độ sáng của thiết bị ảo
         np.multiply(frame, self._config["max_brightness"], frame)
-        np.multiply(frame, self._wls.config["global_brightness"], frame)
 
         return frame
 
@@ -1067,9 +1082,3 @@ def update_effect_config(config, virtual_id, effect):
             virtual["effect"] = {}
         virtual["effect"]["type"] = effect.type
         virtual["effect"]["config"] = effect.config
-
-        # Cập nhật current_effect và led_active trong cấu hình chính
-        # Lấy loại hiệu ứng cơ bản (không có số phiên bản)
-        effect_type = effect.type
-        config["current_effect"] = effect_type
-        config["led_active"] = True

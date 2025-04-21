@@ -384,28 +384,30 @@ class WlsCore:
 
         self.config = load_config(config_dir)
 
-        # Đọc trạng thái LED từ cấu hình (mặc định là True nếu không có)
-        self.led_active = self.config.get("led_active", True)
-        _LOGGER.debug(f"Đã đọc trạng thái LED từ cấu hình: {'Bật' if self.led_active else 'Tắt'}")
+        # Khởi tạo trạng thái LED dựa trên device_states trong cấu hình
+        self.led_active = False
+        if "device_states" in self.config:
+            self.led_active = any(self.config["device_states"].values())
+        _LOGGER.debug(f"Đã khởi tạo trạng thái LED: {'Bật' if self.led_active else 'Tắt'}")
+
+        # Đọc lựa chọn thiết bị từ cấu hình
+        if "selected_device" in self.config:
+            self._selected_device = self.config["selected_device"]
+            _LOGGER.debug(f"Đã đọc lựa chọn thiết bị từ cấu hình: {self._selected_device}")
 
         if clear_effects:
             _LOGGER.warning("Clearing active effects.")
             remove_virtuals_active_effects(self.config)
 
-        # Đọc hiệu ứng đã lưu từ cấu hình
-        if "current_effect" in self.config:
-            self.current_effect = self.config["current_effect"]
-            _LOGGER.debug(f"Đã đọc hiệu ứng đã lưu từ cấu hình: {self.current_effect}")
-
+        # Không còn sử dụng current_effect từ cấu hình, thay vào đó sử dụng device_effects
+        # Hiệu ứng chung sẽ được xác định từ device_effects khi khởi động
         self.config["wls_presets"] = wls_presets
         self.host = host if host else self.config["host"]
         self.port = port if port else self.config["port"]
         self.port_s = port_s if port_s else self.config["port_s"]
 
-        # Khôi phục hiệu ứng hiện tại từ cấu hình (nếu có)
-        if "current_effect" in self.config:
-            self.current_effect = self.config["current_effect"]
-            _LOGGER.debug(f"Đã khôi phục hiệu ứng {self.current_effect} từ cấu hình")
+        # Không còn khôi phục hiệu ứng từ current_effect trong cấu hình
+        # Hiệu ứng sẽ được xác định từ device_effects khi khởi động
         self.ci_testing = ci_testing
         if sys.platform == "win32":
             self.loop = asyncio.ProactorEventLoop()
@@ -424,8 +426,9 @@ class WlsCore:
         self.thread_executor = ThreadPoolExecutor()
         self.loop.set_default_executor(self.thread_executor)
         self.loop.set_exception_handler(self.loop_exception_handler)
+
+        # Hiển thị menu "Đang khởi động..." trước khi khởi tạo các thành phần
         if self.icon:
-            # Sử dụng phương thức mới để thiết lập menu icon
             self.setup_icon_menu()
 
         self.setup_logqueue()
@@ -440,6 +443,18 @@ class WlsCore:
             self.event_handler = WindowsEventHandler(self)
         else:
             self.event_handler = MacOSEventHandler(self)
+
+    def get_led_devices_menu_title(self, led_devices_items):
+        """
+        Lấy tiêu đề menu cho mục Danh sách đèn.
+
+        Args:
+            led_devices_items: Danh sách các mục menu thiết bị LED
+
+        Returns:
+            Tiêu đề menu không hiển thị thiết bị được chọn
+        """
+        return "Đèn cần chỉnh | Instance to control :"
 
     def dev_enabled(self):
         return self.config["dev_mode"]
@@ -607,12 +622,12 @@ class WlsCore:
             # Switch to WLS mode
             self.delete_aw_key()
             self.add_wls_key()
-            menu_text = "Khởi động máy mở Theo màu màn | Enable autostart Screen capture"
+            menu_text = "Mở rộng màn khi khởi động máy | Enable autostart Screen capture"
         else:
             # Switch to AW mode
             self.delete_wls_key()
             self.add_aw_key()
-            menu_text = "Khởi động máy mở Nháy nhạc | Enable autostart Music effect"
+            menu_text = "Nháy nhạc khi khởi động máy | Enable autostart Music effect"
 
         # Update menu
         self.setup_icon_menu(toggle_text=menu_text)
@@ -622,21 +637,122 @@ class WlsCore:
         Toggle LED state between on and off.
         When turning off, it clears all effects (like the stop/clear button in UI).
         When turning on, it resumes normal operation.
+        Based on the selection in the LED Devices menu.
         """
-        if self.led_active:
-            # Turn off LEDs by clearing all effects
+        # Check if a specific device is selected
+        if hasattr(self, '_selected_device'):
+            device_id = self._selected_device
+            _LOGGER.debug(f"Chuyển đổi trạng thái đèn cho thiết bị: {device_id}")
+
+            # Find virtuals associated with this device
+            device_virtuals = []
             for virtual_id, virtual in self.virtuals._virtuals.items():
-                virtual.clear_effect()
+                if hasattr(virtual, 'is_device') and virtual.is_device == device_id:
+                    device_virtuals.append(virtual)
 
-            # Update config to remove effects
-            remove_virtuals_active_effects(self.config)
+            if device_virtuals:
+                if self.led_active:
+                    # Turn off LEDs for this device by clearing effects
+                    for virtual in device_virtuals:
+                        virtual.clear_effect()
 
-            _LOGGER.debug("Đã xóa hiệu ứng và tắt tất cả đèn LED")
+                        # Update config to remove effect for this virtual
+                        for i, virtual_config in enumerate(self.config["virtuals"]):
+                            if virtual_config["id"] == virtual.id:
+                                if "effect" in virtual_config:
+                                    del virtual_config["effect"]
+                                self.config["virtuals"][i] = virtual_config
+
+                    # Lưu trạng thái tắt của thiết bị vào cấu hình
+                    if "device_states" not in self.config:
+                        self.config["device_states"] = {}
+                    self.config["device_states"][str(device_id)] = False
+
+                    # Lưu cấu hình
+                    from wls.config import save_config
+                    save_config(self.config, self.config_dir)
+
+                    _LOGGER.debug(f"Đã xóa hiệu ứng và tắt đèn LED cho thiết bị {device_id}")
+                else:
+                    # Turn on LEDs for this device by applying the last used effect
+                    try:
+                        # Kiểm tra xem có hiệu ứng đã lưu cho thiết bị này không
+                        effect_to_apply = self.current_effect
+                        if "device_effects" in self.config and str(device_id) in self.config["device_effects"]:
+                            effect_to_apply = self.config["device_effects"][str(device_id)]
+                            _LOGGER.debug(f"Áp dụng hiệu ứng đã lưu cho thiết bị {device_id}: {effect_to_apply}")
+                        else:
+                            _LOGGER.debug(f"Áp dụng hiệu ứng mặc định: {effect_to_apply} cho thiết bị {device_id}")
+
+                        self.apply_effect_to_device(effect_to_apply, device_id)
+
+                        # Lưu trạng thái bật của thiết bị vào cấu hình
+                        if "device_states" not in self.config:
+                            self.config["device_states"] = {}
+                        self.config["device_states"][str(device_id)] = True
+
+                        # Lưu cấu hình
+                        from wls.config import save_config
+                        save_config(self.config, self.config_dir)
+
+                        _LOGGER.debug(f"Đã bật đèn LED cho thiết bị {device_id} với hiệu ứng: {effect_to_apply}")
+                    except Exception as e:
+                        _LOGGER.error(f"Lỗi khi áp dụng hiệu ứng đã lưu cho thiết bị {device_id}: {e}")
+            else:
+                _LOGGER.debug(f"Không tìm thấy thiết bị ảo nào liên kết với thiết bị {device_id}, bỏ qua")
+                # Xóa thiết bị đã chọn vì nó không tồn tại
+                delattr(self, '_selected_device')
         else:
-            # Turn on LEDs by applying the last used effect
+            # No specific device selected, toggle all LEDs
+            if self.led_active:
+                # Turn off all LEDs by clearing all effects
+                for virtual_id, virtual in self.virtuals._virtuals.items():
+                    virtual.clear_effect()
+
+                # Update config to remove effects
+                remove_virtuals_active_effects(self.config)
+
+                # Lưu trạng thái tắt của tất cả thiết bị vào cấu hình
+                if "device_states" not in self.config:
+                    self.config["device_states"] = {}
+
+                # Đặt trạng thái tắt cho tất cả thiết bị
+                for virtual_id, virtual in self.virtuals._virtuals.items():
+                    if hasattr(virtual, 'is_device') and virtual.is_device is not None:
+                        self.config["device_states"][str(virtual.is_device)] = False
+
+                # Lưu cấu hình
+                from wls.config import save_config
+                save_config(self.config, self.config_dir)
+
+                _LOGGER.debug("Đã xóa hiệu ứng và tắt tất cả đèn LED")
+            else:
+                # Turn on all LEDs by applying the last used effect
                 try:
-                    _LOGGER.debug(f"Áp dụng hiệu ứng đã lưu: {self.current_effect}")
-                    self.apply_effect_to_all(self.current_effect)
+                    # Kiểm tra xem có hiệu ứng đã lưu cho từng thiết bị không
+                    if "device_effects" in self.config and self.config["device_effects"]:
+                        _LOGGER.debug("Áp dụng hiệu ứng đã lưu cho từng thiết bị")
+                        for device_id, effect_type in self.config["device_effects"].items():
+                            _LOGGER.debug(f"Áp dụng hiệu ứng đã lưu {effect_type} cho thiết bị {device_id}")
+                            self.apply_effect_to_device(effect_type, device_id)
+                    else:
+                        # Nếu không có hiệu ứng đã lưu cho từng thiết bị, áp dụng hiệu ứng chung
+                        _LOGGER.debug(f"Áp dụng hiệu ứng chung đã lưu: {self.current_effect}")
+                        self.apply_effect_to_all(self.current_effect)
+
+                    # Lưu trạng thái bật của tất cả thiết bị vào cấu hình
+                    if "device_states" not in self.config:
+                        self.config["device_states"] = {}
+
+                    # Đặt trạng thái bật cho tất cả thiết bị
+                    for virtual_id, virtual in self.virtuals._virtuals.items():
+                        if hasattr(virtual, 'is_device') and virtual.is_device is not None:
+                            self.config["device_states"][str(virtual.is_device)] = True
+
+                    # Lưu cấu hình
+                    from wls.config import save_config
+                    save_config(self.config, self.config_dir)
+
                     _LOGGER.debug(f"Đã bật tất cả đèn LED với hiệu ứng: {self.current_effect}")
                 except Exception as e:
                     _LOGGER.error(f"Lỗi khi áp dụng hiệu ứng đã lưu: {e}")
@@ -644,9 +760,9 @@ class WlsCore:
         # Update menu to reflect new state
         self.setup_icon_menu()
 
-    def set_global_brightness(self, brightness_value):
+    def set_brightness(self, brightness_value):
         """
-        Set global brightness for all LED devices.
+        Set brightness for selected device or globally.
 
         Args:
             brightness_value (float): Brightness value between 0.0 and 1.0
@@ -654,14 +770,64 @@ class WlsCore:
         # Ensure brightness is within valid range
         brightness_value = max(0.0, min(brightness_value, 1.0))
 
-        # Update config
-        self.config["global_brightness"] = brightness_value
+        # Check if a specific device is selected
+        if hasattr(self, '_selected_device'):
+            device_id = self._selected_device
+            _LOGGER.debug(f"Đặt độ sáng cho thiết bị cụ thể: {device_id}")
+
+            # Find virtuals associated with this device
+            device_virtuals = []
+            for virtual_id, virtual in self.virtuals._virtuals.items():
+                if hasattr(virtual, 'is_device') and virtual.is_device == device_id:
+                    device_virtuals.append(virtual_id)
+
+            if device_virtuals:
+                # Update max_brightness for each virtual associated with this device
+                for virtual_id in device_virtuals:
+                    # Find the virtual in the config
+                    for i, virtual_config in enumerate(self.config["virtuals"]):
+                        if virtual_config["id"] == virtual_id:
+                            # Ensure config has the necessary structure
+                            if "config" not in virtual_config:
+                                virtual_config["config"] = {}
+
+                            # Update max_brightness
+                            virtual_config["config"]["max_brightness"] = brightness_value
+                            self.config["virtuals"][i] = virtual_config
+                            _LOGGER.debug(f"Đã cập nhật độ sáng cho thiết bị ảo {virtual_id} thành {int(brightness_value * 100)}%")
+
+                            # Apply the brightness to the virtual
+                            virtual = self.virtuals.get(virtual_id)
+                            if virtual and hasattr(virtual, 'set_brightness'):
+                                virtual.set_brightness(brightness_value)
+
+                _LOGGER.info(f"Đã đặt độ sáng cho thiết bị {device_id} thành {int(brightness_value * 100)}%")
+            else:
+                _LOGGER.debug(f"Không tìm thấy thiết bị ảo nào liên kết với thiết bị {device_id}, bỏ qua")
+                # Nếu thiết bị này đang được chọn, xóa nó
+                if hasattr(self, '_selected_device') and self._selected_device == device_id:
+                    delattr(self, '_selected_device')
+        else:
+            # Update max_brightness for all devices
+            _LOGGER.info(f"Đặt độ sáng cho tất cả thiết bị thành {int(brightness_value * 100)}%")
+
+            # Update max_brightness for all virtuals
+            for virtual_id, virtual in self.virtuals._virtuals.items():
+                # Update the virtual object
+                if hasattr(virtual, '_config'):
+                    virtual._config["max_brightness"] = brightness_value
+
+                # Update the config
+                for i, virtual_config in enumerate(self.config["virtuals"]):
+                    if virtual_config["id"] == virtual_id:
+                        if "config" not in virtual_config:
+                            virtual_config["config"] = {}
+                        virtual_config["config"]["max_brightness"] = brightness_value
+                        self.config["virtuals"][i] = virtual_config
 
         # Save config
         from wls.config import save_config
         save_config(self.config, self.config_dir)
-
-        _LOGGER.info(f"Đã đặt độ sáng toàn cục thành {int(brightness_value * 100)}%")
 
         # Update menu to reflect new state
         if self.icon:
@@ -670,6 +836,137 @@ class WlsCore:
                 _LOGGER.debug(f"Đã cập nhật menu sau khi thay đổi độ sáng thành {int(brightness_value * 100)}%")
             except Exception as e:
                 _LOGGER.error(f"Lỗi khi cập nhật menu độ sáng: {e}")
+
+    # Phương thức set_global_brightness đã được loại bỏ vì không còn cần thiết
+
+    def _normalize_effect_type(self, effect_type):
+        """
+        Normalize effect type by checking registry and finding case-insensitive matches.
+
+        Args:
+            effect_type (str): The effect type to normalize
+
+        Returns:
+            str: Normalized effect type that exists in registry
+        """
+        # Kiểm tra xem effect_type có trong registry không
+        registry = self.effects._cls.registry()
+
+        # Nếu effect_type không có trong registry, thử tìm kiếm không phân biệt chữ hoa/thường
+        if effect_type not in registry:
+            for reg_effect in registry.keys():
+                if effect_type.lower() == reg_effect.lower():
+                    effect_type = reg_effect
+                    _LOGGER.debug(f"Đã tìm thấy hiệu ứng {effect_type} trong registry")
+                    break
+
+        return effect_type
+
+    def _apply_effect_to_virtuals(self, effect_type, virtuals, device_id=None):
+        """
+        Apply an effect to a list of virtual devices.
+
+        Args:
+            effect_type (str): The effect type to apply
+            virtuals (list): List of virtual devices to apply the effect to
+            device_id (str, optional): The device ID if applying to a specific device
+
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        success = False
+
+        for virtual in virtuals:
+            try:
+                # Tạo hiệu ứng mới
+                effect = self.effects.create(
+                    type=effect_type,
+                    config={},
+                    wls=self,
+                )
+
+                # Đặt hiệu ứng cho thiết bị ảo
+                virtual.set_effect(effect)
+
+                # Cập nhật cấu hình
+                from wls.virtuals import update_effect_config
+                update_effect_config(self.config, virtual.id, effect)
+
+                _LOGGER.debug(f"Đã áp dụng hiệu ứng {effect_type} cho thiết bị ảo {virtual.id}")
+                success = True
+            except Exception as e:
+                _LOGGER.error(f"Lỗi khi áp dụng hiệu ứng {effect_type} cho thiết bị ảo {virtual.id}: {e}")
+                import traceback
+                _LOGGER.error(traceback.format_exc())
+
+        return success
+
+    def apply_effect_to_device(self, effect_type, device_id):
+        """
+        Apply an effect to a specific device.
+
+        Args:
+            effect_type (str): The effect type to apply
+            device_id (str): The ID of the device to apply the effect to
+        """
+        _LOGGER.debug(f"Bắt đầu áp dụng hiệu ứng {effect_type} cho thiết bị {device_id}")
+        try:
+            # Chuẩn hóa effect_type
+            effect_type = self._normalize_effect_type(effect_type)
+
+            # Tìm các thiết bị ảo liên quan đến thiết bị này
+            device_virtuals = []
+            for virtual_id, virtual in self.virtuals._virtuals.items():
+                # Kiểm tra xem virtual có liên kết với device_id không
+                if hasattr(virtual, 'is_device') and virtual.is_device == device_id:
+                    device_virtuals.append(virtual)
+                    _LOGGER.debug(f"Tìm thấy thiết bị ảo {virtual_id} liên kết với thiết bị {device_id}")
+
+            if not device_virtuals:
+                _LOGGER.debug(f"Không tìm thấy thiết bị ảo nào liên kết với thiết bị {device_id}, bỏ qua")
+                # Nếu thiết bị này đang được chọn, xóa nó
+                if hasattr(self, '_selected_device') and self._selected_device == device_id:
+                    delattr(self, '_selected_device')
+                return
+
+            # Áp dụng hiệu ứng cho các thiết bị ảo liên quan
+            success = self._apply_effect_to_virtuals(effect_type, device_virtuals, device_id)
+
+            if not success:
+                return
+
+            # Lưu hiệu ứng hiện tại cho thiết bị cụ thể
+            self.current_effect = effect_type
+
+            # Lưu hiệu ứng hiện tại của thiết bị vào cấu hình
+            if "device_effects" not in self.config:
+                self.config["device_effects"] = {}
+            self.config["device_effects"][str(device_id)] = effect_type
+            _LOGGER.debug(f"Đã lưu hiệu ứng {effect_type} cho thiết bị {device_id} vào cấu hình")
+
+            _LOGGER.info(f"Đã áp dụng hiệu ứng {effect_type} cho thiết bị {device_id}")
+
+            # Cập nhật trạng thái LED thành bật
+            self.led_active = True
+            _LOGGER.debug("Đã cập nhật trạng thái LED thành bật")
+
+            # Lưu cấu hình sau khi đã cập nhật device_effects
+            from wls.config import save_config
+            save_config(self.config, self.config_dir)
+            _LOGGER.debug(f"Đã lưu cấu hình với hiệu ứng {effect_type} cho thiết bị {device_id}")
+
+            # Cập nhật menu
+            if self.icon:
+                try:
+                    self.setup_icon_menu()
+                    _LOGGER.debug(f"Đã cập nhật menu sau khi chọn hiệu ứng {effect_type} cho thiết bị {device_id}")
+                except Exception as e:
+                    _LOGGER.error(f"Lỗi khi cập nhật menu: {e}")
+
+        except Exception as e:
+            _LOGGER.error(f"Lỗi khi áp dụng hiệu ứng {effect_type} cho thiết bị {device_id}: {e}")
+            import traceback
+            _LOGGER.error(traceback.format_exc())
 
     def apply_effect_to_all(self, effect_type):
         """
@@ -680,42 +977,26 @@ class WlsCore:
         """
         _LOGGER.debug(f"Bắt đầu áp dụng hiệu ứng {effect_type} (type: {type(effect_type)}) cho tất cả thiết bị ảo")
         try:
-            # Kiểm tra xem effect_type có trong registry không
-            registry = self.effects._cls.registry()
-            _LOGGER.debug(f"Registry có {len(registry)} hiệu ứng: {', '.join(registry.keys())}")
+            # Chuẩn hóa effect_type
+            effect_type = self._normalize_effect_type(effect_type)
+            _LOGGER.debug(f"Registry có {len(self.effects._cls.registry())} hiệu ứng")
 
-            # Nếu effect_type không có trong registry, thử tìm kiếm không phân biệt chữ hoa/thường
-            if effect_type not in registry:
-                _LOGGER.debug(f"Hiệu ứng {effect_type} không có trong registry, thử tìm kiếm không phân biệt chữ hoa/thường")
-                for reg_effect in registry.keys():
-                    if effect_type.lower() == reg_effect.lower():
-                        effect_type = reg_effect
-                        _LOGGER.debug(f"Đã tìm thấy hiệu ứng {effect_type} trong registry")
-                        break
+            # Đảm bảo device_effects tồn tại trong cấu hình
+            if "device_effects" not in self.config:
+                self.config["device_effects"] = {}
 
-            # Apply to all virtuals - tạo một hiệu ứng riêng biệt cho mỗi thiết bị ảo
-            _LOGGER.debug(f"Áp dụng hiệu ứng cho tất cả thiết bị ảo")
+            # Áp dụng hiệu ứng cho tất cả thiết bị ảo
+            success = self._apply_effect_to_virtuals(effect_type, list(self.virtuals.values()))
+
+            if not success:
+                return
+
+            # Lưu hiệu ứng cho từng thiết bị thực
             for virtual in self.virtuals.values():
-                try:
-                    # Tạo một hiệu ứng mới cho mỗi thiết bị ảo thay vì dùng chung
-                    _LOGGER.debug(f"Tạo hiệu ứng {effect_type} cho thiết bị ảo {virtual.id}")
-                    effect = self.effects.create(
-                        type=effect_type,
-                        wls=self,
-                        config={}  # Empty config to use defaults
-                    )
-
-                    virtual.set_effect(effect)
-
-                    # Cập nhật thông tin chi tiết về hiệu ứng trong cấu hình
-                    from wls.virtuals import update_effect_config
-                    update_effect_config(self.config, virtual.id, effect)
-
-                    _LOGGER.debug(f"Đã áp dụng hiệu ứng {effect_type} cho thiết bị ảo {virtual.id}")
-                except Exception as e:
-                    _LOGGER.error(f"Lỗi khi áp dụng hiệu ứng {effect_type} cho thiết bị ảo {virtual.id}: {e}")
-                    import traceback
-                    _LOGGER.error(traceback.format_exc())
+                if hasattr(virtual, 'is_device') and virtual.is_device is not None:
+                    device_id = virtual.is_device
+                    self.config["device_effects"][str(device_id)] = effect_type
+                    _LOGGER.debug(f"Đã lưu hiệu ứng {effect_type} cho thiết bị {device_id} vào cấu hình")
 
             # Lưu hiệu ứng hiện tại
             self.current_effect = effect_type
@@ -724,6 +1005,11 @@ class WlsCore:
             # Cập nhật trạng thái LED thành bật
             self.led_active = True
             _LOGGER.debug("Đã cập nhật trạng thái LED thành bật")
+
+            # Lưu cấu hình sau khi đã cập nhật device_effects
+            from wls.config import save_config
+            save_config(self.config, self.config_dir)
+            _LOGGER.debug(f"Đã lưu cấu hình với hiệu ứng {effect_type} cho tất cả thiết bị")
 
             # Chỉ cập nhật menu một lần sau khi đã áp dụng hiệu ứng cho tất cả thiết bị
             if self.icon:
@@ -738,6 +1024,522 @@ class WlsCore:
             import traceback
             _LOGGER.error(traceback.format_exc())
 
+
+
+    # Helper methods for menu generation
+    def get_selected_device(self):
+        """
+        Get the currently selected device ID or None if all devices are selected.
+
+        Returns:
+            str or None: The selected device ID or None if all devices are selected
+        """
+        return getattr(self, '_selected_device', None)
+
+    def get_current_effect(self, device_id=None):
+        """
+        Get the current effect for a device or the global effect.
+
+        Args:
+            device_id (str, optional): The device ID to get the effect for
+
+        Returns:
+            str: The current effect type
+        """
+        # If a specific device is provided, check its effect
+        if device_id and "device_effects" in self.config and str(device_id) in self.config["device_effects"]:
+            return self.config["device_effects"][str(device_id)]
+
+        # If no device is provided but a device is selected, check its effect
+        selected_device = self.get_selected_device()
+        if selected_device and "device_effects" in self.config and str(selected_device) in self.config["device_effects"]:
+            return self.config["device_effects"][str(selected_device)]
+
+        # If no device is selected, try to get the effect of the first device
+        if not selected_device and "device_effects" in self.config:
+            # Get the first device
+            first_device = self._get_first_device()
+            if first_device and str(first_device.id) in self.config["device_effects"]:
+                return self.config["device_effects"][str(first_device.id)]
+
+        # Fall back to the global current effect
+        return getattr(self, 'current_effect', None)
+
+    def get_current_brightness(self, device_id=None):
+        """
+        Get the current brightness for a device or the global brightness.
+
+        Args:
+            device_id (str, optional): The device ID to get the brightness for
+
+        Returns:
+            int: The current brightness percentage (0-100)
+        """
+        # Default brightness
+        default_brightness = 100
+
+        # If no specific device is provided, use the selected device
+        if not device_id:
+            device_id = self.get_selected_device()
+
+        # If a device is specified, find its virtual and get brightness
+        if device_id:
+            device_virtual = self._find_virtual_for_device(device_id)
+            if device_virtual:
+                for virtual_config in self.config.get("virtuals", []):
+                    if virtual_config["id"] == device_virtual:
+                        if "config" in virtual_config and "max_brightness" in virtual_config["config"]:
+                            return int(virtual_config["config"]["max_brightness"] * 100)
+        else:
+            # If no device is selected, get brightness from the first device
+            first_device_virtual = self._find_virtual_for_first_device()
+            if first_device_virtual:
+                for virtual_config in self.config.get("virtuals", []):
+                    if virtual_config["id"] == first_device_virtual:
+                        if "config" in virtual_config and "max_brightness" in virtual_config["config"]:
+                            return int(virtual_config["config"]["max_brightness"] * 100)
+
+        return default_brightness
+
+    def _find_virtual_for_device(self, device_id):
+        """
+        Find the virtual ID associated with a device.
+
+        Args:
+            device_id (str): The device ID
+
+        Returns:
+            str or None: The virtual ID or None if not found
+        """
+        for virtual_id, virtual in self.virtuals._virtuals.items():
+            if hasattr(virtual, 'is_device') and virtual.is_device == device_id:
+                return virtual_id
+        return None
+
+    def _find_virtual_for_first_device(self):
+        """
+        Find the virtual ID associated with the first device.
+
+        Returns:
+            str or None: The virtual ID or None if not found
+        """
+        for virtual_id, virtual in self.virtuals._virtuals.items():
+            if hasattr(virtual, 'is_device') and virtual.is_device is not None:
+                return virtual_id
+        return None
+
+    def _get_first_device(self):
+        """
+        Get the first device from the list of devices.
+
+        Returns:
+            object or None: The first device or None if no devices are found
+        """
+        devices = self._get_all_devices()
+        return devices[0] if devices else None
+
+    def _get_all_devices(self):
+        """
+        Get all devices from various sources.
+
+        Returns:
+            list: List of device objects
+        """
+        devices = []
+        device_ids_added = set()
+
+        # Helper class for device info
+        class DeviceInfo:
+            def __init__(self, device_id, name=None):
+                self.id = device_id
+                self.name = name or f"Device {device_id}"
+
+        # 1. Try to get from self.devices
+        if hasattr(self, 'devices') and self.devices:
+            for device in self.devices.values():
+                if device.id not in device_ids_added:
+                    devices.append(device)
+                    device_ids_added.add(device.id)
+
+        # 2. Try to get from self.virtuals
+        if hasattr(self, 'virtuals') and hasattr(self.virtuals, '_virtuals') and self.virtuals._virtuals:
+            for virtual_id, virtual in self.virtuals._virtuals.items():
+                if hasattr(virtual, 'is_device') and virtual.is_device is not None:
+                    device_id = virtual.is_device
+                    if device_id not in device_ids_added:
+                        # Find device name from virtuals config
+                        device_name = f"Device {device_id}"
+
+                        # Look in virtuals config
+                        if "virtuals" in self.config:
+                            for virtual_config in self.config["virtuals"]:
+                                if virtual_config.get("id") == virtual_id:
+                                    if "config" in virtual_config and "name" in virtual_config["config"]:
+                                        device_name = virtual_config["config"]["name"]
+                                        break
+
+                        # If not found in virtuals, try devices
+                        if device_name == f"Device {device_id}" and "devices" in self.config:
+                            for device_config in self.config["devices"]:
+                                if device_config.get("id") == device_id and "name" in device_config:
+                                    device_name = device_config["name"]
+                                    break
+
+                        devices.append(DeviceInfo(device_id, device_name))
+                        device_ids_added.add(device_id)
+
+        # 3. Try to get from config if still no devices
+        if not devices and "devices" in self.config:
+            for device_config in self.config["devices"]:
+                device_id = device_config.get("id")
+                if device_id is not None and device_id not in device_ids_added:
+                    # Find device name from virtuals config first
+                    device_name = None
+
+                    # Look in virtuals config
+                    if "virtuals" in self.config:
+                        for virtual_config in self.config["virtuals"]:
+                            if "is_device" in virtual_config and virtual_config["is_device"] == device_id:
+                                if "config" in virtual_config and "name" in virtual_config["config"]:
+                                    device_name = virtual_config["config"]["name"]
+                                    break
+
+                    # If not found in virtuals, use name from devices
+                    if not device_name:
+                        device_name = device_config.get("name", f"Device {device_id}")
+
+                    devices.append(DeviceInfo(device_id, device_name))
+                    device_ids_added.add(device_id)
+
+        return devices
+
+    def is_device_active(self, device_id=None):
+        """
+        Check if a device is active (turned on).
+
+        Args:
+            device_id (str, optional): The device ID to check
+
+        Returns:
+            bool: True if the device is active, False otherwise
+        """
+        # If no specific device is provided, use the selected device
+        if not device_id:
+            device_id = self.get_selected_device()
+
+        # If a device is specified, check its state
+        if device_id:
+            if "device_states" in self.config and str(device_id) in self.config["device_states"]:
+                return self.config["device_states"][str(device_id)]
+            return True  # Default to active if not specified
+        else:
+            # If no device is selected, check if any device is active
+            if "device_states" in self.config:
+                return any(self.config["device_states"].values())
+            return True  # Default to active if not specified
+
+    def generate_brightness_submenu(self):
+        """
+        Generate the brightness submenu with checkmarks for the current brightness.
+
+        Returns:
+            Menu: The brightness submenu
+        """
+        current_brightness = self.get_current_brightness()
+
+        # Create brightness items with checkmarks
+        brightness_items = []
+        for brightness in [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
+            brightness_text = f"{brightness}%"
+            if brightness == current_brightness:
+                brightness_text = f"✓ {brightness_text}"
+
+            # Create a closure to preserve the brightness value
+            def make_brightness_handler(value):
+                return lambda: self.set_brightness(value/100)
+
+            brightness_items.append(
+                MenuItem(brightness_text, make_brightness_handler(brightness))
+            )
+
+        return Menu(*brightness_items)
+
+    def generate_effects_submenu(self):
+        """
+        Generate the effects submenu grouped by category with checkmarks for the current effect.
+
+        Returns:
+            list: List of effect category menu items
+        """
+        if not hasattr(self, 'effects') or self.effects is None:
+            _LOGGER.debug("self.effects not initialized, skipping effects menu")
+            return []
+
+        try:
+            # Get all available effects
+            try:
+                effect_types = self.effects.types()
+            except Exception as e:
+                _LOGGER.error(f"Error calling self.effects.types(): {e}")
+                try:
+                    effect_types = list(self.effects._cls.registry().keys())
+                except Exception as e2:
+                    _LOGGER.error(f"Error getting registry: {e2}")
+                    return []
+
+            # Create effect items
+            effects_items = []
+            for effect_type in effect_types:
+                # Skip abstract base classes and internal effects
+                if effect_type.startswith('_') or effect_type == 'Effect':
+                    continue
+
+                # Get friendly effect name
+                try:
+                    effect_class = self.effects._cls.registry().get(effect_type)
+                    display_name = effect_class.NAME if effect_class and hasattr(effect_class, 'NAME') else effect_type
+                except Exception:
+                    display_name = effect_type
+
+                # Create handler for this effect
+                def make_handler(effect_name):
+                    def handler():
+                        if self.get_selected_device():
+                            self.apply_effect_to_device(effect_name, self.get_selected_device())
+                        else:
+                            self.apply_effect_to_all(effect_name)
+                    return handler
+
+                effects_items.append(MenuItem(display_name, make_handler(effect_type)))
+
+            # Group effects by category
+            categories = {}
+            for item in effects_items:
+                effect_name = item.text
+                # Find effect in registry
+                for effect_type, effect_class in self.effects._cls.registry().items():
+                    if hasattr(effect_class, 'NAME') and effect_class.NAME == effect_name:
+                        # Get effect category
+                        category = getattr(effect_class, 'CATEGORY', "Khác")
+
+                        # Add effect to category
+                        if category not in categories:
+                            categories[category] = []
+
+                        categories[category].append(item)
+                        break
+                else:
+                    # If effect not found in registry, add to "Other" category
+                    if "Khác" not in categories:
+                        categories["Khác"] = []
+                    categories["Khác"].append(item)
+
+            # Category translations
+            category_translations = {
+                "1. Hiệu ứng màu": "⚬ Hiệu ứng màu | Color Effects",
+                "2. Hiệu ứng nháy theo nhạc": "⚬ Nháy nhạc | Music Effects",
+            }
+
+            # Sort categories
+            sorted_categories = sorted(categories.keys())
+
+            # Create category submenus
+            new_effects_items = []
+            for category in sorted_categories:
+                # Sort effects in category
+                category_items = sorted(categories[category], key=lambda item: item.text)
+
+                # Mark current effect
+                current_effect = self.get_current_effect()
+                if current_effect:
+                    for i, item in enumerate(category_items):
+                        for effect_type, effect_class in self.effects._cls.registry().items():
+                            if (hasattr(effect_class, 'NAME') and
+                                effect_class.NAME == item.text and
+                                effect_type == current_effect):
+                                # Mark current effect
+                                if hasattr(item, '_action'):
+                                    category_items[i] = MenuItem(f"✓ {item.text}", item._action)
+                                break
+
+                # Create category submenu
+                category_menu = Menu(*category_items)
+
+                # Get display category name
+                display_category = category_translations.get(category, category)
+
+                # Add current effect name to category if it belongs to this category
+                if current_effect:
+                    for effect_type, effect_class in self.effects._cls.registry().items():
+                        if (effect_type == current_effect and
+                            hasattr(effect_class, 'CATEGORY') and
+                            effect_class.CATEGORY == category):
+                            # Add current effect name to category
+                            effect_name = getattr(effect_class, 'NAME', effect_type)
+                            display_category = f"{display_category} :   {effect_name}"
+                            break
+
+                new_effects_items.append(MenuItem(display_category, category_menu))
+
+            return new_effects_items
+
+        except Exception as e:
+            _LOGGER.error(f"Error generating effects menu: {e}")
+            return []
+
+    def generate_device_menu_items(self):
+        """
+        Generate the device menu items with checkmarks for the selected device.
+
+        Returns:
+            list: List of device menu items
+        """
+        devices = self._get_all_devices()
+        device_items = []
+
+        # Create "All" option
+        is_all_selected = not self.get_selected_device()
+        device_items.append(MenuItem(
+            f"   {'✓ ' if is_all_selected else '    '}⛬ All",
+            self.select_all_devices
+        ))
+
+        # Create device options
+        for device in sorted(devices, key=lambda d: d.name if hasattr(d, 'name') else d.id):
+            device_id = device.id
+            is_selected = self.get_selected_device() == device_id
+            device_name = device.name if hasattr(device, 'name') else device_id
+
+            # Create device selector function
+            def make_device_selector(dev_id):
+                def select_device():
+                    self._selected_device = dev_id
+                    self.config["selected_device"] = dev_id
+                    from wls.config import save_config
+                    save_config(self.config, self.config_dir)
+
+                    # Update LED state based on selected device
+                    if "device_states" in self.config and str(dev_id) in self.config["device_states"]:
+                        self.led_active = self.config["device_states"][str(dev_id)]
+
+                    self.setup_icon_menu()
+                return select_device
+
+            device_items.append(MenuItem(
+                f"   {'✓ ' if is_selected else '    '} ⚬ {device_name}",
+                make_device_selector(device_id)
+            ))
+
+        return device_items
+
+    def select_all_devices(self):
+        """
+        Select all devices and synchronize their state.
+        """
+        # Clear selected device
+        if hasattr(self, '_selected_device'):
+            delattr(self, '_selected_device')
+        if "selected_device" in self.config:
+            del self.config["selected_device"]
+
+        # Get first device to sync state
+        first_device = self._get_first_device()
+        if first_device:
+            first_device_id = str(first_device.id)
+
+            # 1. Sync on/off state
+            first_device_state = True
+            if "device_states" in self.config and first_device_id in self.config["device_states"]:
+                first_device_state = self.config["device_states"][first_device_id]
+
+            # Apply first device state to all devices
+            if "device_states" not in self.config:
+                self.config["device_states"] = {}
+
+            for device in self._get_all_devices():
+                self.config["device_states"][str(device.id)] = first_device_state
+
+            # 2. Sync brightness
+            first_device_brightness = 1.0
+            first_device_virtual = self._find_virtual_for_device(first_device.id)
+
+            if first_device_virtual:
+                for virtual_config in self.config.get("virtuals", []):
+                    if virtual_config["id"] == first_device_virtual:
+                        if "config" in virtual_config and "max_brightness" in virtual_config["config"]:
+                            first_device_brightness = virtual_config["config"]["max_brightness"]
+                            break
+
+            # Apply brightness to all devices
+            for virtual_id, virtual in self.virtuals._virtuals.items():
+                # Update brightness in config
+                for i, virtual_config in enumerate(self.config.get("virtuals", [])):
+                    if virtual_config["id"] == virtual_id:
+                        if "config" not in virtual_config:
+                            virtual_config["config"] = {}
+                        virtual_config["config"]["max_brightness"] = first_device_brightness
+                        self.config["virtuals"][i] = virtual_config
+
+                        # Apply brightness to virtual
+                        if hasattr(virtual, 'set_brightness'):
+                            virtual.set_brightness(first_device_brightness)
+
+            # 3. Sync effect or turn off all lights
+            if first_device_state:  # If first device is on
+                first_device_effect = None
+
+                # Find effect of first device
+                if first_device_virtual:
+                    for virtual_config in self.config.get("virtuals", []):
+                        if virtual_config["id"] == first_device_virtual and "effect" in virtual_config:
+                            first_device_effect = virtual_config["effect"]["type"]
+                            break
+
+                # Apply effect to all devices
+                if first_device_effect:
+                    for virtual in self.virtuals.values():
+                        try:
+                            effect = self.effects.create(
+                                type=first_device_effect,
+                                wls=self,
+                                config={}
+                            )
+                            virtual.set_effect(effect)
+
+                            # Update config
+                            from wls.virtuals import update_effect_config
+                            update_effect_config(self.config, virtual.id, effect)
+                        except Exception as e:
+                            _LOGGER.error(f"Error applying effect {first_device_effect} to virtual {virtual.id}: {e}")
+            else:  # If first device is off
+                # Turn off all lights by clearing effects
+                for virtual in self.virtuals._virtuals.values():
+                    virtual.clear_effect()
+
+                # Update config to remove effects
+                from wls.config import remove_virtuals_active_effects
+                remove_virtuals_active_effects(self.config)
+        else:
+            # If no devices, update LED state based on all devices
+            if "device_states" in self.config:
+                self.led_active = any(self.config["device_states"].values())
+
+        # Save config
+        from wls.config import save_config
+        save_config(self.config, self.config_dir)
+
+        # Update menu
+        self.setup_icon_menu()
+
+    def get_led_devices_menu_title(self, led_devices_items=None):
+        """
+        Get the title for the LED devices menu section.
+
+        Returns:
+            str: The menu title
+        """
+        return "Đèn cần chỉnh | LED Devices"
+
     def setup_icon_menu(self, toggle_text=None):
         """
         Setup the icon menu with the appropriate text based on current state.
@@ -746,222 +1548,86 @@ class WlsCore:
             toggle_text: Optional text override for the toggle menu item.
                         If None, it will be determined based on current state.
         """
-        # Thêm khóa để bảo vệ việc cập nhật menu
+        # Check if required components are initialized
+        if not hasattr(self, 'virtuals') or not hasattr(self, 'devices'):
+            # If not fully initialized, show simple menu
+            if self.icon:
+                self.icon.menu = Menu(
+                    MenuItem("Đang khởi động...", lambda: None)
+                )
+            return
+
+        # Add lock to protect menu updates
         if not hasattr(self, '_menu_lock'):
             self._menu_lock = threading.Lock()
 
-        # Thử lấy khóa với timeout để tránh deadlock
+        # Try to acquire lock with timeout to avoid deadlock
         if not self._menu_lock.acquire(timeout=2.0):
-            _LOGGER.warning("Không thể cập nhật menu - không lấy được khóa sau 2 giây")
+            _LOGGER.warning("Cannot update menu - could not acquire lock after 2 seconds")
             return
 
         try:
+            # Determine toggle text based on current state
             if toggle_text is None:
-                # Determine appropriate text based on current state
                 if self.check_rmlapp_run_key():
-                    toggle_text = "Khởi động máy mở Nháy nhạc | Enable autostart Music effect"
+                    toggle_text = "Nháy nhạc khi khởi động máy | Enable autostart Music effect"
                 else:
-                    toggle_text = "Khởi động máy mở Theo màu màn | Enable autostart Screen capture"
+                    toggle_text = "Mở rộng màn khi khởi động máy | Enable autostart Screen capture"
 
-            led_toggle_text = "Tắt đèn | Suspend" if self.led_active else "Bật đèn | Resume"
-            # Log trạng thái LED hiện tại
-            _LOGGER.debug(f"Trạng thái LED hiện tại: {'Bật' if self.led_active else 'Tắt'}")
+            # Determine LED state based on selected device
+            device_active = self.is_device_active()
 
-            # Create submenu for advanced options
+            # Update led_active variable
+            self.led_active = device_active
+
+            # Set LED toggle text
+            led_toggle_text = "Tắt đèn | Suspend" if device_active else "Bật đèn | Resume"
+
+            # Log current LED state
+            _LOGGER.debug(f"Current LED state: {'On' if device_active else 'Off'}")
+
+            # Create advanced submenu (static)
             advanced_submenu = Menu(
                 MenuItem("Khởi động lại | Restart", self.restart_wls),
                 MenuItem("Khôi phục mặc định | Restore default", self.restore),
             )
 
-            # Create submenu for brightness
-            current_brightness = int(self.config.get("global_brightness", 1.0) * 100)
+            # Create brightness submenu
+            brightness_submenu = self.generate_brightness_submenu()
+            current_brightness = self.get_current_brightness()
 
-            # Tạo danh sách các mục độ sáng với dấu tích cho mục được chọn
-            brightness_items = []
-            for brightness in [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
-                brightness_text = f"{brightness}%"
-                if brightness == current_brightness:
-                    brightness_text = f"✓ {brightness_text}"
-                # Tạo một hàm closure để giữ giá trị brightness
-                def make_brightness_handler(value):
-                    return lambda: self.set_global_brightness(value/100)
+            # Create device menu items
+            device_items = self.generate_device_menu_items()
 
-                brightness_items.append(
-                    MenuItem(brightness_text, make_brightness_handler(brightness))
-                )
+            # Create effects submenu
+            effects_items = self.generate_effects_submenu()
 
-            brightness_submenu = Menu(*brightness_items)
-
-            # Create submenu for effects
-            effects_items = []
-
-            # Kiểm tra xem self.effects đã tồn tại chưa
-            if not hasattr(self, 'effects') or self.effects is None:
-                _LOGGER.debug("self.effects chưa được khởi tạo, bỏ qua menu hiệu ứng")
-                effect_types = []
-            else:
-                try:
-                    # Get all available effects
-                    _LOGGER.debug("Đang tải danh sách hiệu ứng...")
-                    try:
-                        effect_types = self.effects.types()
-                        _LOGGER.debug(f"Đã tìm thấy {len(effect_types)} hiệu ứng")
-                    except Exception as e:
-                        _LOGGER.error(f"Lỗi khi gọi self.effects.types(): {e}")
-                        # Thử cách khác
-                        _LOGGER.debug("Thử lấy danh sách hiệu ứng từ registry")
-                        try:
-                            effect_types = list(self.effects._cls.registry().keys())
-                            _LOGGER.debug(f"Đã tìm thấy {len(effect_types)} hiệu ứng từ registry")
-                        except Exception as e2:
-                            _LOGGER.error(f"Lỗi khi lấy registry: {e2}")
-                            # Không sử dụng danh sách cố định nữa
-                            _LOGGER.debug("Không thể lấy danh sách hiệu ứng")
-                            effect_types = []
-                except Exception as e:
-                    _LOGGER.error(f"Lỗi khi tạo menu hiệu ứng: {e}")
-                    effect_types = []
-
-                for effect_type in effect_types:
-                    # Skip abstract base classes and internal effects
-                    if effect_type.startswith('_') or effect_type == 'Effect':
-                        continue
-
-                    # Add effect to menu
-                    _LOGGER.debug(f"Thêm hiệu ứng {effect_type} vào menu")
-
-                    # Lấy tên hiệu ứng thân thiện từ thuộc tính NAME của lớp hiệu ứng
-                    try:
-                        # Lấy lớp hiệu ứng từ registry
-                        effect_class = self.effects._cls.registry().get(effect_type)
-                        # Lấy tên hiệu ứng từ thuộc tính NAME
-                        if effect_class and hasattr(effect_class, 'NAME'):
-                            display_name = effect_class.NAME
-                            _LOGGER.debug(f"Tên hiển thị cho {effect_type}: {display_name}")
-                        else:
-                            display_name = effect_type
-                            _LOGGER.debug(f"Không tìm thấy tên hiển thị cho {effect_type}, sử dụng tên mặc định")
-                    except Exception as e:
-                        _LOGGER.error(f"Lỗi khi lấy tên hiển thị cho {effect_type}: {e}")
-                        display_name = effect_type
-
-                    # Sử dụng một hàm đơn giản với tham số cố định
-                    # Tạo một bản sao của effect_type để sử dụng trong hàm
-                    current_effect = effect_type
-
-                    def make_handler(effect_name):
-                        def handler(*args, **kwargs):
-                            _LOGGER.debug(f"Menu handler gọi apply_effect_to_all('{effect_name}')")
-                            self.apply_effect_to_all(effect_name)
-                        return handler
-
-                    effects_items.append(
-                        MenuItem(display_name, make_handler(current_effect))
-                    )
-
-                # Nhóm các hiệu ứng theo danh mục
-                _LOGGER.debug("Bắt đầu nhóm hiệu ứng theo danh mục")
-
-                # Dictionary để lưu trữ các hiệu ứng theo danh mục
-                categories = {}
-
-                # Sắp xếp lại danh sách effects_items
-                new_effects_items = []
-
-                # Duyệt qua tất cả các hiệu ứng đã tạo
-                for item in effects_items:
-                    effect_name = item.text
-                    # Tìm hiệu ứng trong registry
-                    for effect_type, effect_class in self.effects._cls.registry().items():
-                        # Kiểm tra xem hiệu ứng có thuộc tính NAME khớp với tên hiển thị không
-                        if hasattr(effect_class, 'NAME') and effect_class.NAME == effect_name:
-                            # Lấy danh mục của hiệu ứng
-                            category = "Khác"
-                            if hasattr(effect_class, 'CATEGORY'):
-                                category = effect_class.CATEGORY
-
-                            # Thêm hiệu ứng vào danh mục tương ứng
-                            if category not in categories:
-                                categories[category] = []
-
-                            categories[category].append(item)
-                            break
-                    else:
-                        # Nếu không tìm thấy hiệu ứng trong registry, thêm vào danh mục "Khác"
-                        if "Khác" not in categories:
-                            categories["Khác"] = []
-                        categories["Khác"].append(item)
-
-                # Bản dịch tiếng Anh cho các danh mục
-                category_translations = {
-                    "1. Hiệu ứng màu": "1. Hiệu ứng màu | Color Effects",
-                    "2. Hiệu ứng nháy theo nhạc": "2. Nháy nhạc | Music Effects",
-                }
-
-                # Sắp xếp các danh mục theo tên
-                sorted_categories = sorted(categories.keys())
-
-                # Tạo menu con cho từng danh mục
-                for category in sorted_categories:
-                    # Sắp xếp các hiệu ứng trong danh mục theo tên
-                    category_items = sorted(categories[category], key=lambda item: item.text)
-
-                    # Thêm thông tin hiệu ứng đang chọn
-                    if hasattr(self, 'current_effect') and self.current_effect:
-                        for i, item in enumerate(category_items):
-                            # Kiểm tra xem hiệu ứng này có phải là hiệu ứng đang chọn không
-                            for effect_type, effect_class in self.effects._cls.registry().items():
-                                if (hasattr(effect_class, 'NAME') and
-                                    effect_class.NAME == item.text and
-                                    effect_type == self.current_effect):
-                                    # Đánh dấu hiệu ứng đang chọn
-                                    # Sử dụng _action thay vì action
-                                    if hasattr(item, '_action'):
-                                        category_items[i] = MenuItem(f"✓ {item.text}", item._action)
-                                    break
-
-                    # Tạo menu con cho danh mục
-                    category_menu = Menu(*category_items)
-
-                    # Thêm menu con vào danh sách hiệu ứng với tên đã dịch
-                    display_category = category_translations.get(category, category)
-
-                    # Kiểm tra xem có hiệu ứng nào trong danh mục này đang được chọn không
-                    if hasattr(self, 'current_effect') and self.current_effect:
-                        for effect_type, effect_class in self.effects._cls.registry().items():
-                            if (effect_type == self.current_effect and
-                                hasattr(effect_class, 'CATEGORY') and
-                                effect_class.CATEGORY == category):
-                                # Thêm tên hiệu ứng đang chọn vào tên danh mục
-                                if hasattr(effect_class, 'NAME'):
-                                    display_category = f"{display_category} :   {effect_class.NAME}"
-                                else:
-                                    display_category = f"{display_category} :   {effect_type}"
-                                break
-
-                    new_effects_items.append(MenuItem(display_category, category_menu))
-
-                # Thay thế danh sách hiệu ứng cũ bằng danh sách mới đã nhóm
-                effects_items = new_effects_items
-
-                _LOGGER.debug(f"Đã tạo menu với {len(effects_items)} danh mục hiệu ứng")
-
-            # Tạo danh sách các mục cho menu chính
+            # Create main menu
             main_menu_items = [
                 MenuItem(lambda text: toggle_text, self.toggle_startup_mode),
+                Menu.SEPARATOR,
+                # Display "LED Devices" title
+                MenuItem(self.get_led_devices_menu_title(), None),
+            ]
+
+            # Add device items to main menu
+            main_menu_items.extend(device_items)
+
+            # Add next items
+            main_menu_items.extend([
                 Menu.SEPARATOR,
                 MenuItem(lambda text: led_toggle_text, self.toggle_led_state),
                 MenuItem(f"Độ sáng | Brightness :   {current_brightness}%", brightness_submenu),
                 Menu.SEPARATOR
-            ]
+            ])
 
-            # Thêm các danh mục hiệu ứng vào menu chính
+            # Add effect categories to main menu
             for effect_category_item in effects_items:
                 main_menu_items.append(effect_category_item)
 
-            # Thêm các mục còn lại
+            # Add remaining items
             main_menu_items.extend([
-                MenuItem("3. Theo màu màn hình | Screen capture", self.stop_aw),
+                MenuItem("⚬ Mở rộng màn | Screen capture", self.stop_aw),
                 Menu.SEPARATOR,
                 MenuItem("Cài đặt | Setting", self.open_ui, default=True),
                 MenuItem("Nâng cao | Advanced", advanced_submenu),
@@ -976,10 +1642,10 @@ class WlsCore:
                 MenuItem("Thoát | Quit", lambda: self.stop(0)),
             ])
 
-            # Tạo menu chính
+            # Create main menu
             self.icon.menu = Menu(*main_menu_items)
         finally:
-            # Đảm bảo luôn giải phóng khóa
+            # Always release lock
             self._menu_lock.release()
 
     # Compatibility methods for backward compatibility
@@ -1042,7 +1708,9 @@ class WlsCore:
             _LOGGER.debug("Nhận sự kiện EffectClearedEvent - cập nhật menu sang trạng thái 'Tắt đèn'")
             # Cập nhật trạng thái LED
             self.led_active = False
-            self.setup_icon_menu()
+            # Kiểm tra xem self.icon có tồn tại không trước khi gọi setup_icon_menu
+            if self.icon:
+                self.setup_icon_menu()
 
         self.events.add_listener(
             handle_effect_cleared,
@@ -1053,9 +1721,12 @@ class WlsCore:
         def handle_effect_set(event):
             _LOGGER.debug(f"Nhận sự kiện EffectSetEvent - cập nhật menu sang trạng thái 'Bật đèn' với hiệu ứng {event.effect_id}")
             try:
-                self.current_effect = self.config["current_effect"]
+                # Sử dụng hiệu ứng từ sự kiện thay vì từ cấu hình
+                self.current_effect = event.effect_id
                 self.led_active = True
-                self.setup_icon_menu()
+                # Kiểm tra xem self.icon có tồn tại không trước khi gọi setup_icon_menu
+                if self.icon:
+                    self.setup_icon_menu()
             except Exception as e:
                 _LOGGER.error(f"Lỗi khi xử lý sự kiện EffectSetEvent: {e}")
 
@@ -1121,39 +1792,126 @@ class WlsCore:
         self.integrations = Integrations(self)
         self.scenes = Scenes(self)
 
-        # Áp dụng hiệu ứng đã lưu (nếu có và nếu LED đang bật)
-        if self.led_active and hasattr(self, 'current_effect') and self.current_effect:
-            try:
-                _LOGGER.debug(f"Áp dụng hiệu ứng đã lưu: {self.current_effect}")
+        # Khôi phục trạng thái bật/tắt của từng đèn từ cấu hình
+        if "device_states" in self.config:
+            _LOGGER.debug("Khôi phục trạng thái bật/tắt của từng đèn từ cấu hình")
+            device_states = self.config["device_states"]
 
-                # Kiểm tra xem có thông tin chi tiết về hiệu ứng trong cấu hình không
-                has_effect_details = False
-                for virtual_cfg in self.config["virtuals"]:
-                    if "effect" in virtual_cfg and virtual_cfg["effect"].get("type") == self.current_effect:
-                        has_effect_details = True
+            # Nếu có thiết bị cụ thể được chọn, chỉ áp dụng cho thiết bị đó
+            if hasattr(self, '_selected_device'):
+                device_id = self._selected_device
+
+                # Kiểm tra xem thiết bị có tồn tại không
+                device_exists = False
+                for virtual_id, virtual in self.virtuals._virtuals.items():
+                    if hasattr(virtual, 'is_device') and virtual.is_device == device_id:
+                        device_exists = True
                         break
 
-                if has_effect_details:
-                    _LOGGER.debug("Sử dụng thông tin chi tiết về hiệu ứng từ cấu hình")
-                    # Khôi phục hiệu ứng từ cấu hình cho từng thiết bị ảo
-                    for virtual_id, virtual in self.virtuals._virtuals.items():
-                        virtual_cfg = next((v for v in self.config["virtuals"] if v["id"] == virtual_id), None)
-                        if virtual_cfg and "effect" in virtual_cfg:
-                            effect_type = virtual_cfg["effect"]["type"]
-                            effect_config = virtual_cfg["effect"]["config"]
-                            try:
-                                effect = self.effects.create(
-                                    type=effect_type,
-                                    wls=self,
-                                    config=effect_config
-                                )
-                                virtual.set_effect(effect)
-                                _LOGGER.debug(f"Đã khôi phục hiệu ứng {effect_type} cho thiết bị ảo {virtual_id}")
-                            except Exception as e:
-                                _LOGGER.error(f"Lỗi khi khôi phục hiệu ứng cho thiết bị ảo {virtual_id}: {e}")
+                if not device_exists:
+                    _LOGGER.debug(f"Thiết bị {device_id} không tồn tại hoặc chưa được khởi tạo, bỏ qua")
+                    # Xóa thiết bị đã chọn vì nó không tồn tại
+                    delattr(self, '_selected_device')
                 else:
-                    _LOGGER.debug("Không tìm thấy thông tin chi tiết về hiệu ứng, áp dụng hiệu ứng mặc định")
-                    self.apply_effect_to_all(self.current_effect)
+                    device_state = device_states.get(str(device_id), True)  # Mặc định là bật
+
+                    if not device_state:
+                        _LOGGER.debug(f"Thiết bị {device_id} đang ở trạng thái tắt, không áp dụng hiệu ứng")
+                        # Tắt đèn cho thiết bị này
+                        for virtual_id, virtual in self.virtuals._virtuals.items():
+                            if virtual.is_device == device_id:
+                                virtual.clear_effect()
+                                _LOGGER.debug(f"Đã xóa hiệu ứng cho thiết bị ảo {virtual_id} liên kết với thiết bị {device_id}")
+            else:
+                # Áp dụng trạng thái cho tất cả thiết bị
+                for device_id, device_state in device_states.items():
+                    if not device_state:  # Nếu thiết bị đang ở trạng thái tắt
+                        _LOGGER.debug(f"Thiết bị {device_id} đang ở trạng thái tắt, không áp dụng hiệu ứng")
+                        # Tắt đèn cho thiết bị này
+                        for virtual_id, virtual in self.virtuals._virtuals.items():
+                            if hasattr(virtual, 'is_device') and virtual.is_device == int(device_id):
+                                virtual.clear_effect()
+                                _LOGGER.debug(f"Đã xóa hiệu ứng cho thiết bị ảo {virtual_id} liên kết với thiết bị {device_id}")
+
+        # Áp dụng hiệu ứng đã lưu (nếu có và nếu LED đang bật)
+        if self.led_active:
+            try:
+                # Kiểm tra xem có hiệu ứng đã lưu cho từng thiết bị không
+                if "device_effects" in self.config and self.config["device_effects"]:
+                    _LOGGER.debug("Khôi phục hiệu ứng cho từng thiết bị từ cấu hình")
+
+                    # Nếu có thiết bị cụ thể được chọn, chỉ áp dụng cho thiết bị đó
+                    if hasattr(self, '_selected_device'):
+                        device_id = self._selected_device
+                        device_effect = self.config["device_effects"].get(str(device_id))
+
+                        # Kiểm tra xem thiết bị có đang bật không
+                        if "device_states" not in self.config or self.config["device_states"].get(str(device_id), True):
+                            if device_effect:
+                                _LOGGER.debug(f"Áp dụng hiệu ứng đã lưu {device_effect} cho thiết bị {device_id}")
+                                self.apply_effect_to_device(device_effect, device_id)
+                            elif hasattr(self, 'current_effect') and self.current_effect:
+                                _LOGGER.debug(f"Áp dụng hiệu ứng mặc định {self.current_effect} cho thiết bị {device_id}")
+                                self.apply_effect_to_device(self.current_effect, device_id)
+                    else:
+                        # Áp dụng hiệu ứng cho từng thiết bị dựa trên cấu hình đã lưu
+                        for device_id, effect_type in self.config["device_effects"].items():
+                            # Kiểm tra xem thiết bị có đang bật không
+                            if "device_states" not in self.config or self.config["device_states"].get(str(device_id), True):
+                                _LOGGER.debug(f"Áp dụng hiệu ứng đã lưu {effect_type} cho thiết bị {device_id}")
+                                self.apply_effect_to_device(effect_type, device_id)
+
+                # Nếu không có hiệu ứng đã lưu cho từng thiết bị, sử dụng hiệu ứng chung
+                elif hasattr(self, 'current_effect') and self.current_effect:
+                    _LOGGER.debug(f"Áp dụng hiệu ứng đã lưu chung: {self.current_effect}")
+
+                    # Kiểm tra xem có thông tin chi tiết về hiệu ứng trong cấu hình không
+                    has_effect_details = False
+                    for virtual_cfg in self.config["virtuals"]:
+                        if "effect" in virtual_cfg and virtual_cfg["effect"].get("type") == self.current_effect:
+                            has_effect_details = True
+                            break
+
+                    if has_effect_details:
+                        _LOGGER.debug("Sử dụng thông tin chi tiết về hiệu ứng từ cấu hình")
+                        # Khôi phục hiệu ứng từ cấu hình cho từng thiết bị ảo
+                        for virtual_id, virtual in self.virtuals._virtuals.items():
+                            # Kiểm tra xem thiết bị này có đang ở trạng thái tắt không
+                            if hasattr(virtual, 'is_device') and virtual.is_device is not None:
+                                device_id = virtual.is_device
+                                if "device_states" in self.config and str(device_id) in self.config["device_states"]:
+                                    if not self.config["device_states"][str(device_id)]:
+                                        _LOGGER.debug(f"Bỏ qua thiết bị {device_id} vì đang ở trạng thái tắt")
+                                        continue
+
+                            virtual_cfg = next((v for v in self.config["virtuals"] if v["id"] == virtual_id), None)
+                            if virtual_cfg and "effect" in virtual_cfg:
+                                effect_type = virtual_cfg["effect"]["type"]
+                                effect_config = virtual_cfg["effect"]["config"]
+                                try:
+                                    effect = self.effects.create(
+                                        type=effect_type,
+                                        wls=self,
+                                        config=effect_config
+                                    )
+                                    virtual.set_effect(effect)
+                                    _LOGGER.debug(f"Đã khôi phục hiệu ứng {effect_type} cho thiết bị ảo {virtual_id}")
+                                except Exception as e:
+                                    _LOGGER.error(f"Lỗi khi khôi phục hiệu ứng cho thiết bị ảo {virtual_id}: {e}")
+                    else:
+                        _LOGGER.debug("Không tìm thấy thông tin chi tiết về hiệu ứng, áp dụng hiệu ứng mặc định")
+                        # Áp dụng hiệu ứng cho tất cả thiết bị không ở trạng thái tắt
+                        if hasattr(self, '_selected_device'):
+                            device_id = self._selected_device
+                            if "device_states" not in self.config or self.config["device_states"].get(str(device_id), True):
+                                self.apply_effect_to_device(self.current_effect, device_id)
+                        else:
+                            # Áp dụng cho tất cả thiết bị không ở trạng thái tắt
+                            for virtual_id, virtual in self.virtuals._virtuals.items():
+                                if hasattr(virtual, 'is_device') and virtual.is_device is not None:
+                                    device_id = virtual.is_device
+                                    if "device_states" not in self.config or self.config["device_states"].get(str(device_id), True):
+                                        self.apply_effect_to_device(self.current_effect, device_id)
             except Exception as e:
                 _LOGGER.error(f"Lỗi khi áp dụng hiệu ứng đã lưu: {e}")
                 # Nếu có lỗi, đặt lại hiệu ứng hiện tại
@@ -1164,6 +1922,10 @@ class WlsCore:
         # Cập nhật menu sau khi effects đã được khởi tạo
         if self.icon:
             _LOGGER.debug("Cập nhật menu sau khi effects đã được khởi tạo")
+            # Nếu có lựa chọn thiết bị từ cấu hình, khôi phục lại
+            if "selected_device" in self.config:
+                self._selected_device = self.config["selected_device"]
+                _LOGGER.debug(f"Đã khôi phục lựa chọn thiết bị từ cấu hình: {self._selected_device}")
             self.setup_icon_menu()
         self.colors = UserDefaultCollection(
             self,
