@@ -397,10 +397,6 @@ class Virtual:
                 self._wls.config["device_states"][device_id] = False
                 _LOGGER.debug(f"Đã cập nhật trạng thái tắt cho thiết bị {device_id}")
 
-            # Lưu cấu hình
-            from wls.config import save_config
-            save_config(self._wls.config, self._wls.config_dir)
-
             # Phát sự kiện EffectClearedEvent
             self._wls.events.fire_event(EffectClearedEvent())
             self.clear_transition_effect()
