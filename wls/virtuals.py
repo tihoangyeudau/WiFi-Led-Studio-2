@@ -396,9 +396,6 @@ class Virtual:
                 device_id = str(self.is_device)
                 self._wls.config["device_states"][device_id] = False
                 _LOGGER.debug(f"Đã cập nhật trạng thái tắt cho thiết bị {device_id}")
-            else:
-                # Nếu không, sử dụng hàm update_led_state_off để cập nhật tất cả thiết bị
-                update_led_state_off(self._wls.config)
 
             # Lưu cấu hình
             from wls.config import save_config
