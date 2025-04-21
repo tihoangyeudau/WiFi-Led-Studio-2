@@ -1538,7 +1538,7 @@ class WlsCore:
         Returns:
             str: The menu title
         """
-        return "Đèn cần chỉnh | LED Devices :"
+        return "Đèn cần chỉnh | Instance to control :"
 
     def setup_icon_menu(self, toggle_text=None):
         """
