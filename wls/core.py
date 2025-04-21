@@ -1400,7 +1400,7 @@ class WlsCore:
         # Create "All" option
         is_all_selected = not self.get_selected_device()
         device_items.append(MenuItem(
-            f"   {'✓ ' if is_all_selected else '    '}⛬ All",
+            f"   {'✓ ' if is_all_selected else '    '}⛬ Tất cả | All",
             self.select_all_devices
         ))
 
@@ -1538,7 +1538,7 @@ class WlsCore:
         Returns:
             str: The menu title
         """
-        return "Đèn cần chỉnh | LED Devices"
+        return "Đèn cần chỉnh | LED Devices :"
 
     def setup_icon_menu(self, toggle_text=None):
         """
