@@ -1706,9 +1706,6 @@ class WlsCore:
         # Thêm listener cho sự kiện EffectClearedEvent
         def handle_effect_cleared(event):
             _LOGGER.debug("Nhận sự kiện EffectClearedEvent - cập nhật menu sang trạng thái 'Tắt đèn'")
-            # Cập nhật trạng thái LED
-            self.led_active = False
-            # Kiểm tra xem self.icon có tồn tại không trước khi gọi setup_icon_menu
             if self.icon:
                 self.setup_icon_menu()
 
@@ -1720,15 +1717,8 @@ class WlsCore:
         # Thêm listener cho sự kiện EffectSetEvent
         def handle_effect_set(event):
             _LOGGER.debug(f"Nhận sự kiện EffectSetEvent - cập nhật menu sang trạng thái 'Bật đèn' với hiệu ứng {event.effect_id}")
-            try:
-                # Sử dụng hiệu ứng từ sự kiện thay vì từ cấu hình
-                self.current_effect = event.effect_id
-                self.led_active = True
-                # Kiểm tra xem self.icon có tồn tại không trước khi gọi setup_icon_menu
-                if self.icon:
-                    self.setup_icon_menu()
-            except Exception as e:
-                _LOGGER.error(f"Lỗi khi xử lý sự kiện EffectSetEvent: {e}")
+            if self.icon:
+                self.setup_icon_menu()
 
         self.events.add_listener(
             handle_effect_set,

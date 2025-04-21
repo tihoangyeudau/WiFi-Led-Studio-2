@@ -333,6 +333,21 @@ class Virtual:
 
             self._active_effect = effect
             self._active_effect.activate(self)
+
+            # Cập nhật device_states trong config
+            if "device_states" not in self._wls.config:
+                self._wls.config["device_states"] = {}
+
+            if "device_effects" not in self._wls.config:
+                self._wls.config["device_effects"] = {}
+
+            # Nếu virtual này đại diện cho một thiết bị thực, cập nhật trạng thái và hiệu ứng của thiết bị đó
+            if hasattr(self, 'is_device') and self.is_device is not None:
+                device_id = str(self.is_device)
+                self._wls.config["device_states"][device_id] = True
+                self._wls.config["device_effects"][device_id] = effect.type
+                _LOGGER.debug(f"Đã cập nhật trạng thái bật và hiệu ứng {effect.type} cho thiết bị {device_id}")
+
             self._wls.events.fire_event(
                 EffectSetEvent(
                     self._active_effect.name,
@@ -372,8 +387,19 @@ class Virtual:
             return
 
         try:
-            # Cập nhật trạng thái LED trong cấu hình
-            update_led_state_off(self._wls.config)
+            # Cập nhật trạng thái device_states trong config cho thiết bị cụ thể
+            if "device_states" not in self._wls.config:
+                self._wls.config["device_states"] = {}
+
+            # Nếu virtual này đại diện cho một thiết bị thực, cập nhật trạng thái của thiết bị đó
+            if hasattr(self, 'is_device') and self.is_device is not None:
+                device_id = str(self.is_device)
+                self._wls.config["device_states"][device_id] = False
+                _LOGGER.debug(f"Đã cập nhật trạng thái tắt cho thiết bị {device_id}")
+            else:
+                # Nếu không, sử dụng hàm update_led_state_off để cập nhật tất cả thiết bị
+                update_led_state_off(self._wls.config)
+
             # Lưu cấu hình
             from wls.config import save_config
             save_config(self._wls.config, self._wls.config_dir)
@@ -1041,19 +1067,6 @@ class Virtuals:
                     f"Deactivating device {device.id} as it is not in use by any active virtuals"
                 )
                 device.deactivate()
-
-def update_led_state_off(config):
-    """
-    Update the LED state to off in the configuration.
-
-    Args:
-        config (dict): The current config structure
-
-    Returns:
-        None
-    """
-    config["led_active"] = False
-    # Không xóa current_effect để có thể khôi phục khi bật lại
 
 def update_effect_config(config, virtual_id, effect):
     """
