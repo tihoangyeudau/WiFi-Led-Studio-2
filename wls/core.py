@@ -1469,8 +1469,12 @@ class WlsCore:
             is_selected = selected_device == device_id
             device_name = device.name if hasattr(device, 'name') else device_id
 
+            # Add active/inactive indicator to device name
+            is_active = self.is_device_active(device.id)
+            status_icon = "◉" if is_active else "○"
+
             device_items.append(MenuItem(
-                f"   {'✓ ' if is_selected else '    '} ⚬ {device_name}",
+                f"   {'✓ ' if is_selected else '    '}{status_icon} {device_name}",
                 make_device_selector(device_id)
             ))
 
