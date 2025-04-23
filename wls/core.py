@@ -1295,6 +1295,7 @@ class WlsCore:
     def generate_effects_submenu(self):
         """
         Generate the effects submenu grouped by category with checkmarks for the current effect.
+        Optimized version to reduce processing time with many devices.
 
         Returns:
             list: List of effect category menu items
@@ -1304,31 +1305,54 @@ class WlsCore:
             return []
 
         try:
-            # Get all available effects
-            try:
-                effect_types = self.effects.types()
-            except Exception as e:
-                _LOGGER.error(f"Error calling self.effects.types(): {e}")
+            # Use cached registry if available to avoid repeated lookups
+            if not hasattr(self, '_effects_registry_cache'):
                 try:
-                    effect_types = list(self.effects._cls.registry().keys())
-                except Exception as e2:
-                    _LOGGER.error(f"Error getting registry: {e2}")
-                    return []
+                    self._effects_registry_cache = self.effects._cls.registry()
+                    self._effects_types_cache = self.effects.types()
+                except Exception as e:
+                    _LOGGER.error(f"Error initializing effects cache: {e}")
+                    try:
+                        self._effects_registry_cache = self.effects._cls.registry()
+                        self._effects_types_cache = list(self._effects_registry_cache.keys())
+                    except Exception as e2:
+                        _LOGGER.error(f"Error getting registry: {e2}")
+                        return []
 
-            # Create effect items
-            effects_items = []
-            for effect_type in effect_types:
+            # Get current effect once
+            current_effect = self.get_current_effect()
+
+            # Pre-process effect classes to avoid repeated lookups
+            effect_info = {}
+            categories = {}
+
+            # First pass: collect all effect information
+            for effect_type in self._effects_types_cache:
                 # Skip abstract base classes and internal effects
                 if effect_type.startswith('_') or effect_type == 'Effect':
                     continue
 
-                # Get friendly effect name
-                try:
-                    effect_class = self.effects._cls.registry().get(effect_type)
-                    display_name = effect_class.NAME if effect_class and hasattr(effect_class, 'NAME') else effect_type
-                except Exception:
-                    display_name = effect_type
+                effect_class = self._effects_registry_cache.get(effect_type)
+                if not effect_class:
+                    continue
 
+                # Get effect name and category
+                display_name = getattr(effect_class, 'NAME', effect_type)
+                category = getattr(effect_class, 'CATEGORY', "Khác")
+
+                # Store effect info
+                effect_info[effect_type] = {
+                    'name': display_name,
+                    'category': category,
+                    'is_current': effect_type == current_effect
+                }
+
+                # Initialize category if needed
+                if category not in categories:
+                    categories[category] = []
+
+            # Create menu items with handlers
+            for effect_type, info in effect_info.items():
                 # Create handler for this effect
                 def make_handler(effect_name):
                     def handler():
@@ -1338,29 +1362,13 @@ class WlsCore:
                             self.apply_effect_to_all(effect_name)
                     return handler
 
-                effects_items.append(MenuItem(display_name, make_handler(effect_type)))
+                # Create menu item
+                display_text = info['name']
+                if info['is_current']:
+                    display_text = f"✓ {display_text}"
 
-            # Group effects by category
-            categories = {}
-            for item in effects_items:
-                effect_name = item.text
-                # Find effect in registry
-                for effect_type, effect_class in self.effects._cls.registry().items():
-                    if hasattr(effect_class, 'NAME') and effect_class.NAME == effect_name:
-                        # Get effect category
-                        category = getattr(effect_class, 'CATEGORY', "Khác")
-
-                        # Add effect to category
-                        if category not in categories:
-                            categories[category] = []
-
-                        categories[category].append(item)
-                        break
-                else:
-                    # If effect not found in registry, add to "Other" category
-                    if "Khác" not in categories:
-                        categories["Khác"] = []
-                    categories["Khác"].append(item)
+                menu_item = MenuItem(display_text, make_handler(effect_type))
+                categories[info['category']].append(menu_item)
 
             # Category translations
             category_translations = {
@@ -1374,21 +1382,8 @@ class WlsCore:
             # Create category submenus
             new_effects_items = []
             for category in sorted_categories:
-                # Sort effects in category
-                category_items = sorted(categories[category], key=lambda item: item.text)
-
-                # Mark current effect
-                current_effect = self.get_current_effect()
-                if current_effect:
-                    for i, item in enumerate(category_items):
-                        for effect_type, effect_class in self.effects._cls.registry().items():
-                            if (hasattr(effect_class, 'NAME') and
-                                effect_class.NAME == item.text and
-                                effect_type == current_effect):
-                                # Mark current effect
-                                if hasattr(item, '_action'):
-                                    category_items[i] = MenuItem(f"✓ {item.text}", item._action)
-                                break
+                # Sort effects in category by name
+                category_items = sorted(categories[category], key=lambda item: item.text.replace("✓ ", ""))
 
                 # Create category submenu
                 category_menu = Menu(*category_items)
@@ -1398,14 +1393,9 @@ class WlsCore:
 
                 # Add current effect name to category if it belongs to this category
                 if current_effect:
-                    for effect_type, effect_class in self.effects._cls.registry().items():
-                        if (effect_type == current_effect and
-                            hasattr(effect_class, 'CATEGORY') and
-                            effect_class.CATEGORY == category):
-                            # Add current effect name to category
-                            effect_name = getattr(effect_class, 'NAME', effect_type)
-                            display_category = f"{display_category} :   {effect_name}"
-                            break
+                    current_info = effect_info.get(current_effect)
+                    if current_info and current_info['category'] == category:
+                        display_category = f"{display_category} :   {current_info['name']}"
 
                 new_effects_items.append(MenuItem(display_category, category_menu))
 
@@ -1418,28 +1408,43 @@ class WlsCore:
     def generate_device_menu_items(self):
         """
         Generate the device menu items with checkmarks for the selected device.
+        Optimized version to reduce processing time with many devices.
 
         Returns:
             list: List of device menu items
         """
-        devices = self._get_all_devices()
+        # Initialize cache time if not exists
+        if not hasattr(self, '_devices_cache_time'):
+            self._devices_cache_time = 0
+
+        # Cache device list to avoid repeated calls
+        if not hasattr(self, '_devices_cache') or self._devices_cache_time < time.time() - 5:
+            self._devices_cache = self._get_all_devices()
+            self._devices_cache_time = time.time()
+
+        devices = self._devices_cache
         device_items = []
+        selected_device = self.get_selected_device()
 
         # Create "All" option
-        is_all_selected = not self.get_selected_device()
+        is_all_selected = not selected_device
         device_items.append(MenuItem(
             f"   {'✓ ' if is_all_selected else '    '}⛬ Tất cả | All",
             self.select_all_devices
         ))
 
-        # Create device options
-        for device in sorted(devices, key=lambda d: d.name if hasattr(d, 'name') else d.id):
-            device_id = device.id
-            is_selected = self.get_selected_device() == device_id
-            device_name = device.name if hasattr(device, 'name') else device_id
+        # Create device options - use a more efficient approach
+        # Pre-sort devices to avoid sorting in the loop
+        sorted_devices = sorted(devices, key=lambda d: d.name if hasattr(d, 'name') else d.id)
 
-            # Create device selector function
+        # Create a reusable selector factory
+        def create_device_selector_factory():
+            # This closure captures the current state
+            # and returns a factory function that creates selectors
+            current_selected = selected_device
+
             def make_device_selector(dev_id):
+                # This is the factory that creates a selector for a specific device
                 def select_device():
                     self._selected_device = dev_id
                     self.config["selected_device"] = dev_id
@@ -1452,6 +1457,17 @@ class WlsCore:
 
                     self.setup_icon_menu()
                 return select_device
+
+            return make_device_selector
+
+        # Create the selector factory once
+        make_device_selector = create_device_selector_factory()
+
+        # Create menu items for each device
+        for device in sorted_devices:
+            device_id = device.id
+            is_selected = selected_device == device_id
+            device_name = device.name if hasattr(device, 'name') else device_id
 
             device_items.append(MenuItem(
                 f"   {'✓ ' if is_selected else '    '} ⚬ {device_name}",
@@ -1585,16 +1601,41 @@ class WlsCore:
                 )
             return
 
-        # Add lock to protect menu updates
-        if not hasattr(self, '_menu_lock'):
+        # Initialize throttling mechanism
+        if not hasattr(self, '_last_menu_update'):
+            self._last_menu_update = 0
+            self._menu_update_scheduled = False
             self._menu_lock = threading.Lock()
+            self._menu_update_thread = None
+
+        # Check if an update is already scheduled
+        current_time = time.time()
+        min_update_interval = 0.3  # Minimum time between updates in seconds
+
+        # If an update was recently performed and no update is scheduled, schedule one
+        if (current_time - self._last_menu_update < min_update_interval and
+            not self._menu_update_scheduled):
+            if self._menu_update_thread is None or not self._menu_update_thread.is_alive():
+                self._menu_update_scheduled = True
+                self._menu_update_thread = threading.Thread(
+                    target=self._delayed_menu_update,
+                    args=(toggle_text, min_update_interval - (current_time - self._last_menu_update)),
+                    daemon=True
+                )
+                self._menu_update_thread.start()
+                _LOGGER.debug("Menu update throttled - scheduled for later")
+            return
 
         # Try to acquire lock with timeout to avoid deadlock
-        if not self._menu_lock.acquire(timeout=2.0):
-            _LOGGER.warning("Cannot update menu - could not acquire lock after 2 seconds")
+        if not self._menu_lock.acquire(timeout=1.0):
+            _LOGGER.warning("Cannot update menu - could not acquire lock after 1 second")
             return
 
         try:
+            # Update timestamp
+            self._last_menu_update = time.time()
+            self._menu_update_scheduled = False
+
             # Determine toggle text based on current state
             if toggle_text is None:
                 if self.check_rmlapp_run_key():
@@ -1627,8 +1668,14 @@ class WlsCore:
             # Create device menu items
             device_items = self.generate_device_menu_items()
 
-            # Create effects submenu
-            effects_items = self.generate_effects_submenu()
+            # Create effects submenu - this is the most expensive operation
+            # Only regenerate if necessary (first time or after effect change)
+            if not hasattr(self, '_cached_effects_items') or self._should_regenerate_effects_menu():
+                effects_items = self.generate_effects_submenu()
+                self._cached_effects_items = effects_items
+                self._last_effect_state = self.get_current_effect()
+            else:
+                effects_items = self._cached_effects_items
 
             # Create main menu
             main_menu_items = [
@@ -1675,6 +1722,39 @@ class WlsCore:
         finally:
             # Always release lock
             self._menu_lock.release()
+
+    def _delayed_menu_update(self, toggle_text, delay):
+        """
+        Perform a delayed menu update to avoid rapid consecutive updates.
+
+        Args:
+            toggle_text: Text to use for the toggle menu item
+            delay: Time to wait before updating in seconds
+        """
+        try:
+            time.sleep(delay)
+            self.setup_icon_menu(toggle_text)
+        except Exception as e:
+            _LOGGER.error(f"Error in delayed menu update: {e}")
+        finally:
+            self._menu_update_scheduled = False
+
+    def _should_regenerate_effects_menu(self):
+        """
+        Determine if the effects menu needs to be regenerated.
+
+        Returns:
+            bool: True if the menu should be regenerated, False otherwise
+        """
+        # Check if the current effect has changed
+        current_effect = self.get_current_effect()
+        if not hasattr(self, '_last_effect_state') or self._last_effect_state != current_effect:
+            return True
+
+        # Add other conditions that would require regeneration
+        # For example, if effects have been added or removed
+
+        return False
 
     # Compatibility methods for backward compatibility
     def setup_icon_menu_aw(self):
@@ -1735,6 +1815,9 @@ class WlsCore:
         def handle_effect_cleared(event):
             _LOGGER.debug("Nhận sự kiện EffectClearedEvent - cập nhật menu sang trạng thái 'Tắt đèn'")
             if self.icon:
+                # Invalidate effects cache to force regeneration
+                if hasattr(self, '_cached_effects_items'):
+                    delattr(self, '_cached_effects_items')
                 self.setup_icon_menu()
 
         self.events.add_listener(
@@ -1746,6 +1829,9 @@ class WlsCore:
         def handle_effect_set(event):
             _LOGGER.debug(f"Nhận sự kiện EffectSetEvent - cập nhật menu sang trạng thái 'Bật đèn' với hiệu ứng {event.effect_id}")
             if self.icon:
+                # Invalidate effects cache to force regeneration
+                if hasattr(self, '_cached_effects_items'):
+                    delattr(self, '_cached_effects_items')
                 self.setup_icon_menu()
 
         self.events.add_listener(
