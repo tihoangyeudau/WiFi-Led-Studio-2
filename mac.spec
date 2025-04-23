@@ -105,9 +105,13 @@ app = BUNDLE(coll,
             bundle_identifier = 'com.rml.wls',
             info_plist = {
                 'NSHighResolutionCapable': 'True',
-                'NSMicrophoneUsageDescription': 'Access Microphone',
+                'NSMicrophoneUsageDescription': 'WiFi Led Studio needs microphone access to capture audio for light effects and visualizations',
                 'LSUIElement': 'True',
                 'UIApplicationExitsOnSuspend': 'True',
+                'NSRequiresAquaSystemAppearance': 'False',
+                'NSAppleEventsUsageDescription': 'WiFi Led Studio needs to control system audio settings',
+                'NSCameraUsageDescription': 'WiFi Led Studio does not use the camera',
+                'NSBluetoothAlwaysUsageDescription': 'WiFi Led Studio uses Bluetooth to connect to some LED controllers',
             }
 )
 
