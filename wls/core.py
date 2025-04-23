@@ -11,8 +11,6 @@ if sys.platform == "win32":
     import ctypes
     from ctypes import wintypes
     import winreg
-    import tkinter as tk
-    from tkinter import messagebox
 elif sys.platform == "darwin":
     import shutil
     from AppKit import NSWorkspace, NSObject, NSDistributedNotificationCenter
@@ -562,51 +560,81 @@ class WlsCore:
 
     def restore(self):
         if sys.platform == "win32":
-            # Tạo cửa sổ gốc ẩn
-            root = tk.Tk()
-            root.withdraw()  # Ẩn cửa sổ gốc
+            try:
+                # Sử dụng ctypes để hiển thị hộp thoại MessageBox của Windows
+                # MB_YESNO | MB_ICONWARNING = 0x00000034
+                result = ctypes.windll.user32.MessageBoxW(
+                    0,
+                    "Bạn có chắc chắn muốn khôi phục về mặc định không nếu mọi cài đặt trước đây của bạn sẽ bị xoá?",
+                    "Xác nhận",
+                    0x00000034
+                )
 
-            # Hiển thị hộp thoại xác nhận với biểu tượng cảnh báo và các nút Yes/No
-            result = messagebox.askyesno(
-                title="Xác nhận",
-                message="Bạn có chắc chắn muốn khôi phục về mặc định không nếu mọi cài đặt trước đây của bạn sẽ bị xoá?",
-                icon='warning'
-            )
+                # Nếu người dùng nhấn Yes (IDYES = 6)
+                if result == 6:
+                    path_restore = os.path.join(os.environ["ProgramFiles"], "Rainbow Music Led\\bin", "restore.exe")
 
-            # Nếu người dùng nhấn Yes
-            if result:
-                path_restore = os.path.join(os.environ["ProgramFiles"], "Rainbow Music Led\\bin", "restore.exe")
+                    try:
+                        # Chạy chương trình restore.exe với cửa sổ ẩn
+                        subprocess.Popen(
+                            [path_restore],
+                            shell=True,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            creationflags=subprocess.CREATE_NO_WINDOW  # Chỉ hoạt động trên Windows
+                        )
 
-                try:
-                    # Chạy chương trình restore.exe với cửa sổ ẩn
-                    subprocess.Popen(
-                        [path_restore],
-                        shell=True,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        creationflags=subprocess.CREATE_NO_WINDOW  # Chỉ hoạt động trên Windows
-                    )
+                        self.stop(0)
+                    except Exception as e:
+                        # Hiển thị lỗi bằng MessageBox thay vì messagebox của tkinter
+                        ctypes.windll.user32.MessageBoxW(
+                            0,
+                            f"Không thể chạy chương trình: {e}",
+                            "Lỗi",
+                            0x00000010  # MB_ICONERROR
+                        )
+                        _LOGGER.error(f"Lỗi khi khôi phục mặc định: {e}")
+            except Exception as e:
+                _LOGGER.error(f"Lỗi khi hiển thị hộp thoại xác nhận: {e}")
+        elif sys.platform == "darwin":
+            try:
+                # Sử dụng AppleScript để hiển thị hộp thoại xác nhận trên macOS
+                script = '''
+                tell application "System Events"
+                    display dialog "Bạn có chắc chắn muốn khôi phục về mặc định không nếu mọi cài đặt trước đây của bạn sẽ bị xoá?" buttons {"Không", "Có"} default button "Không" with icon caution with title "Xác nhận"
+                    set the button_pressed to the button returned of the result
+                    if the button_pressed is "Có" then
+                        return "yes"
+                    else
+                        return "no"
+                    end if
+                end tell
+                '''
 
-                    self.stop(0)
-                except Exception as e:
-                    messagebox.showerror("Lỗi", f"Không thể chạy chương trình: {e}")
+                # Chạy AppleScript và lấy kết quả
+                proc = subprocess.Popen(['osascript', '-e', script], stdout=subprocess.PIPE)
+                result = proc.communicate()[0].decode('utf-8').strip()
 
-            root.destroy()
+                # Nếu người dùng nhấn Có
+                if result == "yes":
+                    # Lấy thư mục home của người dùng
+                    home_dir = os.path.expanduser("~")
+                    aw_dest_path = os.path.join(home_dir, ".rmlapp")
+                    wls_dest_path = os.path.join(home_dir, ".wls")
+
+                    # Xóa thư mục .rmlapp nếu nó tồn tại
+                    if os.path.exists(aw_dest_path) and os.path.isdir(aw_dest_path):
+                        shutil.rmtree(aw_dest_path)
+
+                    # Xóa thư mục .wls nếu nó tồn tại
+                    if os.path.exists(wls_dest_path) and os.path.isdir(wls_dest_path):
+                        shutil.rmtree(wls_dest_path)
+
+                    self.stop_aw(0)
+            except Exception as e:
+                _LOGGER.error(f"Lỗi khi khôi phục mặc định trên macOS: {e}")
         else:
-            # Lấy thư mục home của người dùng
-            home_dir = os.path.expanduser("~")
-            aw_dest_path = os.path.join(home_dir, ".rmlapp")
-            wls_dest_path = os.path.join(home_dir, ".wls")
-
-            # Xóa thư mục .rmlapp nếu nó tồn tại
-            if os.path.exists(aw_dest_path) and os.path.isdir(aw_dest_path):
-                shutil.rmtree(aw_dest_path)
-
-            # Xóa thư mục .wls nếu nó tồn tại
-            if os.path.exists(wls_dest_path) and os.path.isdir(wls_dest_path):
-                shutil.rmtree(wls_dest_path)
-
-            self.stop_aw(0)
+            _LOGGER.error(f"Khôi phục mặc định không được hỗ trợ trên nền tảng: {sys.platform}")
 
     def toggle_startup_mode(self):
         """
