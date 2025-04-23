@@ -1434,8 +1434,19 @@ class WlsCore:
         ))
 
         # Create device options - use a more efficient approach
-        # Pre-sort devices to avoid sorting in the loop
-        sorted_devices = sorted(devices, key=lambda d: d.name if hasattr(d, 'name') else d.id)
+        # Pre-sort devices by ID with priority to numeric IDs (0 first), then alphabetical
+        def device_sort_key(d):
+            device_id = d.id
+            # Try to convert ID to integer for numeric sorting
+            try:
+                # If ID is numeric, return tuple with 0 prefix for priority sorting
+                return (0, int(device_id), "")
+            except (ValueError, TypeError):
+                # If ID is not numeric, return tuple with 1 prefix (lower priority)
+                # and use name for alphabetical sorting
+                return (1, 0, d.name if hasattr(d, 'name') else device_id)
+
+        sorted_devices = sorted(devices, key=device_sort_key)
 
         # Create a reusable selector factory
         def create_device_selector_factory():

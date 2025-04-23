@@ -422,7 +422,6 @@ class AvailableCOMPorts:
 
 @BaseRegistry.no_registration
 class SerialDevice(Device):
-
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Required(
@@ -450,6 +449,7 @@ class SerialDevice(Device):
         self.led_id = self._config["led_id"]
         self._reconnect_lock = threading.Lock()  # Thêm lock để đồng bộ hóa
         self._reconnect_scheduled = False  # Cờ để kiểm tra xem đã lên lịch reconnect chưa
+        self.search_enabled = True  # Biến cờ để kiểm soát quá trình tìm kiếm thiết bị
 
     def _get_version_baudrate(self):
         version_mapping = {
@@ -588,6 +588,11 @@ class SerialDevice(Device):
             return False
 
     def serial_check_id_method(self):
+        # Kiểm tra xem quá trình tìm kiếm có được bật không cho thiết bị này
+        if not self.search_enabled:
+            _LOGGER.debug(f"Quá trình tìm kiếm thiết bị đã bị tắt cho thiết bị {self.name if hasattr(self, 'name') else 'unknown'}")
+            return False
+
         # Ưu tiên thử kết nối đến com_port đã lưu trong config trước
         connected = self.try_connect_to_com_port(self.com_port)
         if connected:
@@ -656,6 +661,32 @@ class SerialDevice(Device):
         if response and len(response) == 4 and response.startswith("R"):
             _LOGGER.debug(f"Đã nhận được ID: {response} từ cổng: {self.com_port}")
             check_id = self.led_id
+
+            # Kiểm tra trạng thái thiết bị trong cấu hình
+            device_active = True
+
+            # Tìm thiết bị trong danh sách thiết bị đã tắt
+            if hasattr(self, '_wls') and hasattr(self._wls, 'config') and "device_states" in self._wls.config:
+                # Lấy danh sách thiết bị đã tắt
+                device_states = self._wls.config["device_states"]
+
+                # Kiểm tra tất cả thiết bị đã tắt
+                all_devices_off = True
+                for state in device_states.values():
+                    if state:  # Nếu có ít nhất một thiết bị đang bật
+                        all_devices_off = False
+                        break
+
+                # Nếu tất cả thiết bị đều đã tắt, không cần kiểm tra ID
+                if all_devices_off:
+                    device_active = False
+
+            # Nếu ID không khớp nhưng thiết bị đã tắt, không ghi log cảnh báo
+            if check_id != "_Auto_" and check_id != response and not device_active:
+                # Thiết bị đã tắt, không cần ghi log cảnh báo
+                _LOGGER.debug(f"Thiết bị đã tắt, bỏ qua kiểm tra ID: {response} vs {check_id}")
+                return False
+
             if check_id == "_Auto_" or check_id == response:
                 if check_id == "_Auto_":
                     self.led_id = response

@@ -346,6 +346,13 @@ class Virtual:
                 device_id = str(self.is_device)
                 self._wls.config["device_states"][device_id] = True
                 self._wls.config["device_effects"][device_id] = effect.type
+
+                # Bật lại quá trình tìm kiếm thiết bị khi thiết bị được bật
+                device = self._wls.devices.get_device(self.is_device)
+                if device and hasattr(device, 'search_enabled'):
+                    device.search_enabled = True
+                    _LOGGER.debug(f"Đã bật lại quá trình tìm kiếm thiết bị cho {device.name if hasattr(device, 'name') else device_id}")
+
                 _LOGGER.debug(f"Đã cập nhật trạng thái bật và hiệu ứng {effect.type} cho thiết bị {device_id}")
 
             self._wls.events.fire_event(
@@ -395,6 +402,13 @@ class Virtual:
             if hasattr(self, 'is_device') and self.is_device is not None:
                 device_id = str(self.is_device)
                 self._wls.config["device_states"][device_id] = False
+
+                # Tắt quá trình tìm kiếm thiết bị khi thiết bị bị tắt
+                device = self._wls.devices.get_device(self.is_device)
+                if device and hasattr(device, 'search_enabled'):
+                    device.search_enabled = False
+                    _LOGGER.debug(f"Đã tắt quá trình tìm kiếm thiết bị cho {device.name if hasattr(device, 'name') else device_id}")
+
                 _LOGGER.debug(f"Đã cập nhật trạng thái tắt cho thiết bị {device_id}")
 
             # Phát sự kiện EffectClearedEvent
