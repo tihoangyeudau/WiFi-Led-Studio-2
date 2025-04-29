@@ -26,25 +26,78 @@ function createSocket() {
           })
         );
 
-        const req = {
+        // Đăng ký sự kiện devices_updated
+        const req1 = {
           event_type: "devices_updated",
           id: 1,
           type: "subscribe_event",
         };
-        ws.send(JSON.stringify(++req.id && req));
+        ws.send(JSON.stringify(++req1.id && req1));
+
+        // Đăng ký sự kiện effect_changed_systray
+        const req2 = {
+          event_type: "effect_changed_systray",
+          id: 2,
+          type: "subscribe_event",
+        };
+        ws.send(JSON.stringify(++req2.id && req2));
+
+        // Đăng ký sự kiện led_state_changed
+        const req3 = {
+          event_type: "led_state_changed",
+          id: 3,
+          type: "subscribe_event",
+        };
+        ws.send(JSON.stringify(++req3.id && req3));
       },
       onmessage: (event) => {
-        if (JSON.parse(event.data).event_type === "visualisation_update") {
+        const data = JSON.parse(event.data);
+        if (data.event_type === "visualisation_update") {
           document.dispatchEvent(
             new CustomEvent("YZ", {
               detail: {
-                id: JSON.parse(event.data).vis_id,
-                pixels: JSON.parse(event.data).pixels,
+                id: data.vis_id,
+                pixels: data.pixels,
               }
             })
           );
         }
-        if (JSON.parse(event.data).event_type === "devices_updated") {
+        if (data.event_type === "devices_updated") {
+          document.dispatchEvent(
+            new CustomEvent("YZold", {
+              detail: "devices_updated"
+            })
+          );
+        }
+        // Xử lý sự kiện mới khi hiệu ứng được thay đổi qua systray
+        if (data.event_type === "effect_changed_systray") {
+          document.dispatchEvent(
+            new CustomEvent("effectChangedSystray", {
+              detail: {
+                effect_type: data.effect_type,
+                device_id: data.device_id
+              }
+            })
+          );
+          // Cập nhật danh sách thiết bị để hiển thị hiệu ứng mới
+          document.dispatchEvent(
+            new CustomEvent("YZold", {
+              detail: "devices_updated"
+            })
+          );
+        }
+
+        // Xử lý sự kiện mới khi trạng thái đèn LED được thay đổi qua systray
+        if (data.event_type === "led_state_changed") {
+          document.dispatchEvent(
+            new CustomEvent("ledStateChanged", {
+              detail: {
+                is_active: data.is_active,
+                device_id: data.device_id
+              }
+            })
+          );
+          // Cập nhật danh sách thiết bị để hiển thị trạng thái mới
           document.dispatchEvent(
             new CustomEvent("YZold", {
               detail: "devices_updated"

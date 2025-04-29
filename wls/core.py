@@ -700,6 +700,11 @@ class WlsCore:
                     from wls.config import save_config
                     save_config(self.config, self.config_dir)
 
+                    # Phát ra sự kiện để thông báo cho frontend về thay đổi trạng thái đèn LED
+                    from wls.events import LedStateChangedEvent
+                    self.events.fire_event(LedStateChangedEvent(is_active=False, device_id=device_id))
+                    _LOGGER.debug(f"Đã phát ra sự kiện LedStateChangedEvent(is_active=False) cho thiết bị {device_id}")
+
                     _LOGGER.debug(f"Đã xóa hiệu ứng và tắt đèn LED cho thiết bị {device_id}")
                 else:
                     # Turn on LEDs for this device by applying the last used effect
@@ -722,6 +727,11 @@ class WlsCore:
                         # Lưu cấu hình
                         from wls.config import save_config
                         save_config(self.config, self.config_dir)
+
+                        # Phát ra sự kiện để thông báo cho frontend về thay đổi trạng thái đèn LED
+                        from wls.events import LedStateChangedEvent
+                        self.events.fire_event(LedStateChangedEvent(is_active=True, device_id=device_id))
+                        _LOGGER.debug(f"Đã phát ra sự kiện LedStateChangedEvent(is_active=True) cho thiết bị {device_id}")
 
                         _LOGGER.debug(f"Đã bật đèn LED cho thiết bị {device_id} với hiệu ứng: {effect_to_apply}")
                     except Exception as e:
@@ -753,6 +763,11 @@ class WlsCore:
                 from wls.config import save_config
                 save_config(self.config, self.config_dir)
 
+                # Phát ra sự kiện để thông báo cho frontend về thay đổi trạng thái đèn LED
+                from wls.events import LedStateChangedEvent
+                self.events.fire_event(LedStateChangedEvent(is_active=False))
+                _LOGGER.debug("Đã phát ra sự kiện LedStateChangedEvent(is_active=False) cho tất cả thiết bị")
+
                 _LOGGER.debug("Đã xóa hiệu ứng và tắt tất cả đèn LED")
             else:
                 # Turn on all LEDs by applying the last used effect
@@ -780,6 +795,11 @@ class WlsCore:
                     # Lưu cấu hình
                     from wls.config import save_config
                     save_config(self.config, self.config_dir)
+
+                    # Phát ra sự kiện để thông báo cho frontend về thay đổi trạng thái đèn LED
+                    from wls.events import LedStateChangedEvent
+                    self.events.fire_event(LedStateChangedEvent(is_active=True))
+                    _LOGGER.debug("Đã phát ra sự kiện LedStateChangedEvent(is_active=True) cho tất cả thiết bị")
 
                     _LOGGER.debug(f"Đã bật tất cả đèn LED với hiệu ứng: {self.current_effect}")
                 except Exception as e:
@@ -988,6 +1008,11 @@ class WlsCore:
                 try:
                     self.setup_icon_menu()
                     _LOGGER.debug(f"Đã cập nhật menu sau khi chọn hiệu ứng {effect_type} cho thiết bị {device_id}")
+
+                    # Phát ra sự kiện để thông báo cho frontend về thay đổi hiệu ứng qua systray
+                    from wls.events import EffectChangedSystrayEvent
+                    self.events.fire_event(EffectChangedSystrayEvent(effect_type, device_id))
+                    _LOGGER.debug(f"Đã phát ra sự kiện EffectChangedSystrayEvent cho hiệu ứng {effect_type}, thiết bị {device_id}")
                 except Exception as e:
                     _LOGGER.error(f"Lỗi khi cập nhật menu: {e}")
 
@@ -1044,6 +1069,11 @@ class WlsCore:
                 try:
                     self.setup_icon_menu()
                     _LOGGER.debug(f"Đã cập nhật menu sau khi chọn hiệu ứng {effect_type}")
+
+                    # Phát ra sự kiện để thông báo cho frontend về thay đổi hiệu ứng qua systray
+                    from wls.events import EffectChangedSystrayEvent
+                    self.events.fire_event(EffectChangedSystrayEvent(effect_type))
+                    _LOGGER.debug(f"Đã phát ra sự kiện EffectChangedSystrayEvent cho hiệu ứng {effect_type}, tất cả thiết bị")
                 except Exception as e:
                     _LOGGER.error(f"Lỗi khi cập nhật menu: {e}")
 

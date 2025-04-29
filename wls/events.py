@@ -19,6 +19,8 @@ class Event:
     GRAPH_UPDATE = "graph_update"
     EFFECT_SET = "effect_set"
     EFFECT_CLEARED = "effect_cleared"
+    EFFECT_CHANGED_SYSTRAY = "effect_changed_systray"  # Sự kiện mới cho thay đổi hiệu ứng qua systray
+    LED_STATE_CHANGED = "led_state_changed"  # Sự kiện mới cho thay đổi trạng thái đèn LED qua systray
     SCENE_ACTIVATED = "scene_activated"
     SCENE_DELETED = "scene_deleted"
     PRESET_ACTIVATED = "preset_activated"
@@ -185,6 +187,24 @@ class RestartAudioInputSourceEvent(Event):
 
     def __init__(self):
         super().__init__(Event.RESTART_AUDIO_INPUT_SOURCE)
+
+
+class EffectChangedSystrayEvent(Event):
+    """Event emitted when an effect is changed via systray menu"""
+
+    def __init__(self, effect_type, device_id=None):
+        super().__init__(Event.EFFECT_CHANGED_SYSTRAY)
+        self.effect_type = effect_type
+        self.device_id = device_id  # None means all devices
+
+
+class LedStateChangedEvent(Event):
+    """Event emitted when LED state is changed via systray menu"""
+
+    def __init__(self, is_active, device_id=None):
+        super().__init__(Event.LED_STATE_CHANGED)
+        self.is_active = is_active
+        self.device_id = device_id  # None means all devices
 
 
 class EventListener:

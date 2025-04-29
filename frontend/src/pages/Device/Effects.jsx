@@ -56,9 +56,9 @@ const EffectsCard = ({ virtId }) => {
   const viewMode = useStore((state) => state.viewMode);
   const updateVirtual = useStore((state) => state.updateVirtual);
   const features = useStore((state) => state.features);
-  
+
   const graphs = useStore((state) => state.graphs);
-  
+
   const getV = () => {
     for (var prop in virtuals) {
       if (virtuals[prop].id == virtId) {
@@ -67,10 +67,10 @@ const EffectsCard = ({ virtId }) => {
     }
   };
   const virtual = getV();
-  
+
   const effectType = virtual && virtual.effect.type;
   const [theModel, setTheModel] = useState(virtual?.effect?.config)
-  
+
   // const handleRandomize = () => {
   //   setVirtualEffect(
   //     virtual.id,
@@ -114,11 +114,33 @@ const EffectsCard = ({ virtId }) => {
       setPixelGraphs([virtId]);
     }
   }, [graphs, setPixelGraphs, getVirtuals, getSchemas, effectType]);
-  
+
+  // Lắng nghe sự kiện khi hiệu ứng được thay đổi qua systray
+  useEffect(() => {
+    const handleEffectChangedSystray = (e) => {
+      // Cập nhật danh sách thiết bị khi hiệu ứng được thay đổi qua systray
+      getVirtuals();
+    };
+
+    // Lắng nghe sự kiện khi trạng thái đèn LED được thay đổi qua systray
+    const handleLedStateChanged = (e) => {
+      // Cập nhật danh sách thiết bị khi trạng thái đèn LED được thay đổi
+      getVirtuals();
+    };
+
+    document.addEventListener('effectChangedSystray', handleEffectChangedSystray);
+    document.addEventListener('ledStateChanged', handleLedStateChanged);
+
+    return () => {
+      document.removeEventListener('effectChangedSystray', handleEffectChangedSystray);
+      document.removeEventListener('ledStateChanged', handleLedStateChanged);
+    };
+  }, [getVirtuals]);
+
   useEffect(() => {
     virtuals && virtual?.effect?.config && setTheModel(virtual.effect.config)
   }, [virtuals, virtual, virtual.effect, virtual.effect.config]);
-  
+
   return (
     <>
       <Card className={classes.card}>
@@ -181,7 +203,7 @@ const EffectsCard = ({ virtId }) => {
             features={features}
             getVirtuals={getVirtuals}
             setVirtualEffect={setVirtualEffect}
-            
+
           />
         </CardContent>
       </Card>

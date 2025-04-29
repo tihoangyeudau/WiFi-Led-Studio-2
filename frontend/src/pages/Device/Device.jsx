@@ -50,6 +50,36 @@ const Device = ({
     effectType && getPresets(effectType);
   }, [getVirtuals, getSchemas, getPresets, effectType]);
 
+  // Lắng nghe sự kiện khi hiệu ứng được thay đổi qua systray
+  useEffect(() => {
+    const handleEffectChangedSystray = (e) => {
+      // Cập nhật danh sách thiết bị khi hiệu ứng được thay đổi qua systray
+      getVirtuals();
+
+      // Nếu thiết bị hiện tại được thay đổi hiệu ứng, cập nhật presets
+      if (
+        (e.detail.device_id === virtId || e.detail.device_id === null) &&
+        e.detail.effect_type
+      ) {
+        getPresets(e.detail.effect_type);
+      }
+    };
+
+    // Lắng nghe sự kiện khi trạng thái đèn LED được thay đổi qua systray
+    const handleLedStateChanged = (e) => {
+      // Cập nhật danh sách thiết bị khi trạng thái đèn LED được thay đổi
+      getVirtuals();
+    };
+
+    document.addEventListener('effectChangedSystray', handleEffectChangedSystray);
+    document.addEventListener('ledStateChanged', handleLedStateChanged);
+
+    return () => {
+      document.removeEventListener('effectChangedSystray', handleEffectChangedSystray);
+      document.removeEventListener('ledStateChanged', handleLedStateChanged);
+    };
+  }, [getVirtuals, getPresets, virtId]);
+
   return (
     <Grid
       container

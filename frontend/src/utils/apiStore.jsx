@@ -250,7 +250,7 @@ const useStore = create(
         isLogged: logged
       })),
 
-      
+
       // API
       devices: {},
       getDevices: async () => {
@@ -333,6 +333,16 @@ const useStore = create(
         set,
         'DELETE',
       ),
+
+      // Xóa tất cả hiệu ứng trên tất cả thiết bị
+      clearAllEffects: async () => await Wls(
+        `/api/effects`,
+        set,
+        'PUT',
+        {
+          action: "clear_all_effects"
+        }
+      ),
       setVirtualEffect: async (virtId, { type, config, active }) => {
         const resp = await Wls(
           `/api/virtuals/${virtId}/effects`,
@@ -404,7 +414,7 @@ const useStore = create(
           return true;
         }
         return false;
-      },         
+      },
       updateVirtualSegments: async ({ virtId, segments }) => {
         const resp = await Wls(
           `/api/virtuals/${virtId}`,
@@ -489,7 +499,7 @@ const useStore = create(
           data: colorkey
         },
       ),
-      
+
       scenes: {},
       getScenes: async () => {
         const resp = await Wls('/api/scenes', set);
@@ -596,7 +606,7 @@ const useStore = create(
         if (resp && resp.paused) {
           set({ paused: resp.paused })
         }
-      },     
+      },
 
       shutdown: async () => await Wls('/api/power', set, 'POST', {
         timeout: 0,
@@ -608,8 +618,8 @@ const useStore = create(
       }),
       getInfo: async () => await Wls('/api/info', set),
       getPing: async (virtId) => await Wls(`/api/ping/${virtId}`, set),
-     
-    
+
+
     })),
     {
       // ...
