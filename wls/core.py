@@ -48,8 +48,10 @@ from wls.utils import (
     UserDefaultCollection,
     async_fire_and_forget,
     currently_frozen,
+    get_icon_path,
 )
 from wls.virtuals import Virtuals
+from PIL import Image
 
 _LOGGER = logging.getLogger(__name__)
 if currently_frozen():
@@ -360,6 +362,34 @@ class WlsCore:
         4: "Restart request via API - Restarting.",
         5: "Shutdown request via CI testing flag - Shutting down.",
     }
+
+    # Bộ đệm cho các icon menu
+    _menu_icons = {}
+
+    def get_menu_icon(self, icon_name):
+        """
+        Tải và lưu vào bộ đệm icon cho menu item.
+
+        Args:
+            icon_name (str): Tên file icon (không bao gồm đường dẫn và phần mở rộng)
+
+        Returns:
+            Image: Đối tượng PIL Image hoặc None nếu không tìm thấy
+        """
+        if icon_name in self._menu_icons:
+            return self._menu_icons[icon_name]
+
+        try:
+            icon_path = get_icon_path(f"{icon_name}.png")
+            if os.path.exists(icon_path):
+                icon_image = Image.open(icon_path)
+                # Lưu vào bộ đệm
+                self._menu_icons[icon_name] = icon_image
+                return icon_image
+        except Exception as e:
+            _LOGGER.error(f"Không thể tải icon {icon_name}: {e}")
+
+        return None
 
     def __init__(
         self,
@@ -1402,8 +1432,8 @@ class WlsCore:
 
             # Category translations
             category_translations = {
-                "1. Hiệu ứng màu": "⚬ Hiệu ứng màu | Color Effects",
-                "2. Hiệu ứng nháy theo nhạc": "⚬ Nháy nhạc | Music Effects",
+                "1. Hiệu ứng màu": "Hiệu ứng màu | Color Effects",
+                "2. Hiệu ứng nháy theo nhạc": "Nháy nhạc | Music Effects",
             }
 
             # Sort categories
@@ -1427,7 +1457,14 @@ class WlsCore:
                     if current_info and current_info['category'] == category:
                         display_category = f"{display_category} :   {current_info['name']}"
 
-                new_effects_items.append(MenuItem(display_category, category_menu))
+                # Xác định icon cho danh mục
+                category_icon = None
+                if "màu" in category.lower():
+                    category_icon = self.get_menu_icon("color")
+                elif "nhạc" in category.lower():
+                    category_icon = self.get_menu_icon("effects")
+
+                new_effects_items.append(MenuItem(display_category, category_menu, icon=category_icon))
 
             return new_effects_items
 
@@ -1702,8 +1739,8 @@ class WlsCore:
 
             # Create advanced submenu (static)
             advanced_submenu = Menu(
-                MenuItem("Khởi động lại | Restart", self.restart_wls),
-                MenuItem("Khôi phục mặc định | Restore default", self.restore),
+                MenuItem("Khởi động lại | Restart", self.restart_wls, icon=self.get_menu_icon("restart")),
+                MenuItem("Khôi phục mặc định | Restore default", self.restore, icon=self.get_menu_icon("default")),
             )
 
             # Create brightness submenu
@@ -1724,20 +1761,23 @@ class WlsCore:
 
             # Create main menu
             main_menu_items = [
-                MenuItem(lambda text: toggle_text, self.toggle_startup_mode),
+                MenuItem(lambda text: toggle_text, self.toggle_startup_mode, icon=self.get_menu_icon("autorun")),
                 Menu.SEPARATOR,
                 # Display "LED Devices" title
-                MenuItem(self.get_led_devices_menu_title(), None),
+                MenuItem(self.get_led_devices_menu_title(), None, icon=self.get_menu_icon("instances")),
             ]
 
             # Add device items to main menu
             main_menu_items.extend(device_items)
 
             # Add next items
+            # Chọn icon dựa trên trạng thái LED
+            led_icon = self.get_menu_icon("resume" if not device_active else "suspend")
+
             main_menu_items.extend([
                 Menu.SEPARATOR,
-                MenuItem(lambda text: led_toggle_text, self.toggle_led_state),
-                MenuItem(f"Độ sáng | Brightness :   {current_brightness}%", brightness_submenu),
+                MenuItem(lambda text: led_toggle_text, self.toggle_led_state, icon=led_icon),
+                MenuItem(f"Độ sáng | Brightness :   {current_brightness}%", brightness_submenu, icon=self.get_menu_icon("brightness")),
                 Menu.SEPARATOR
             ])
 
@@ -1747,19 +1787,19 @@ class WlsCore:
 
             # Add remaining items
             main_menu_items.extend([
-                MenuItem("⚬ Mở rộng màn | Screen capture", self.stop_aw),
+                MenuItem("Mở rộng màn | Screen capture", self.stop_aw, icon=self.get_menu_icon("capture")),
                 Menu.SEPARATOR,
-                MenuItem("Cài đặt | Setting", self.open_ui, default=True),
-                MenuItem("Nâng cao | Advanced", advanced_submenu),
+                MenuItem("Cài đặt | Setting", self.open_ui, default=True, icon=self.get_menu_icon("settings")),
+                MenuItem("Nâng cao | Advanced", advanced_submenu, icon=self.get_menu_icon("restart")),
                 Menu.SEPARATOR,
                 MenuItem("RAINBOW MUSIC LED", Menu(
-                    MenuItem("Hướng dẫn | Guide", lambda: webbrowser.open("https://rainbowmusicled.com/huong-dan")),
-                    MenuItem("Hỗ trợ | Support", lambda: webbrowser.open("https://rainbowmusicled.com/ho-tro")),
-                    MenuItem("Bảo hành | Warranty", lambda: webbrowser.open("https://rainbowmusicled.com/bao-hanh")),
-                    MenuItem("Cửa hàng | Shop", lambda: webbrowser.open("https://rainbowmusicled.com")),
-                )),
+                    MenuItem("Hướng dẫn | Guide", lambda: webbrowser.open("https://rainbowmusicled.com/huong-dan"), icon=self.get_menu_icon("guide")),
+                    MenuItem("Hỗ trợ | Support", lambda: webbrowser.open("https://rainbowmusicled.com/ho-tro"), icon=self.get_menu_icon("support")),
+                    MenuItem("Bảo hành | Warranty", lambda: webbrowser.open("https://rainbowmusicled.com/bao-hanh"), icon=self.get_menu_icon("warranty")),
+                    MenuItem("Cửa hàng | Shop", lambda: webbrowser.open("https://rainbowmusicled.com"), icon=self.get_menu_icon("shop")),
+                ), icon=self.get_menu_icon("rml")),
                 Menu.SEPARATOR,
-                MenuItem("Thoát | Quit", lambda: self.stop(0)),
+                MenuItem("Thoát | Quit", lambda: self.stop(0), icon=self.get_menu_icon("quit")),
             ])
 
             # Create main menu
