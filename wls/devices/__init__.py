@@ -647,11 +647,7 @@ class SerialDevice(Device):
             self.serial = None
             return False
 
-        if sys.platform == "win32":
-            self.reset_serial_port()
-        else:
-            self.send_and_receive(b"CheckID", read_response=False)
-            time.sleep(0.06)
+        self.reset_serial_port()
 
         response = self.send_and_receive(b"r\n", read_response=True)
         if response:
