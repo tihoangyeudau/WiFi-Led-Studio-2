@@ -99,14 +99,23 @@ coll = COLLECT(exe,
                upx=False,
                upx_exclude=[],
                name='WiFi Led Studio',)
-app = BUNDLE(coll,
-            name = 'WiFi Led Studio.app',
-            icon = '/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons/WiFi Led Studio.icns',
-            bundle_identifier = 'com.rml.wls',
-            info_plist = {
+app = BUNDLE(
+            coll,
+            name='WiFi Led Studio.app',
+            icon='/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons/WiFi Led Studio.icns',
+            bundle_identifier='com.rml.wls',
+            info_plist={
                 'NSMicrophoneUsageDescription': 'WiFi Led Studio needs microphone access to capture audio for light effects and visualizations',
-                'LSUIElement': 'True',
                 'NSAppleEventsUsageDescription': 'WiFi Led Studio needs to control other applications to synchronize light effects with media playback',
+                'NSLocalNetworkUsageDescription': 'WiFi Led Studio needs to discover and control WiFi lighting devices on your local network',
+                'LSUIElement': 'True',
+                'NSBonjourServices': [
+                    '_http._tcp',
+                    '_tcp',
+                    '_udp',
+                    '_rml._tcp',
+                    '_services._dns-sd._udp'
+                ]
             }
 )
 
