@@ -2,12 +2,12 @@
 import os
 import sys
 from PyInstaller.utils.hooks import copy_metadata
-datas = [   ('/Users/rainbowmusicled/Documents/GitHub/WiFi-Led-Studio-2/icons', 'icons/'),
-            ('/Users/rainbowmusicled/Documents/GitHub/WiFi-Led-Studio-2/icons/tray.png', '.'),
-            ('/usr/local/bin/build/WiFi Led Studio-3.3.7.app/Contents/MacOS/lib/wls', 'wls/'),
-            ('/usr/local/bin/build/WiFi Led Studio-3.3.7.app/Contents/MacOS/lib/wls_frontend', 'wls_frontend/'),
-            ('/usr/local/bin/build/WiFi Led Studio-3.3.7.app/Contents/MacOS/lib/xyzservices', 'xyzservices/'),
-            ('/usr/local/bin/build/WiFi Led Studio-3.3.7.app/Contents/MacOS/lib/stupidArtnet', 'stupidArtnet/'),]
+datas = [   ('/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons', 'icons/'),
+            ('/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons/tray.png', '.'),
+            ('/usr/local/bin/build/WiFi Led Studio-3.4.0.app/Contents/MacOS/lib/wls', 'wls/'),
+            ('/usr/local/bin/build/WiFi Led Studio-3.4.0.app/Contents/MacOS/lib/wls_frontend', 'wls_frontend/'),
+            ('/usr/local/bin/build/WiFi Led Studio-3.4.0.app/Contents/MacOS/lib/xyzservices', 'xyzservices/'),
+            ('/usr/local/bin/build/WiFi Led Studio-3.4.0.app/Contents/MacOS/lib/stupidArtnet', 'stupidArtnet/'),]
 datas += copy_metadata('bokeh')
 
 
@@ -101,17 +101,12 @@ coll = COLLECT(exe,
                name='WiFi Led Studio',)
 app = BUNDLE(coll,
             name = 'WiFi Led Studio.app',
-            icon = '/Users/rainbowmusicled/Documents/GitHub/WiFi-Led-Studio-2/icons/WiFi Led Studio.icns',
+            icon = '/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons/WiFi Led Studio.icns',
             bundle_identifier = 'com.rml.wls',
             info_plist = {
-                'NSHighResolutionCapable': 'True',
                 'NSMicrophoneUsageDescription': 'WiFi Led Studio needs microphone access to capture audio for light effects and visualizations',
                 'LSUIElement': 'True',
-                'UIApplicationExitsOnSuspend': 'True',
-                'NSRequiresAquaSystemAppearance': 'False',
-                'NSAppleEventsUsageDescription': 'WiFi Led Studio needs to control system audio settings',
-                'NSCameraUsageDescription': 'WiFi Led Studio does not use the camera',
-                'NSBluetoothAlwaysUsageDescription': 'WiFi Led Studio uses Bluetooth to connect to some LED controllers',
+                'NSAppleEventsUsageDescription': 'WiFi Led Studio needs to control other applications to synchronize light effects with media playback',
             }
 )
 

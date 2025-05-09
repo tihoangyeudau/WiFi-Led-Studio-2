@@ -51,6 +51,10 @@ class UDPRealtimeDevice(UDPDevice):
     def flush(self, data):
         """Override flush method để xử lý lỗi tốt hơn"""
         try:
+            # Kiểm tra xem thiết bị có đang hoạt động không
+            if not self._active or self._sock is None:
+                return
+                
             if self._destination is None:
                 # Thử kích hoạt lại nếu chưa có kết nối
                 self.activate()
@@ -138,7 +142,7 @@ class UDPRealtimeDevice(UDPDevice):
                     self.transmit_packet(udpData, frame_is_equal_to_last)
 
     def transmit_packet(self, packet, frame_is_equal_to_last: bool):
-        if self._destination is None:
+        if self._destination is None or self._sock is None:
             return
 
         timestamp = time.time()

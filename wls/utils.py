@@ -369,43 +369,111 @@ class RML:
         else:
             return res["seg"]
 
-    async def set_power_state(self, state, max_retries=5, delay=2):
+    async def set_power_state(self, state, max_retries=5, delay=1):
         """
         Set power state for RML device using JSON API.
 
         Args:
             state (bool): True to turn on, False to turn off
         """
-        async def send_requests():
-            """Helper function to send both requests in parallel."""
+        async def send_power_request():
+            """Gửi yêu cầu thay đổi trạng thái nguồn."""
             power = {"on": state}
+            try:
+                # Sử dụng timeout ngắn hơn cho các yêu cầu HTTP
+                timeout = 0.5  # Giảm timeout xuống 0.5 giây
+                
+                # Gửi yêu cầu đến /json/state
+                await RML._rml_request(requests.post, self.ip_address, "/json/state", timeout=timeout, json=power)
+                return True
+            except Exception as e:
+                _LOGGER.debug(f"Lỗi khi gửi yêu cầu power HTTP: {e}")
+                return False
+                
+        async def send_live_request():
+            """Gửi yêu cầu thay đổi trạng thái live."""
             live = {"live": state}
-            await asyncio.gather(
-                RML._rml_request(requests.post, self.ip_address, "/json/state", json=power),
-                RML._rml_request(requests.post, self.ip_address, "/json/info", json=live),
-            )
+            try:
+                # Sử dụng timeout ngắn hơn cho các yêu cầu HTTP
+                timeout = 0.5  # Giảm timeout xuống 0.5 giây
+                
+                # Gửi yêu cầu đến /json/info
+                await RML._rml_request(requests.post, self.ip_address, "/json/info", timeout=timeout, json=live)
+                return True
+            except Exception as e:
+                _LOGGER.debug(f"Lỗi khi gửi yêu cầu live HTTP: {e}")
+                return False
 
         try:
+            power_success = False
+            live_success = False
+            
+            # Thử gửi yêu cầu power
             for attempt in range(max_retries):
-                await send_requests()
+                if await send_power_request():
+                    # Kiểm tra lại trạng thái thực tế của thiết bị
+                    current_state = await self.get_power_state()
 
-                # Kiểm tra lại trạng thái thực tế của thiết bị
-                current_state = await self.get_power_state()
-
-                if current_state is None:
-                    _LOGGER.error(f"Không thể xác định trạng thái RML {self.ip_address}. Thử lại lần {attempt + 1}.")
-                elif current_state == state:
-                    _LOGGER.info(f"RML {self.ip_address}: Đã {'bật' if state else 'tắt'} thành công.")
-                    return  # Nếu trạng thái đúng, thoát khỏi vòng lặp
+                    if current_state is None:
+                        _LOGGER.error(f"Không thể xác định trạng thái RML {self.ip_address}. Thử lại lần {attempt + 1}.")
+                    elif current_state == state:
+                        _LOGGER.info(f"RML {self.ip_address}: Đã {'bật' if state else 'tắt'} nguồn thành công.")
+                        power_success = True
+                        break  # Nếu trạng thái đúng, thoát khỏi vòng lặp
+                    else:
+                        _LOGGER.warning(f"RML {self.ip_address}: Trạng thái không đồng bộ. Mong đợi {state}, nhưng hiện tại là {current_state}. Thử lại lần {attempt + 1}.")
                 else:
-                    _LOGGER.warning(f"RML {self.ip_address}: Trạng thái không đồng bộ. Mong đợi {state}, nhưng hiện tại là {current_state}. Thử lại lần {attempt + 1}.")
+                    _LOGGER.warning(f"RML {self.ip_address}: Không thể gửi yêu cầu power HTTP. Thử lại lần {attempt + 1}.")
 
                 # Nếu chưa thành công, đợi một thời gian rồi thử lại
                 if attempt < max_retries - 1:  # Không delay sau lần thử cuối
                     await asyncio.sleep(delay)
-
-            # Nếu không thành công sau max_retries lần thử
-            _LOGGER.error(f"Không thể thay đổi trạng thái RML {self.ip_address} sau {max_retries} lần thử.")
+            
+            # Thử gửi yêu cầu live (với số lần thử nhiều hơn cho live)
+            live_max_retries = max_retries + 2  # Thêm 2 lần thử cho live
+            for attempt in range(live_max_retries):
+                if await send_live_request():
+                    _LOGGER.info(f"RML {self.ip_address}: Đã {'bật' if state else 'tắt'} chế độ live thành công.")
+                    live_success = True
+                    break
+                else:
+                    _LOGGER.warning(f"RML {self.ip_address}: Không thể gửi yêu cầu live HTTP. Thử lại lần {attempt + 1}.")
+                
+                # Nếu chưa thành công, đợi một thời gian rồi thử lại
+                if attempt < live_max_retries - 1:  # Không delay sau lần thử cuối
+                    await asyncio.sleep(delay)
+            
+            # Nếu đang tắt thiết bị và không thành công, thử một lần cuối cùng với phương pháp đồng bộ
+            if not state and not power_success:
+                try:
+                    # Sử dụng phương pháp đồng bộ để đảm bảo yêu cầu được hoàn thành
+                    power = {"on": state}
+                    url = f"http://{self.ip_address}/json/state"
+                    response = requests.post(url, json=power, timeout=2.0)
+                    if response.ok:
+                        _LOGGER.info(f"RML {self.ip_address}: Đã tắt nguồn thành công (phương pháp đồng bộ).")
+                        power_success = True
+                except Exception as e:
+                    _LOGGER.error(f"Lỗi khi sử dụng phương pháp đồng bộ cho power: {e}")
+            
+            # Nếu đang tắt thiết bị và không thành công với live, thử một lần cuối cùng với phương pháp đồng bộ
+            if not state and not live_success:
+                try:
+                    # Sử dụng phương pháp đồng bộ để đảm bảo yêu cầu được hoàn thành
+                    live = {"live": state}
+                    url = f"http://{self.ip_address}/json/info"
+                    response = requests.post(url, json=live, timeout=2.0)
+                    if response.ok:
+                        _LOGGER.info(f"RML {self.ip_address}: Đã tắt chế độ live thành công (phương pháp đồng bộ).")
+                        live_success = True
+                except Exception as e:
+                    _LOGGER.error(f"Lỗi khi sử dụng phương pháp đồng bộ cho live: {e}")
+            
+            if not power_success:
+                _LOGGER.error(f"Không thể thay đổi trạng thái nguồn RML {self.ip_address} sau {max_retries} lần thử.")
+            
+            if not live_success:
+                _LOGGER.error(f"Không thể thay đổi trạng thái live RML {self.ip_address} sau {live_max_retries} lần thử.")
 
         except Exception as e:
             _LOGGER.error(f"Lỗi khi đặt trạng thái nguồn cho RML {self.ip_address}: {e}")
