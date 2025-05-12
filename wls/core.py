@@ -412,19 +412,19 @@ class WlsCore:
 
         self.config = load_config(config_dir)
 
-        # Khởi tạo trạng thái LED dựa trên device_state trong cấu hình của virtuals
+        # Khởi tạo trạng thái LED dựa trên last_state trong cấu hình của virtuals
         self.led_active = False
 
         # Kiểm tra trong cấu hình của virtuals
         for virtual_config in self.config.get("virtuals", []):
-            if "config" in virtual_config and "device_state" in virtual_config["config"]:
-                if virtual_config["config"]["device_state"]:
+            if "config" in virtual_config and "last_state" in virtual_config["config"]:
+                if virtual_config["config"]["last_state"]:
                     self.led_active = True
                     break
 
         # Vẫn giữ lại cách cũ để đảm bảo tương thích ngược
-        if not self.led_active and "device_states" in self.config:
-            self.led_active = any(self.config["device_states"].values())
+        if not self.led_active and "last_states" in self.config:
+            self.led_active = any(self.config["last_states"].values())
         _LOGGER.debug(f"Đã khởi tạo trạng thái LED: {'Bật' if self.led_active else 'Tắt'}")
 
         # Đọc lựa chọn thiết bị từ cấu hình
@@ -436,15 +436,15 @@ class WlsCore:
             _LOGGER.warning("Clearing active effects.")
             remove_virtuals_active_effects(self.config)
 
-        # Không còn sử dụng current_effect từ cấu hình, thay vào đó sử dụng device_effects
-        # Hiệu ứng chung sẽ được xác định từ device_effects khi khởi động
+        # Không còn sử dụng current_effect từ cấu hình, thay vào đó sử dụng last_effects
+        # Hiệu ứng chung sẽ được xác định từ last_effects khi khởi động
         self.config["wls_presets"] = wls_presets
         self.host = host if host else self.config["host"]
         self.port = port if port else self.config["port"]
         self.port_s = port_s if port_s else self.config["port_s"]
 
         # Không còn khôi phục hiệu ứng từ current_effect trong cấu hình
-        # Hiệu ứng sẽ được xác định từ device_effects khi khởi động
+        # Hiệu ứng sẽ được xác định từ last_effects khi khởi động
         self.ci_testing = ci_testing
         if sys.platform == "win32":
             self.loop = asyncio.ProactorEventLoop()
@@ -731,9 +731,9 @@ class WlsCore:
                                 self.config["virtuals"][i] = virtual_config
 
                     # Lưu trạng thái tắt của thiết bị vào cấu hình
-                    if "device_states" not in self.config:
-                        self.config["device_states"] = {}
-                    self.config["device_states"][str(device_id)] = False
+                    if "last_states" not in self.config:
+                        self.config["last_states"] = {}
+                    self.config["last_states"][str(device_id)] = False
 
                     # Lưu cấu hình
                     from wls.config import save_config
@@ -750,8 +750,8 @@ class WlsCore:
                     try:
                         # Kiểm tra xem có hiệu ứng đã lưu cho thiết bị này không
                         effect_to_apply = self.current_effect
-                        if "device_effects" in self.config and str(device_id) in self.config["device_effects"]:
-                            effect_to_apply = self.config["device_effects"][str(device_id)]
+                        if "last_effects" in self.config and str(device_id) in self.config["last_effects"]:
+                            effect_to_apply = self.config["last_effects"][str(device_id)]
                             _LOGGER.debug(f"Áp dụng hiệu ứng đã lưu cho thiết bị {device_id}: {effect_to_apply}")
                         else:
                             _LOGGER.debug(f"Áp dụng hiệu ứng mặc định: {effect_to_apply} cho thiết bị {device_id}")
@@ -759,9 +759,9 @@ class WlsCore:
                         self.apply_effect_to_device(effect_to_apply, device_id)
 
                         # Lưu trạng thái bật của thiết bị vào cấu hình
-                        if "device_states" not in self.config:
-                            self.config["device_states"] = {}
-                        self.config["device_states"][str(device_id)] = True
+                        if "last_states" not in self.config:
+                            self.config["last_states"] = {}
+                        self.config["last_states"][str(device_id)] = True
 
                         # Lưu cấu hình
                         from wls.config import save_config
@@ -790,13 +790,13 @@ class WlsCore:
                 remove_virtuals_active_effects(self.config)
 
                 # Lưu trạng thái tắt của tất cả thiết bị vào cấu hình
-                if "device_states" not in self.config:
-                    self.config["device_states"] = {}
+                if "last_states" not in self.config:
+                    self.config["last_states"] = {}
 
                 # Đặt trạng thái tắt cho tất cả thiết bị
                 for virtual_id, virtual in self.virtuals._virtuals.items():
                     if hasattr(virtual, 'is_device') and virtual.is_device is not None:
-                        self.config["device_states"][str(virtual.is_device)] = False
+                        self.config["last_states"][str(virtual.is_device)] = False
 
                 # Lưu cấu hình
                 from wls.config import save_config
@@ -812,9 +812,9 @@ class WlsCore:
                 # Turn on all LEDs by applying the last used effect
                 try:
                     # Kiểm tra xem có hiệu ứng đã lưu cho từng thiết bị không
-                    if "device_effects" in self.config and self.config["device_effects"]:
+                    if "last_effects" in self.config and self.config["last_effects"]:
                         _LOGGER.debug("Áp dụng hiệu ứng đã lưu cho từng thiết bị")
-                        for device_id, effect_type in self.config["device_effects"].items():
+                        for device_id, effect_type in self.config["last_effects"].items():
                             _LOGGER.debug(f"Áp dụng hiệu ứng đã lưu {effect_type} cho thiết bị {device_id}")
                             self.apply_effect_to_device(effect_type, device_id)
                     else:
@@ -823,13 +823,13 @@ class WlsCore:
                         self.apply_effect_to_all(self.current_effect)
 
                     # Lưu trạng thái bật của tất cả thiết bị vào cấu hình
-                    if "device_states" not in self.config:
-                        self.config["device_states"] = {}
+                    if "last_states" not in self.config:
+                        self.config["last_states"] = {}
 
                     # Đặt trạng thái bật cho tất cả thiết bị
                     for virtual_id, virtual in self.virtuals._virtuals.items():
                         if hasattr(virtual, 'is_device') and virtual.is_device is not None:
-                            self.config["device_states"][str(virtual.is_device)] = True
+                            self.config["last_states"][str(virtual.is_device)] = True
 
                     # Lưu cấu hình
                     from wls.config import save_config
@@ -1031,22 +1031,22 @@ class WlsCore:
                 if hasattr(virtual, 'is_device') and virtual.is_device == device_id:
                     # Cập nhật trong đối tượng virtual
                     if hasattr(virtual, '_config'):
-                        virtual._config["device_effect"] = effect_type
+                        virtual._config["last_effect"] = effect_type
 
                     # Cập nhật trong cấu hình
                     for idx, virtual_config in enumerate(self.config["virtuals"]):
                         if virtual_config["id"] == virtual.id:
                             if "config" not in virtual_config:
                                 virtual_config["config"] = {}
-                            virtual_config["config"]["device_effect"] = effect_type
+                            virtual_config["config"]["last_effect"] = effect_type
                             self.config["virtuals"][idx] = virtual_config
                             break
                     break
 
             # Vẫn giữ lại cách cũ để đảm bảo tương thích ngược
-            if "device_effects" not in self.config:
-                self.config["device_effects"] = {}
-            self.config["device_effects"][str(device_id)] = effect_type
+            if "last_effects" not in self.config:
+                self.config["last_effects"] = {}
+            self.config["last_effects"][str(device_id)] = effect_type
             _LOGGER.debug(f"Đã lưu hiệu ứng {effect_type} cho thiết bị {device_id} vào cấu hình")
 
             _LOGGER.info(f"Đã áp dụng hiệu ứng {effect_type} cho thiết bị {device_id}")
@@ -1055,7 +1055,7 @@ class WlsCore:
             self.led_active = True
             _LOGGER.debug("Đã cập nhật trạng thái LED thành bật")
 
-            # Lưu cấu hình sau khi đã cập nhật device_effects
+            # Lưu cấu hình sau khi đã cập nhật last_effects
             from wls.config import save_config
             save_config(self.config, self.config_dir)
             _LOGGER.debug(f"Đã lưu cấu hình với hiệu ứng {effect_type} cho thiết bị {device_id}")
@@ -1104,21 +1104,21 @@ class WlsCore:
 
                     # Cập nhật trong đối tượng virtual
                     if hasattr(virtual, '_config'):
-                        virtual._config["device_effect"] = effect_type
+                        virtual._config["last_effect"] = effect_type
 
                     # Cập nhật trong cấu hình
                     for idx, virtual_config in enumerate(self.config["virtuals"]):
                         if virtual_config["id"] == virtual.id:
                             if "config" not in virtual_config:
                                 virtual_config["config"] = {}
-                            virtual_config["config"]["device_effect"] = effect_type
+                            virtual_config["config"]["last_effect"] = effect_type
                             self.config["virtuals"][idx] = virtual_config
                             break
 
                     # Vẫn giữ lại cách cũ để đảm bảo tương thích ngược
-                    if "device_effects" not in self.config:
-                        self.config["device_effects"] = {}
-                    self.config["device_effects"][str(device_id)] = effect_type
+                    if "last_effects" not in self.config:
+                        self.config["last_effects"] = {}
+                    self.config["last_effects"][str(device_id)] = effect_type
                     _LOGGER.debug(f"Đã lưu hiệu ứng {effect_type} cho thiết bị {device_id} vào cấu hình")
 
             # Lưu hiệu ứng hiện tại
@@ -1129,7 +1129,7 @@ class WlsCore:
             self.led_active = True
             _LOGGER.debug("Đã cập nhật trạng thái LED thành bật")
 
-            # Lưu cấu hình sau khi đã cập nhật device_effects
+            # Lưu cấu hình sau khi đã cập nhật last_effects
             from wls.config import save_config
             save_config(self.config, self.config_dir)
             _LOGGER.debug(f"Đã lưu cấu hình với hiệu ứng {effect_type} cho tất cả thiết bị")
@@ -1175,20 +1175,20 @@ class WlsCore:
             str: The current effect type
         """
         # If a specific device is provided, check its effect
-        if device_id and "device_effects" in self.config and str(device_id) in self.config["device_effects"]:
-            return self.config["device_effects"][str(device_id)]
+        if device_id and "last_effects" in self.config and str(device_id) in self.config["last_effects"]:
+            return self.config["last_effects"][str(device_id)]
 
         # If no device is provided but a device is selected, check its effect
         selected_device = self.get_selected_device()
-        if selected_device and "device_effects" in self.config and str(selected_device) in self.config["device_effects"]:
-            return self.config["device_effects"][str(selected_device)]
+        if selected_device and "last_effects" in self.config and str(selected_device) in self.config["last_effects"]:
+            return self.config["last_effects"][str(selected_device)]
 
         # If no device is selected, try to get the effect of the first device
-        if not selected_device and "device_effects" in self.config:
+        if not selected_device and "last_effects" in self.config:
             # Get the first device
             first_device = self._get_first_device()
-            if first_device and str(first_device.id) in self.config["device_effects"]:
-                return self.config["device_effects"][str(first_device.id)]
+            if first_device and str(first_device.id) in self.config["last_effects"]:
+                return self.config["last_effects"][str(first_device.id)]
 
         # Fall back to the global current effect
         return getattr(self, 'current_effect', None)
@@ -1357,13 +1357,13 @@ class WlsCore:
 
         # If a device is specified, check its state
         if device_id:
-            if "device_states" in self.config and str(device_id) in self.config["device_states"]:
-                return self.config["device_states"][str(device_id)]
+            if "last_states" in self.config and str(device_id) in self.config["last_states"]:
+                return self.config["last_states"][str(device_id)]
             return True  # Default to active if not specified
         else:
             # If no device is selected, check if any device is active
-            if "device_states" in self.config:
-                return any(self.config["device_states"].values())
+            if "last_states" in self.config:
+                return any(self.config["last_states"].values())
             return True  # Default to active if not specified
 
     def generate_brightness_submenu(self):
@@ -1570,8 +1570,8 @@ class WlsCore:
                     save_config(self.config, self.config_dir)
 
                     # Update LED state based on selected device
-                    if "device_states" in self.config and str(dev_id) in self.config["device_states"]:
-                        self.led_active = self.config["device_states"][str(dev_id)]
+                    if "last_states" in self.config and str(dev_id) in self.config["last_states"]:
+                        self.led_active = self.config["last_states"][str(dev_id)]
 
                     self.setup_icon_menu()
                 return select_device
@@ -1615,15 +1615,15 @@ class WlsCore:
 
             # 1. Sync on/off state
             first_device_state = True
-            if "device_states" in self.config and first_device_id in self.config["device_states"]:
-                first_device_state = self.config["device_states"][first_device_id]
+            if "last_states" in self.config and first_device_id in self.config["last_states"]:
+                first_device_state = self.config["last_states"][first_device_id]
 
             # Apply first device state to all devices
-            if "device_states" not in self.config:
-                self.config["device_states"] = {}
+            if "last_states" not in self.config:
+                self.config["last_states"] = {}
 
             for device in self._get_all_devices():
-                self.config["device_states"][str(device.id)] = first_device_state
+                self.config["last_states"][str(device.id)] = first_device_state
 
             # 2. Sync brightness
             first_device_brightness = 1.0
@@ -1652,21 +1652,21 @@ class WlsCore:
 
             # 3. Sync effect or turn off all lights
             if first_device_state:  # If first device is on
-                first_device_effect = None
+                first_last_effect = None
 
                 # Find effect of first device
                 if first_device_virtual:
                     for virtual_config in self.config.get("virtuals", []):
                         if virtual_config["id"] == first_device_virtual and "effect" in virtual_config:
-                            first_device_effect = virtual_config["effect"]["type"]
+                            first_last_effect = virtual_config["effect"]["type"]
                             break
 
                 # Apply effect to all devices
-                if first_device_effect:
+                if first_last_effect:
                     for virtual in self.virtuals.values():
                         try:
                             effect = self.effects.create(
-                                type=first_device_effect,
+                                type=first_last_effect,
                                 wls=self,
                                 config={}
                             )
@@ -1676,7 +1676,7 @@ class WlsCore:
                             from wls.virtuals import update_effect_config
                             update_effect_config(self.config, virtual.id, effect)
                         except Exception as e:
-                            _LOGGER.error(f"Error applying effect {first_device_effect} to virtual {virtual.id}: {e}")
+                            _LOGGER.error(f"Error applying effect {first_last_effect} to virtual {virtual.id}: {e}")
             else:  # If first device is off
                 # Turn off all lights by clearing effects
                 for virtual in self.virtuals._virtuals.values():
@@ -1687,8 +1687,8 @@ class WlsCore:
                 remove_virtuals_active_effects(self.config)
         else:
             # If no devices, update LED state based on all devices
-            if "device_states" in self.config:
-                self.led_active = any(self.config["device_states"].values())
+            if "last_states" in self.config:
+                self.led_active = any(self.config["last_states"].values())
 
         # Save config
         from wls.config import save_config
@@ -2022,9 +2022,9 @@ class WlsCore:
         self.scenes = Scenes(self)
 
         # Khôi phục trạng thái bật/tắt của từng đèn từ cấu hình
-        if "device_states" in self.config:
+        if "last_states" in self.config:
             _LOGGER.debug("Khôi phục trạng thái bật/tắt của từng đèn từ cấu hình")
-            device_states = self.config["device_states"]
+            last_states = self.config["last_states"]
 
             # Nếu có thiết bị cụ thể được chọn, chỉ áp dụng cho thiết bị đó
             if hasattr(self, '_selected_device'):
@@ -2042,9 +2042,9 @@ class WlsCore:
                     # Xóa thiết bị đã chọn vì nó không tồn tại
                     delattr(self, '_selected_device')
                 else:
-                    device_state = device_states.get(str(device_id), True)  # Mặc định là bật
+                    last_state = last_states.get(str(device_id), True)  # Mặc định là bật
 
-                    if not device_state:
+                    if not last_state:
                         _LOGGER.debug(f"Thiết bị {device_id} đang ở trạng thái tắt, không áp dụng hiệu ứng")
                         # Tắt đèn cho thiết bị này
                         for virtual_id, virtual in self.virtuals._virtuals.items():
@@ -2053,8 +2053,8 @@ class WlsCore:
                                 _LOGGER.debug(f"Đã xóa hiệu ứng cho thiết bị ảo {virtual_id} liên kết với thiết bị {device_id}")
             else:
                 # Áp dụng trạng thái cho tất cả thiết bị
-                for device_id, device_state in device_states.items():
-                    if not device_state:  # Nếu thiết bị đang ở trạng thái tắt
+                for device_id, last_state in last_states.items():
+                    if not last_state:  # Nếu thiết bị đang ở trạng thái tắt
                         _LOGGER.debug(f"Thiết bị {device_id} đang ở trạng thái tắt, không áp dụng hiệu ứng")
                         # Tắt đèn cho thiết bị này
                         for virtual_id, virtual in self.virtuals._virtuals.items():
@@ -2073,33 +2073,33 @@ class WlsCore:
                     device_id = self._selected_device
 
                     # Tìm virtual tương ứng với thiết bị này
-                    device_effect = None
-                    device_state = True
+                    last_effect = None
+                    last_state = True
 
                     for virtual_config in self.config.get("virtuals", []):
                         if "is_device" in virtual_config and virtual_config["is_device"] == device_id:
                             # Lấy hiệu ứng từ cấu hình của virtual
-                            if "config" in virtual_config and "device_effect" in virtual_config["config"]:
-                                device_effect = virtual_config["config"]["device_effect"]
+                            if "config" in virtual_config and "last_effect" in virtual_config["config"]:
+                                last_effect = virtual_config["config"]["last_effect"]
 
                             # Lấy trạng thái từ cấu hình của virtual
-                            if "config" in virtual_config and "device_state" in virtual_config["config"]:
-                                device_state = virtual_config["config"]["device_state"]
+                            if "config" in virtual_config and "last_state" in virtual_config["config"]:
+                                last_state = virtual_config["config"]["last_state"]
                             break
 
-                    # Nếu không tìm thấy trong cấu hình của virtual, thử lấy từ device_effects (tương thích ngược)
-                    if device_effect is None and "device_effects" in self.config and str(device_id) in self.config["device_effects"]:
-                        device_effect = self.config["device_effects"][str(device_id)]
+                    # Nếu không tìm thấy trong cấu hình của virtual, thử lấy từ last_effects (tương thích ngược)
+                    if last_effect is None and "last_effects" in self.config and str(device_id) in self.config["last_effects"]:
+                        last_effect = self.config["last_effects"][str(device_id)]
 
-                    # Nếu không tìm thấy trạng thái trong cấu hình của virtual, thử lấy từ device_states (tương thích ngược)
-                    if "device_states" in self.config and str(device_id) in self.config["device_states"]:
-                        device_state = self.config["device_states"][str(device_id)]
+                    # Nếu không tìm thấy trạng thái trong cấu hình của virtual, thử lấy từ last_states (tương thích ngược)
+                    if "last_states" in self.config and str(device_id) in self.config["last_states"]:
+                        last_state = self.config["last_states"][str(device_id)]
 
                     # Kiểm tra xem thiết bị có đang bật không
-                    if device_state:
-                        if device_effect:
-                            _LOGGER.debug(f"Áp dụng hiệu ứng đã lưu {device_effect} cho thiết bị {device_id}")
-                            self.apply_effect_to_device(device_effect, device_id)
+                    if last_state:
+                        if last_effect:
+                            _LOGGER.debug(f"Áp dụng hiệu ứng đã lưu {last_effect} cho thiết bị {device_id}")
+                            self.apply_effect_to_device(last_effect, device_id)
                         elif hasattr(self, 'current_effect') and self.current_effect:
                             _LOGGER.debug(f"Áp dụng hiệu ứng mặc định {self.current_effect} cho thiết bị {device_id}")
                             self.apply_effect_to_device(self.current_effect, device_id)
@@ -2110,23 +2110,23 @@ class WlsCore:
                             device_id = virtual_config["is_device"]
 
                             # Lấy hiệu ứng từ cấu hình của virtual
-                            device_effect = None
-                            if "config" in virtual_config and "device_effect" in virtual_config["config"]:
-                                device_effect = virtual_config["config"]["device_effect"]
+                            last_effect = None
+                            if "config" in virtual_config and "last_effect" in virtual_config["config"]:
+                                last_effect = virtual_config["config"]["last_effect"]
 
                             # Lấy trạng thái từ cấu hình của virtual
-                            device_state = True
-                            if "config" in virtual_config and "device_state" in virtual_config["config"]:
-                                device_state = virtual_config["config"]["device_state"]
+                            last_state = True
+                            if "config" in virtual_config and "last_state" in virtual_config["config"]:
+                                last_state = virtual_config["config"]["last_state"]
 
                             # Kiểm tra xem thiết bị có đang bật không
-                            if device_state and device_effect:
-                                _LOGGER.debug(f"Áp dụng hiệu ứng đã lưu {device_effect} cho thiết bị {device_id} từ cấu hình virtual")
-                                self.apply_effect_to_device(device_effect, device_id)
+                            if last_state and last_effect:
+                                _LOGGER.debug(f"Áp dụng hiệu ứng đã lưu {last_effect} cho thiết bị {device_id} từ cấu hình virtual")
+                                self.apply_effect_to_device(last_effect, device_id)
 
                     # Vẫn giữ lại cách cũ để đảm bảo tương thích ngược
-                    if "device_effects" in self.config and self.config["device_effects"]:
-                        for device_id, effect_type in self.config["device_effects"].items():
+                    if "last_effects" in self.config and self.config["last_effects"]:
+                        for device_id, effect_type in self.config["last_effects"].items():
                             # Kiểm tra xem đã khôi phục hiệu ứng cho thiết bị này chưa
                             device_restored = False
                             for virtual_config in self.config.get("virtuals", []):
@@ -2136,8 +2136,8 @@ class WlsCore:
 
                             if not device_restored:
                                 # Kiểm tra xem thiết bị có đang bật không
-                                if "device_states" not in self.config or self.config["device_states"].get(str(device_id), True):
-                                    _LOGGER.debug(f"Áp dụng hiệu ứng đã lưu {effect_type} cho thiết bị {device_id} từ device_effects")
+                                if "last_states" not in self.config or self.config["last_states"].get(str(device_id), True):
+                                    _LOGGER.debug(f"Áp dụng hiệu ứng đã lưu {effect_type} cho thiết bị {device_id} từ last_effects")
                                     self.apply_effect_to_device(effect_type, device_id)
 
                 # Nếu không có hiệu ứng đã lưu cho từng thiết bị, sử dụng hiệu ứng chung
@@ -2158,8 +2158,8 @@ class WlsCore:
                             # Kiểm tra xem thiết bị này có đang ở trạng thái tắt không
                             if hasattr(virtual, 'is_device') and virtual.is_device is not None:
                                 device_id = virtual.is_device
-                                if "device_states" in self.config and str(device_id) in self.config["device_states"]:
-                                    if not self.config["device_states"][str(device_id)]:
+                                if "last_states" in self.config and str(device_id) in self.config["last_states"]:
+                                    if not self.config["last_states"][str(device_id)]:
                                         _LOGGER.debug(f"Bỏ qua thiết bị {device_id} vì đang ở trạng thái tắt")
                                         continue
 
@@ -2182,14 +2182,14 @@ class WlsCore:
                         # Áp dụng hiệu ứng cho tất cả thiết bị không ở trạng thái tắt
                         if hasattr(self, '_selected_device'):
                             device_id = self._selected_device
-                            if "device_states" not in self.config or self.config["device_states"].get(str(device_id), True):
+                            if "last_states" not in self.config or self.config["last_states"].get(str(device_id), True):
                                 self.apply_effect_to_device(self.current_effect, device_id)
                         else:
                             # Áp dụng cho tất cả thiết bị không ở trạng thái tắt
                             for virtual_id, virtual in self.virtuals._virtuals.items():
                                 if hasattr(virtual, 'is_device') and virtual.is_device is not None:
                                     device_id = virtual.is_device
-                                    if "device_states" not in self.config or self.config["device_states"].get(str(device_id), True):
+                                    if "last_states" not in self.config or self.config["last_states"].get(str(device_id), True):
                                         self.apply_effect_to_device(self.current_effect, device_id)
             except Exception as e:
                 _LOGGER.error(f"Lỗi khi áp dụng hiệu ứng đã lưu: {e}")

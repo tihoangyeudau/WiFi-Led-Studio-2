@@ -220,12 +220,12 @@ def ensure_config_directory(config_dir: str) -> None:
 
 
 def migrate_device_info_to_virtuals(config):
-    """Di chuyển thông tin từ device_effects và device_states vào cấu hình của virtuals"""
+    """Di chuyển thông tin từ last_effects và last_states vào cấu hình của virtuals"""
     if "virtuals" not in config:
         return config
 
-    # Kiểm tra xem có device_effects hoặc device_states không
-    if "device_effects" not in config and "device_states" not in config:
+    # Kiểm tra xem có last_effects hoặc last_states không
+    if "last_effects" not in config and "last_states" not in config:
         return config
 
     # Di chuyển thông tin vào cấu hình của virtuals
@@ -237,13 +237,13 @@ def migrate_device_info_to_virtuals(config):
             if "config" not in virtual:
                 virtual["config"] = {}
 
-            # Di chuyển device_effect
-            if "device_effects" in config and device_id in config["device_effects"]:
-                virtual["config"]["device_effect"] = config["device_effects"][device_id]
+            # Di chuyển last_effect
+            if "last_effects" in config and device_id in config["last_effects"]:
+                virtual["config"]["last_effect"] = config["last_effects"][device_id]
 
-            # Di chuyển device_state
-            if "device_states" in config and device_id in config["device_states"]:
-                virtual["config"]["device_state"] = config["device_states"][device_id]
+            # Di chuyển last_state
+            if "last_states" in config and device_id in config["last_states"]:
+                virtual["config"]["last_state"] = config["last_states"][device_id]
 
     return config
 
@@ -267,7 +267,7 @@ def load_config(config_dir: str) -> dict:
                     config_json["configuration_version"]
                 ) == parse_version(CONFIGURATION_VERSION)
 
-                # Di chuyển thông tin từ device_effects và device_states vào cấu hình của virtuals
+                # Di chuyển thông tin từ last_effects và last_states vào cấu hình của virtuals
                 config_json = migrate_device_info_to_virtuals(config_json)
 
                 return CORE_CONFIG_SCHEMA(config_json)
@@ -279,7 +279,7 @@ def load_config(config_dir: str) -> dict:
                 try:
                     config = migrate_config(config_json)
 
-                    # Di chuyển thông tin từ device_effects và device_states vào cấu hình của virtuals
+                    # Di chuyển thông tin từ last_effects và last_states vào cấu hình của virtuals
                     config = migrate_device_info_to_virtuals(config)
 
                     save_config(config, config_dir)
@@ -578,19 +578,19 @@ def save_config(config: dict, config_dir: str) -> None:
     config["configuration_version"] = CONFIGURATION_VERSION
     config_view = dict(config)
 
-    # Kiểm tra xem tất cả các virtuals đã có thông tin device_effect và device_state chưa
+    # Kiểm tra xem tất cả các virtuals đã có thông tin last_effect và last_state chưa
     all_virtuals_have_info = True
     for virtual in config_view.get("virtuals", []):
         if "is_device" in virtual and virtual["is_device"] is not None:
-            if "config" not in virtual or "device_effect" not in virtual["config"] or "device_state" not in virtual["config"]:
+            if "config" not in virtual or "last_effect" not in virtual["config"] or "last_state" not in virtual["config"]:
                 all_virtuals_have_info = False
                 break
 
-    # Nếu tất cả virtuals đã có thông tin, xóa các trường device_effects và device_states
+    # Nếu tất cả virtuals đã có thông tin, xóa các trường last_effects và last_states
     unneeded_keys = ["wls_presets"]
     if all_virtuals_have_info:
-        unneeded_keys.extend(["device_effects", "device_states"])
-        _LOGGER.info("Đã di chuyển thông tin device_effects và device_states vào cấu hình của virtuals")
+        unneeded_keys.extend(["last_effects", "last_states"])
+        _LOGGER.info("Đã di chuyển thông tin last_effects và last_states vào cấu hình của virtuals")
 
     for key in [key for key in config_view if key in unneeded_keys]:
         del config_view[key]
