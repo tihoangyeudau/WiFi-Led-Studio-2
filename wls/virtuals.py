@@ -104,6 +104,9 @@ class Virtual:
                     max=MAX_FREQ,
                 ),
             ),  # AND HERE TOO,
+            # Các trường lưu trữ tự động, không phải lựa chọn của người dùng
+            vol.Optional("device_effect"): str,
+            vol.Optional("device_state"): bool,
         }
     )
 

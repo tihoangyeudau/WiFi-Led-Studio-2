@@ -851,22 +851,23 @@ class Devices(RegistryLoader):
             wls=self._wls,
         )
 
-        # Tạo một đối tượng của class SerialDevice
-        try:
-            # Cố gắng tạo một đối tượng của class SerialDevice
-            serial_device = SerialDevice(self._wls, device.config)
-        except TypeError:
-            # Nếu xảy ra lỗi (không thể tạo instance của lớp trừu tượng),
-            # lấy giá trị mặc định từ schema của SerialDevice class
-            serial_device = {
-                "led_id": "_Auto_"  # Đây là giá trị mặc định từ schema của bạn
-            }
+        # Chỉ thêm led_id cho các thiết bị USB, không phải thiết bị WiFi
+        if device_type == "skydimond-usb":
+            try:
+                # Cố gắng tạo một đối tượng của class SerialDevice
+                serial_device = SerialDevice(self._wls, device.config)
+            except TypeError:
+                # Nếu xảy ra lỗi (không thể tạo instance của lớp trừu tượng),
+                # lấy giá trị mặc định từ schema của SerialDevice class
+                serial_device = {
+                    "led_id": "_Auto_"  # Đây là giá trị mặc định từ schema của bạn
+                }
 
-        # Lấy led_id từ SerialDevice
-        led_id = serial_device['led_id']
+            # Lấy led_id từ SerialDevice
+            led_id = serial_device['led_id']
 
-        # Cập nhật config của thiết bị với led_id mới
-        device.config["led_id"] = led_id
+            # Cập nhật config của thiết bị với led_id mới
+            device.config["led_id"] = led_id
 
         if hasattr(device, "async_initialize"):
             await device.async_initialize()
