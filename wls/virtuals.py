@@ -334,16 +334,34 @@ class Virtual:
             self._active_effect = effect
             self._active_effect.activate(self)
 
-            # Cập nhật device_states trong config
-            if "device_states" not in self._wls.config:
-                self._wls.config["device_states"] = {}
-
-            if "device_effects" not in self._wls.config:
-                self._wls.config["device_effects"] = {}
-
-            # Nếu virtual này đại diện cho một thiết bị thực, cập nhật trạng thái và hiệu ứng của thiết bị đó
+            # Nếu virtual này đại diện cho một thiết bị thực, cập nhật trạng thái và hiệu ứng trong config của virtual
             if hasattr(self, 'is_device') and self.is_device is not None:
                 device_id = str(self.is_device)
+
+                # Lưu trạng thái và hiệu ứng trong config của virtual
+                if "device_state" not in self._config:
+                    self._config["device_state"] = True
+                else:
+                    self._config["device_state"] = True
+
+                if "device_effect" not in self._config:
+                    self._config["device_effect"] = effect.type
+                else:
+                    self._config["device_effect"] = effect.type
+
+                # Cập nhật config trong danh sách virtuals của wls
+                for idx, virtual_config in enumerate(self._wls.config["virtuals"]):
+                    if virtual_config["id"] == self.id:
+                        virtual_config["config"]["device_state"] = True
+                        virtual_config["config"]["device_effect"] = effect.type
+                        self._wls.config["virtuals"][idx] = virtual_config
+                        break
+
+                # Vẫn giữ lại cách cũ để đảm bảo tương thích ngược
+                if "device_states" not in self._wls.config:
+                    self._wls.config["device_states"] = {}
+                if "device_effects" not in self._wls.config:
+                    self._wls.config["device_effects"] = {}
                 self._wls.config["device_states"][device_id] = True
                 self._wls.config["device_effects"][device_id] = effect.type
 
@@ -394,13 +412,26 @@ class Virtual:
             return
 
         try:
-            # Cập nhật trạng thái device_states trong config cho thiết bị cụ thể
-            if "device_states" not in self._wls.config:
-                self._wls.config["device_states"] = {}
-
-            # Nếu virtual này đại diện cho một thiết bị thực, cập nhật trạng thái của thiết bị đó
+            # Nếu virtual này đại diện cho một thiết bị thực, cập nhật trạng thái trong config của virtual
             if hasattr(self, 'is_device') and self.is_device is not None:
                 device_id = str(self.is_device)
+
+                # Lưu trạng thái trong config của virtual
+                if "device_state" not in self._config:
+                    self._config["device_state"] = False
+                else:
+                    self._config["device_state"] = False
+
+                # Cập nhật config trong danh sách virtuals của wls
+                for idx, virtual_config in enumerate(self._wls.config["virtuals"]):
+                    if virtual_config["id"] == self.id:
+                        virtual_config["config"]["device_state"] = False
+                        self._wls.config["virtuals"][idx] = virtual_config
+                        break
+
+                # Vẫn giữ lại cách cũ để đảm bảo tương thích ngược
+                if "device_states" not in self._wls.config:
+                    self._wls.config["device_states"] = {}
                 self._wls.config["device_states"][device_id] = False
 
                 # Tắt quá trình tìm kiếm thiết bị khi thiết bị bị tắt
