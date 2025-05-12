@@ -22,8 +22,8 @@ class RMLDevice(NetworkedDevice):
             vol.Optional(
                 "sync_mode",
                 description="Giao thức truyền trực tuyến tới thiết bị RML. Khuyến nghị: DDP cho v0.13 trở lên. Sử dụng UDP cho các phiên bản cũ hơn.",
-                default="DDP",
-            ): vol.In(["DDP", "UDP"]),
+                default="auto",
+            ): vol.In(["auto", "DDP", "UDP"]),
             vol.Optional(
                 "timeout",
                 description="Thời gian giữa hiệu ứng WiFi Led Studio tắt và hiệu ứng đèn Rainbow Music Led kích hoạt",
@@ -151,12 +151,19 @@ class RMLDevice(NetworkedDevice):
             rml_name = rml_config["name"]
             rml_count = led_info["count"]
             rml_rgbmode = led_info["rgbw"]
+            rml_udpport = rml_config.get("udpport", None)
 
             rml_config = {
                 "name": rml_name,
                 "pixel_count": rml_count,
                 "rgbw_led": rml_rgbmode,
             }
+
+            # Thiết lập sync_mode dựa trên giá trị của rml_udpport
+            if rml_udpport is None or not rml_udpport:
+                self._config["sync_mode"] = "DDP"
+            else:
+                self._config["sync_mode"] = "UDP"
 
             self._config.update(rml_config)
             self._not_supported = False  # Đánh dấu thiết bị được hỗ trợ

@@ -922,14 +922,3 @@ class Devices(RegistryLoader):
         )
 
         return device
-
-    async def set_rmls_sync_mode(self, mode):
-        for device in self.values():
-            if (
-                device.type == "skydimond-wifi"
-                and device.pixel_count > 480
-                and device.config["sync_mode"] != mode
-            ):
-                device.rml.set_sync_mode(mode)
-                await device.rml.flush_sync_settings()
-                device.update_config({"sync_mode": mode})
