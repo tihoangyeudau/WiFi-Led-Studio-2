@@ -6,7 +6,7 @@ datas = [   ('/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons', 'i
             ('/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons/tray.png', '.'),
             ('/usr/local/bin/build/WiFi Led Studio-3.4.0.app/Contents/MacOS/lib/wls', 'wls/'),
             ('/usr/local/bin/build/WiFi Led Studio-3.4.0.app/Contents/MacOS/lib/wls_frontend', 'wls_frontend/'),
-            ('/usr/local/bin/build/WiFi Led Studio-3.4.0.app/Contents/MacOS/lib/xyzservices', 'xyzservices/'),
+            ('/usr/local/bin/build/WiFi Led Studio-3.4.0.app/Contents/MacOS/lib/xyzservices', 'xyzservices/')]
 datas += copy_metadata('bokeh')
 
 
