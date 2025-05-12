@@ -604,8 +604,8 @@ class WlsCore:
                 # MB_YESNO | MB_ICONWARNING = 0x00000034
                 result = ctypes.windll.user32.MessageBoxW(
                     0,
-                    "Bạn có chắc chắn muốn khôi phục về mặc định không nếu mọi cài đặt trước đây của bạn sẽ bị xoá?",
-                    "Xác nhận",
+                    "Bạn có chắc chắn muốn khôi phục về mặc định không nếu mọi cài đặt trước đây của bạn sẽ bị xoá?\n\nAre you sure you want to restore to default settings? All your previous settings will be deleted.",
+                    "Xác nhận | Confirm",
                     0x00000034
                 )
 
@@ -615,13 +615,21 @@ class WlsCore:
 
                     try:
                         # Chạy chương trình restore.exe với cửa sổ ẩn
-                        subprocess.Popen(
+                        process = subprocess.Popen(
                             [path_restore],
                             shell=True,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
                             creationflags=subprocess.CREATE_NO_WINDOW  # Chỉ hoạt động trên Windows
                         )
+
+                        # Đợi một khoảng thời gian ngắn để đảm bảo quá trình đã bắt đầu
+                        time.sleep(1)
+
+                        # Kiểm tra xem quá trình có bắt đầu thành công không
+                        if process.poll() is not None and process.returncode != 0:
+                            stderr = process.stderr.read().decode('utf-8', errors='ignore')
+                            raise Exception(f"Lỗi khi khởi chạy restore.exe: {stderr}")
 
                         self.stop(0)
                     except Exception as e:
@@ -2013,7 +2021,7 @@ class WlsCore:
             and self.icon.HAS_NOTIFICATION
         ):
             self.icon.notify(
-                "Bạn ơi, tôi ở dưới đây!\nBấm vào biểu tượng ở khay hệ thống để chọn hiệu ứng nhé", "Nháy theo nhạc, màu đơn, hiệu ứng màu"
+                "Bấm vào biểu tượng ở khay hệ thống để chọn hiệu ứng nhé\n\nClick on the icon in the systray to control", "Nháy theo nhạc | Music Effects"
             )
         self.devices = Devices(self)
         self.effects = Effects(self)
