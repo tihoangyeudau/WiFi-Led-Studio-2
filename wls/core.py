@@ -648,12 +648,11 @@ class WlsCore:
                 # Sử dụng AppleScript để hiển thị hộp thoại xác nhận trên macOS
                 script = '''
                     tell application "System Events"
-                        display dialog "Bạn có chắc chắn muốn khôi phục về mặc định không? Nếu bạn tiếp tục, mọi cài đặt trước đây của bạn sẽ bị xoá.
+                        set dialogResult to display dialog "Bạn có chắc chắn muốn khôi phục về mặc định không? Nếu bạn tiếp tục, mọi cài đặt trước đây của bạn sẽ bị xoá.
 
-                Are you sure you want to reset to default? If you continue, all your previous settings will be deleted."
-                        buttons {"Không | No", "Có | Yes"} default button "Không | No" with icon caution with title "Xác nhận | Confirmation"
+Are you sure you want to reset to default? If you continue, all your previous settings will be deleted." buttons {"Không | No", "Có | Yes"} default button "Không | No" with icon caution with title "Xác nhận | Confirmation"
 
-                        set the button_pressed to the button returned of the result
+                        set the button_pressed to button returned of dialogResult
                         if the button_pressed is "Có | Yes" then
                             return "yes"
                         else
