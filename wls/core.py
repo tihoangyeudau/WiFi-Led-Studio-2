@@ -647,20 +647,20 @@ class WlsCore:
             try:
                 # Sử dụng AppleScript để hiển thị hộp thoại xác nhận trên macOS
                 script = '''
-                tell application "System Events"
-                    display dialog "Bạn có chắc chắn muốn khôi phục về mặc định không? Nếu bạn tiếp tục, mọi cài đặt trước đây của bạn sẽ bị xoá.
+                    tell application "System Events"
+                        display dialog "Bạn có chắc chắn muốn khôi phục về mặc định không? Nếu bạn tiếp tục, mọi cài đặt trước đây của bạn sẽ bị xoá.
 
-                    Are you sure you want to reset to default? If you continue, all your previous settings will be deleted."
-                    buttons {"Không | No", "Có | Yes"} default button "Không | No" with icon caution with title "Xác nhận | Confirmation"
+                Are you sure you want to reset to default? If you continue, all your previous settings will be deleted."
+                        buttons {"Không | No", "Có | Yes"} default button "Không | No" with icon caution with title "Xác nhận | Confirmation"
 
-                    set the button_pressed to the button returned of the result
-                    if the button_pressed is "Có | Yes" then
-                        return "yes"
-                    else
-                        return "no"
-                    end if
-                end tell
-                '''
+                        set the button_pressed to the button returned of the result
+                        if the button_pressed is "Có | Yes" then
+                            return "yes"
+                        else
+                            return "no"
+                        end if
+                    end tell
+                    '''
 
                 # Chạy AppleScript và lấy kết quả
                 proc = subprocess.Popen(['osascript', '-e', script], stdout=subprocess.PIPE)
@@ -2314,9 +2314,9 @@ class WlsCore:
         return await self._common_async_stop(exit_code)
 
     async def async_stop_aw(self, exit_code):
-        exit_code = await self._common_async_stop(exit_code)
-
         if sys.platform == "win32":
+            exit_code = await self._common_async_stop(exit_code)
+
             path_rmlapp = os.path.join(os.environ["ProgramFiles"], "Rainbow Music Led\\bin", "rmlapp.exe")
             startupinfo = subprocess.STARTUPINFO()
             subprocess.Popen([path_rmlapp], startupinfo=startupinfo)
