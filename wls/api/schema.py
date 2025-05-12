@@ -61,11 +61,14 @@ class SchemaEndpoint(RestEndpoint):
         for schema in schemas:
             if schema == "devices":
                 response["devices"] = {}
-                # Generate all the device schema
+                # Generate all the device schema, excluding UDP and DDP devices
                 for (
                     device_type,
                     device,
                 ) in self._wls.devices.classes().items():
+                    # Skip UDP and DDP device types - only show skydimond-usb and skydimond-wifi
+                    if device_type in ["udp", "ddp"]:
+                        continue
                     response["devices"][device_type] = {
                         "schema": convertToJsonSchema(device.schema()),
                         "id": device_type,
@@ -84,7 +87,7 @@ class SchemaEndpoint(RestEndpoint):
                         "name": effect.NAME,
                         "category": effect.CATEGORY,
                     }
-                    
+
                     if effect.HIDDEN_KEYS:
                         response["effects"][effect_type][
                             "hidden_keys"
