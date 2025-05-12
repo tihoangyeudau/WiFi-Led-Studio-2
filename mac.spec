@@ -7,7 +7,6 @@ datas = [   ('/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons', 'i
             ('/usr/local/bin/build/WiFi Led Studio-3.4.0.app/Contents/MacOS/lib/wls', 'wls/'),
             ('/usr/local/bin/build/WiFi Led Studio-3.4.0.app/Contents/MacOS/lib/wls_frontend', 'wls_frontend/'),
             ('/usr/local/bin/build/WiFi Led Studio-3.4.0.app/Contents/MacOS/lib/xyzservices', 'xyzservices/'),
-            ('/usr/local/bin/build/WiFi Led Studio-3.4.0.app/Contents/MacOS/lib/stupidArtnet', 'stupidArtnet/'),]
 datas += copy_metadata('bokeh')
 
 
@@ -18,8 +17,6 @@ a = Analysis(['./wls/__main__.py'],
              binaries=[],
              datas=datas,
              hiddenimports=[
-                            "sacn",
-                            "stupidArtnet",
                             "aubio",
                             "numpy",
                             "math",

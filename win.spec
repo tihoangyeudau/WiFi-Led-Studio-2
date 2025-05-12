@@ -8,7 +8,6 @@ datas = [
          (f'C:/Users/tuant/AppData/Local/Programs/Python/Python312/Scripts/build/exe.win-amd64-3.12/lib/wls','wls/'),
          (f'C:/Users/tuant/AppData/Local/Programs/Python/Python312/Scripts/build/exe.win-amd64-3.12/lib/wls_frontend','wls_frontend/'),
          (f'C:/Users/tuant/AppData/Local/Programs/Python/Python312/Scripts/build/exe.win-amd64-3.12/lib/xyzservices','xyzservices/'),
-         (f'C:/Users/tuant/AppData/Local/Programs/Python/Python312/Scripts/build/exe.win-amd64-3.12/lib/stupidArtnet','stupidArtnet/'),
          (f'{spec_root}/icons','icons/'),
          (f'{spec_root}/icons/tray.png','.')
       ]
@@ -23,8 +22,6 @@ a = Analysis([f'{spec_root}\\wls\\__main__.py'],
              binaries=[],
              datas=datas,
              hiddenimports=[
-                           "sacn",
-                           "stupidArtnet",
                            "aubio",
                            "numpy",
                            "math",

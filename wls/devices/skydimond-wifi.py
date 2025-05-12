@@ -4,7 +4,6 @@ import voluptuous as vol
 
 from wls.devices import NetworkedDevice
 from wls.devices.ddp import DDPDevice
-from wls.devices.e131 import E131Device
 from wls.devices.udp import UDPRealtimeDevice
 from wls.utils import RML
 
@@ -23,8 +22,8 @@ class RMLDevice(NetworkedDevice):
             vol.Optional(
                 "sync_mode",
                 description="Giao thức truyền trực tuyến tới thiết bị RML. Khuyến nghị: DDP cho v0.13 trở lên. Sử dụng UDP cho các phiên bản cũ hơn.",
-                default="UDP",
-            ): vol.In(["UDP", "DDP", "E131"]),
+                default="DDP",
+            ): vol.In(["DDP", "UDP"]),
             vol.Optional(
                 "timeout",
                 description="Thời gian giữa hiệu ứng WiFi Led Studio tắt và hiệu ứng đèn Rainbow Music Led kích hoạt",
@@ -34,9 +33,8 @@ class RMLDevice(NetworkedDevice):
     )
 
     SYNC_MODES = {
-        "UDP": UDPRealtimeDevice,
         "DDP": DDPDevice,
-        "E131": E131Device,
+        "UDP": UDPRealtimeDevice,
     }
 
     def __init__(self, wls, config):
@@ -57,16 +55,7 @@ class RMLDevice(NetworkedDevice):
                 "name": None,
                 "ip_address": None,
                 "pixel_count": None,
-            },
-            "E131": {
-                "name": None,
-                "ip_address": None,
-                "pixel_count": None,
-                "universe": 1,
-                "universe_size": 510,
-                "channel_offset": 0,
-                "packet_priority": 100,
-            },
+            }
         }
 
     def config_updated(self, config):

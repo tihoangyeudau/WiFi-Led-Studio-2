@@ -116,7 +116,6 @@ const RmlCard = ({ className }) => {
                                         disabled={!settings.rml_preferences.rml_preferred_mode.user_enabled}
                                     >
                                         <MenuItem value={"unset"}>Không cài</MenuItem>
-                                        <MenuItem value={"E131"}>E131</MenuItem>
                                         <MenuItem value={"DDP"}>DDP</MenuItem>
                                         <MenuItem value={"UDP"}>UDP</MenuItem>
                                     </Select>
@@ -206,7 +205,7 @@ const RmlCard = ({ className }) => {
                                     id="rml-universe-select"
                                     value={settings.rml_preferences.start_universe_setting.setting}
                                     onChange={(e) => onChangeSetting("start_universe_setting", e.target.value)}
-                                    disabled={!settings.rml_preferences.start_universe_setting.user_enabled} 
+                                    disabled={!settings.rml_preferences.start_universe_setting.user_enabled}
                                     className={classes.formControl} />
 
                             </div>

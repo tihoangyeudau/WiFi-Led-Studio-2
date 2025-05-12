@@ -33,8 +33,8 @@ export const String = Template.bind({});
 String.args = {
   disabled: false,
   schema: {
-    default: 'UDP',
-    enum: ['UDP', 'DDP', 'E131'],
+    default: 'DDP',
+    enum: ['UDP', 'DDP'],
     title: 'Chế độ đồng bộ',
     type: 'string',
   },

@@ -142,7 +142,7 @@ AddDeviceRML.args = {
       },
       sync_mode: {
         type: 'string',
-        enum: ['UDP', 'DDP', 'E131'],
+        enum: ['UDP', 'DDP'],
         title: 'Chế độ đồng bộ',
         description:
           'Giao thức truyền trực tuyến tới đèn. Khuyến nghị: UDP <480 LED, DDP> 480 LED',

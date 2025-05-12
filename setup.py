@@ -35,7 +35,6 @@ INSTALL_REQUIRES = [
     "pyserial>=3.5",
     "pystray>=0.19.5",
     "requests>=2.31.0",
-    "sacn>=1.9.0",
     "sentry-sdk>=1.40.4",
     "sounddevice>=0.4.6",
     "samplerate>=0.2.1",
@@ -43,7 +42,6 @@ INSTALL_REQUIRES = [
     "voluptuous>=0.14.1",
     "zeroconf~=0.119.0",
     "pillow>=10.1.0",
-    "stupidartnet~=1.4.0",
     "pyinstaller==6.8.0",
     "cx-freeze>=7.2.2",
     # Conditional Requirement

@@ -222,7 +222,7 @@ class RML:
     A collection of RML helper functions
     """
 
-    SYNC_MODES = {"DDP": 7979, "E131": 6868, "ARTNET": 3939}
+    SYNC_MODES = {"DDP": 7979}
 
     def __init__(self, ip_address):
         self.ip_address = ip_address
@@ -382,21 +382,21 @@ class RML:
             try:
                 # Sử dụng timeout ngắn hơn cho các yêu cầu HTTP
                 timeout = 0.5  # Giảm timeout xuống 0.5 giây
-                
+
                 # Gửi yêu cầu đến /json/state
                 await RML._rml_request(requests.post, self.ip_address, "/json/state", timeout=timeout, json=power)
                 return True
             except Exception as e:
                 _LOGGER.debug(f"Lỗi khi gửi yêu cầu power HTTP: {e}")
                 return False
-                
+
         async def send_live_request():
             """Gửi yêu cầu thay đổi trạng thái live."""
             live = {"live": state}
             try:
                 # Sử dụng timeout ngắn hơn cho các yêu cầu HTTP
                 timeout = 0.5  # Giảm timeout xuống 0.5 giây
-                
+
                 # Gửi yêu cầu đến /json/info
                 await RML._rml_request(requests.post, self.ip_address, "/json/info", timeout=timeout, json=live)
                 return True
@@ -407,7 +407,7 @@ class RML:
         try:
             power_success = False
             live_success = False
-            
+
             # Thử gửi yêu cầu power
             for attempt in range(max_retries):
                 if await send_power_request():
@@ -428,7 +428,7 @@ class RML:
                 # Nếu chưa thành công, đợi một thời gian rồi thử lại
                 if attempt < max_retries - 1:  # Không delay sau lần thử cuối
                     await asyncio.sleep(delay)
-            
+
             # Thử gửi yêu cầu live (với số lần thử nhiều hơn cho live)
             live_max_retries = max_retries + 2  # Thêm 2 lần thử cho live
             for attempt in range(live_max_retries):
@@ -438,11 +438,11 @@ class RML:
                     break
                 else:
                     _LOGGER.warning(f"RML {self.ip_address}: Không thể gửi yêu cầu live HTTP. Thử lại lần {attempt + 1}.")
-                
+
                 # Nếu chưa thành công, đợi một thời gian rồi thử lại
                 if attempt < live_max_retries - 1:  # Không delay sau lần thử cuối
                     await asyncio.sleep(delay)
-            
+
             # Nếu đang tắt thiết bị và không thành công, thử một lần cuối cùng với phương pháp đồng bộ
             if not state and not power_success:
                 try:
@@ -455,7 +455,7 @@ class RML:
                         power_success = True
                 except Exception as e:
                     _LOGGER.error(f"Lỗi khi sử dụng phương pháp đồng bộ cho power: {e}")
-            
+
             # Nếu đang tắt thiết bị và không thành công với live, thử một lần cuối cùng với phương pháp đồng bộ
             if not state and not live_success:
                 try:
@@ -468,10 +468,10 @@ class RML:
                         live_success = True
                 except Exception as e:
                     _LOGGER.error(f"Lỗi khi sử dụng phương pháp đồng bộ cho live: {e}")
-            
+
             if not power_success:
                 _LOGGER.error(f"Không thể thay đổi trạng thái nguồn RML {self.ip_address} sau {max_retries} lần thử.")
-            
+
             if not live_success:
                 _LOGGER.error(f"Không thể thay đổi trạng thái live RML {self.ip_address} sau {live_max_retries} lần thử.")
 
@@ -581,7 +581,7 @@ class RML:
         Updates internal sync settings to set sync mode
 
         Args:
-            mode: str, in ["ddp", "e131", "artnet" or "udp"]
+            mode: str, in ["ddp" or "udp"]
         """
         mode = mode.upper()
 

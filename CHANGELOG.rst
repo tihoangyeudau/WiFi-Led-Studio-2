@@ -173,5 +173,4 @@ Version 0.1.0
 
 - **Initial release with basic feature set!**
     - Added a framework for highly customizable effects and outputs
-    - Added support for E1.31 devices
     - Added some basic effects and audio reaction ones

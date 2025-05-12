@@ -804,20 +804,9 @@ class Devices(RegistryLoader):
                     existing_device.config["ip_address"] == device_ip
                     or existing_device.config["ip_address"] == resolved_dest
                 ):
-                    if device_type in ["e131", "artnet"]:
-                        # check the universes for e131 and artnet, it might still be okay at a shared ip_address
-                        # eg. for multi output controllers
-                        if (
-                            device_config["universe"]
-                            == existing_device.config["universe"]
-                        ):
-                            msg = f"Bỏ qua đèn {device_ip}: Chia sẻ IP và Universe đầu tiên với đèn hiện có là {existing_device.name}"
-                            _LOGGER.info(msg)
-                            raise ValueError(msg)
-                    else:
-                        msg = f"Bỏ qua đèn {device_ip}: Chia sẻ điểm đến với đèn hiện có {existing_device.name}"
-                        _LOGGER.info(msg)
-                        raise ValueError(msg)
+                    msg = f"Bỏ qua đèn {device_ip}: Chia sẻ điểm đến với đèn hiện có {existing_device.name}"
+                    _LOGGER.info(msg)
+                    raise ValueError(msg)
 
         # If RML device, get all the necessary config from the device itself
         if device_type == "skydimond-wifi":
@@ -841,7 +830,7 @@ class Devices(RegistryLoader):
                 "pixel_count": rml_count,
                 "icon_name": "rml",
                 "rgbw_led": rml_rgbmode,
-                "sync_mode": "UDP",
+                "sync_mode": "DDP",
             }
 
             device_config.update(rml_config)
