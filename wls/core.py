@@ -433,20 +433,34 @@ class WlsCore:
         # Try to read language from plist file on macOS
         elif sys.platform == "darwin":
             try:
+                import subprocess
                 import plistlib
-
-                # Path to the plist file
-                plist_path = os.path.expanduser("~/Library/Preferences/com.rainbow-music-led.RmlApp.plist")
-
-                # Read existing plist if it exists
-                if os.path.exists(plist_path):
-                    with open(plist_path, 'rb') as fp:
-                        plist_data = plistlib.load(fp)
-
-                    # Get language setting
-                    if 'language' in plist_data and plist_data['language'] in ["en", "vi"]:
-                        self.config["language"] = plist_data['language']
-                        _LOGGER.debug(f"Loaded language from plist: {plist_data['language']}")
+                
+                # First try using the defaults command
+                try:
+                    result = subprocess.run([
+                        'defaults', 'read', 
+                        'com.rainbow-music-led.RmlApp', 
+                        'language'
+                    ], capture_output=True, text=True, check=True)
+                    
+                    language_value = result.stdout.strip()
+                    if language_value in ["en", "vi"]:
+                        self.config["language"] = language_value
+                        _LOGGER.debug(f"Loaded language from defaults command: {language_value}")
+                except subprocess.SubprocessError:
+                    # If defaults command fails, try using plistlib
+                    plist_path = os.path.expanduser("~/Library/Preferences/com.rainbow-music-led.RmlApp.plist")
+                    
+                    # Read existing plist if it exists
+                    if os.path.exists(plist_path):
+                        with open(plist_path, 'rb') as fp:
+                            plist_data = plistlib.load(fp)
+                        
+                        # Get language setting
+                        if 'language' in plist_data and plist_data['language'] in ["en", "vi"]:
+                            self.config["language"] = plist_data['language']
+                            _LOGGER.debug(f"Loaded language from plist file: {plist_data['language']}")
             except Exception as e:
                 # Plist file doesn't exist or other error
                 _LOGGER.debug(f"Could not read language from plist: {e}")
@@ -2014,25 +2028,39 @@ class WlsCore:
             elif sys.platform == "darwin":
                 try:
                     import plistlib
+                    import subprocess
                     
                     # Path to the plist file
                     plist_path = os.path.expanduser("~/Library/Preferences/com.rainbow-music-led.RmlApp.plist")
                     
-                    # Read existing plist if it exists
-                    if os.path.exists(plist_path):
-                        with open(plist_path, 'rb') as fp:
-                            plist_data = plistlib.load(fp)
-                    else:
-                        plist_data = {}
-                    
-                    # Update language setting
-                    plist_data['language'] = language
-                    
-                    # Write back to file
-                    with open(plist_path, 'wb') as fp:
-                        plistlib.dump(plist_data, fp)
-                    
-                    _LOGGER.debug(f"Updated plist file with language: {language}")
+                    # Use defaults command to write the language setting
+                    # This is the macOS native way to modify plist files
+                    try:
+                        subprocess.run([
+                            'defaults', 'write', 
+                            'com.rainbow-music-led.RmlApp', 
+                            'language', language
+                        ], check=True)
+                        _LOGGER.debug(f"Updated plist file with language: {language} using defaults command")
+                    except subprocess.SubprocessError as e:
+                        _LOGGER.error(f"Error using defaults command: {e}")
+                        
+                        # Fallback to plistlib if defaults command fails
+                        # Read existing plist if it exists
+                        if os.path.exists(plist_path):
+                            with open(plist_path, 'rb') as fp:
+                                plist_data = plistlib.load(fp)
+                        else:
+                            plist_data = {}
+                        
+                        # Update language setting
+                        plist_data['language'] = language
+                        
+                        # Write back to file in XML format
+                        with open(plist_path, 'wb') as fp:
+                            plistlib.dump(plist_data, fp, fmt=plistlib.FMT_XML)
+                        
+                        _LOGGER.debug(f"Updated plist file with language: {language} using plistlib")
                 except Exception as e:
                     _LOGGER.error(f"Error updating plist file with language: {e}")
             
