@@ -98,6 +98,7 @@ CORE_CONFIG_SCHEMA = vol.Schema(
         vol.Optional("global_brightness", default=1.0): vol.All(
             vol.Coerce(float), vol.Range(0, 1.0)
         ),
+        vol.Optional("language", default="vi"): vol.In(["en", "vi"]),
     },
     extra=vol.ALLOW_EXTRA,
 )
@@ -174,7 +175,10 @@ def create_default_config(config_dir: str) -> str:
         return config_path
 
     except OSError:
-        print(f"Không thể tạo tệp cấu hình mặc định {config_path}.")
+        try:
+            print(f"Không thể tạo tệp cấu hình mặc định {config_path}.")
+        except UnicodeEncodeError:
+            print(f"Cannot create default config file {config_path}.")
 
         return None
 
@@ -249,11 +253,19 @@ def migrate_device_info_to_virtuals(config):
 
 def load_config(config_dir: str) -> dict:
     """Validates and loads the configuration file in the provided directory"""
-
+    
+    # Initialize logger
+    load_logger()
+    
     config_file = ensure_config_file(config_dir)
-    print(
-        f"Đang tải tệp cấu hình: {os.path.join(os.path.abspath(config_dir), CONFIG_FILE_NAME)}"
-    )
+    try:
+        print(
+            f"Đang tải tệp cấu hình: {os.path.join(os.path.abspath(config_dir), CONFIG_FILE_NAME)}"
+        )
+    except UnicodeEncodeError:
+        print(
+            f"Loading config file: {os.path.join(os.path.abspath(config_dir), CONFIG_FILE_NAME)}"
+        )
     try:
         with open(config_file, encoding="utf-8") as file:
             config_json = json.load(file)

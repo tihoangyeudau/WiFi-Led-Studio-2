@@ -412,6 +412,45 @@ class WlsCore:
 
         self.config = load_config(config_dir)
 
+        # Try to read language from registry on Windows
+        if sys.platform == "win32":
+            try:
+                reg_path = r"SOFTWARE\Rainbow Music Led\RmlApp"
+                key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_READ)
+                try:
+                    language_value, _ = winreg.QueryValueEx(key, "language")
+                    if language_value in ["en", "vi"]:
+                        self.config["language"] = language_value
+                        _LOGGER.debug(f"Loaded language from registry: {language_value}")
+                except FileNotFoundError:
+                    # Language key doesn't exist in registry
+                    pass
+                winreg.CloseKey(key)
+            except Exception as e:
+                # Registry key doesn't exist or other error
+                _LOGGER.debug(f"Could not read language from registry: {e}")
+
+        # Try to read language from plist file on macOS
+        elif sys.platform == "darwin":
+            try:
+                import plistlib
+
+                # Path to the plist file
+                plist_path = os.path.expanduser("~/Library/Preferences/com.rainbow-music-led.RmlApp.plist")
+
+                # Read existing plist if it exists
+                if os.path.exists(plist_path):
+                    with open(plist_path, 'rb') as fp:
+                        plist_data = plistlib.load(fp)
+
+                    # Get language setting
+                    if 'language' in plist_data and plist_data['language'] in ["en", "vi"]:
+                        self.config["language"] = plist_data['language']
+                        _LOGGER.debug(f"Loaded language from plist: {plist_data['language']}")
+            except Exception as e:
+                # Plist file doesn't exist or other error
+                _LOGGER.debug(f"Could not read language from plist: {e}")
+
         # Khởi tạo trạng thái LED dựa trên last_state trong cấu hình của virtuals
         self.led_active = False
 
@@ -604,8 +643,11 @@ class WlsCore:
                 # MB_YESNO | MB_ICONWARNING = 0x00000034
                 result = ctypes.windll.user32.MessageBoxW(
                     0,
-                    "Bạn có chắc chắn muốn khôi phục về mặc định không nếu mọi cài đặt trước đây của bạn sẽ bị xoá?\n\nAre you sure you want to restore to default settings? All your previous settings will be deleted.",
-                    "Xác nhận | Confirm",
+                    self.get_text(
+                        "Are you sure you want to restore to default settings? All your previous settings will be deleted.",
+                        "Bạn có chắc chắn muốn khôi phục về mặc định không? Mọi cài đặt trước đây của bạn sẽ bị xoá."
+                    ),
+                    self.get_text("Confirm", "Xác nhận"),
                     0x00000034
                 )
 
@@ -646,14 +688,24 @@ class WlsCore:
         elif sys.platform == "darwin":
             try:
                 # Sử dụng AppleScript để hiển thị hộp thoại xác nhận trên macOS
-                script = '''
+                # Determine which language to use
+                if self.get_language() == "en":
+                    dialog_text = "Are you sure you want to reset to default? If you continue, all your previous settings will be deleted."
+                    no_button = "No"
+                    yes_button = "Yes"
+                    title = "Confirmation"
+                else:
+                    dialog_text = "Bạn có chắc chắn muốn khôi phục về mặc định không? Nếu bạn tiếp tục, mọi cài đặt trước đây của bạn sẽ bị xoá."
+                    no_button = "Không"
+                    yes_button = "Có"
+                    title = "Xác nhận"
+                
+                script = f'''
                     tell application "System Events"
-                        set dialogResult to display dialog "Bạn có chắc chắn muốn khôi phục về mặc định không? Nếu bạn tiếp tục, mọi cài đặt trước đây của bạn sẽ bị xoá.
-
-Are you sure you want to reset to default? If you continue, all your previous settings will be deleted." buttons {"Không | No", "Có | Yes"} default button "Không | No" with icon caution with title "Xác nhận | Confirmation"
+                        set dialogResult to display dialog "{dialog_text}" buttons {{"{no_button}", "{yes_button}"}} default button "{no_button}" with icon caution with title "{title}"
 
                         set the button_pressed to button returned of dialogResult
-                        if the button_pressed is "Có | Yes" then
+                        if the button_pressed is "{yes_button}" then
                             return "yes"
                         else
                             return "no"
@@ -700,12 +752,12 @@ Are you sure you want to reset to default? If you continue, all your previous se
             # Switch to WLS mode
             self.delete_aw_key()
             self.add_wls_key()
-            menu_text = "Mở rộng màn khi khởi động máy | Enable autostart Screen capture"
+            menu_text = self.get_text("Enable autostart Screen capture", "Mở rộng màn khi khởi động máy")
         else:
             # Switch to AW mode
             self.delete_wls_key()
             self.add_aw_key()
-            menu_text = "Nháy nhạc khi khởi động máy | Enable autostart Music effect"
+            menu_text = self.get_text("Enable autostart Music effect", "Nháy nhạc khi khởi động máy")
 
         # Update menu
         self.setup_icon_menu(toggle_text=menu_text)
@@ -1481,11 +1533,17 @@ Are you sure you want to reset to default? If you continue, all your previous se
                 menu_item = MenuItem(display_text, make_handler(effect_type))
                 categories[info['category']].append(menu_item)
 
-            # Category translations
-            category_translations = {
-                "1. Hiệu ứng màu": "Hiệu ứng màu | Color Effects",
-                "2. Hiệu ứng nháy theo nhạc": "Nháy nhạc | Music Effects",
-            }
+            # Category translations - use fixed translations regardless of what get_text returns
+            if self.get_language() == "en":
+                category_translations = {
+                    "1. Hiệu ứng màu": "Color Effects",
+                    "2. Hiệu ứng nháy theo nhạc": "Music Effects",
+                }
+            else:  # vi
+                category_translations = {
+                    "1. Hiệu ứng màu": "Hiệu ứng màu",
+                    "2. Hiệu ứng nháy theo nhạc": "Nháy nhạc",
+                }
 
             # Sort categories
             sorted_categories = sorted(categories.keys())
@@ -1517,6 +1575,9 @@ Are you sure you want to reset to default? If you continue, all your previous se
 
                 new_effects_items.append(MenuItem(display_category, category_menu, icon=category_icon))
 
+            # Store current language for comparison in _should_regenerate_effects_menu
+            self._last_language = self.get_language()
+            
             return new_effects_items
 
         except Exception as e:
@@ -1547,7 +1608,7 @@ Are you sure you want to reset to default? If you continue, all your previous se
         # Create "All" option
         is_all_selected = not selected_device
         device_items.append(MenuItem(
-            f"   {'✓ ' if is_all_selected else '    '}⛬ Tất cả | All",
+            f"   {'✓ ' if is_all_selected else '    '}⛬ {self.get_text('All', 'Tất cả')}",
             self.select_all_devices
         ))
 
@@ -1715,15 +1776,16 @@ Are you sure you want to reset to default? If you continue, all your previous se
         Returns:
             str: The menu title
         """
-        return "Đèn cần chỉnh | Instance to control :"
+        return self.get_text("Instance to control :", "Đèn cần chỉnh")
 
-    def setup_icon_menu(self, toggle_text=None):
+    def setup_icon_menu(self, toggle_text=None, force_regenerate=False):
         """
         Setup the icon menu with the appropriate text based on current state.
 
         Args:
             toggle_text: Optional text override for the toggle menu item.
                         If None, it will be determined based on current state.
+            force_regenerate: If True, force regeneration of the effects menu.
         """
         # Check if required components are initialized
         if not hasattr(self, 'virtuals') or not hasattr(self, 'devices'):
@@ -1772,9 +1834,9 @@ Are you sure you want to reset to default? If you continue, all your previous se
             # Determine toggle text based on current state
             if toggle_text is None:
                 if self.check_rmlapp_run_key():
-                    toggle_text = "Nháy nhạc khi khởi động máy | Enable autostart Music effect"
+                    toggle_text = self.get_text("Enable autostart Music effect", "Nháy nhạc khi khởi động máy")
                 else:
-                    toggle_text = "Mở rộng màn khi khởi động máy | Enable autostart Screen capture"
+                    toggle_text = self.get_text("Enable autostart Screen capture", "Mở rộng màn khi khởi động máy")
 
             # Determine LED state based on selected device
             device_active = self.is_device_active()
@@ -1783,15 +1845,25 @@ Are you sure you want to reset to default? If you continue, all your previous se
             self.led_active = device_active
 
             # Set LED toggle text
-            led_toggle_text = "Tắt đèn | Suspend" if device_active else "Bật đèn | Resume"
+            led_toggle_text = self.get_text("Suspend", "Tắt đèn") if device_active else self.get_text("Resume", "Bật đèn")
 
             # Log current LED state
             _LOGGER.debug(f"Current LED state: {'On' if device_active else 'Off'}")
 
+            # Create language submenu
+            language_submenu = Menu(
+                MenuItem("English", lambda: self.set_language("en"), 
+                         checked=lambda _: self.get_language() == "en", 
+                         icon=self.get_menu_icon("english")),
+                MenuItem("Tiếng Việt", lambda: self.set_language("vi"), 
+                         checked=lambda _: self.get_language() == "vi", 
+                         icon=self.get_menu_icon("vietnamese"))
+            )
+            
             # Create advanced submenu (static)
             advanced_submenu = Menu(
-                MenuItem("Khởi động lại | Restart", self.restart_wls, icon=self.get_menu_icon("restart")),
-                MenuItem("Khôi phục mặc định | Restore default", self.restore, icon=self.get_menu_icon("default")),
+                MenuItem(self.get_text("Restart", "Khởi động lại"), self.restart_wls, icon=self.get_menu_icon("restart")),
+                MenuItem(self.get_text("Restore default", "Khôi phục mặc định"), self.restore, icon=self.get_menu_icon("default")),
             )
 
             # Create brightness submenu
@@ -1802,8 +1874,8 @@ Are you sure you want to reset to default? If you continue, all your previous se
             device_items = self.generate_device_menu_items()
 
             # Create effects submenu - this is the most expensive operation
-            # Only regenerate if necessary (first time or after effect change)
-            if not hasattr(self, '_cached_effects_items') or self._should_regenerate_effects_menu():
+            # Only regenerate if necessary (first time, after effect change, or if forced)
+            if not hasattr(self, '_cached_effects_items') or self._should_regenerate_effects_menu() or force_regenerate:
                 effects_items = self.generate_effects_submenu()
                 self._cached_effects_items = effects_items
                 self._last_effect_state = self.get_current_effect()
@@ -1828,7 +1900,7 @@ Are you sure you want to reset to default? If you continue, all your previous se
             main_menu_items.extend([
                 Menu.SEPARATOR,
                 MenuItem(lambda text: led_toggle_text, self.toggle_led_state, icon=led_icon),
-                MenuItem(f"Độ sáng | Brightness :   {current_brightness}%", brightness_submenu, icon=self.get_menu_icon("brightness")),
+                MenuItem(f"{self.get_text('Brightness', 'Độ sáng')} :   {current_brightness}%", brightness_submenu, icon=self.get_menu_icon("brightness")),
                 Menu.SEPARATOR
             ])
 
@@ -1838,19 +1910,26 @@ Are you sure you want to reset to default? If you continue, all your previous se
 
             # Add remaining items
             main_menu_items.extend([
-                MenuItem("Mở rộng màn | Screen capture", self.stop_aw, icon=self.get_menu_icon("capture")),
+                MenuItem(self.get_text("Screen capture", "Mở rộng màn"), self.stop_aw, icon=self.get_menu_icon("capture")),
                 Menu.SEPARATOR,
-                MenuItem("Cài đặt | Setting", self.open_ui, default=True, icon=self.get_menu_icon("settings")),
-                MenuItem("Nâng cao | Advanced", advanced_submenu, icon=self.get_menu_icon("restart")),
+                MenuItem(self.get_text("Setting", "Cài đặt"), self.open_ui, default=True, icon=self.get_menu_icon("settings")),
+                MenuItem(
+                    # Show "Language" when Vietnamese is selected, "Ngôn ngữ" when English is selected
+                    "Language" if self.get_language() == "vi" else "Ngôn ngữ", 
+                    language_submenu, 
+                    # Use vietnamese icon when Vietnamese is selected, english icon when English is selected
+                    icon=self.get_menu_icon("vietnamese" if self.get_language() == "vi" else "english")
+                ),
+                MenuItem(self.get_text("Advanced", "Nâng cao"), advanced_submenu, icon=self.get_menu_icon("restart")),
                 Menu.SEPARATOR,
                 MenuItem("RAINBOW MUSIC LED", Menu(
-                    MenuItem("Hướng dẫn | Guide", lambda: webbrowser.open("https://rainbowmusicled.com/huong-dan"), icon=self.get_menu_icon("guide")),
-                    MenuItem("Hỗ trợ | Support", lambda: webbrowser.open("https://rainbowmusicled.com/ho-tro"), icon=self.get_menu_icon("support")),
-                    MenuItem("Bảo hành | Warranty", lambda: webbrowser.open("https://rainbowmusicled.com/bao-hanh"), icon=self.get_menu_icon("warranty")),
-                    MenuItem("Cửa hàng | Shop", lambda: webbrowser.open("https://rainbowmusicled.com"), icon=self.get_menu_icon("shop")),
+                    MenuItem(self.get_text("Guide", "Hướng dẫn"), lambda: webbrowser.open("https://rainbowmusicled.com/huong-dan"), icon=self.get_menu_icon("guide")),
+                    MenuItem(self.get_text("Support", "Hỗ trợ"), lambda: webbrowser.open("https://rainbowmusicled.com/ho-tro"), icon=self.get_menu_icon("support")),
+                    MenuItem(self.get_text("Warranty", "Bảo hành"), lambda: webbrowser.open("https://rainbowmusicled.com/bao-hanh"), icon=self.get_menu_icon("warranty")),
+                    MenuItem(self.get_text("Shop", "Cửa hàng"), lambda: webbrowser.open("https://rainbowmusicled.com"), icon=self.get_menu_icon("shop")),
                 ), icon=self.get_menu_icon("rml")),
                 Menu.SEPARATOR,
-                MenuItem("Thoát | Quit", lambda: self.stop(0), icon=self.get_menu_icon("quit")),
+                MenuItem(self.get_text("Quit", "Thoát"), lambda: self.stop(0), icon=self.get_menu_icon("quit")),
             ])
 
             # Create main menu
@@ -1886,11 +1965,107 @@ Are you sure you want to reset to default? If you continue, all your previous se
         current_effect = self.get_current_effect()
         if not hasattr(self, '_last_effect_state') or self._last_effect_state != current_effect:
             return True
+            
+        # Check if language has changed since last menu generation
+        if hasattr(self, '_last_language') and self._last_language != self.get_language():
+            return True
+            
+        # Store current language for future comparison
+        self._last_language = self.get_language()
 
         # Add other conditions that would require regeneration
         # For example, if effects have been added or removed
 
         return False
+        
+    def set_language(self, language):
+        """
+        Set the application language.
+        
+        Args:
+            language (str): The language code to set ('en' or 'vi')
+        """
+        if language in ["en", "vi"]:
+            # Update config
+            self.config["language"] = language
+            from wls.config import save_config
+            save_config(self.config, self.config_dir)
+            _LOGGER.debug(f"Language set to: {language}")
+            
+            # Update registry on Windows
+            if sys.platform == "win32":
+                try:
+                    # Create or open the Rainbow Music Led registry key
+                    reg_path = r"SOFTWARE\Rainbow Music Led\RmlApp"
+                    try:
+                        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_ALL_ACCESS)
+                    except FileNotFoundError:
+                        # Create the key if it doesn't exist
+                        key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, reg_path)
+                    
+                    # Set the language value
+                    winreg.SetValueEx(key, "language", 0, winreg.REG_SZ, language)
+                    winreg.CloseKey(key)
+                    _LOGGER.debug(f"Updated registry with language: {language}")
+                except Exception as e:
+                    _LOGGER.error(f"Error updating registry with language: {e}")
+            
+            # Update plist file on macOS
+            elif sys.platform == "darwin":
+                try:
+                    import plistlib
+                    
+                    # Path to the plist file
+                    plist_path = os.path.expanduser("~/Library/Preferences/com.rainbow-music-led.RmlApp.plist")
+                    
+                    # Read existing plist if it exists
+                    if os.path.exists(plist_path):
+                        with open(plist_path, 'rb') as fp:
+                            plist_data = plistlib.load(fp)
+                    else:
+                        plist_data = {}
+                    
+                    # Update language setting
+                    plist_data['language'] = language
+                    
+                    # Write back to file
+                    with open(plist_path, 'wb') as fp:
+                        plistlib.dump(plist_data, fp)
+                    
+                    _LOGGER.debug(f"Updated plist file with language: {language}")
+                except Exception as e:
+                    _LOGGER.error(f"Error updating plist file with language: {e}")
+            
+            # Update the menu to reflect the new language
+            # Force regeneration of the effects menu
+            self.setup_icon_menu(force_regenerate=True)
+            
+    def get_language(self):
+        """
+        Get the current application language.
+        
+        Returns:
+            str: The current language code ('en' or 'vi')
+        """
+        return self.config.get("language", "vi")
+        
+    def get_text(self, en_text, vi_text):
+        """
+        Get text in the appropriate language based on current settings.
+        
+        Args:
+            en_text (str): English text
+            vi_text (str): Vietnamese text
+            
+        Returns:
+            str: Text in the appropriate language
+        """
+        language = self.get_language()
+        
+        if language == "en":
+            return en_text
+        else:  # vi
+            return vi_text
 
     # Compatibility methods for backward compatibility
     def setup_icon_menu_aw(self):
@@ -2023,9 +2198,15 @@ Are you sure you want to reset to default? If you continue, all your previous se
             and self.icon.notify is not None
             and self.icon.HAS_NOTIFICATION
         ):
-            self.icon.notify(
-                "Bấm vào biểu tượng ở khay hệ thống để chọn hiệu ứng nhé\n\nClick on the icon in the systray to control", "Nháy theo nhạc | Music Effects"
-            )
+            # Get appropriate notification text based on language
+            if self.get_language() == "en":
+                message = "Click on the icon in the systray to control"
+                title = "Music Effects"
+            else:  # vi
+                message = "Bấm vào biểu tượng ở khay hệ thống để chọn hiệu ứng nhé"
+                title = "Nháy nhạc"
+                
+            self.icon.notify(message, title)
         self.devices = Devices(self)
         self.effects = Effects(self)
         self.virtuals = Virtuals(self)
