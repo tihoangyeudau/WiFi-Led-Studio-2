@@ -100,12 +100,16 @@ app = BUNDLE(
             coll,
             name='WiFi Led Studio.app',
             icon='/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons/WiFi Led Studio.icns',
-            bundle_identifier='com.rml.wls',
+            bundle_identifier='com.rml.rmlapp',
             info_plist={
                 'NSMicrophoneUsageDescription': 'WiFi Led Studio needs microphone access to capture audio for light effects and visualizations',
                 'NSAppleEventsUsageDescription': 'WiFi Led Studio needs to control other applications to synchronize light effects with media playback',
                 'NSLocalNetworkUsageDescription': 'WiFi Led Studio needs to discover and control WiFi lighting devices on your local network',
                 'LSUIElement': 'True',
+                'NSRequiresAquaSystemAppearance': 'False',
+                'NSCameraUsageDescription': 'WiFi Led Studio does not use the camera, but the audio framework may require this permission',
+                'NSPrincipalClass': 'NSApplication',
+                'NSHighResolutionCapable': 'True',
                 'NSBonjourServices': [
                     '_http._tcp',
                     '_tcp',
@@ -115,4 +119,3 @@ app = BUNDLE(
                 ]
             }
 )
-
