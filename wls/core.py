@@ -14,6 +14,8 @@ if sys.platform == "win32":
 elif sys.platform == "darwin":
     import shutil
     from AppKit import NSWorkspace, NSObject, NSDistributedNotificationCenter
+    import plistlib
+    import subprocess
 
 from pystray import Menu, MenuItem
 from concurrent.futures import ThreadPoolExecutor
@@ -433,17 +435,14 @@ class WlsCore:
         # Try to read language from plist file on macOS
         elif sys.platform == "darwin":
             try:
-                import subprocess
-                import plistlib
-                
                 # First try using the defaults command
                 try:
                     result = subprocess.run([
-                        'defaults', 'read', 
-                        'com.rainbow-music-led.RmlApp', 
+                        'defaults', 'read',
+                        'com.rainbow-music-led.RmlApp',
                         'language'
                     ], capture_output=True, text=True, check=True)
-                    
+
                     language_value = result.stdout.strip()
                     if language_value in ["en", "vi"]:
                         self.config["language"] = language_value
@@ -451,12 +450,12 @@ class WlsCore:
                 except subprocess.SubprocessError:
                     # If defaults command fails, try using plistlib
                     plist_path = os.path.expanduser("~/Library/Preferences/com.rainbow-music-led.RmlApp.plist")
-                    
+
                     # Read existing plist if it exists
                     if os.path.exists(plist_path):
                         with open(plist_path, 'rb') as fp:
                             plist_data = plistlib.load(fp)
-                        
+
                         # Get language setting
                         if 'language' in plist_data and plist_data['language'] in ["en", "vi"]:
                             self.config["language"] = plist_data['language']
@@ -713,7 +712,7 @@ class WlsCore:
                     no_button = "Không"
                     yes_button = "Có"
                     title = "Xác nhận"
-                
+
                 script = f'''
                     tell application "System Events"
                         set dialogResult to display dialog "{dialog_text}" buttons {{"{no_button}", "{yes_button}"}} default button "{no_button}" with icon caution with title "{title}"
@@ -816,6 +815,72 @@ class WlsCore:
                     from wls.config import save_config
                     save_config(self.config, self.config_dir)
 
+                    # Update registry on Windows
+                    if sys.platform == "win32":
+                        try:
+                            # Create or open the Rainbow Music Led registry key
+                            reg_path = r"SOFTWARE\Rainbow Music Led\RmlApp"
+                            try:
+                                key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_ALL_ACCESS)
+                            except FileNotFoundError:
+                                # Create the key if it doesn't exist
+                                key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, reg_path)
+
+                            # Create or open the device-specific subkey
+                            device_reg_path = f"{reg_path}\\Instance_{device_id}"
+                            try:
+                                device_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, device_reg_path, 0, winreg.KEY_ALL_ACCESS)
+                            except FileNotFoundError:
+                                # Create the key if it doesn't exist
+                                device_key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, device_reg_path)
+
+                            # Set the deviceEnabled value
+                            winreg.SetValueEx(device_key, "deviceEnabled", 0, winreg.REG_SZ, "false")
+                            winreg.CloseKey(device_key)
+                            winreg.CloseKey(key)
+                            _LOGGER.debug(f"Updated registry with deviceEnabled=false for device {device_id}")
+                        except Exception as e:
+                            _LOGGER.error(f"Error updating registry with deviceEnabled: {e}")
+
+                    # Update plist file on macOS
+                    elif sys.platform == "darwin":
+                        try:
+                            # Path to the plist file
+                            plist_path = os.path.expanduser("~/Library/Preferences/com.rainbow-music-led.RmlApp.plist")
+
+                            # Key name for this device
+                            key_name = f"Instance_{device_id}.deviceEnabled"
+
+                            # Use defaults command to write the deviceEnabled setting
+                            try:
+                                subprocess.run([
+                                    'defaults', 'write',
+                                    'com.rainbow-music-led.RmlApp',
+                                    key_name, "-bool", "false"
+                                ], check=True)
+                                _LOGGER.debug(f"Updated plist file with deviceEnabled=false for device {device_id} using defaults command")
+                            except subprocess.SubprocessError as e:
+                                _LOGGER.error(f"Error using defaults command: {e}")
+
+                                # Fallback to plistlib if defaults command fails
+                                # Read existing plist if it exists
+                                if os.path.exists(plist_path):
+                                    with open(plist_path, 'rb') as fp:
+                                        plist_data = plistlib.load(fp)
+                                else:
+                                    plist_data = {}
+
+                                # Update deviceEnabled setting
+                                plist_data[key_name] = False
+
+                                # Write back to file in XML format
+                                with open(plist_path, 'wb') as fp:
+                                    plistlib.dump(plist_data, fp, fmt=plistlib.FMT_XML)
+
+                                _LOGGER.debug(f"Updated plist file with deviceEnabled=false for device {device_id} using plistlib")
+                        except Exception as e:
+                            _LOGGER.error(f"Error updating plist file with deviceEnabled: {e}")
+
                     # Phát ra sự kiện để thông báo cho frontend về thay đổi trạng thái đèn LED
                     from wls.events import LedStateChangedEvent
                     self.events.fire_event(LedStateChangedEvent(is_active=False, device_id=device_id))
@@ -843,6 +908,72 @@ class WlsCore:
                         # Lưu cấu hình
                         from wls.config import save_config
                         save_config(self.config, self.config_dir)
+
+                        # Update registry on Windows
+                        if sys.platform == "win32":
+                            try:
+                                # Create or open the Rainbow Music Led registry key
+                                reg_path = r"SOFTWARE\Rainbow Music Led\RmlApp"
+                                try:
+                                    key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_ALL_ACCESS)
+                                except FileNotFoundError:
+                                    # Create the key if it doesn't exist
+                                    key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, reg_path)
+
+                                # Create or open the device-specific subkey
+                                device_reg_path = f"{reg_path}\\Instance_{device_id}"
+                                try:
+                                    device_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, device_reg_path, 0, winreg.KEY_ALL_ACCESS)
+                                except FileNotFoundError:
+                                    # Create the key if it doesn't exist
+                                    device_key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, device_reg_path)
+
+                                # Set the deviceEnabled value
+                                winreg.SetValueEx(device_key, "deviceEnabled", 0, winreg.REG_SZ, "true")
+                                winreg.CloseKey(device_key)
+                                winreg.CloseKey(key)
+                                _LOGGER.debug(f"Updated registry with deviceEnabled=true for device {device_id}")
+                            except Exception as e:
+                                _LOGGER.error(f"Error updating registry with deviceEnabled: {e}")
+
+                        # Update plist file on macOS
+                        elif sys.platform == "darwin":
+                            try:
+                                # Path to the plist file
+                                plist_path = os.path.expanduser("~/Library/Preferences/com.rainbow-music-led.RmlApp.plist")
+
+                                # Key name for this device
+                                key_name = f"Instance_{device_id}.deviceEnabled"
+
+                                # Use defaults command to write the deviceEnabled setting
+                                try:
+                                    subprocess.run([
+                                        'defaults', 'write',
+                                        'com.rainbow-music-led.RmlApp',
+                                        key_name, "-bool", "true"
+                                    ], check=True)
+                                    _LOGGER.debug(f"Updated plist file with deviceEnabled=true for device {device_id} using defaults command")
+                                except subprocess.SubprocessError as e:
+                                    _LOGGER.error(f"Error using defaults command: {e}")
+
+                                    # Fallback to plistlib if defaults command fails
+                                    # Read existing plist if it exists
+                                    if os.path.exists(plist_path):
+                                        with open(plist_path, 'rb') as fp:
+                                            plist_data = plistlib.load(fp)
+                                    else:
+                                        plist_data = {}
+
+                                    # Update deviceEnabled setting
+                                    plist_data[key_name] = True
+
+                                    # Write back to file in XML format
+                                    with open(plist_path, 'wb') as fp:
+                                        plistlib.dump(plist_data, fp, fmt=plistlib.FMT_XML)
+
+                                    _LOGGER.debug(f"Updated plist file with deviceEnabled=true for device {device_id} using plistlib")
+                            except Exception as e:
+                                _LOGGER.error(f"Error updating plist file with deviceEnabled: {e}")
 
                         # Phát ra sự kiện để thông báo cho frontend về thay đổi trạng thái đèn LED
                         from wls.events import LedStateChangedEvent
@@ -879,6 +1010,113 @@ class WlsCore:
                 from wls.config import save_config
                 save_config(self.config, self.config_dir)
 
+                # Update registry on Windows
+                if sys.platform == "win32":
+                    try:
+                        # Create or open the Rainbow Music Led registry key
+                        reg_path = r"SOFTWARE\Rainbow Music Led\RmlApp"
+                        try:
+                            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_ALL_ACCESS)
+                        except FileNotFoundError:
+                            # Create the key if it doesn't exist
+                            key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, reg_path)
+
+                        # Update SystrayState subkey
+                        systray_reg_path = f"{reg_path}\\SystrayState"
+                        try:
+                            systray_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, systray_reg_path, 0, winreg.KEY_ALL_ACCESS)
+                        except FileNotFoundError:
+                            # Create the key if it doesn't exist
+                            systray_key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, systray_reg_path)
+
+                        # Set the deviceEnabled value
+                        winreg.SetValueEx(systray_key, "deviceEnabled", 0, winreg.REG_SZ, "false")
+                        winreg.CloseKey(systray_key)
+
+                        # Also update each device instance
+                        for virtual_id, virtual in self.virtuals._virtuals.items():
+                            if hasattr(virtual, 'is_device') and virtual.is_device is not None:
+                                device_id = virtual.is_device
+                                device_reg_path = f"{reg_path}\\Instance_{device_id}"
+                                try:
+                                    device_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, device_reg_path, 0, winreg.KEY_ALL_ACCESS)
+                                except FileNotFoundError:
+                                    # Create the key if it doesn't exist
+                                    device_key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, device_reg_path)
+
+                                # Set the deviceEnabled value
+                                winreg.SetValueEx(device_key, "deviceEnabled", 0, winreg.REG_SZ, "false")
+                                winreg.CloseKey(device_key)
+
+                        winreg.CloseKey(key)
+                        _LOGGER.debug("Updated registry with deviceEnabled=false for all devices")
+                    except Exception as e:
+                        _LOGGER.error(f"Error updating registry with deviceEnabled: {e}")
+
+                # Update plist file on macOS
+                elif sys.platform == "darwin":
+                    try:
+                        # Path to the plist file
+                        plist_path = os.path.expanduser("~/Library/Preferences/com.rainbow-music-led.RmlApp.plist")
+
+                        # Update SystrayState first
+                        try:
+                            subprocess.run([
+                                'defaults', 'write',
+                                'com.rainbow-music-led.RmlApp',
+                                'SystrayState.deviceEnabled', "-bool", "false"
+                            ], check=True)
+                            _LOGGER.debug("Updated plist file with SystrayState.deviceEnabled=false using defaults command")
+                        except subprocess.SubprocessError as e:
+                            _LOGGER.error(f"Error using defaults command: {e}")
+
+                            # Fallback to plistlib if defaults command fails
+                            if os.path.exists(plist_path):
+                                with open(plist_path, 'rb') as fp:
+                                    plist_data = plistlib.load(fp)
+                            else:
+                                plist_data = {}
+
+                            # Update SystrayState deviceEnabled setting
+                            plist_data['SystrayState.deviceEnabled'] = False
+
+                            # Write back to file in XML format
+                            with open(plist_path, 'wb') as fp:
+                                plistlib.dump(plist_data, fp, fmt=plistlib.FMT_XML)
+
+                        # Also update each device instance
+                        for virtual_id, virtual in self.virtuals._virtuals.items():
+                            if hasattr(virtual, 'is_device') and virtual.is_device is not None:
+                                device_id = virtual.is_device
+                                key_name = f"Instance_{device_id}.deviceEnabled"
+
+                                try:
+                                    subprocess.run([
+                                        'defaults', 'write',
+                                        'com.rainbow-music-led.RmlApp',
+                                        key_name, "-bool", "false"
+                                    ], check=True)
+                                except subprocess.SubprocessError as e:
+                                    _LOGGER.error(f"Error using defaults command for device {device_id}: {e}")
+
+                                    # Fallback to plistlib if defaults command fails
+                                    if os.path.exists(plist_path):
+                                        with open(plist_path, 'rb') as fp:
+                                            plist_data = plistlib.load(fp)
+                                    else:
+                                        plist_data = {}
+
+                                    # Update deviceEnabled setting for this device
+                                    plist_data[key_name] = False
+
+                                    # Write back to file in XML format
+                                    with open(plist_path, 'wb') as fp:
+                                        plistlib.dump(plist_data, fp, fmt=plistlib.FMT_XML)
+
+                        _LOGGER.debug("Updated plist file with deviceEnabled=false for all devices")
+                    except Exception as e:
+                        _LOGGER.error(f"Error updating plist file with deviceEnabled: {e}")
+
                 # Phát ra sự kiện để thông báo cho frontend về thay đổi trạng thái đèn LED
                 from wls.events import LedStateChangedEvent
                 self.events.fire_event(LedStateChangedEvent(is_active=False))
@@ -911,6 +1149,113 @@ class WlsCore:
                     # Lưu cấu hình
                     from wls.config import save_config
                     save_config(self.config, self.config_dir)
+
+                    # Update registry on Windows
+                    if sys.platform == "win32":
+                        try:
+                            # Create or open the Rainbow Music Led registry key
+                            reg_path = r"SOFTWARE\Rainbow Music Led\RmlApp"
+                            try:
+                                key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_ALL_ACCESS)
+                            except FileNotFoundError:
+                                # Create the key if it doesn't exist
+                                key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, reg_path)
+
+                            # Update SystrayState subkey
+                            systray_reg_path = f"{reg_path}\\SystrayState"
+                            try:
+                                systray_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, systray_reg_path, 0, winreg.KEY_ALL_ACCESS)
+                            except FileNotFoundError:
+                                # Create the key if it doesn't exist
+                                systray_key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, systray_reg_path)
+
+                            # Set the deviceEnabled value
+                            winreg.SetValueEx(systray_key, "deviceEnabled", 0, winreg.REG_SZ, "true")
+                            winreg.CloseKey(systray_key)
+
+                            # Also update each device instance
+                            for virtual_id, virtual in self.virtuals._virtuals.items():
+                                if hasattr(virtual, 'is_device') and virtual.is_device is not None:
+                                    device_id = virtual.is_device
+                                    device_reg_path = f"{reg_path}\\Instance_{device_id}"
+                                    try:
+                                        device_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, device_reg_path, 0, winreg.KEY_ALL_ACCESS)
+                                    except FileNotFoundError:
+                                        # Create the key if it doesn't exist
+                                        device_key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, device_reg_path)
+
+                                    # Set the deviceEnabled value
+                                    winreg.SetValueEx(device_key, "deviceEnabled", 0, winreg.REG_SZ, "true")
+                                    winreg.CloseKey(device_key)
+
+                            winreg.CloseKey(key)
+                            _LOGGER.debug("Updated registry with deviceEnabled=true for all devices")
+                        except Exception as e:
+                            _LOGGER.error(f"Error updating registry with deviceEnabled: {e}")
+
+                    # Update plist file on macOS
+                    elif sys.platform == "darwin":
+                        try:
+                            # Path to the plist file
+                            plist_path = os.path.expanduser("~/Library/Preferences/com.rainbow-music-led.RmlApp.plist")
+
+                            # Update SystrayState first
+                            try:
+                                subprocess.run([
+                                    'defaults', 'write',
+                                    'com.rainbow-music-led.RmlApp',
+                                    'SystrayState.deviceEnabled', "-bool", "true"
+                                ], check=True)
+                                _LOGGER.debug("Updated plist file with SystrayState.deviceEnabled=true using defaults command")
+                            except subprocess.SubprocessError as e:
+                                _LOGGER.error(f"Error using defaults command: {e}")
+
+                                # Fallback to plistlib if defaults command fails
+                                if os.path.exists(plist_path):
+                                    with open(plist_path, 'rb') as fp:
+                                        plist_data = plistlib.load(fp)
+                                else:
+                                    plist_data = {}
+
+                                # Update SystrayState deviceEnabled setting
+                                plist_data['SystrayState.deviceEnabled'] = True
+
+                                # Write back to file in XML format
+                                with open(plist_path, 'wb') as fp:
+                                    plistlib.dump(plist_data, fp, fmt=plistlib.FMT_XML)
+
+                            # Also update each device instance
+                            for virtual_id, virtual in self.virtuals._virtuals.items():
+                                if hasattr(virtual, 'is_device') and virtual.is_device is not None:
+                                    device_id = virtual.is_device
+                                    key_name = f"Instance_{device_id}.deviceEnabled"
+
+                                    try:
+                                        subprocess.run([
+                                            'defaults', 'write',
+                                            'com.rainbow-music-led.RmlApp',
+                                            key_name, "-bool", "true"
+                                        ], check=True)
+                                    except subprocess.SubprocessError as e:
+                                        _LOGGER.error(f"Error using defaults command for device {device_id}: {e}")
+
+                                        # Fallback to plistlib if defaults command fails
+                                        if os.path.exists(plist_path):
+                                            with open(plist_path, 'rb') as fp:
+                                                plist_data = plistlib.load(fp)
+                                        else:
+                                            plist_data = {}
+
+                                        # Update deviceEnabled setting for this device
+                                        plist_data[key_name] = True
+
+                                        # Write back to file in XML format
+                                        with open(plist_path, 'wb') as fp:
+                                            plistlib.dump(plist_data, fp, fmt=plistlib.FMT_XML)
+
+                            _LOGGER.debug("Updated plist file with deviceEnabled=true for all devices")
+                        except Exception as e:
+                            _LOGGER.error(f"Error updating plist file with deviceEnabled: {e}")
 
                     # Phát ra sự kiện để thông báo cho frontend về thay đổi trạng thái đèn LED
                     from wls.events import LedStateChangedEvent
@@ -992,6 +1337,97 @@ class WlsCore:
         # Save config
         from wls.config import save_config
         save_config(self.config, self.config_dir)
+
+        # Update registry on Windows
+        if sys.platform == "win32":
+            try:
+                # Create or open the Rainbow Music Led registry key
+                reg_path = r"SOFTWARE\Rainbow Music Led\RmlApp"
+                try:
+                    key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_ALL_ACCESS)
+                except FileNotFoundError:
+                    # Create the key if it doesn't exist
+                    key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, reg_path)
+
+                # Check if a specific device is selected
+                if hasattr(self, '_selected_device'):
+                    device_id = self._selected_device
+                    # Create or open the device-specific subkey
+                    device_reg_path = f"{reg_path}\\Instance_{device_id}"
+                    try:
+                        device_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, device_reg_path, 0, winreg.KEY_ALL_ACCESS)
+                    except FileNotFoundError:
+                        # Create the key if it doesn't exist
+                        device_key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, device_reg_path)
+
+                    # Set the brightness value (convert to DWORD)
+                    brightness_int = int(brightness_value * 100)
+                    winreg.SetValueEx(device_key, "brightness", 0, winreg.REG_DWORD, brightness_int)
+                    winreg.CloseKey(device_key)
+                else:
+                    # Update SystrayState subkey
+                    systray_reg_path = f"{reg_path}\\SystrayState"
+                    try:
+                        systray_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, systray_reg_path, 0, winreg.KEY_ALL_ACCESS)
+                    except FileNotFoundError:
+                        # Create the key if it doesn't exist
+                        systray_key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, systray_reg_path)
+
+                    # Set the brightness value (convert to DWORD)
+                    brightness_int = int(brightness_value * 100)
+                    winreg.SetValueEx(systray_key, "brightness", 0, winreg.REG_DWORD, brightness_int)
+                    winreg.CloseKey(systray_key)
+
+                winreg.CloseKey(key)
+                _LOGGER.debug(f"Updated registry with brightness: {int(brightness_value * 100)}%")
+            except Exception as e:
+                _LOGGER.error(f"Error updating registry with brightness: {e}")
+
+        # Update plist file on macOS
+        elif sys.platform == "darwin":
+            try:
+                # Path to the plist file
+                plist_path = os.path.expanduser("~/Library/Preferences/com.rainbow-music-led.RmlApp.plist")
+
+                # Check if a specific device is selected
+                if hasattr(self, '_selected_device'):
+                    device_id = self._selected_device
+                    key_name = f"Instance_{device_id}.brightness"
+                else:
+                    key_name = "SystrayState.brightness"
+
+                # Convert brightness to integer percentage
+                brightness_int = int(brightness_value * 100)
+
+                # Use defaults command to write the brightness setting
+                try:
+                    subprocess.run([
+                        'defaults', 'write',
+                        'com.rainbow-music-led.RmlApp',
+                        key_name, str(brightness_int)
+                    ], check=True)
+                    _LOGGER.debug(f"Updated plist file with brightness: {brightness_int}% using defaults command")
+                except subprocess.SubprocessError as e:
+                    _LOGGER.error(f"Error using defaults command: {e}")
+
+                    # Fallback to plistlib if defaults command fails
+                    # Read existing plist if it exists
+                    if os.path.exists(plist_path):
+                        with open(plist_path, 'rb') as fp:
+                            plist_data = plistlib.load(fp)
+                    else:
+                        plist_data = {}
+
+                    # Update brightness setting
+                    plist_data[key_name] = brightness_int
+
+                    # Write back to file in XML format
+                    with open(plist_path, 'wb') as fp:
+                        plistlib.dump(plist_data, fp, fmt=plistlib.FMT_XML)
+
+                    _LOGGER.debug(f"Updated plist file with brightness: {brightness_int}% using plistlib")
+            except Exception as e:
+                _LOGGER.error(f"Error updating plist file with brightness: {e}")
 
         # Update menu to reflect new state
         if self.icon:
@@ -1591,7 +2027,7 @@ class WlsCore:
 
             # Store current language for comparison in _should_regenerate_effects_menu
             self._last_language = self.get_language()
-            
+
             return new_effects_items
 
         except Exception as e:
@@ -1654,6 +2090,68 @@ class WlsCore:
                     self.config["selected_device"] = dev_id
                     from wls.config import save_config
                     save_config(self.config, self.config_dir)
+
+                    # Update registry on Windows
+                    if sys.platform == "win32":
+                        try:
+                            # Create or open the Rainbow Music Led registry key
+                            reg_path = r"SOFTWARE\Rainbow Music Led\RmlApp"
+                            try:
+                                key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_ALL_ACCESS)
+                            except FileNotFoundError:
+                                # Create the key if it doesn't exist
+                                key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, reg_path)
+
+                            # Set the selectedInstance value (convert to DWORD)
+                            # Ensure dev_id is an integer
+                            try:
+                                dev_id_int = int(dev_id)
+                                winreg.SetValueEx(key, "selectedInstance", 0, winreg.REG_DWORD, dev_id_int)
+                                winreg.CloseKey(key)
+                                _LOGGER.debug(f"Updated registry with selectedInstance: {dev_id_int}")
+                            except (ValueError, TypeError):
+                                # If conversion fails, use 0 as default
+                                winreg.SetValueEx(key, "selectedInstance", 0, winreg.REG_DWORD, 0)
+                                winreg.CloseKey(key)
+                                _LOGGER.debug(f"Updated registry with selectedInstance: 0 (default, could not convert {dev_id})")
+                        except Exception as e:
+                            _LOGGER.error(f"Error updating registry with selectedInstance: {e}")
+
+                    # Update plist file on macOS
+                    elif sys.platform == "darwin":
+                        try:
+                            # Path to the plist file
+                            plist_path = os.path.expanduser("~/Library/Preferences/com.rainbow-music-led.RmlApp.plist")
+
+                            # Use defaults command to write the selectedInstance setting
+                            try:
+                                subprocess.run([
+                                    'defaults', 'write',
+                                    'com.rainbow-music-led.RmlApp',
+                                    'selectedInstance', str(dev_id)
+                                ], check=True)
+                                _LOGGER.debug(f"Updated plist file with selectedInstance: {dev_id} using defaults command")
+                            except subprocess.SubprocessError as e:
+                                _LOGGER.error(f"Error using defaults command: {e}")
+
+                                # Fallback to plistlib if defaults command fails
+                                # Read existing plist if it exists
+                                if os.path.exists(plist_path):
+                                    with open(plist_path, 'rb') as fp:
+                                        plist_data = plistlib.load(fp)
+                                else:
+                                    plist_data = {}
+
+                                # Update selectedInstance setting
+                                plist_data['selectedInstance'] = dev_id
+
+                                # Write back to file in XML format
+                                with open(plist_path, 'wb') as fp:
+                                    plistlib.dump(plist_data, fp, fmt=plistlib.FMT_XML)
+
+                                _LOGGER.debug(f"Updated plist file with selectedInstance: {dev_id} using plistlib")
+                        except Exception as e:
+                            _LOGGER.error(f"Error updating plist file with selectedInstance: {e}")
 
                     # Update LED state based on selected device
                     if "last_states" in self.config and str(dev_id) in self.config["last_states"]:
@@ -1780,6 +2278,75 @@ class WlsCore:
         from wls.config import save_config
         save_config(self.config, self.config_dir)
 
+        # Update registry on Windows
+        if sys.platform == "win32":
+            try:
+                # Create or open the Rainbow Music Led registry key
+                reg_path = r"SOFTWARE\Rainbow Music Led\RmlApp"
+                try:
+                    key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_ALL_ACCESS)
+                except FileNotFoundError:
+                    # Create the key if it doesn't exist
+                    key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, reg_path)
+
+                # Set the selectedInstance value to 0xFFFFFFFF (all devices)
+                # 0xFFFFFFFF = 4294967295 in decimal (unsigned 32-bit max value)
+                try:
+                    # Use -1 which will be interpreted as 0xFFFFFFFF in unsigned 32-bit
+                    winreg.SetValueEx(key, "selectedInstance", 0, winreg.REG_DWORD, 0xFFFFFFFF & 0xFFFFFFFF)
+                    winreg.CloseKey(key)
+                    _LOGGER.debug("Updated registry with selectedInstance: 0xFFFFFFFF (all devices)")
+                except Exception as e:
+                    # If that fails, try with -1 directly
+                    try:
+                        winreg.SetValueEx(key, "selectedInstance", 0, winreg.REG_DWORD, -1)
+                        _LOGGER.debug("Updated registry with selectedInstance: -1 (all devices)")
+                    except Exception:
+                        # Last resort: use a string value instead
+                        winreg.SetValueEx(key, "selectedInstance", 0, winreg.REG_SZ, "-1")
+                        _LOGGER.debug("Updated registry with selectedInstance: '-1' (string, all devices)")
+                    winreg.CloseKey(key)
+            except Exception as e:
+                _LOGGER.error(f"Error updating registry with selectedInstance: {e}")
+
+        # Update plist file on macOS
+        elif sys.platform == "darwin":
+            try:
+                # Path to the plist file
+                plist_path = os.path.expanduser("~/Library/Preferences/com.rainbow-music-led.RmlApp.plist")
+
+                # Use defaults command to write the selectedInstance setting
+                # For "all devices" we use -1 (or 0xFFFFFFFF)
+                try:
+                    subprocess.run([
+                        'defaults', 'write',
+                        'com.rainbow-music-led.RmlApp',
+                        'selectedInstance', "-1"
+                    ], check=True)
+                    _LOGGER.debug("Updated plist file with selectedInstance: -1 (all devices) using defaults command")
+                except subprocess.SubprocessError as e:
+                    _LOGGER.error(f"Error using defaults command: {e}")
+
+                    # Fallback to plistlib if defaults command fails
+                    # Read existing plist if it exists
+                    if os.path.exists(plist_path):
+                        with open(plist_path, 'rb') as fp:
+                            plist_data = plistlib.load(fp)
+                    else:
+                        plist_data = {}
+
+                    # Update selectedInstance setting
+                    # For "all devices" we use -1 (or 0xFFFFFFFF)
+                    plist_data['selectedInstance'] = -1
+
+                    # Write back to file in XML format
+                    with open(plist_path, 'wb') as fp:
+                        plistlib.dump(plist_data, fp, fmt=plistlib.FMT_XML)
+
+                    _LOGGER.debug("Updated plist file with selectedInstance: -1 (all devices) using plistlib")
+            except Exception as e:
+                _LOGGER.error(f"Error updating plist file with selectedInstance: {e}")
+
         # Update menu
         self.setup_icon_menu()
 
@@ -1866,14 +2433,14 @@ class WlsCore:
 
             # Create language submenu
             language_submenu = Menu(
-                MenuItem("English", lambda: self.set_language("en"), 
-                         checked=lambda _: self.get_language() == "en", 
+                MenuItem("English", lambda: self.set_language("en"),
+                         checked=lambda _: self.get_language() == "en",
                          icon=self.get_menu_icon("english")),
-                MenuItem("Tiếng Việt", lambda: self.set_language("vi"), 
-                         checked=lambda _: self.get_language() == "vi", 
+                MenuItem("Tiếng Việt", lambda: self.set_language("vi"),
+                         checked=lambda _: self.get_language() == "vi",
                          icon=self.get_menu_icon("vietnamese"))
             )
-            
+
             # Create advanced submenu (static)
             advanced_submenu = Menu(
                 MenuItem(self.get_text("Restart", "Khởi động lại"), self.restart_wls, icon=self.get_menu_icon("restart")),
@@ -1929,8 +2496,8 @@ class WlsCore:
                 MenuItem(self.get_text("Setting", "Cài đặt"), self.open_ui, default=True, icon=self.get_menu_icon("settings")),
                 MenuItem(
                     # Show "Language" when Vietnamese is selected, "Ngôn ngữ" when English is selected
-                    "Language" if self.get_language() == "vi" else "Ngôn ngữ", 
-                    language_submenu, 
+                    "Language" if self.get_language() == "vi" else "Ngôn ngữ",
+                    language_submenu,
                     # Use vietnamese icon when Vietnamese is selected, english icon when English is selected
                     icon=self.get_menu_icon("vietnamese" if self.get_language() == "vi" else "english")
                 ),
@@ -1979,11 +2546,11 @@ class WlsCore:
         current_effect = self.get_current_effect()
         if not hasattr(self, '_last_effect_state') or self._last_effect_state != current_effect:
             return True
-            
+
         # Check if language has changed since last menu generation
         if hasattr(self, '_last_language') and self._last_language != self.get_language():
             return True
-            
+
         # Store current language for future comparison
         self._last_language = self.get_language()
 
@@ -1991,11 +2558,11 @@ class WlsCore:
         # For example, if effects have been added or removed
 
         return False
-        
+
     def set_language(self, language):
         """
         Set the application language.
-        
+
         Args:
             language (str): The language code to set ('en' or 'vi')
         """
@@ -2005,7 +2572,7 @@ class WlsCore:
             from wls.config import save_config
             save_config(self.config, self.config_dir)
             _LOGGER.debug(f"Language set to: {language}")
-            
+
             # Update registry on Windows
             if sys.platform == "win32":
                 try:
@@ -2016,35 +2583,32 @@ class WlsCore:
                     except FileNotFoundError:
                         # Create the key if it doesn't exist
                         key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, reg_path)
-                    
+
                     # Set the language value
                     winreg.SetValueEx(key, "language", 0, winreg.REG_SZ, language)
                     winreg.CloseKey(key)
                     _LOGGER.debug(f"Updated registry with language: {language}")
                 except Exception as e:
                     _LOGGER.error(f"Error updating registry with language: {e}")
-            
+
             # Update plist file on macOS
             elif sys.platform == "darwin":
                 try:
-                    import plistlib
-                    import subprocess
-                    
                     # Path to the plist file
                     plist_path = os.path.expanduser("~/Library/Preferences/com.rainbow-music-led.RmlApp.plist")
-                    
+
                     # Use defaults command to write the language setting
                     # This is the macOS native way to modify plist files
                     try:
                         subprocess.run([
-                            'defaults', 'write', 
-                            'com.rainbow-music-led.RmlApp', 
+                            'defaults', 'write',
+                            'com.rainbow-music-led.RmlApp',
                             'language', language
                         ], check=True)
                         _LOGGER.debug(f"Updated plist file with language: {language} using defaults command")
                     except subprocess.SubprocessError as e:
                         _LOGGER.error(f"Error using defaults command: {e}")
-                        
+
                         # Fallback to plistlib if defaults command fails
                         # Read existing plist if it exists
                         if os.path.exists(plist_path):
@@ -2052,44 +2616,44 @@ class WlsCore:
                                 plist_data = plistlib.load(fp)
                         else:
                             plist_data = {}
-                        
+
                         # Update language setting
                         plist_data['language'] = language
-                        
+
                         # Write back to file in XML format
                         with open(plist_path, 'wb') as fp:
                             plistlib.dump(plist_data, fp, fmt=plistlib.FMT_XML)
-                        
+
                         _LOGGER.debug(f"Updated plist file with language: {language} using plistlib")
                 except Exception as e:
                     _LOGGER.error(f"Error updating plist file with language: {e}")
-            
+
             # Update the menu to reflect the new language
             # Force regeneration of the effects menu
             self.setup_icon_menu(force_regenerate=True)
-            
+
     def get_language(self):
         """
         Get the current application language.
-        
+
         Returns:
             str: The current language code ('en' or 'vi')
         """
         return self.config.get("language", "vi")
-        
+
     def get_text(self, en_text, vi_text):
         """
         Get text in the appropriate language based on current settings.
-        
+
         Args:
             en_text (str): English text
             vi_text (str): Vietnamese text
-            
+
         Returns:
             str: Text in the appropriate language
         """
         language = self.get_language()
-        
+
         if language == "en":
             return en_text
         else:  # vi
@@ -2233,7 +2797,7 @@ class WlsCore:
             else:  # vi
                 message = "Bấm vào biểu tượng ở khay hệ thống để chọn hiệu ứng nhé"
                 title = "Nháy nhạc"
-                
+
             self.icon.notify(message, title)
         self.devices = Devices(self)
         self.effects = Effects(self)
