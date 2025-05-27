@@ -367,13 +367,7 @@ class Virtual:
                         self._wls.config["virtuals"][idx] = virtual_config
                         break
 
-                # Vẫn giữ lại cách cũ để đảm bảo tương thích ngược
-                if "last_states" not in self._wls.config:
-                    self._wls.config["last_states"] = {}
-                if "last_effects" not in self._wls.config:
-                    self._wls.config["last_effects"] = {}
-                self._wls.config["last_states"][device_id] = True
-                self._wls.config["last_effects"][device_id] = effect.type
+                # Đã lưu trạng thái và hiệu ứng vào config của virtual
 
                 # Bật lại quá trình tìm kiếm thiết bị khi thiết bị được bật
                 device = self._wls.devices.get_device(self.is_device)
@@ -505,10 +499,7 @@ class Virtual:
                         self._wls.config["virtuals"][idx] = virtual_config
                         break
 
-                # Vẫn giữ lại cách cũ để đảm bảo tương thích ngược
-                if "last_states" not in self._wls.config:
-                    self._wls.config["last_states"] = {}
-                self._wls.config["last_states"][device_id] = False
+                # Đã lưu trạng thái tắt vào config của virtual
 
                 # Tắt quá trình tìm kiếm thiết bị khi thiết bị bị tắt
                 device = self._wls.devices.get_device(self.is_device)

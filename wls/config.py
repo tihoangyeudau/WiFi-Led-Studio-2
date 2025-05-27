@@ -222,41 +222,12 @@ def ensure_config_directory(config_dir: str) -> None:
             # Exit with code 1 to indicate that there was an error creating the configuration directory.
             sys.exit(1)
 
-
-def migrate_device_info_to_virtuals(config):
-    """Di chuyển thông tin từ last_effects và last_states vào cấu hình của virtuals"""
-    if "virtuals" not in config:
-        return config
-
-    # Kiểm tra xem có last_effects hoặc last_states không
-    if "last_effects" not in config and "last_states" not in config:
-        return config
-
-    # Di chuyển thông tin vào cấu hình của virtuals
-    for virtual in config["virtuals"]:
-        if "is_device" in virtual and virtual["is_device"] is not None:
-            device_id = str(virtual["is_device"])
-
-            # Đảm bảo có trường config
-            if "config" not in virtual:
-                virtual["config"] = {}
-
-            # Di chuyển last_effect
-            if "last_effects" in config and device_id in config["last_effects"]:
-                virtual["config"]["last_effect"] = config["last_effects"][device_id]
-
-            # Di chuyển last_state
-            if "last_states" in config and device_id in config["last_states"]:
-                virtual["config"]["last_state"] = config["last_states"][device_id]
-
-    return config
-
 def load_config(config_dir: str) -> dict:
     """Validates and loads the configuration file in the provided directory"""
-    
+
     # Initialize logger
     load_logger()
-    
+
     config_file = ensure_config_file(config_dir)
     try:
         print(
@@ -279,9 +250,6 @@ def load_config(config_dir: str) -> dict:
                     config_json["configuration_version"]
                 ) == parse_version(CONFIGURATION_VERSION)
 
-                # Di chuyển thông tin từ last_effects và last_states vào cấu hình của virtuals
-                config_json = migrate_device_info_to_virtuals(config_json)
-
                 return CORE_CONFIG_SCHEMA(config_json)
             except (KeyError, AssertionError):
                 create_backup(config_dir, config_file, "VERSION")
@@ -290,9 +258,6 @@ def load_config(config_dir: str) -> dict:
                 )
                 try:
                     config = migrate_config(config_json)
-
-                    # Di chuyển thông tin từ last_effects và last_states vào cấu hình của virtuals
-                    config = migrate_device_info_to_virtuals(config)
 
                     save_config(config, config_dir)
                 except Exception as e:
@@ -589,23 +554,6 @@ def save_config(config: dict, config_dir: str) -> None:
     _LOGGER.info(("Đang lưu tệp cấu hình vào {}").format(config_dir))
     config["configuration_version"] = CONFIGURATION_VERSION
     config_view = dict(config)
-
-    # Kiểm tra xem tất cả các virtuals đã có thông tin last_effect và last_state chưa
-    all_virtuals_have_info = True
-    for virtual in config_view.get("virtuals", []):
-        if "is_device" in virtual and virtual["is_device"] is not None:
-            if "config" not in virtual or "last_effect" not in virtual["config"] or "last_state" not in virtual["config"]:
-                all_virtuals_have_info = False
-                break
-
-    # Nếu tất cả virtuals đã có thông tin, xóa các trường last_effects và last_states
-    unneeded_keys = ["wls_presets"]
-    if all_virtuals_have_info:
-        unneeded_keys.extend(["last_effects", "last_states"])
-        _LOGGER.info("Đã di chuyển thông tin last_effects và last_states vào cấu hình của virtuals")
-
-    for key in [key for key in config_view if key in unneeded_keys]:
-        del config_view[key]
 
     with open(config_file, "w", encoding="utf-8") as file:
         json.dump(

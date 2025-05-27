@@ -662,16 +662,14 @@ class SerialDevice(Device):
             device_active = True
 
             # Tìm thiết bị trong danh sách thiết bị đã tắt
-            if hasattr(self, '_wls') and hasattr(self._wls, 'config') and "last_states" in self._wls.config:
-                # Lấy danh sách thiết bị đã tắt
-                last_states = self._wls.config["last_states"]
-
+            if hasattr(self, '_wls') and hasattr(self._wls, 'config') and "virtuals" in self._wls.config:
                 # Kiểm tra tất cả thiết bị đã tắt
                 all_devices_off = True
-                for state in last_states.values():
-                    if state:  # Nếu có ít nhất một thiết bị đang bật
-                        all_devices_off = False
-                        break
+                for virtual in self._wls.config["virtuals"]:
+                    if "is_device" in virtual and virtual["is_device"] is not None:
+                        if "config" in virtual and "last_state" in virtual["config"] and virtual["config"]["last_state"]:
+                            all_devices_off = False
+                            break
 
                 # Nếu tất cả thiết bị đều đã tắt, không cần kiểm tra ID
                 if all_devices_off:
