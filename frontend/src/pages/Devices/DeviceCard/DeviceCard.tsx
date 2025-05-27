@@ -65,6 +65,23 @@ const DeviceCard = ({
     setExpanded(!expanded);
   };
 
+  // Lắng nghe sự kiện ledStateChanged để cập nhật UI ngay lập tức
+  useEffect(() => {
+    const handleLedStateChanged = (e: CustomEvent) => {
+      // Cập nhật trạng thái active dựa trên sự kiện
+      if (e.detail && typeof e.detail.is_active !== 'undefined') {
+        setIsActive(e.detail.is_active);
+      }
+    };
+
+    // Thêm type assertion để TypeScript hiểu rằng đây là một CustomEvent
+    document.addEventListener('ledStateChanged', handleLedStateChanged as EventListener);
+    return () => {
+      document.removeEventListener('ledStateChanged', handleLedStateChanged as EventListener);
+    };
+  }, []);
+
+  // Cập nhật trạng thái dựa trên props
   useEffect(() => {
     setIsActive(isEffectSet || isStreaming);
   }, [isEffectSet, isStreaming]);

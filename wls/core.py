@@ -41,6 +41,8 @@ from wls.events import (
     GlobalPauseEvent,
     GlobalResumeEvent,
     VisualisationUpdateEvent,
+    LedStateChangedEvent,
+    EffectChangedSystrayEvent
 )
 from wls.http_manager import HttpServer
 from wls.integrations import Integrations
@@ -722,7 +724,6 @@ class WlsCore:
                     else:
                         _LOGGER.error(f"Failed to update device enabled state for device {device_id}")
 
-                    from wls.events import LedStateChangedEvent
                     self.events.fire_event(LedStateChangedEvent(is_active=False, device_id=device_id))
 
                 else:
@@ -756,7 +757,6 @@ class WlsCore:
                         else:
                             _LOGGER.error(f"Failed to update device enabled state for device {device_id}")
 
-                        from wls.events import LedStateChangedEvent
                         self.events.fire_event(LedStateChangedEvent(is_active=True, device_id=device_id))
 
                     except Exception as e:
@@ -822,7 +822,6 @@ class WlsCore:
                         else:
                             _LOGGER.error(f"Failed to update brightness for device {device_id}")
 
-                from wls.events import LedStateChangedEvent
                 self.events.fire_event(LedStateChangedEvent(is_active=False))
             else:
                 # Turn on all LEDs by applying the last used effect
@@ -889,7 +888,6 @@ class WlsCore:
                             else:
                                 _LOGGER.error(f"Failed to update brightness for device {device_id}")
 
-                    from wls.events import LedStateChangedEvent
                     self.events.fire_event(LedStateChangedEvent(is_active=True))
 
                 except Exception as e:
@@ -1116,7 +1114,6 @@ class WlsCore:
                 try:
                     self.setup_icon_menu()
 
-                    from wls.events import EffectChangedSystrayEvent
                     self.events.fire_event(EffectChangedSystrayEvent(effect_type, device_id))
                 except Exception as e:
                     _LOGGER.error(f"Lỗi khi cập nhật menu: {e}")
@@ -1167,7 +1164,6 @@ class WlsCore:
                 try:
                     self.setup_icon_menu()
 
-                    from wls.events import EffectChangedSystrayEvent
                     self.events.fire_event(EffectChangedSystrayEvent(effect_type))
                 except Exception as e:
                     _LOGGER.error(f"Lỗi khi cập nhật menu: {e}")
@@ -2533,6 +2529,10 @@ class WlsCore:
                             config={}
                         )
                         virtual.set_effect(effect)
+
+                        device_id = virtual.device_id if hasattr(virtual, 'device_id') else virtual_id
+                        self.events.fire_event(LedStateChangedEvent(is_active=True, device_id=device_id))
+                        self.events.fire_event(EffectChangedSystrayEvent(effect_type=last_effect, device_id=device_id))
                     except Exception as e:
                         _LOGGER.error(f"Lỗi khi áp dụng hiệu ứng {last_effect} cho thiết bị ảo {virtual_id}: {e}")
 

@@ -46,13 +46,31 @@ const DeviceCardWrapper = ({ virtual, index }) => {
       .then(() => getDevices());
   };
 
-  useEffect(() => {        
+  // Lắng nghe sự kiện ledStateChanged để cập nhật trạng thái thiết bị ngay lập tức
+  useEffect(() => {
+    const handleLedStateChanged = (e) => {
+      const { is_active, device_id } = e.detail;
+
+      // Nếu sự kiện là cho tất cả thiết bị hoặc cho thiết bị cụ thể này
+      if (!device_id || (virtuals[virtual]?.is_device === device_id)) {
+        setIsActive(is_active);
+      }
+    };
+
+    document.addEventListener('ledStateChanged', handleLedStateChanged);
+    return () => {
+      document.removeEventListener('ledStateChanged', handleLedStateChanged);
+    };
+  }, [virtual, virtuals]);
+
+  // Cập nhật trạng thái dựa trên dữ liệu từ store
+  useEffect(() => {
     setIsActive((virtual && virtuals[virtual] && Object.keys(virtuals[virtual]?.effect)?.length > 0) || devices[Object.keys(devices).find(d => d === virtual)]?.active_virtuals?.length > 0)
-  }, [virtuals, devices])
+  }, [virtuals, devices, virtual])
 
 
   return virtual && virtuals[virtual] ?
-    <DeviceCard 
+    <DeviceCard
       deviceName={virtual && virtuals[virtual]?.config && virtuals[virtual]?.config.name}
       online={devices[Object.keys(devices).find(d => d === virtual)]?.online}
       virtId={virtual}
@@ -61,7 +79,7 @@ const DeviceCardWrapper = ({ virtual, index }) => {
       handleEditVirtual={()=>handleEditVirtual(virtual)}
       handleClearEffect={()=>handleClearEffect(virtual)}
       handlePlayPause={()=>handlePlayPause()}
-      linkTo={`/device/${virtuals[virtual]?.id}`}      
+      linkTo={`/device/${virtuals[virtual]?.id}`}
       iconName={virtuals[virtual]?.config && virtuals[virtual]?.config.icon_name && virtuals[virtual]?.config.icon_name}
       effectName={virtuals[virtual]?.effect.name}
       graphsActive={graphs}

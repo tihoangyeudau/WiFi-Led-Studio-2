@@ -38,13 +38,27 @@ const Devices = () => {
     const handleWebsockets = (e) => {
       if (e.detail === 'devices_updated') {
         getDevices();
+        getVirtuals(); // Thêm getVirtuals để cập nhật đầy đủ thông tin
       }
     };
     document.addEventListener('YZold', handleWebsockets);
     return () => {
       document.removeEventListener('YZold', handleWebsockets);
     };
-  }, [getDevices]);
+  }, [getDevices, getVirtuals]);
+
+  // Thêm event listener mới cho sự kiện ledStateChanged
+  useEffect(() => {
+    const handleLedStateChanged = (e) => {
+      // Cập nhật cả danh sách thiết bị và danh sách virtuals
+      getDevices();
+      getVirtuals();
+    };
+    document.addEventListener('ledStateChanged', handleLedStateChanged);
+    return () => {
+      document.removeEventListener('ledStateChanged', handleLedStateChanged);
+    };
+  }, [getDevices, getVirtuals]);
 
   useEffect(() => {
     const handleWebsockets = (e) => {
@@ -60,7 +74,7 @@ const Devices = () => {
     return () => {
       document.removeEventListener('YZold', handleWebsockets);
     };
-    
+
   }, []);
 
   useEffect(() => {
