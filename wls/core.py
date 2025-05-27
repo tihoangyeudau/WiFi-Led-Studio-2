@@ -504,45 +504,107 @@ class WlsCore:
     def restore(self):
         if sys.platform == "win32":
             try:
-                result = ctypes.windll.user32.MessageBoxW(
-                    0,
-                    self.get_text(
+                # Sử dụng tkinter để hiển thị hộp thoại xác nhận thay vì MessageBox
+                # Tkinter có thể tránh được các vấn đề về xử lý sự kiện chuột của Windows API
+                import tkinter as tk
+                from tkinter import messagebox
+
+                # Tạo cửa sổ root ẩn
+                root = tk.Tk()
+                root.withdraw()  # Ẩn cửa sổ root
+
+                # Đưa cửa sổ lên trên cùng
+                root.attributes('-topmost', True)
+
+                # Hiển thị hộp thoại xác nhận
+                result = messagebox.askyesno(
+                    title=self.get_text("Confirm", "Xác nhận"),
+                    message=self.get_text(
                         "Are you sure you want to restore to default settings? All your previous settings will be deleted.",
                         "Bạn có chắc chắn muốn khôi phục về mặc định không? Mọi cài đặt trước đây của bạn sẽ bị xoá."
                     ),
-                    self.get_text("Confirm", "Xác nhận"),
-                    0x00000034
+                    icon=messagebox.WARNING
                 )
 
-                if result == 6:
+                # Hủy cửa sổ root
+                root.destroy()
+
+                # Nếu người dùng nhấn Yes
+                if result:
                     path_restore = os.path.join(os.environ["ProgramFiles"], "Rainbow Music Led\\bin", "restore.exe")
 
                     try:
+                        # Chạy chương trình restore.exe với cửa sổ ẩn
                         process = subprocess.Popen(
                             [path_restore],
                             shell=True,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
-                            creationflags=subprocess.CREATE_NO_WINDOW
+                            creationflags=subprocess.CREATE_NO_WINDOW  # Chỉ hoạt động trên Windows
                         )
 
+                        # Đợi một khoảng thời gian ngắn để đảm bảo quá trình đã bắt đầu
                         time.sleep(1)
 
+                        # Kiểm tra xem quá trình có bắt đầu thành công không
                         if process.poll() is not None and process.returncode != 0:
                             stderr = process.stderr.read().decode('utf-8', errors='ignore')
                             raise Exception(f"Lỗi khi khởi chạy restore.exe: {stderr}")
 
                         self.stop(0)
                     except Exception as e:
-                        ctypes.windll.user32.MessageBoxW(
-                            0,
-                            f"Không thể chạy chương trình: {e}",
-                            "Lỗi",
-                            0x00000010  # MB_ICONERROR
-                        )
+                        # Hiển thị lỗi bằng tkinter messagebox
+                        try:
+                            import tkinter as tk
+                            from tkinter import messagebox
+
+                            # Tạo cửa sổ root ẩn
+                            error_root = tk.Tk()
+                            error_root.withdraw()  # Ẩn cửa sổ root
+
+                            # Đưa cửa sổ lên trên cùng
+                            error_root.attributes('-topmost', True)
+
+                            # Hiển thị hộp thoại lỗi
+                            messagebox.showerror(
+                                title="Lỗi",
+                                message=f"Không thể chạy chương trình: {e}"
+                            )
+
+                            # Hủy cửa sổ root
+                            error_root.destroy()
+                        except Exception as dialog_error:
+                            # Fallback nếu tkinter gặp lỗi
+                            _LOGGER.error(f"Lỗi khi hiển thị dialog lỗi: {dialog_error}")
+
                         _LOGGER.error(f"Lỗi khi khôi phục mặc định: {e}")
             except Exception as e:
+                # Ghi log lỗi
                 _LOGGER.error(f"Lỗi khi hiển thị hộp thoại xác nhận: {e}")
+
+                # Hiển thị thông báo lỗi bằng tkinter nếu có thể
+                try:
+                    import tkinter as tk
+                    from tkinter import messagebox
+
+                    # Tạo cửa sổ root ẩn
+                    error_root = tk.Tk()
+                    error_root.withdraw()  # Ẩn cửa sổ root
+
+                    # Đưa cửa sổ lên trên cùng
+                    error_root.attributes('-topmost', True)
+
+                    # Hiển thị hộp thoại lỗi
+                    messagebox.showerror(
+                        title="Lỗi",
+                        message=f"Lỗi khi hiển thị hộp thoại xác nhận: {e}"
+                    )
+
+                    # Hủy cửa sổ root
+                    error_root.destroy()
+                except Exception as dialog_error:
+                    # Fallback nếu tkinter gặp lỗi
+                    _LOGGER.error(f"Lỗi khi hiển thị dialog lỗi: {dialog_error}")
         elif sys.platform == "darwin":
             try:
                 # Determine which language to use
