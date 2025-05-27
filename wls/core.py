@@ -2226,6 +2226,21 @@ class WlsCore:
                     from wls.config import save_config
                     save_config(self.config, self.config_dir)
 
+                    # Update LED state based on selected device
+                    device_state = True  # Default is enabled
+                    device_brightness = 100  # Default is 100%
+
+                    for virtual_config in self.config.get("virtuals", []):
+                        if "is_device" in virtual_config and virtual_config["is_device"] == dev_id:
+                            if "config" in virtual_config:
+                                if "last_state" in virtual_config["config"]:
+                                    device_state = virtual_config["config"]["last_state"]
+                                if "max_brightness" in virtual_config["config"]:
+                                    device_brightness = int(virtual_config["config"]["max_brightness"] * 100)
+                            break
+
+                    self.led_active = device_state
+
                     # Update registry on Windows
                     if sys.platform == "win32":
                         try:
@@ -2252,79 +2267,15 @@ class WlsCore:
                     elif sys.platform == "darwin":
                         try:
                             plist_path = os.path.expanduser("~/Library/Preferences/com.rainbow-music-led.RmlApp.plist")
+                            # Cập nhật trạng thái đèn
+                            key_name_enabled = f"Instance_{dev_id}.deviceEnabled" if dev_id else "SystrayState.deviceEnabled"
                             try:
                                 subprocess.run([
                                     'defaults', 'write',
                                     'com.rainbow-music-led.RmlApp',
-                                    'selectedInstance', str(dev_id)
+                                    key_name_enabled, "-bool", "true" if device_state else "false"
                                 ], check=True)
-                                _LOGGER.debug(f"Updated plist file with selectedInstance: {dev_id} using defaults command")
-                            except subprocess.SubprocessError as e:
-                                _LOGGER.error(f"Error using defaults command: {e}")
-                                if os.path.exists(plist_path):
-                                    with open(plist_path, 'rb') as fp:
-                                        plist_data = plistlib.load(fp)
-                                else:
-                                    plist_data = {}
-                                plist_data['selectedInstance'] = dev_id
-                                with open(plist_path, 'wb') as fp:
-                                    plistlib.dump(plist_data, fp, fmt=plistlib.FMT_XML)
-                                _LOGGER.debug(f"Updated plist file with selectedInstance: {dev_id} using plistlib")
-                        except Exception as e:
-                            _LOGGER.error(f"Error updating plist file with selectedInstance: {e}")
-
-                    # Update LED state based on selected device
-                    device_state = True  # Default is enabled
-                    device_brightness = 100  # Default is 100%
-
-                    for virtual_config in self.config.get("virtuals", []):
-                        if "is_device" in virtual_config and virtual_config["is_device"] == dev_id:
-                            if "config" in virtual_config:
-                                if "last_state" in virtual_config["config"]:
-                                    device_state = virtual_config["config"]["last_state"]
-                                if "max_brightness" in virtual_config["config"]:
-                                    device_brightness = int(virtual_config["config"]["max_brightness"] * 100)
-                            break
-
-                    self.led_active = device_state
-
-                    # Update registry/plist with device state and brightness
-                    if sys.platform == "win32":
-                        try:
-                            # Update ledState in main RmlApp key
-                            reg_path = r"SOFTWARE\Rainbow Music Led\RmlApp"
-                            try:
-                                key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_ALL_ACCESS)
-                            except FileNotFoundError:
-                                key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, reg_path)
-                            winreg.SetValueEx(key, "ledState", 0, winreg.REG_DWORD, 1 if device_state else 0)
-                            winreg.CloseKey(key)
-
-                            # Update brightness in Instance_{dev_id} subkey
-                            instance_path = f"{reg_path}\\Instance_{dev_id}"
-                            try:
-                                key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, instance_path, 0, winreg.KEY_ALL_ACCESS)
-                            except FileNotFoundError:
-                                key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, instance_path)
-                            winreg.SetValueEx(key, "brightness", 0, winreg.REG_DWORD, device_brightness)
-                            winreg.CloseKey(key)
-                            _LOGGER.debug(f"Updated registry Instance_{dev_id} with brightness: {device_brightness}")
-                        except Exception as e:
-                            _LOGGER.error(f"Error updating registry with ledState or brightness: {e}")
-                    elif sys.platform == "darwin":
-                        try:
-                            try:
-                                subprocess.run([
-                                    'defaults', 'write',
-                                    'com.rainbow-music-led.RmlApp',
-                                    'ledState', '1' if device_state else '0'
-                                ], check=True)
-                                subprocess.run([
-                                    'defaults', 'write',
-                                    'com.rainbow-music-led.RmlApp',
-                                    'brightness', str(device_brightness)
-                                ], check=True)
-                                _LOGGER.debug(f"Updated plist with ledState: {1 if device_state else 0}, brightness: {device_brightness}")
+                                _LOGGER.debug(f"Updated plist with {key_name_enabled}: {'true' if device_state else 'false'}")
                             except subprocess.SubprocessError as e:
                                 _LOGGER.error(f"Error using defaults command: {e}")
                                 plist_path = os.path.expanduser("~/Library/Preferences/com.rainbow-music-led.RmlApp.plist")
@@ -2333,13 +2284,34 @@ class WlsCore:
                                         plist_data = plistlib.load(fp)
                                 else:
                                     plist_data = {}
-                                plist_data['ledState'] = 1 if device_state else 0
-                                plist_data['brightness'] = device_brightness
+                                plist_data[key_name_enabled] = device_state
                                 with open(plist_path, 'wb') as fp:
                                     plistlib.dump(plist_data, fp, fmt=plistlib.FMT_XML)
-                                _LOGGER.debug(f"Updated plist with ledState: {1 if device_state else 0}, brightness: {device_brightness} using plistlib")
+                                _LOGGER.debug(f"Updated plist with {key_name_enabled}: {device_state} using plistlib")
+
+                            # Cập nhật độ sáng
+                            key_name_brightness = f"Instance_{dev_id}.brightness" if dev_id else "SystrayState.brightness"
+                            try:
+                                subprocess.run([
+                                    'defaults', 'write',
+                                    'com.rainbow-music-led.RmlApp',
+                                    key_name_brightness, "-int", str(device_brightness)
+                                ], check=True)
+                                _LOGGER.debug(f"Updated plist with {key_name_brightness}: {device_brightness}")
+                            except subprocess.SubprocessError as e:
+                                _LOGGER.error(f"Error using defaults command: {e}")
+                                plist_path = os.path.expanduser("~/Library/Preferences/com.rainbow-music-led.RmlApp.plist")
+                                if os.path.exists(plist_path):
+                                    with open(plist_path, 'rb') as fp:
+                                        plist_data = plistlib.load(fp)
+                                else:
+                                    plist_data = {}
+                                plist_data[key_name_brightness] = device_brightness
+                                with open(plist_path, 'wb') as fp:
+                                    plistlib.dump(plist_data, fp, fmt=plistlib.FMT_XML)
+                                _LOGGER.debug(f"Updated plist with {key_name_brightness}: {device_brightness} using plistlib")
                         except Exception as e:
-                            _LOGGER.error(f"Error updating plist with ledState or brightness: {e}")
+                            _LOGGER.error(f"Error updating plist file with selectedInstance: {e}")
 
                     self.setup_icon_menu()
                 return select_device
