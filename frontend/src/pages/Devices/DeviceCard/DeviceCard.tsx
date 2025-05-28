@@ -77,9 +77,6 @@ const DeviceCard = ({
         if (!device_id || (isDevice === device_id)) {
           setIsActive(is_active);
           setLastEventTime(Date.now()); // Cập nhật thời gian sự kiện gần nhất
-
-          // Ghi log để debug
-          console.log(`DeviceCard.tsx: Cập nhật isActive=${is_active} cho thiết bị ${virtId}, device_id=${device_id}`);
         }
       }
     };

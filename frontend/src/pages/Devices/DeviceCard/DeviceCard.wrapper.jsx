@@ -69,12 +69,6 @@ const DeviceCardWrapper = ({ virtual, index }) => {
     const deviceKey = Object.keys(devices).find(d => d === virtual);
     const hasActiveVirtuals = devices[deviceKey]?.active_virtuals?.length > 0;
 
-    // Log để debug
-    console.log(`DeviceCard.wrapper: virtual=${virtual}, hasEffect=${hasEffect}, hasActiveVirtuals=${hasActiveVirtuals}`);
-    if (deviceKey) {
-      console.log(`DeviceCard.wrapper: active_virtuals=`, devices[deviceKey]?.active_virtuals);
-    }
-
     setIsActive(hasEffect || hasActiveVirtuals);
   }, [virtuals, devices, virtual])
 
