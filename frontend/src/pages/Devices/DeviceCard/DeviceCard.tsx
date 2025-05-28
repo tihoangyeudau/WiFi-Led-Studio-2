@@ -57,6 +57,7 @@ const DeviceCard = ({
   // eslint-disable-next-line
   const [fade, _setFade] = useState(false);
   const [isActive, setIsActive] = useState(isEffectSet || isStreaming);
+  const [lastEventTime, setLastEventTime] = useState(0);
 
   const [expanded, setExpanded] = useState(false);
   const color = 'inherit';
@@ -70,7 +71,16 @@ const DeviceCard = ({
     const handleLedStateChanged = (e: CustomEvent) => {
       // Cập nhật trạng thái active dựa trên sự kiện
       if (e.detail && typeof e.detail.is_active !== 'undefined') {
-        setIsActive(e.detail.is_active);
+        const { is_active, device_id } = e.detail;
+
+        // Chỉ cập nhật nếu sự kiện là cho tất cả thiết bị hoặc cho thiết bị cụ thể này
+        if (!device_id || (isDevice === device_id)) {
+          setIsActive(is_active);
+          setLastEventTime(Date.now()); // Cập nhật thời gian sự kiện gần nhất
+
+          // Ghi log để debug
+          console.log(`DeviceCard.tsx: Cập nhật isActive=${is_active} cho thiết bị ${virtId}, device_id=${device_id}`);
+        }
       }
     };
 
@@ -79,12 +89,17 @@ const DeviceCard = ({
     return () => {
       document.removeEventListener('ledStateChanged', handleLedStateChanged as EventListener);
     };
-  }, []);
+  }, [isDevice, virtId]);
 
-  // Cập nhật trạng thái dựa trên props
+  // Cập nhật trạng thái dựa trên props, nhưng chỉ khi không có sự kiện ledStateChanged gần đây
   useEffect(() => {
-    setIsActive(isEffectSet || isStreaming);
-  }, [isEffectSet, isStreaming]);
+    // Chỉ cập nhật từ props nếu không có sự kiện ledStateChanged trong 500ms gần đây
+    const now = Date.now();
+    if (now - lastEventTime > 500) {
+      setIsActive(isEffectSet || isStreaming);
+      console.log(`DeviceCard.tsx: Cập nhật isActive từ props: isEffectSet=${isEffectSet}, isStreaming=${isStreaming}`);
+    }
+  }, [isEffectSet, isStreaming, lastEventTime]);
 
   return (
     <NavLink
@@ -195,7 +210,16 @@ const DeviceCard = ({
                   <Clear />
                 </Button>
               </Typography>
+            ) : !isActive ? (
+              // Nếu isActive là false (từ sự kiện ledStateChanged), luôn hiển thị "tắt"
+              <Typography
+                variant="body1"
+                style={{ color: theme.palette.text.disabled, height: 25 }}
+              >
+                tắt
+              </Typography>
             ) : isStreaming ? (
+              // Nếu isActive là true và isStreaming cũng true, hiển thị "Đang truyền..."
               <Typography
                 variant="body1"
                 color="textSecondary"
@@ -204,6 +228,7 @@ const DeviceCard = ({
                 Đang truyền...
               </Typography>
             ) : (
+              // Trường hợp còn lại
               <Typography
                 variant="body1"
                 style={{ color: theme.palette.text.disabled, height: 25 }}

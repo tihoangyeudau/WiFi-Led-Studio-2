@@ -2532,7 +2532,6 @@ class WlsCore:
 
                         device_id = virtual.device_id if hasattr(virtual, 'device_id') else virtual_id
                         self.events.fire_event(LedStateChangedEvent(is_active=True, device_id=device_id))
-                        self.events.fire_event(EffectChangedSystrayEvent(effect_type=last_effect, device_id=device_id))
                     except Exception as e:
                         _LOGGER.error(f"Lỗi khi áp dụng hiệu ứng {last_effect} cho thiết bị ảo {virtual_id}: {e}")
 

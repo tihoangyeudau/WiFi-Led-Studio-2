@@ -65,7 +65,17 @@ const DeviceCardWrapper = ({ virtual, index }) => {
 
   // Cập nhật trạng thái dựa trên dữ liệu từ store
   useEffect(() => {
-    setIsActive((virtual && virtuals[virtual] && Object.keys(virtuals[virtual]?.effect)?.length > 0) || devices[Object.keys(devices).find(d => d === virtual)]?.active_virtuals?.length > 0)
+    const hasEffect = virtual && virtuals[virtual] && Object.keys(virtuals[virtual]?.effect)?.length > 0;
+    const deviceKey = Object.keys(devices).find(d => d === virtual);
+    const hasActiveVirtuals = devices[deviceKey]?.active_virtuals?.length > 0;
+
+    // Log để debug
+    console.log(`DeviceCard.wrapper: virtual=${virtual}, hasEffect=${hasEffect}, hasActiveVirtuals=${hasActiveVirtuals}`);
+    if (deviceKey) {
+      console.log(`DeviceCard.wrapper: active_virtuals=`, devices[deviceKey]?.active_virtuals);
+    }
+
+    setIsActive(hasEffect || hasActiveVirtuals);
   }, [virtuals, devices, virtual])
 
 
