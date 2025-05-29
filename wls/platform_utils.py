@@ -128,8 +128,19 @@ elif sys.platform == "darwin":
             try:
                 if use_defaults:
                     # Try using defaults command first (preferred method)
-                    value_type = "-bool" if isinstance(value, bool) else "-string"
-                    value_str = str(value).lower() if isinstance(value, bool) else value
+                    # Determine the correct type flag based on the value type
+                    if isinstance(value, bool):
+                        value_type = "-bool"
+                        value_str = str(value).lower()
+                    elif isinstance(value, int):
+                        value_type = "-int"
+                        value_str = str(value)
+                    elif isinstance(value, float):
+                        value_type = "-float"
+                        value_str = str(value)
+                    else:
+                        value_type = "-string"
+                        value_str = str(value)
 
                     subprocess.run([
                         'defaults', 'write',
@@ -176,6 +187,21 @@ elif sys.platform == "darwin":
                         return True
                     elif value == "0":
                         return False
+                    
+                    # Try to convert to integer if it looks like an integer
+                    try:
+                        if value.isdigit() or (value.startswith('-') and value[1:].isdigit()):
+                            return int(value)
+                    except (ValueError, AttributeError):
+                        pass
+                    
+                    # Try to convert to float if it looks like a float
+                    try:
+                        if '.' in value:
+                            return float(value)
+                    except (ValueError, AttributeError):
+                        pass
+                    
                     return value
 
                 # Fallback to plistlib
