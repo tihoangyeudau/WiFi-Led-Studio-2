@@ -11,6 +11,7 @@ if sys.platform == "win32":
     import ctypes
     from ctypes import wintypes
 elif sys.platform == "darwin":
+    import shutil
     from AppKit import NSWorkspace, NSObject, NSDistributedNotificationCenter
 
 from pystray import Menu, MenuItem
@@ -387,9 +388,16 @@ class WlsCore:
         self.config = load_config(config_dir)
 
         # Try to read language setting using platform_utils
-        language_value = get_language_setting()
-        if language_value in ["en", "vi"]:
-            self.config["language"] = language_value
+        if "language" in self.config:
+            self._selected_device = self.config["language"]
+        else:
+            language_value = get_language_setting()
+            if language_value in ["en", "vi"]:
+                self.config["language"] = language_value
+                self._selected_device = self.config["language"]
+            else:
+                self.config["language"] = "vi"
+                self._selected_device = self.config["language"]
 
         self.led_active = False
 
@@ -640,14 +648,11 @@ class WlsCore:
                 if result == "yes":
                     home_dir = os.path.expanduser("~")
                     aw_dest_path = os.path.join(home_dir, ".rmlapp")
-                    wls_dest_path = os.path.join(home_dir, ".wls")
 
                     if os.path.exists(aw_dest_path) and os.path.isdir(aw_dest_path):
                         shutil.rmtree(aw_dest_path)
 
-                    if os.path.exists(wls_dest_path) and os.path.isdir(wls_dest_path):
-                        shutil.rmtree(wls_dest_path)
-
+                    # Dừng ứng dụng hiện tại
                     self.stop_aw(0)
             except Exception as e:
                 _LOGGER.error(f"Lỗi khi khôi phục mặc định trên macOS: {e}")
