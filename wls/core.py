@@ -1,4 +1,4 @@
-﻿import asyncio
+﻿﻿﻿import asyncio
 import logging
 import sys
 import os
@@ -2501,7 +2501,14 @@ class WlsCore:
             startupinfo = subprocess.STARTUPINFO()
             subprocess.Popen([path_rmlapp], startupinfo=startupinfo)
         elif sys.platform == "darwin":
-            subprocess.run(['open', '/Applications/rmlapp.app'], check=True)
+            rmlapp_path = '/Applications/rmlapp.app'
+            if os.path.exists(rmlapp_path):
+                try:
+                    subprocess.run(['open', rmlapp_path], check=False)
+                except Exception as e:
+                    logging.error(f"Failed to open rmlapp.app: {e}")
+            else:
+                logging.warning(f"rmlapp.app not found at {rmlapp_path}")
 
         return exit_code
 
