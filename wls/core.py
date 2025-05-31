@@ -12,14 +12,21 @@ if sys.platform == "win32":
     from ctypes import wintypes
 elif sys.platform == "darwin":
     import shutil
-    from AppKit import NSWorkspace, NSObject, NSDistributedNotificationCenter
+    from AppKit import (
+        NSWorkspace,
+        NSObject,
+        NSDistributedNotificationCenter
+    )
 
 from pystray import Menu, MenuItem
 from wls.platform_utils import (
-    set_device_enabled, get_device_enabled, set_startup_enabled,
-    add_startup_entry, remove_startup_entry, check_startup_enabled,
-    get_language_setting, set_language_setting, set_device_brightness,
-    set_selected_device
+    set_selected_device,
+    set_device_enabled,
+    set_device_brightness,
+    set_language_setting,
+    check_startup_enabled,
+    add_startup_entry,
+    remove_startup_entry
 )
 from concurrent.futures import ThreadPoolExecutor
 
@@ -386,18 +393,6 @@ class WlsCore:
             create_backup(config_dir, "DELETE")
 
         self.config = load_config(config_dir)
-
-        # Try to read language setting using platform_utils
-        if "language" in self.config:
-            self._selected_device = self.config["language"]
-        else:
-            language_value = get_language_setting()
-            if language_value in ["en", "vi"]:
-                self.config["language"] = language_value
-                self._selected_device = self.config["language"]
-            else:
-                self.config["language"] = "vi"
-                self._selected_device = self.config["language"]
 
         self.led_active = False
 

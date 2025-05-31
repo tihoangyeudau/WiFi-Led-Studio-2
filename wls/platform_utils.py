@@ -187,21 +187,21 @@ elif sys.platform == "darwin":
                         return True
                     elif value == "0":
                         return False
-                    
+
                     # Try to convert to integer if it looks like an integer
                     try:
                         if value.isdigit() or (value.startswith('-') and value[1:].isdigit()):
                             return int(value)
                     except (ValueError, AttributeError):
                         pass
-                    
+
                     # Try to convert to float if it looks like a float
                     try:
                         if '.' in value:
                             return float(value)
                     except (ValueError, AttributeError):
                         pass
-                    
+
                     return value
 
                 # Fallback to plistlib
@@ -437,37 +437,6 @@ def set_selected_device(device_id=None):
 
     return False
 
-def get_device_enabled(device_id):
-    """Get the enabled state for a device across platforms."""
-    if sys.platform == "win32":
-        # Windows registry
-        device_reg_path = f"{WINDOWS_RMLAPP_KEY_PATH}\\Instance_{device_id}"
-        value = RegistryManager.get_value(device_reg_path, "deviceEnabled")
-        return value == "true" if value is not None else False
-
-    elif sys.platform == "darwin":
-        # macOS plist
-        key_name = f"Instance_{device_id}.deviceEnabled"
-        return PlistManager.get_value(MACOS_PLIST_DOMAIN, key_name, False)
-
-    return False
-
-def set_startup_enabled(app_type, enabled):
-    """Enable or disable application startup.
-    
-    Args:
-        app_type: Either 'wls' for WiFi Led Studio or 'rmlapp' for Rainbow Music Led
-        enabled: True to enable startup, False to disable
-    """
-    if app_type not in ['wls', 'rmlapp']:
-        _LOGGER.error(f"Invalid app_type: {app_type}")
-        return False
-
-    if enabled:
-        return add_startup_entry(app_type)
-    else:
-        return remove_startup_entry(app_type)
-
 def add_startup_entry(app_type):
     """Add a startup entry for the specified application."""
     if sys.platform == "win32":
@@ -525,14 +494,6 @@ def check_startup_enabled(app_type):
             return PlistManager.check_launch_agent_exists(RMLAPP_LAUNCH_AGENT)
 
     return False
-
-def get_language_setting():
-    """Get the language setting from registry/plist."""
-    if sys.platform == "win32":
-        return RegistryManager.get_value(WINDOWS_RMLAPP_KEY_PATH, "language", "en")
-    elif sys.platform == "darwin":
-        return PlistManager.get_value(MACOS_PLIST_DOMAIN, "language", "en")
-    return "en"  # Default to English
 
 def set_language_setting(language):
     """Set the language setting in registry/plist."""
