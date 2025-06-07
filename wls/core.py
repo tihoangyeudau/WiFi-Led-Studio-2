@@ -394,6 +394,10 @@ class WlsCore:
 
         self.config = load_config(config_dir)
 
+        # Ensure wls_presets from presets.py are loaded into config
+        if not self.config["wls_presets"]:
+            self.config["wls_presets"] = wls_presets
+
         self.led_active = False
 
         for virtual_config in self.config.get("virtuals", []):
