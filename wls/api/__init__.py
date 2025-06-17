@@ -53,6 +53,32 @@ class RestEndpoint(BaseRegistry):
             # finally:
             #     if self._wls.dev_enabled():
             #         raise
+            
+    async def invalid_request(self, reason):
+        """Handle invalid requests with a standardized error response."""
+        response = {
+            "status": "failed",
+            "payload": {
+                "type": "error",
+                "reason": reason,
+            },
+        }
+        return web.json_response(data=response, status=400)
+        
+    async def request_success(self, type_str, message):
+        """Handle successful requests with a standardized success response."""
+        response = {
+            "status": "success",
+            "payload": {
+                "type": type_str,
+                "message": message,
+            },
+        }
+        return web.json_response(data=response, status=200)
+        
+    async def json_decode_error(self):
+        """Handle JSON decode errors with a standardized error response."""
+        return await self.invalid_request("Invalid JSON in request body")
 
 
 class RestApi(RegistryLoader):

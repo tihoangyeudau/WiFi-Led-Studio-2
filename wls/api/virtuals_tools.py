@@ -112,7 +112,7 @@ class VirtualsToolsEndpoint(RestEndpoint):
             hold = data.get("hold", 0)
             fade = data.get("fade", 0)
 
-            if sum(ramp, hold, fade) == 0:
+            if sum([ramp, hold, fade]) == 0:
                 return await self.invalid_request(
                     "At least one of ramp, hold or fade must be greater than 0"
                 )

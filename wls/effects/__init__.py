@@ -20,6 +20,7 @@ class DummyEffect:
     _active = True
     is_active = _active
     NAME = name = ""
+    type = "dummy"  # Thêm thuộc tính type để tránh lỗi
 
     def __init__(self, pixel_count):
         self.pixels = np.zeros((pixel_count, 3))
