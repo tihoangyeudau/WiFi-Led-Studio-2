@@ -42,7 +42,7 @@ class HotkeyManager:
             '<ctrl>+<alt>+4': self._quick_effect_energy,
 
             # Screen capture
-            '<ctrl>+<alt>+m': self._screen_capture,
+            '<ctrl>+<alt>+x': self._screen_capture,
 
             # Open web interface
             '<ctrl>+<alt>+w': self._open_web_interface,
@@ -147,7 +147,7 @@ class HotkeyManager:
         """Log available hotkeys for user reference"""
         _LOGGER.info("Available global hotkeys:")
         hotkey_descriptions = {
-            '<ctrl>+<alt>+l': 'Toggle LED on/off',
+            '<ctrl>+<alt>+t': 'Toggle LED on/off',
             '<ctrl>+<alt>+<up>': 'Increase brightness',
             '<ctrl>+<alt>+<down>': 'Decrease brightness',
             '<ctrl>+<alt>+<right>': 'Next effect',
@@ -156,7 +156,7 @@ class HotkeyManager:
             '<ctrl>+<alt>+2': 'Strobe effect',
             '<ctrl>+<alt>+3': 'Fade effect',
             '<ctrl>+<alt>+4': 'Energy effect',
-            '<ctrl>+<alt>+s': 'Screen capture',
+            '<ctrl>+<alt>+x': 'Screen capture',
             '<ctrl>+<alt>+w': 'Open web interface',
         }
 
