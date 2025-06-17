@@ -1151,6 +1151,10 @@ def update_effect_config(config, virtual_id, effect):
     Returns:
         None
     """
+    # Skip DummyEffect as it doesn't have type attribute and shouldn't be saved
+    if isinstance(effect, DummyEffect):
+        return
+    
     # Store as both the active effect to protect existing code, and one of effects
     virtual = next(
         (item for item in config["virtuals"] if item["id"] == virtual_id),

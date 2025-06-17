@@ -24,6 +24,7 @@ from wls.platform_utils import (
     set_device_enabled,
     set_device_brightness,
     set_language_setting,
+    set_hotkeys_enabled_setting,
     check_startup_enabled,
     add_startup_entry,
     remove_startup_entry
@@ -65,6 +66,7 @@ from wls.utils import (
     get_icon_path,
 )
 from wls.virtuals import Virtuals
+from wls.hotkeys import HotkeyManager
 from PIL import Image
 
 _LOGGER = logging.getLogger(__name__)
@@ -391,32 +393,17 @@ class WlsCore:
         if clear_config:
             _LOGGER.warning("Clearing WiFi Led Studio config.")
             create_backup(config_dir, "DELETE")
-
         self.config = load_config(config_dir)
-
-        # Ensure wls_presets from presets.py are loaded into config
-        if not self.config["wls_presets"]:
-            self.config["wls_presets"] = wls_presets
-
-        self.led_active = False
-
-        for virtual_config in self.config.get("virtuals", []):
-            if "config" in virtual_config and "last_state" in virtual_config["config"]:
-                if virtual_config["config"]["last_state"]:
-                    self.led_active = True
-                    break
-
-        if "selected_device" in self.config:
-            self._selected_device = self.config["selected_device"]
 
         if clear_effects:
             _LOGGER.warning("Clearing active effects.")
             remove_virtuals_active_effects(self.config)
 
+        self.config["wls_presets"] = wls_presets
+        self.led_active = False
         self.host = host if host else self.config["host"]
         self.port = port if port else self.config["port"]
         self.port_s = port_s if port_s else self.config["port_s"]
-
         self.ci_testing = ci_testing
         if sys.platform == "win32":
             self.loop = asyncio.ProactorEventLoop()
@@ -451,6 +438,18 @@ class WlsCore:
             self.event_handler = WindowsEventHandler(self)
         else:
             self.event_handler = MacOSEventHandler(self)
+
+        for virtual_config in self.config.get("virtuals", []):
+            if "config" in virtual_config and "last_state" in virtual_config["config"]:
+                if virtual_config["config"]["last_state"]:
+                    self.led_active = True
+                    break
+
+        if "selected_device" in self.config:
+            self._selected_device = self.config["selected_device"]
+
+        # Initialize hotkey manager
+        self.hotkey_manager = HotkeyManager(self)
 
     def get_led_devices_menu_title(self, led_devices_items):
         return "Đèn cần chỉnh | Instance to control :"
@@ -1969,6 +1968,12 @@ class WlsCore:
             # Create main menu
             main_menu_items = [
                 MenuItem(lambda text: toggle_text, self.toggle_startup_mode, icon=self.get_menu_icon("autorun")),
+                MenuItem(
+                    self._get_hotkey_toggle_text(),
+                    self._toggle_hotkeys,
+                    checked=None,
+                    icon=self._get_hotkey_toggle_icon()
+                ),
                 Menu.SEPARATOR,
                 # Display "LED Devices" title
                 MenuItem(self.get_led_devices_menu_title(), None, icon=self.get_menu_icon("instances")),
@@ -2111,6 +2116,49 @@ class WlsCore:
         else:  # vi
             return vi_text
 
+    # Hotkey management methods
+    def _get_hotkey_toggle_text(self):
+        """Get text for hotkey toggle menu item"""
+        if hasattr(self, 'hotkey_manager') and self.hotkey_manager.is_enabled():
+            return self.get_text("Disable Global Hotkeys", "Vô hiệu hoá phím tắt")
+        else:
+            return self.get_text("Enable Global Hotkeys", "Kích hoạt phím tắt")
+
+    def _get_hotkey_toggle_icon(self):
+        """Get icon for hotkey toggle menu item based on current state"""
+        if hasattr(self, 'hotkey_manager') and self.hotkey_manager.is_enabled():
+            return self.get_menu_icon("hotkey-disable")
+        else:
+            return self.get_menu_icon("hotkey-enable")
+
+    def _toggle_hotkeys(self):
+        """Toggle global hotkeys on/off"""
+        try:
+            if hasattr(self, 'hotkey_manager'):
+                if self.hotkey_manager.is_enabled():
+                    self.hotkey_manager.disable()
+                    _LOGGER.info("Global hotkeys disabled")
+                    # Update registry setting
+                    if set_hotkeys_enabled_setting(False):
+                        _LOGGER.debug("Updated registry with hotkeysEnabled=false")
+                    else:
+                        _LOGGER.error("Failed to update registry with hotkeysEnabled=false")
+                else:
+                    self.hotkey_manager.enable()
+                    _LOGGER.info("Global hotkeys enabled")
+                    # Update registry setting
+                    if set_hotkeys_enabled_setting(True):
+                        _LOGGER.debug("Updated registry with hotkeysEnabled=true")
+                    else:
+                        _LOGGER.error("Failed to update registry with hotkeysEnabled=true")
+
+                # Update menu to reflect new state
+                self.setup_icon_menu()
+            else:
+                _LOGGER.warning("Hotkey manager not initialized")
+        except Exception as e:
+            _LOGGER.error(f"Error toggling hotkeys: {e}")
+
     # Compatibility methods for backward compatibility
     def setup_icon_menu_aw(self):
         """Legacy method, redirects to toggle_startup_mode"""
@@ -2231,6 +2279,10 @@ class WlsCore:
 
         if self.event_handler:
             self.event_handler.start()
+
+        # Start hotkey manager
+        if hasattr(self, 'hotkey_manager'):
+            self.hotkey_manager.start()
 
         await self.http.start(get_ssl_certs(config_dir=self.config_dir))
         if (
@@ -2489,6 +2541,10 @@ class WlsCore:
     async def async_stop(self, exit_code):
         if self.event_handler:
             self.event_handler.stop()
+
+        # Stop hotkey manager
+        if hasattr(self, 'hotkey_manager'):
+            self.hotkey_manager.stop()
 
         return await self._common_async_stop(exit_code)
 

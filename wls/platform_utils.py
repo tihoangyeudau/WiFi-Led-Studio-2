@@ -80,7 +80,7 @@ if sys.platform == "win32":
                 value, _ = winreg.QueryValueEx(key, value_name)
                 winreg.CloseKey(key)
                 return value
-            except (FileNotFoundError, WindowsError):
+            except (FileNotFoundError, WindowsError, OSError):
                 return default
 
         @staticmethod
@@ -505,4 +505,51 @@ def set_language_setting(language):
         return RegistryManager.set_value(WINDOWS_RMLAPP_KEY_PATH, "language", language)
     elif sys.platform == "darwin":
         return PlistManager.set_value(MACOS_PLIST_DOMAIN, "language", language)
+    return False
+
+def get_hotkeys_enabled_setting():
+    """Get the hotkeys enabled setting from registry/plist.
+    
+    Returns:
+        bool: True if hotkeys are enabled, False otherwise. Default is True if not set.
+    """
+    try:
+        if sys.platform == "win32":
+            # Windows registry
+            value = RegistryManager.get_value(WINDOWS_RMLAPP_KEY_PATH, "hotkeysEnabled", "true")
+            # Convert string to boolean
+            return value.lower() == "true" if isinstance(value, str) else bool(value)
+        elif sys.platform == "darwin":
+            # macOS plist
+            value = PlistManager.get_value(MACOS_PLIST_DOMAIN, "hotkeysEnabled", True)
+            return bool(value)
+    except Exception as e:
+        _LOGGER.error(f"Error getting hotkeys enabled setting: {e}")
+    
+    # Default to True if platform not supported or error occurred
+    return True
+
+def set_hotkeys_enabled_setting(enabled):
+    """Set the hotkeys enabled setting in registry/plist.
+    
+    Args:
+        enabled (bool): True to enable hotkeys, False to disable
+        
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    try:
+        value = "true" if enabled else "false"
+        
+        if sys.platform == "win32":
+            # Windows registry - store as string like in the example
+            # Only create registry entry when user explicitly changes the setting
+            return RegistryManager.set_value(WINDOWS_RMLAPP_KEY_PATH, "hotkeysEnabled", value)
+        elif sys.platform == "darwin":
+            # macOS plist - store as boolean
+            return PlistManager.set_value(MACOS_PLIST_DOMAIN, "hotkeysEnabled", enabled)
+    except Exception as e:
+        _LOGGER.error(f"Error setting hotkeys enabled setting: {e}")
+        return False
+    
     return False

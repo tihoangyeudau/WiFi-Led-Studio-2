@@ -44,6 +44,7 @@ INSTALL_REQUIRES = [
     "pillow>=10.1.0",
     "pyinstaller==6.8.0",
     "cx-freeze>=7.2.2",
+    "pynput>=1.7.6",
     # Conditional Requirement
     # uvloop doesn't work on Windows yet, but should be a good speedup for low power linux devices
     'uvloop>=0.16.0; platform_system != "Windows"',

@@ -548,12 +548,24 @@ def create_backup(config_dir, config_file, errortype):
 
 
 def save_config(config: dict, config_dir: str) -> None:
-    """Saves the configuration to the provided directory"""
+    """
+    Saves the configuration to the provided directory.
+
+    Args:
+        config (dict): The configuration to be saved.
+        config_dir (str): The directory where the configuration file will be saved.
+
+    Returns:
+        None
+    """
 
     config_file = ensure_config_file(config_dir)
     _LOGGER.info(("Đang lưu tệp cấu hình vào {}").format(config_dir))
     config["configuration_version"] = CONFIGURATION_VERSION
     config_view = dict(config)
+    unneeded_keys = ["wls_presets"]
+    for key in [key for key in config_view if key in unneeded_keys]:
+        del config_view[key]
 
     with open(config_file, "w", encoding="utf-8") as file:
         json.dump(

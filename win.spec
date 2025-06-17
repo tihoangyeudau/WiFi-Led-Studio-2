@@ -22,6 +22,7 @@ a = Analysis([f'{spec_root}\\wls\\__main__.py'],
              binaries=[],
              datas=datas,
              hiddenimports=[
+                           "pynput",
                            "aubio",
                            "numpy",
                            "math",
