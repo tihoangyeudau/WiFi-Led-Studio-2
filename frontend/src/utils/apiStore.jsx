@@ -3,9 +3,15 @@ import create from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { Wls } from './apiProxy';
 
+// Kiểm tra xem Redux DevTools có sẵn không để tránh cảnh báo
+const reduxDevtoolsExtension = 
+  typeof window !== 'undefined' &&
+  window.__REDUX_DEVTOOLS_EXTENSION__;
+
 const useStore = create(
   persist(
-    devtools((set, get) => ({
+    devtools(
+      (set, get) => ({
 
       host: isElectron() ? 'http://localhost:8090' : window.location.href.split('#')[0],
       setHost: (host) => {
