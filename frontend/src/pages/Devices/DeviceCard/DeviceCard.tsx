@@ -94,7 +94,6 @@ const DeviceCard = ({
     const now = Date.now();
     if (now - lastEventTime > 500) {
       setIsActive(isEffectSet || isStreaming);
-      console.log(`DeviceCard.tsx: Cập nhật isActive từ props: isEffectSet=${isEffectSet}, isStreaming=${isStreaming}`);
     }
   }, [isEffectSet, isStreaming, lastEventTime]);
 
