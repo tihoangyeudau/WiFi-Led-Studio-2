@@ -22,11 +22,7 @@ class EffectsEndpoint(RestEndpoint):
         """
         virtual = self._wls.virtuals.get(virtual_id)
         if virtual is None:
-            response = {
-                "status": "failed",
-                "reason": f"Đèn ảo có ID {virtual_id} không được tìm thấy",
-            }
-            return web.json_response(data=response, status=404)
+            return await self.invalid_request(f"Đèn ảo có ID {virtual_id} không được tìm thấy")
 
         # Get the active effect
         response = {"effect": {}}
@@ -45,27 +41,15 @@ class EffectsEndpoint(RestEndpoint):
         """
         virtual = self._wls.virtuals.get(virtual_id)
         if virtual is None:
-            response = {
-                "status": "failed",
-                "reason": f"Đèn ảo có ID {virtual_id} không được tìm thấy",
-            }
-            return web.json_response(data=response, status=404)
+            return await self.invalid_request(f"Đèn ảo có ID {virtual_id} không được tìm thấy")
 
         if not virtual.active_effect:
-            response = {
-                "status": "failed",
-                "reason": f"Đèn ảo {virtual_id} không kích hoạt hiệu ứng nào",
-            }
-            return web.json_response(data=response, status=400)
+            return await self.invalid_request(f"Đèn ảo {virtual_id} không kích hoạt hiệu ứng nào")
 
         try:
             data = await request.json()
         except JSONDecodeError:
-            response = {
-                "status": "failed",
-                "reason": "Không giải mã được JSON",
-            }
-            return web.json_response(data=response, status=400)
+            return await self.json_decode_error()
         effect_config = data.get("config")
         effect_type = data.get("type")
         if effect_config is None:
@@ -170,27 +154,15 @@ class EffectsEndpoint(RestEndpoint):
         """
         virtual = self._wls.virtuals.get(virtual_id)
         if virtual is None:
-            response = {
-                "status": "failed",
-                "reason": f"Đèn ảo có ID {virtual_id} không được tìm thấy",
-            }
-            return web.json_response(data=response, status=404)
+            return await self.invalid_request(f"Đèn ảo có ID {virtual_id} không được tìm thấy")
 
         try:
             data = await request.json()
         except JSONDecodeError:
-            response = {
-                "status": "failed",
-                "reason": "Không giải mã được JSON",
-            }
-            return web.json_response(data=response, status=400)
+            return await self.json_decode_error()
         effect_type = data.get("type")
         if effect_type is None:
-            response = {
-                "status": "failed",
-                "reason": 'Thuộc tính bắt buộc "type" không được cung cấp',
-            }
-            return web.json_response(data=response, status=400)
+            return await self.invalid_request('Thuộc tính bắt buộc "type" không được cung cấp')
 
         effect_config = data.get("config")
         if effect_config is None:
@@ -277,24 +249,24 @@ class EffectsEndpoint(RestEndpoint):
     async def delete(self, virtual_id) -> web.Response:
         virtual = self._wls.virtuals.get(virtual_id)
         if virtual is None:
-            response = {
-                "status": "failed",
-                "reason": f"Đèn ảo có ID {virtual_id} không được tìm thấy",
-            }
-            return web.json_response(data=response, status=404)
+            return await self.invalid_request(f"Đèn ảo có ID {virtual_id} không được tìm thấy")
 
-        # Clear the effect
-        virtual.clear_effect()
+        try:
+            # Clear the effect
+            virtual.clear_effect()
 
-        for virtual_cfg in self._wls.config["virtuals"]:
-            if virtual_cfg["id"] == virtual_id:
-                if "effect" in virtual_cfg:
-                    del virtual_cfg["effect"]
-                    break
-        save_config(
-            config=self._wls.config,
-            config_dir=self._wls.config_dir,
-        )
+            for virtual_cfg in self._wls.config["virtuals"]:
+                if virtual_cfg["id"] == virtual_id:
+                    if "effect" in virtual_cfg:
+                        del virtual_cfg["effect"]
+                        break
+            save_config(
+                config=self._wls.config,
+                config_dir=self._wls.config_dir,
+            )
 
-        response = {"status": "success", "effect": {}}
-        return web.json_response(data=response, status=200)
+            response = {"status": "success", "effect": {}}
+            return web.json_response(data=response, status=200)
+        except Exception as e:
+            _LOGGER.error(f"Lỗi khi xóa hiệu ứng cho virtual {virtual_id}: {e}")
+            return await self.invalid_request(f"Không thể xóa hiệu ứng: {str(e)}")

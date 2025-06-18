@@ -26,26 +26,14 @@ class EffectsEndpoint(RestEndpoint):
         try:
             data = await request.json()
         except JSONDecodeError:
-            response = {
-                "status": "failed",
-                "reason": "Không giải mã được JSON",
-            }
-            return web.json_response(data=response, status=400)
+            return await self.json_decode_error()
 
         action = data.get("action")
         if action is None:
-            response = {
-                "status": "failed",
-                "reason": 'Thuộc tính bắt buộc "action" không được cung cấp',
-            }
-            return web.json_response(data=response, status=400)
+            return await self.invalid_request('Thuộc tính bắt buộc "action" không được cung cấp')
 
-        if action not in ["clear_all_effects"]:
-            response = {
-                "status": "failed",
-                "reason": f'Hành động không hợp lệ "{action}"',
-            }
-            return web.json_response(data=response, status=400)
+        if action not in ["clear_all_effects", "toggle_led_state"]:
+            return await self.invalid_request(f'Hành động không hợp lệ "{action}"')
 
         # Clear all effects on all devices
         if action == "clear_all_effects":
@@ -58,3 +46,19 @@ class EffectsEndpoint(RestEndpoint):
                 },
             }
             return web.json_response(data=response, status=200)
+
+        # Toggle LED state
+        elif action == "toggle_led_state":
+            try:
+                self._wls.toggle_led_state()
+                response = {
+                    "status": "success",
+                    "payload": {
+                        "type": "info",
+                        "message": "Đã chuyển đổi trạng thái LED",
+                    },
+                }
+                return web.json_response(data=response, status=200)
+            except Exception as e:
+                _LOGGER.error(f"Lỗi khi toggle LED state: {e}")
+                return await self.invalid_request(f"Không thể chuyển đổi trạng thái LED: {str(e)}")
