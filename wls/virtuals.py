@@ -350,18 +350,27 @@ class Virtual:
                 else:
                     self._config["last_state"] = True
 
-                if "last_effect" not in self._config:
-                    self._config["last_effect"] = effect.type
-                else:
-                    self._config["last_effect"] = effect.type
+                # Không lưu "dummy" effect vì nó không phải là effect thực sự
+                if effect.type != "dummy":
+                    if "last_effect" not in self._config:
+                        self._config["last_effect"] = effect.type
+                    else:
+                        self._config["last_effect"] = effect.type
 
-                # Cập nhật config trong danh sách virtuals của wls
-                for idx, virtual_config in enumerate(self._wls.config["virtuals"]):
-                    if virtual_config["id"] == self.id:
-                        virtual_config["config"]["last_state"] = True
-                        virtual_config["config"]["last_effect"] = effect.type
-                        self._wls.config["virtuals"][idx] = virtual_config
-                        break
+                    # Cập nhật config trong danh sách virtuals của wls
+                    for idx, virtual_config in enumerate(self._wls.config["virtuals"]):
+                        if virtual_config["id"] == self.id:
+                            virtual_config["config"]["last_state"] = True
+                            virtual_config["config"]["last_effect"] = effect.type
+                            self._wls.config["virtuals"][idx] = virtual_config
+                            break
+                else:
+                    # Chỉ cập nhật last_state cho dummy effect
+                    for idx, virtual_config in enumerate(self._wls.config["virtuals"]):
+                        if virtual_config["id"] == self.id:
+                            virtual_config["config"]["last_state"] = True
+                            self._wls.config["virtuals"][idx] = virtual_config
+                            break
 
                 # Đã lưu trạng thái và hiệu ứng vào config của virtual
 
@@ -1154,7 +1163,7 @@ def update_effect_config(config, virtual_id, effect):
     # Skip DummyEffect as it doesn't have type attribute and shouldn't be saved
     if isinstance(effect, DummyEffect):
         return
-    
+
     # Store as both the active effect to protect existing code, and one of effects
     virtual = next(
         (item for item in config["virtuals"] if item["id"] == virtual_id),

@@ -1,4 +1,4 @@
-﻿import asyncio
+﻿﻿import asyncio
 import logging
 import sys
 import os
@@ -1021,6 +1021,11 @@ class WlsCore:
 
             return last_effect
 
+        # Bỏ qua effect "dummy" vì nó không được đăng ký trong registry
+        if effect_type == "dummy":
+            _LOGGER.debug("Bỏ qua effect 'dummy', sử dụng 'rainbow' làm mặc định")
+            return "rainbow"
+
         registry = self.effects._cls.registry()
 
         if effect_type not in registry:
@@ -1094,19 +1099,21 @@ class WlsCore:
 
             self.current_effect = effect_type
 
-            for virtual in self.virtuals.values():
-                if hasattr(virtual, 'is_device') and virtual.is_device == device_id:
-                    if hasattr(virtual, '_config'):
-                        virtual._config["last_effect"] = effect_type
+            # Không lưu "dummy" effect vì nó không phải là effect thực sự
+            if effect_type != "dummy":
+                for virtual in self.virtuals.values():
+                    if hasattr(virtual, 'is_device') and virtual.is_device == device_id:
+                        if hasattr(virtual, '_config'):
+                            virtual._config["last_effect"] = effect_type
 
-                    for idx, virtual_config in enumerate(self.config["virtuals"]):
-                        if virtual_config["id"] == virtual.id:
-                            if "config" not in virtual_config:
-                                virtual_config["config"] = {}
-                            virtual_config["config"]["last_effect"] = effect_type
-                            self.config["virtuals"][idx] = virtual_config
-                            break
-                    break
+                        for idx, virtual_config in enumerate(self.config["virtuals"]):
+                            if virtual_config["id"] == virtual.id:
+                                if "config" not in virtual_config:
+                                    virtual_config["config"] = {}
+                                virtual_config["config"]["last_effect"] = effect_type
+                                self.config["virtuals"][idx] = virtual_config
+                                break
+                        break
 
             self.led_active = True
 
@@ -1141,20 +1148,22 @@ class WlsCore:
             if not success:
                 return
 
-            for virtual in self.virtuals.values():
-                if hasattr(virtual, 'is_device') and virtual.is_device is not None:
-                    device_id = virtual.is_device
+            # Không lưu "dummy" effect vì nó không phải là effect thực sự
+            if effect_type != "dummy":
+                for virtual in self.virtuals.values():
+                    if hasattr(virtual, 'is_device') and virtual.is_device is not None:
+                        device_id = virtual.is_device
 
-                    if hasattr(virtual, '_config'):
-                        virtual._config["last_effect"] = effect_type
+                        if hasattr(virtual, '_config'):
+                            virtual._config["last_effect"] = effect_type
 
-                    for idx, virtual_config in enumerate(self.config["virtuals"]):
-                        if virtual_config["id"] == virtual.id:
-                            if "config" not in virtual_config:
-                                virtual_config["config"] = {}
-                            virtual_config["config"]["last_effect"] = effect_type
-                            self.config["virtuals"][idx] = virtual_config
-                            break
+                        for idx, virtual_config in enumerate(self.config["virtuals"]):
+                            if virtual_config["id"] == virtual.id:
+                                if "config" not in virtual_config:
+                                    virtual_config["config"] = {}
+                                virtual_config["config"]["last_effect"] = effect_type
+                                self.config["virtuals"][idx] = virtual_config
+                                break
 
             self.current_effect = effect_type
 
