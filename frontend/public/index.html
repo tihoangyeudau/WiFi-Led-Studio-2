@@ -41,7 +41,8 @@
 
 <body>
   <noscript>Bạn cần bật JavaScript để chạy ứng dụng này.</noscript>
-  <script type="application/javascript">
+  <!-- Service Worker registration is handled by serviceWorkerRegistration.js -->
+  <!-- <script type="application/javascript">
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function () {
         navigator.serviceWorker.register('serviceWorker.js', { scope: '.' }).then(function (registration) {
@@ -53,7 +54,7 @@
         });
       });
     }
-  </script>
+  </script> -->
   <div id="root"></div>
   <!--
       This HTML file is a template.

@@ -68,7 +68,7 @@ class HttpServer:
 
     async def service_worker(self, response):
         return web.FileResponse(
-            path=wls_frontend.where() + "/serviceWorker.js", status=200
+            path=wls_frontend.where() + "/service-worker.js", status=200
         )
 
     async def service_worker_b(self, response):

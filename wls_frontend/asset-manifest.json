@@ -9,6 +9,7 @@
     "static/media/MaterialIcons-Regular.woff2": "./static/media/MaterialIcons-Regular.f71673ad689fb42ddae1.woff2",
     "static/media/logomain.png": "./static/media/logomain.9793ef48882e77aba353.png",
     "static/media/logo.png": "./static/media/logo.1aeff8817b258c4cdcce.png",
+    "service-worker.js": "./service-worker.js",
     "index.html": "./index.html",
     "main.abf1406e.css.map": "./static/css/main.abf1406e.css.map",
     "main.3055edfd.js.map": "./static/js/main.3055edfd.js.map",
