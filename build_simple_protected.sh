@@ -32,33 +32,12 @@ echo ""
 
 # Step 3: Build with protected source
 echo -e "${CYAN}Step 3: Building with bytecode-protected source...${NC}"
-
-# Check if numpy is installed
-echo -e "${CYAN}Checking dependencies...${NC}"
-python3 -c "import numpy; print(f'Numpy version: {numpy.__version__}')" 2>/dev/null
-if [ $? -ne 0 ]; then
-    echo -e "${YELLOW}Warning: numpy not found, installing...${NC}"
-    pip3 install numpy
-fi
-
-python3 -c "import cx_Freeze; print(f'cx-Freeze version: {cx_Freeze.__version__}')" 2>/dev/null
-if [ $? -ne 0 ]; then
-    echo -e "${YELLOW}Warning: cx-Freeze not found, installing...${NC}"
-    pip3 install cx-freeze
-fi
-
-# Run the build
-python3 setup_simple_protected.py build 2>&1
+python3 setup_simple_protected.py build
 
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}Protected build completed successfully!${NC}"
 else
     echo -e "${RED}Protected build failed!${NC}"
-    echo -e "${YELLOW}Common solutions:${NC}"
-    echo "1. Install missing dependencies: pip3 install -r requirements.txt"
-    echo "2. Update numpy: pip3 install --upgrade numpy"
-    echo "3. Update cx-freeze: pip3 install --upgrade cx-freeze"
-    echo "4. Check Python version (3.8+ required)"
     read -p "Press Enter to exit"
     exit 1
 fi
