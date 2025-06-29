@@ -18,18 +18,8 @@ def main():
         print(f"⚠️  This script is for macOS, but running on {platform.system()}")
         print("Continuing anyway...")
     
-    # Step 1: Check dependencies
-    print("\n🔍 Step 1: Checking dependencies...")
-    try:
-        result = subprocess.run([sys.executable, 'check_dependencies_macos.py'], 
-                              check=True, text=True)
-        print("✅ Dependencies check passed")
-    except subprocess.CalledProcessError as e:
-        print(f"⚠️  Dependencies check had issues: {e}")
-        print("Continuing with build anyway...")
-    
-    # Step 2: Fix pynput installation
-    print("\n🔧 Step 2: Fixing pynput for macOS...")
+    # Step 1: Fix pynput installation
+    print("\n🔧 Step 1: Fixing pynput for macOS...")
     try:
         result = subprocess.run([sys.executable, 'fix_pynput_macos.py'], 
                               check=True, text=True)
@@ -38,8 +28,8 @@ def main():
         print(f"⚠️  pynput fix had issues: {e}")
         print("Continuing with build anyway...")
     
-    # Step 3: Source protection
-    print("\n🔐 Step 3: Source protection...")
+    # Step 2: Source protection
+    print("\n🔐 Step 2: Source protection...")
     try:
         result = subprocess.run([sys.executable, 'simple_protect.py'], 
                               check=True, capture_output=True, text=True)
@@ -48,15 +38,15 @@ def main():
         print(f"❌ Source protection failed: {e}")
         return False
     
-    # Step 4: Clean previous build
-    print("\n🧹 Step 4: Cleaning previous build...")
+    # Step 3: Clean previous build
+    print("\n🧹 Step 3: Cleaning previous build...")
     if os.path.exists('build_simple_protected'):
         import shutil
         shutil.rmtree('build_simple_protected')
         print("✅ Previous build cleaned")
     
-    # Step 5: Build with hotkeys
-    print("\n🏗️  Step 5: Building with hotkeys support...")
+    # Step 4: Build with hotkeys
+    print("\n🏗️  Step 4: Building with hotkeys support...")
     try:
         result = subprocess.run([sys.executable, 'setup_simple_minimal.py', 'build'], 
                               check=True, text=True)
@@ -72,14 +62,14 @@ def main():
         
         return False
     
-    # Step 6: Verify
-    print("\n✅ Step 6: Verifying build...")
+    # Step 5: Verify
+    print("\n✅ Step 5: Verifying build...")
     app_path = "build_simple_protected/WiFi Led Studio.app"
     if os.path.exists(app_path):
         print(f"✅ App bundle created: {app_path}")
         
         # Test the app quickly
-        print("\n🧪 Step 7: Testing app...")
+        print("\n🧪 Step 6: Testing app...")
         executable_path = os.path.join(app_path, "Contents", "MacOS", "WiFi Led Studio")
         if os.path.exists(executable_path):
             try:

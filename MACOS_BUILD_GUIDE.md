@@ -47,24 +47,14 @@ This is a pystray compatibility issue with cx-freeze on macOS.
 #### Error: "No module named 'pynput.keyboard._darwin'"
 This is a pynput compatibility issue with cx-freeze on macOS.
 
-#### Error: "No module named 'icmplib'"
-This means icmplib dependency is missing from the build.
-
-**Quick Fix: Use Hotkeys Build (handles all dependencies)**
+**Quick Fix: Use Hotkeys Build**
 ```bash
 python3 build_macos_with_hotkeys.py
 ```
 
-**Manual Fixes:**
+**Manual Fix:**
 ```bash
-# Fix pynput
 python3 fix_pynput_macos.py
-
-# Install missing dependencies
-python3 install_dependencies_macos.py
-
-# Check all dependencies
-python3 check_dependencies_macos.py
 ```
 
 **Other Solutions:**
