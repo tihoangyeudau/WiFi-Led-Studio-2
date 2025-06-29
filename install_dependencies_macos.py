@@ -19,17 +19,17 @@ def install_package(package_name, import_name=None):
     """Install a package using pip"""
     if import_name is None:
         import_name = package_name
-    
+
     if check_dependency(import_name):
         print(f"✅ {package_name} already installed")
         return True
-    
+
     print(f"📦 Installing {package_name}...")
     try:
         result = subprocess.run([
             sys.executable, '-m', 'pip', 'install', package_name
         ], check=True, capture_output=True, text=True)
-        
+
         # Verify installation
         if check_dependency(import_name):
             print(f"✅ {package_name} installed successfully")
@@ -37,7 +37,7 @@ def install_package(package_name, import_name=None):
         else:
             print(f"⚠️  {package_name} installed but import failed")
             return False
-            
+
     except subprocess.CalledProcessError as e:
         print(f"❌ Failed to install {package_name}: {e}")
         return False
@@ -46,7 +46,7 @@ def main():
     """Main installation function"""
     print("🍎 WiFi Led Studio - Dependencies Installer for macOS")
     print("=" * 55)
-    
+
     # List of required packages
     packages = [
         # Core packages
@@ -55,41 +55,42 @@ def main():
         ('psutil', 'psutil'),
         ('pyserial', 'serial'),
         ('zeroconf', 'zeroconf'),
-        
+
         # Audio packages
         ('aubio', 'aubio'),
         ('sounddevice', 'sounddevice'),
-        
+
         # Network packages
         ('icmplib', 'icmplib'),
-        
+        ('paho-mqtt', 'paho.mqtt'),
+
         # GUI packages
         ('pillow', 'PIL'),
         ('pystray', 'pystray'),
         ('pynput', 'pynput'),
-        
+
         # Build tools
         ('cx-freeze', 'cx_Freeze'),
     ]
-    
+
     print("🔍 Checking and installing dependencies...")
     print("-" * 40)
-    
+
     installed = 0
     failed = 0
-    
+
     for package_name, import_name in packages:
         if install_package(package_name, import_name):
             installed += 1
         else:
             failed += 1
-    
+
     print("\n" + "=" * 55)
     print(f"📊 Installation Summary:")
     print(f"   ✅ Successful: {installed}")
     print(f"   ❌ Failed: {failed}")
     print(f"   📦 Total: {len(packages)}")
-    
+
     if failed == 0:
         print("\n🎉 All dependencies installed successfully!")
         print("\nNext steps:")
@@ -109,10 +110,10 @@ def install_system_dependencies():
     """Install system-level dependencies"""
     print("\n🔧 System Dependencies:")
     print("-" * 25)
-    
+
     # Check for Xcode Command Line Tools
     try:
-        result = subprocess.run(['xcode-select', '--print-path'], 
+        result = subprocess.run(['xcode-select', '--print-path'],
                               capture_output=True, text=True)
         if result.returncode == 0:
             print("✅ Xcode Command Line Tools already installed")
@@ -121,14 +122,14 @@ def install_system_dependencies():
             subprocess.run(['xcode-select', '--install'])
     except FileNotFoundError:
         print("❌ xcode-select not found")
-    
+
     # Check for Homebrew (optional)
     try:
-        result = subprocess.run(['brew', '--version'], 
+        result = subprocess.run(['brew', '--version'],
                               capture_output=True, text=True)
         if result.returncode == 0:
             print("✅ Homebrew available")
-            
+
             # Suggest some useful packages
             print("💡 Optional: Install audio libraries via Homebrew:")
             print("   brew install portaudio")

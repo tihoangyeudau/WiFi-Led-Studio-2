@@ -47,8 +47,11 @@ This is a pystray compatibility issue with cx-freeze on macOS.
 #### Error: "No module named 'pynput.keyboard._darwin'"
 This is a pynput compatibility issue with cx-freeze on macOS.
 
-#### Error: "No module named 'icmplib'"
-This means icmplib dependency is missing from the build.
+#### Error: "No module named 'icmplib'" or "No module named 'paho'"
+These mean dependencies are missing from the build.
+
+#### Warning: "This process is not trusted! Input event monitoring will not be possible"
+This means accessibility permissions are needed for hotkeys.
 
 **Quick Fix: Use Hotkeys Build (handles all dependencies)**
 ```bash
@@ -57,11 +60,14 @@ python3 build_macos_with_hotkeys.py
 
 **Manual Fixes:**
 ```bash
+# Install missing dependencies
+python3 install_dependencies_macos.py
+
 # Fix pynput
 python3 fix_pynput_macos.py
 
-# Install missing dependencies
-python3 install_dependencies_macos.py
+# Fix accessibility permissions
+python3 fix_accessibility_macos.py
 
 # Check all dependencies
 python3 check_dependencies_macos.py
