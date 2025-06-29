@@ -125,59 +125,6 @@ def check_other_dependencies():
     
     return len(missing) == 0
 
-def check_pystray_modules():
-    """Check pystray platform-specific modules"""
-    print("\n🖼️  Checking pystray modules...")
-    
-    try:
-        import pystray
-        print(f"✅ pystray base module available")
-        
-        # Check platform-specific modules
-        platform_modules = []
-        if platform.system() == 'Darwin':  # macOS
-            modules_to_check = [
-                'pystray._darwin',
-                'pystray._util.darwin',
-                'pystray._base'
-            ]
-        elif platform.system() == 'Windows':
-            modules_to_check = [
-                'pystray._win32',
-                'pystray._util.win32',
-                'pystray._base'
-            ]
-        else:  # Linux
-            modules_to_check = [
-                'pystray._xorg',
-                'pystray._base'
-            ]
-        
-        available_modules = []
-        missing_modules = []
-        
-        for module_name in modules_to_check:
-            try:
-                importlib.import_module(module_name)
-                available_modules.append(module_name)
-            except ImportError as e:
-                missing_modules.append((module_name, str(e)))
-        
-        print(f"✅ Available pystray modules: {len(available_modules)}")
-        for mod in available_modules:
-            print(f"   - {mod}")
-        
-        if missing_modules:
-            print(f"⚠️  Missing pystray modules: {len(missing_modules)}")
-            for mod, error in missing_modules:
-                print(f"   - {mod}: {error}")
-        
-        return len(available_modules) > 0
-        
-    except ImportError as e:
-        print(f"❌ pystray not available: {e}")
-        return False
-
 def check_build_files():
     """Check if required build files exist"""
     print("\n📁 Checking build files...")
@@ -268,7 +215,6 @@ def main():
         ("Numpy", check_numpy),
         ("cx-Freeze", check_cx_freeze),
         ("Other Dependencies", check_other_dependencies),
-        ("Pystray Modules", check_pystray_modules),
         ("Build Files", check_build_files),
     ]
     

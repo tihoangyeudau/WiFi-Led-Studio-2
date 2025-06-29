@@ -112,9 +112,6 @@ def run_build():
         if "No module named 'numpy.core._methods'" in str(e):
             print("\n🔧 Numpy module issue detected. Trying fixes...")
             return try_numpy_fixes()
-        elif "No module named 'pystray._util.darwin'" in str(e):
-            print("\n🔧 Pystray module issue detected. Trying fixes...")
-            return try_pystray_fixes()
         
         return False
 
@@ -146,36 +143,6 @@ def try_numpy_fixes():
             continue
     
     print("❌ All numpy fixes failed")
-    return False
-
-def try_pystray_fixes():
-    """Try various pystray-related fixes"""
-    print("🔧 Attempting pystray fixes...")
-    
-    fixes = [
-        ("Reinstall pystray", [sys.executable, '-m', 'pip', 'uninstall', '-y', 'pystray'], 
-                             [sys.executable, '-m', 'pip', 'install', 'pystray']),
-        ("Install specific pystray version", [sys.executable, '-m', 'pip', 'install', 'pystray==0.19.4']),
-        ("Install from source", [sys.executable, '-m', 'pip', 'install', 'git+https://github.com/moses-palmer/pystray.git'])
-    ]
-    
-    for fix_name, *commands in fixes:
-        print(f"   Trying: {fix_name}")
-        try:
-            for cmd in commands:
-                subprocess.run(cmd, check=True, capture_output=True)
-            
-            # Try build again
-            result = subprocess.run([sys.executable, 'setup_simple_protected.py', 'build'], 
-                                  check=True, capture_output=True)
-            print(f"✅ {fix_name} worked!")
-            return True
-            
-        except subprocess.CalledProcessError:
-            print(f"   {fix_name} didn't work, trying next...")
-            continue
-    
-    print("❌ All pystray fixes failed")
     return False
 
 def verify_build():

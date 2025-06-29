@@ -2,17 +2,12 @@
 
 ## Quick Start
 
-### Method 1: Minimal Build (Recommended for problematic systems)
-```bash
-python3 build_minimal_macos.py
-```
-
-### Method 2: Safe Build Script
+### Method 1: Safe Build Script (Recommended)
 ```bash
 python3 build_macos_safe.py
 ```
 
-### Method 3: Manual Build
+### Method 2: Manual Build
 ```bash
 # 1. Protect source code
 python3 simple_protect.py
@@ -21,27 +16,16 @@ python3 simple_protect.py
 python3 setup_simple_protected.py build
 ```
 
-### Method 4: Cross-Platform Script
+### Method 3: Cross-Platform Script
 ```bash
 python3 build_simple_protected_cross_platform.py
 ```
 
 ## Troubleshooting
 
-### Common Errors
+### Common Error: "No module named 'numpy.core._methods'"
 
-#### Error: "No module named 'numpy.core._methods'"
-This is a known issue with cx-freeze and numpy on macOS.
-
-#### Error: "No module named 'pystray._util.darwin'"
-This is a pystray compatibility issue with cx-freeze on macOS.
-
-**Quick Fix: Use Minimal Build**
-```bash
-python3 build_minimal_macos.py
-```
-
-**Other Solutions:**
+This is a known issue with cx-freeze and numpy on macOS. Try these solutions:
 
 #### Solution 1: Debug Script
 ```bash
