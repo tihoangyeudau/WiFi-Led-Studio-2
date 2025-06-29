@@ -114,7 +114,8 @@ build_options = {
         (os.path.join(protected_dir, 'wls'), 'lib/wls'),
         (os.path.join(protected_dir, 'wls_frontend'), 'lib/wls_frontend'),
         (os.path.join(base_dir, 'icons'), 'icons'),
-        # Note: tray.png is already included in icons directory
+        # Copy tray.png
+        (os.path.join(base_dir, 'icons', 'tray.png'), 'tray.png'),
     ],
     'optimize': 2,
     'build_exe': f'build_simple_protected/WiFi Led Studio',
@@ -176,27 +177,14 @@ if is_macos and os.path.exists(build_options['build_exe']):
     os.makedirs(macos_dir, exist_ok=True)
     os.makedirs(resources_dir, exist_ok=True)
 
-    # Separate executable and resources
-    executable_name = 'WiFi Led Studio'
-    
+    # Move build contents to MacOS directory
     for item in os.listdir(build_dir):
         src = os.path.join(build_dir, item)
-        
-        # Executable goes to MacOS
-        if item == executable_name:
-            dst = os.path.join(macos_dir, item)
-            shutil.copy2(src, dst)
-            print(f"✅ Moved executable to MacOS/")
-        
-        # Everything else goes to Resources
+        dst = os.path.join(macos_dir, item)
+        if os.path.isdir(src):
+            shutil.copytree(src, dst)
         else:
-            dst = os.path.join(resources_dir, item)
-            if os.path.isdir(src):
-                shutil.copytree(src, dst)
-                print(f"✅ Moved {item}/ to Resources/")
-            else:
-                shutil.copy2(src, dst)
-                print(f"✅ Moved {item} to Resources/")
+            shutil.copy2(src, dst)
 
     # Create minimal Info.plist
     info_plist = {
@@ -229,10 +217,9 @@ if is_macos and os.path.exists(build_options['build_exe']):
             plistlib.dump(info_plist, f)
 
     # Make executable
-    executable_path = os.path.join(macos_dir, executable_name)
+    executable_path = os.path.join(macos_dir, 'WiFi Led Studio')
     if os.path.exists(executable_path):
         os.chmod(executable_path, 0o755)
-        print(f"✅ Made {executable_name} executable")
 
     # Remove original build directory
     shutil.rmtree(build_dir)
