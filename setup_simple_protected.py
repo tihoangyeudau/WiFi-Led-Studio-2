@@ -115,65 +115,6 @@ def get_pystray_includes():
     
     return pystray_includes
 
-def get_pynput_includes():
-    """Get pynput includes for current platform"""
-    pynput_includes = []
-    
-    try:
-        import pynput
-        
-        # Basic pynput modules
-        basic_modules = ['pynput', 'pynput.keyboard', 'pynput.mouse']
-        pynput_includes.extend(basic_modules)
-        
-        # Platform-specific modules
-        if is_windows:
-            win_modules = [
-                'pynput.keyboard._win32',
-                'pynput.mouse._win32',
-                'pynput._util.win32'
-            ]
-            for module_name in win_modules:
-                try:
-                    __import__(module_name)
-                    pynput_includes.append(module_name)
-                except ImportError:
-                    pass
-                    
-        elif is_macos:
-            mac_modules = [
-                'pynput.keyboard._darwin',
-                'pynput.mouse._darwin',
-                'pynput._util.darwin',
-                'pynput._util'
-            ]
-            for module_name in mac_modules:
-                try:
-                    __import__(module_name)
-                    pynput_includes.append(module_name)
-                except ImportError:
-                    print(f"   Warning: {module_name} not available")
-                    
-        elif is_linux:
-            linux_modules = [
-                'pynput.keyboard._xorg',
-                'pynput.mouse._xorg',
-                'pynput._util.xorg'
-            ]
-            for module_name in linux_modules:
-                try:
-                    __import__(module_name)
-                    pynput_includes.append(module_name)
-                except ImportError:
-                    pass
-        
-        print(f"   Pynput includes: {len(pynput_includes)} modules")
-        
-    except ImportError:
-        print("   Warning: pynput not found, hotkeys will be disabled")
-    
-    return pynput_includes
-
 try:
     print(f"🖥️  Platform detected: {platform.system()} ({platform.machine()})")
 except UnicodeEncodeError:
@@ -239,7 +180,7 @@ build_options = {
         'aubio', 'sounddevice',
         'sentry_sdk.integrations.logging', 'icmplib.sockets',
         'bokeh.io', 'tornado.web', 'jinja2.ext',
-    ] + platform_includes + get_numpy_includes() + get_pystray_includes() + get_pynput_includes(),
+    ] + platform_includes + get_numpy_includes() + get_pystray_includes(),
     'excludes': [
         # GUI frameworks we don't use
         'tkinter', 'PyQt5', 'PyQt6', 'PySide2', 'PySide6', 'wx',

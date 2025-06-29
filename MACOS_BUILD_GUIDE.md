@@ -2,25 +2,17 @@
 
 ## Quick Start
 
-### Method 1: Build with Hotkeys (Recommended)
-```bash
-python3 build_macos_with_hotkeys.py
-```
-*Automatically fixes pynput issues and includes hotkeys*
-
-### Method 2: Minimal Build
+### Method 1: Minimal Build (Recommended for problematic systems)
 ```bash
 python3 build_minimal_macos.py
 ```
-*Minimal dependencies with hotkeys*
 
-### Method 3: Safe Build Script
+### Method 2: Safe Build Script
 ```bash
 python3 build_macos_safe.py
 ```
-*Auto-fixes common issues*
 
-### Method 4: Manual Build
+### Method 3: Manual Build
 ```bash
 # 1. Protect source code
 python3 simple_protect.py
@@ -44,17 +36,9 @@ This is a known issue with cx-freeze and numpy on macOS.
 #### Error: "No module named 'pystray._util.darwin'"
 This is a pystray compatibility issue with cx-freeze on macOS.
 
-#### Error: "No module named 'pynput.keyboard._darwin'"
-This is a pynput compatibility issue with cx-freeze on macOS.
-
-**Quick Fix: Use Hotkeys Build**
+**Quick Fix: Use Minimal Build**
 ```bash
-python3 build_macos_with_hotkeys.py
-```
-
-**Manual Fix:**
-```bash
-python3 fix_pynput_macos.py
+python3 build_minimal_macos.py
 ```
 
 **Other Solutions:**
