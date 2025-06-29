@@ -82,7 +82,21 @@ def main():
             except Exception as e:
                 print(f"⚠️  App test: {e}")
         
-
+        # Step 7: Verify app bundle structure
+        print("\n📁 Step 7: Verifying app bundle structure...")
+        try:
+            result = subprocess.run([sys.executable, 'test_app_structure.py'], 
+                                  check=True, text=True)
+            print("✅ App structure verified")
+        except subprocess.CalledProcessError as e:
+            print(f"⚠️  App structure verification had issues: {e}")
+            print("Running structure fix...")
+            try:
+                subprocess.run([sys.executable, 'fix_app_structure_macos.py'], 
+                             check=True, text=True)
+                print("✅ App structure fixed")
+            except subprocess.CalledProcessError as fix_error:
+                print(f"⚠️  Structure fix failed: {fix_error}")
         
         return True
     else:
