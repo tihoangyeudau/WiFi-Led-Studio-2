@@ -74,8 +74,6 @@ build_options = {
         'requests',
         # Network utilities
         'icmplib',
-        # MQTT
-        'paho.mqtt',
         # Input handling
         'pynput',
         # System tray
@@ -91,8 +89,6 @@ build_options = {
         'requests',
         # Network utilities
         'icmplib', 'icmplib.sockets',
-        # MQTT
-        'paho.mqtt', 'paho.mqtt.client',
         # Image processing
         'PIL', 'PIL.Image', 'PIL.ImageDraw',
         # System tray

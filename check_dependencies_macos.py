@@ -100,7 +100,6 @@ def main():
     
     network_deps = [
         ('icmplib', 'icmplib'),
-        ('paho-mqtt', 'paho.mqtt'),
     ]
     
     network_available = 0
