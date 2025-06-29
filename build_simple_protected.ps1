@@ -39,8 +39,6 @@ Write-Host ""
 
 # Step 4: Verify build
 $exePath = "build_simple_protected\WiFi Led Studio\WiFi Led Studio.exe"
-$appPath = "build_simple_protected\WiFi Led Studio.app"
-
 if (Test-Path $exePath) {
     Write-Host "Protected executable created: $exePath" -ForegroundColor Green
 
@@ -66,27 +64,8 @@ if (Test-Path $exePath) {
             Write-Host "No source files found - check build" -ForegroundColor Red
         }
     }
-} elseif (Test-Path $appPath) {
-    Write-Host "Protected .app bundle created: $appPath" -ForegroundColor Green
-    
-    # Check bundle size (if on Windows with proper tools)
-    try {
-        $bundleSize = (Get-ChildItem -Path $appPath -Recurse | Measure-Object -Property Length -Sum).Sum / 1MB
-        Write-Host "Bundle size: $([math]::Round($bundleSize, 2)) MB" -ForegroundColor Cyan
-    } catch {
-        Write-Host "Bundle created successfully" -ForegroundColor Cyan
-    }
-    
-    # Check for executable in bundle
-    $bundleExecutable = "$appPath\Contents\MacOS\WiFi Led Studio"
-    if (Test-Path $bundleExecutable) {
-        Write-Host "Bundle executable found and ready" -ForegroundColor Green
-    }
-    
-    Write-Host "Note: .app bundle created for macOS. Cannot test on Windows." -ForegroundColor Yellow
-    $skipTest = $true
 } else {
-    Write-Host "Protected executable/bundle not found!" -ForegroundColor Red
+    Write-Host "Protected executable not found!" -ForegroundColor Red
     Read-Host "Press Enter to exit"
     exit 1
 }
@@ -94,14 +73,13 @@ if (Test-Path $exePath) {
 Write-Host ""
 
 # Step 5: Test the protected build
-if (-not $skipTest) {
-    Write-Host "Step 5: Testing protected build..." -ForegroundColor Cyan
-    Write-Host "Starting protected WiFi Led Studio..." -ForegroundColor Yellow
-    Write-Host "Check system tray for icon and web interface at http://localhost:8090" -ForegroundColor Yellow
-    Write-Host "Test will run for 15 seconds" -ForegroundColor Yellow
-    Write-Host ""
+Write-Host "Step 5: Testing protected build..." -ForegroundColor Cyan
+Write-Host "Starting protected WiFi Led Studio..." -ForegroundColor Yellow
+Write-Host "Check system tray for icon and web interface at http://localhost:8090" -ForegroundColor Yellow
+Write-Host "Test will run for 15 seconds" -ForegroundColor Yellow
+Write-Host ""
 
-    try {
+try {
     # Start the process
     $process = Start-Process -FilePath $exePath -PassThru -WindowStyle Hidden
 
@@ -132,11 +110,8 @@ if (-not $skipTest) {
 
     Write-Host "Test completed" -ForegroundColor Green
 
-    } catch {
-        Write-Host "Error testing protected build: $_" -ForegroundColor Red
-    }
-} else {
-    Write-Host "Step 5: Skipping test (macOS .app bundle cannot be tested on Windows)" -ForegroundColor Yellow
+} catch {
+    Write-Host "Error testing protected build: $_" -ForegroundColor Red
 }
 
 Write-Host ""
