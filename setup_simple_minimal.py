@@ -26,10 +26,10 @@ print(f"🖥️  Platform: {platform.system()} ({platform.machine()})")
 def get_pynput_includes():
     """Get pynput includes for current platform"""
     pynput_includes = []
-    
+
     try:
         import pynput
-        
+
         if is_macos:
             # Try to import macOS-specific modules
             macos_modules = [
@@ -38,7 +38,7 @@ def get_pynput_includes():
                 'pynput._util.darwin',
                 'pynput._util'
             ]
-            
+
             for module_name in macos_modules:
                 try:
                     __import__(module_name)
@@ -46,12 +46,12 @@ def get_pynput_includes():
                     print(f"   ✅ Found: {module_name}")
                 except ImportError:
                     print(f"   ⚠️  Missing: {module_name}")
-        
+
         print(f"   Pynput includes: {len(pynput_includes)} modules")
-        
+
     except ImportError:
         print("   Warning: pynput not found")
-    
+
     return pynput_includes
 
 # Base directory
@@ -72,8 +72,14 @@ build_options = {
         'psutil',
         # HTTP requests
         'requests',
+        # Network utilities
+        'icmplib',
         # Input handling
         'pynput',
+        # System tray
+        'pystray',
+        # Image processing
+        'PIL',
     ],
     'includes': [
         # Minimal includes
@@ -81,6 +87,12 @@ build_options = {
         'serial', 'zeroconf',
         'psutil',
         'requests',
+        # Network utilities
+        'icmplib', 'icmplib.sockets',
+        # Image processing
+        'PIL', 'PIL.Image', 'PIL.ImageDraw',
+        # System tray
+        'pystray', 'pystray._base',
     ] + get_pynput_includes(),
     'excludes': [
         # Exclude problematic modules
@@ -141,26 +153,26 @@ setup(
 # Post-build processing for macOS
 if is_macos and os.path.exists(build_options['build_exe']):
     print("🍎 Creating minimal macOS .app bundle...")
-    
+
     import shutil
     import plistlib
-    
+
     build_dir = build_options['build_exe']
     app_name = 'WiFi Led Studio.app'
     app_path = os.path.join(os.path.dirname(build_dir), app_name)
-    
+
     # Remove existing app bundle
     if os.path.exists(app_path):
         shutil.rmtree(app_path)
-    
+
     # Create app bundle structure
     contents_dir = os.path.join(app_path, 'Contents')
     macos_dir = os.path.join(contents_dir, 'MacOS')
     resources_dir = os.path.join(contents_dir, 'Resources')
-    
+
     os.makedirs(macos_dir, exist_ok=True)
     os.makedirs(resources_dir, exist_ok=True)
-    
+
     # Move build contents to MacOS directory
     for item in os.listdir(build_dir):
         src = os.path.join(build_dir, item)
@@ -169,7 +181,7 @@ if is_macos and os.path.exists(build_options['build_exe']):
             shutil.copytree(src, dst)
         else:
             shutil.copy2(src, dst)
-    
+
     # Create minimal Info.plist
     info_plist = {
         'CFBundleName': 'WiFi Led Studio',
@@ -185,12 +197,12 @@ if is_macos and os.path.exists(build_options['build_exe']):
         'NSHighResolutionCapable': True,
         'NSRequiresAquaSystemAppearance': False,
     }
-    
+
     # Write Info.plist
     plist_path = os.path.join(contents_dir, 'Info.plist')
     with open(plist_path, 'wb') as f:
         plistlib.dump(info_plist, f)
-    
+
     # Copy icon if available
     icon_src = os.path.join(base_dir, 'icons', 'WiFi Led Studio.icns')
     if os.path.exists(icon_src):
@@ -199,15 +211,15 @@ if is_macos and os.path.exists(build_options['build_exe']):
         # Update plist with icon
         with open(plist_path, 'wb') as f:
             plistlib.dump(info_plist, f)
-    
+
     # Make executable
     executable_path = os.path.join(macos_dir, 'WiFi Led Studio')
     if os.path.exists(executable_path):
         os.chmod(executable_path, 0o755)
-    
+
     # Remove original build directory
     shutil.rmtree(build_dir)
-    
+
     print(f"✅ Minimal macOS .app bundle created: {app_path}")
 
 print("✅ Minimal build completed!")
