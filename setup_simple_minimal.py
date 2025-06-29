@@ -23,6 +23,37 @@ is_macos = current_platform == 'darwin'
 
 print(f"🖥️  Platform: {platform.system()} ({platform.machine()})")
 
+def get_pynput_includes():
+    """Get pynput includes for current platform"""
+    pynput_includes = []
+    
+    try:
+        import pynput
+        
+        if is_macos:
+            # Try to import macOS-specific modules
+            macos_modules = [
+                'pynput.keyboard._darwin',
+                'pynput.mouse._darwin',
+                'pynput._util.darwin',
+                'pynput._util'
+            ]
+            
+            for module_name in macos_modules:
+                try:
+                    __import__(module_name)
+                    pynput_includes.append(module_name)
+                    print(f"   ✅ Found: {module_name}")
+                except ImportError:
+                    print(f"   ⚠️  Missing: {module_name}")
+        
+        print(f"   Pynput includes: {len(pynput_includes)} modules")
+        
+    except ImportError:
+        print("   Warning: pynput not found")
+    
+    return pynput_includes
+
 # Base directory
 base_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -41,6 +72,8 @@ build_options = {
         'psutil',
         # HTTP requests
         'requests',
+        # Input handling
+        'pynput',
     ],
     'includes': [
         # Minimal includes
@@ -48,7 +81,7 @@ build_options = {
         'serial', 'zeroconf',
         'psutil',
         'requests',
-    ],
+    ] + get_pynput_includes(),
     'excludes': [
         # Exclude problematic modules
         'tkinter', 'PyQt5', 'PyQt6', 'PySide2', 'PySide6',
