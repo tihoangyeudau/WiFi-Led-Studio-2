@@ -178,20 +178,15 @@ if is_macos and os.path.exists(build_options['build_exe']):
     # Move build contents to appropriate directories
     for item in os.listdir(build_dir):
         src = os.path.join(build_dir, item)
-
+        
         # Resources go to Resources directory
-        if item == 'icons':
-            # Only copy tray.png and other needed icons, not the app icon
-            dst_icons_dir = os.path.join(resources_dir, 'icons')
-            os.makedirs(dst_icons_dir, exist_ok=True)
-
-            # Copy specific files from icons directory
-            for icon_file in os.listdir(src):
-                if icon_file != 'WiFi Led Studio.icns':  # Skip app icon, will be copied separately
-                    icon_src = os.path.join(src, icon_file)
-                    icon_dst = os.path.join(dst_icons_dir, icon_file)
-                    if os.path.isfile(icon_src):
-                        shutil.copy2(icon_src, icon_dst)
+        if item in ['icons', 'WiFi Led Studio.icns']:
+            if item == 'icons':
+                dst = os.path.join(resources_dir, item)
+                shutil.copytree(src, dst)
+            else:
+                dst = os.path.join(resources_dir, item)
+                shutil.copy2(src, dst)
         # Everything else goes to MacOS directory
         else:
             dst = os.path.join(macos_dir, item)
@@ -221,11 +216,10 @@ if is_macos and os.path.exists(build_options['build_exe']):
     with open(plist_path, 'wb') as f:
         plistlib.dump(info_plist, f)
 
-    # Copy app icon to Resources directory (required for macOS app bundle)
+    # Copy icon if available
     icon_src = os.path.join(base_dir, 'icons', 'WiFi Led Studio.icns')
     if os.path.exists(icon_src):
-        icon_dst = os.path.join(resources_dir, 'WiFi Led Studio.icns')
-        shutil.copy2(icon_src, icon_dst)
+        shutil.copy2(icon_src, resources_dir)
         info_plist['CFBundleIconFile'] = 'WiFi Led Studio.icns'
         # Update plist with icon
         with open(plist_path, 'wb') as f:
