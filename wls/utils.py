@@ -687,7 +687,15 @@ def currently_frozen():
     Returns:
         boolean
     """
-    return getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")
+    # Check for PyInstaller
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        return True
+    
+    # Check for cx_Freeze
+    if getattr(sys, "frozen", False):
+        return True
+    
+    return False
 
 
 def get_icon_path(icon_filename) -> str:
@@ -698,15 +706,45 @@ def get_icon_path(icon_filename) -> str:
     Returns:
             icon_location(str): fully qualified path
     """
-    current_directory = os.path.dirname(__file__)
+    if currently_frozen():
+        # For frozen/built applications
+        if hasattr(sys, '_MEIPASS'):
+            # PyInstaller
+            base_path = sys._MEIPASS
+        else:
+            # cx_Freeze
+            base_path = os.path.dirname(sys.executable)
+        
+        # Try multiple locations for frozen app
+        possible_paths = [
+            os.path.join(base_path, "icons", icon_filename),
+            os.path.join(base_path, icon_filename),
+            os.path.join(base_path, "lib", "wls", icon_filename),
+            os.path.join(base_path, "lib", icon_filename),
+        ]
+        
+        for icon_location in possible_paths:
+            if os.path.isfile(icon_location):
+                _LOGGER.info(f"Found icon at {icon_location}")
+                return icon_location
+        
+        # If not found, log all attempted paths
+        _LOGGER.error(f"Icon {icon_filename} not found in any of these locations:")
+        for path in possible_paths:
+            _LOGGER.error(f"  - {path}")
+        
+        # Return first path as fallback
+        return possible_paths[0]
+    else:
+        # For development/source mode
+        current_directory = os.path.dirname(__file__)
+        icon_location = os.path.normpath(
+            os.path.join(current_directory, "..", "icons", icon_filename)
+        )
 
-    icon_location = os.path.normpath(
-        os.path.join(current_directory, "..", "icons", icon_filename)
-    )
-
-    if not os.path.isfile(icon_location):
-        _LOGGER.error(f"No icon found at {icon_location}")
-    return icon_location
+        if not os.path.isfile(icon_location):
+            _LOGGER.error(f"No icon found at {icon_location}")
+        return icon_location
 
 
 def generate_id(name):

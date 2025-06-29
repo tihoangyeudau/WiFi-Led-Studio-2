@@ -363,9 +363,13 @@ def main():
 
         icon_location = get_icon_path("tray.png")
 
-        icon = pystray.Icon(
-            "Wls", icon=Image.open(icon_location), title="WiFi Led Studio @ Rainbow Music Led"
-        )
+        try:
+            icon_image = Image.open(icon_location)
+            icon = pystray.Icon(
+                "Wls", icon=icon_image, title="WiFi Led Studio @ Rainbow Music Led"
+            )
+        except Exception as e:
+            icon = None
     else:
         icon = None
 

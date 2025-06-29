@@ -50,8 +50,8 @@ docs/api/*
 docs/_build/*
 cover/*
 MANIFEST
-
-
+build_simple_protected/*
+protected_source/*
 
 # Keyfile and pyupdater files for signing pyupdater
 keypack.pyu
