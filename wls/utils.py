@@ -708,6 +708,10 @@ def get_icon_path(icon_filename) -> str:
 
         # Try multiple locations for frozen app
         possible_paths = [
+            # macOS app bundle Resources directory
+            os.path.join(base_path, "..", "Resources", "icons", icon_filename),
+            os.path.join(base_path, "..", "Resources", icon_filename),
+            # Standard locations
             os.path.join(base_path, "icons", icon_filename),
             os.path.join(base_path, icon_filename),
             os.path.join(base_path, "lib", "wls", icon_filename),
