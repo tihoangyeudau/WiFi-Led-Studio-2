@@ -30,6 +30,56 @@ is_windows = current_platform == 'windows'
 is_macos = current_platform == 'darwin'
 is_linux = current_platform == 'linux'
 
+def get_numpy_includes():
+    """Get numpy includes that work across different numpy versions"""
+    numpy_includes = []
+    
+    try:
+        import numpy
+        numpy_version = numpy.__version__
+        
+        # Basic numpy modules that should always work
+        basic_includes = [
+            'numpy.core', 'numpy.lib', 'numpy.random',
+            'numpy.fft', 'numpy.linalg', 'numpy.ma'
+        ]
+        
+        # Version-specific modules to try
+        optional_includes = [
+            'numpy.core._methods',
+            'numpy._distributor_init',
+            'numpy.core._multiarray_umath',
+            'numpy.core.multiarray',
+            'numpy.core.umath'
+        ]
+        
+        # Add basic includes
+        numpy_includes.extend(basic_includes)
+        
+        # Try to include optional modules safely
+        for module_name in optional_includes:
+            try:
+                __import__(module_name)
+                numpy_includes.append(module_name)
+            except ImportError:
+                # Skip modules that don't exist in this numpy version
+                pass
+        
+        print(f"   Numpy version: {numpy_version}")
+        print(f"   Numpy includes: {len(numpy_includes)} modules")
+        
+        # Special handling for macOS numpy issues
+        if is_macos:
+            # Remove problematic modules on macOS
+            problematic_modules = ['numpy.core._methods']
+            numpy_includes = [mod for mod in numpy_includes if mod not in problematic_modules]
+            print(f"   macOS: Filtered to {len(numpy_includes)} safe modules")
+        
+    except ImportError:
+        print("   Warning: numpy not found, skipping numpy-specific includes")
+    
+    return numpy_includes
+
 try:
     print(f"🖥️  Platform detected: {platform.system()} ({platform.machine()})")
 except UnicodeEncodeError:
@@ -54,7 +104,9 @@ elif is_macos:
         'AppKit', 'Foundation', 'Cocoa', 'objc'
     ])
     platform_includes.extend([
-        'pystray._darwin', 'pystray._util.darwin'
+        'pystray._darwin', 'pystray._util.darwin',
+        # macOS-specific numpy fixes
+        'numpy._distributor_init',
     ])
 elif is_linux:
     platform_packages.extend([
@@ -93,18 +145,40 @@ build_options = {
         # Common includes
         'pystray', 'pystray._base', 'pystray._util',
         'PIL', 'PIL.Image', 'PIL.ImageDraw',
-        'numpy.core._methods', 'aubio', 'sounddevice',
+        'aubio', 'sounddevice',
         'sentry_sdk.integrations.logging', 'icmplib.sockets',
         'bokeh.io', 'tornado.web', 'jinja2.ext',
-    ] + platform_includes,
+    ] + platform_includes + get_numpy_includes(),
     'excludes': [
-        'tkinter',
-        'unittest',
-        'test',
-        'distutils',
-        'setuptools',
-        'pip',
-        'wheel',
+        # GUI frameworks we don't use
+        'tkinter', 'PyQt5', 'PyQt6', 'PySide2', 'PySide6', 'wx',
+        
+        # Development and testing
+        'unittest', 'test', 'pytest', 'nose', 'coverage',
+        'distutils', 'setuptools', 'pip', 'wheel',
+        'cx_Freeze', 'pyinstaller',
+        
+        # Documentation
+        'sphinx', 'docutils', 'pydoc',
+        
+        # Interactive environments
+        'IPython', 'jupyter', 'notebook', 'qtconsole',
+        
+        # Test modules
+        'matplotlib.tests', 'numpy.tests', 'scipy.tests',
+        'pandas.tests', 'PIL.tests', 'tornado.test',
+        'aiohttp.test_utils', 'bokeh.tests', 'gevent.tests',
+        'psutil.tests', 'win32com.test', 'comtypes.test',
+        
+        # Numpy modules that might cause issues
+        'numpy.core._methods', 'numpy.core._multiarray_tests',
+        'numpy.core._operand_flag_tests', 'numpy.core._rational_tests',
+        'numpy.core._struct_ufunc_tests', 'numpy.core._umath_tests',
+        'numpy.distutils', 'numpy.f2py', 'numpy.testing',
+        
+        # Other potentially problematic modules
+        'curses', 'readline', 'rlcompleter',
+        'pdb', 'bdb', 'cmd', 'code',
     ],
     'include_files': [
         # Use protected source (bytecode)
