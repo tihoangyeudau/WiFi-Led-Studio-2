@@ -6,6 +6,8 @@ Minimal setup script for macOS with fewer dependencies
 import os
 import sys
 import platform
+import glob
+import shutil
 from cx_Freeze import setup, Executable
 
 # Check for protected source
@@ -152,11 +154,42 @@ setup(
     executables=[executable]
 )
 
-# Post-build processing for macOS
+def cleanup_for_codesign(macos_dir):
+    """Remove files that cause codesign issues"""
+    problematic_patterns = [
+        '**/.hash',           # aiohttp .hash files
+        '**/__pycache__',     # Python cache directories
+        # '**/*.pyc',           # Compiled Python files
+        # '**/*.pyo',           # Optimized Python files
+        '**/.DS_Store',       # macOS system files
+        '**/Thumbs.db',       # Windows thumbnail files
+        '**/*.tmp',           # Temporary files
+        '**/*.log',           # Log files
+    ]
+
+    for pattern in problematic_patterns:
+        full_pattern = os.path.join(macos_dir, pattern)
+        for file_path in glob.glob(full_pattern, recursive=True):
+            try:
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
+                    print(f"🧹 Removed: {os.path.relpath(file_path, macos_dir)}")
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+                    print(f"🧹 Removed directory: {os.path.relpath(file_path, macos_dir)}")
+            except Exception as e:
+                print(f"⚠️  Could not remove {file_path}: {e}")
+
+# Post-build processing
+if os.path.exists(build_options['build_exe']):
+    # Always cleanup problematic files for codesign
+    print("🧹 Cleaning up problematic files...")
+    cleanup_for_codesign(build_options['build_exe'])
+
+# macOS app bundle creation
 if is_macos and os.path.exists(build_options['build_exe']):
     print("🍎 Creating minimal macOS .app bundle...")
 
-    import shutil
     import plistlib
 
     build_dir = build_options['build_exe']
