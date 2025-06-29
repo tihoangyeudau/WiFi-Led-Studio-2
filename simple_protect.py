@@ -26,9 +26,15 @@ def compile_directory(source_dir, output_dir):
                 pyc_path = os.path.join(output_file_dir, file + 'c')
                 try:
                     py_compile.compile(source_path, pyc_path, doraise=True)
-                    print(f"  ✓ {rel_path}")
+                    try:
+                        print(f"  ✓ {rel_path}")
+                    except UnicodeEncodeError:
+                        print(f"  OK {rel_path}")
                 except Exception as e:
-                    print(f"  ✗ {rel_path}: {e}")
+                    try:
+                        print(f"  ✗ {rel_path}: {e}")
+                    except UnicodeEncodeError:
+                        print(f"  ERROR {rel_path}: {e}")
                     # Fallback: copy source file
                     shutil.copy2(source_path, os.path.join(output_file_dir, file))
             else:
@@ -41,7 +47,10 @@ def compile_directory(source_dir, output_dir):
 
 def protect_source():
     """Simple source protection"""
-    print("🔐 Simple Source Protection")
+    try:
+        print("🔐 Simple Source Protection")
+    except UnicodeEncodeError:
+        print("Simple Source Protection")
     print("===========================")
     print()
 
@@ -53,15 +62,25 @@ def protect_source():
     os.makedirs(protected_dir, exist_ok=True)
 
     # Compile wls directory
-    print("🔒 Compiling wls directory...")
+    try:
+        print("🔒 Compiling wls directory...")
+    except UnicodeEncodeError:
+        print("Compiling wls directory...")
     compile_directory("wls", os.path.join(protected_dir, "wls"))
 
     # Copy wls_frontend (static files)
-    print("📁 Copying wls_frontend...")
+    try:
+        print("📁 Copying wls_frontend...")
+    except UnicodeEncodeError:
+        print("Copying wls_frontend...")
     shutil.copytree("wls_frontend", os.path.join(protected_dir, "wls_frontend"))
 
-    print("✅ Simple protection completed!")
-    print(f"📂 Protected source: {protected_dir}")
+    try:
+        print("✅ Simple protection completed!")
+        print(f"📂 Protected source: {protected_dir}")
+    except UnicodeEncodeError:
+        print("Simple protection completed!")
+        print(f"Protected source: {protected_dir}")
 
     return protected_dir
 
