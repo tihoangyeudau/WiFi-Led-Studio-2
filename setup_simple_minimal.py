@@ -192,8 +192,8 @@ if is_macos and os.path.exists(build_options['build_exe']):
                     icon_dst = os.path.join(dst_icons_dir, icon_file)
                     if os.path.isfile(icon_src):
                         shutil.copy2(icon_src, icon_dst)
-        # Everything else goes to MacOS directory (except app icon)
-        elif item != 'WiFi Led Studio.icns':
+        # Everything else goes to MacOS directory
+        else:
             dst = os.path.join(macos_dir, item)
             if os.path.isdir(src):
                 shutil.copytree(src, dst)
