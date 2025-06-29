@@ -80,6 +80,41 @@ def get_numpy_includes():
     
     return numpy_includes
 
+def get_pystray_includes():
+    """Get pystray includes that work on current platform"""
+    pystray_includes = ['pystray', 'pystray._base']
+    
+    try:
+        import pystray
+        
+        # Try platform-specific modules
+        if is_windows:
+            try:
+                import pystray._win32
+                pystray_includes.extend(['pystray._win32', 'pystray._util.win32'])
+            except ImportError:
+                pass
+        elif is_macos:
+            try:
+                import pystray._darwin
+                pystray_includes.append('pystray._darwin')
+            except ImportError:
+                pass
+            # Don't include pystray._util.darwin as it may not exist
+        elif is_linux:
+            try:
+                import pystray._xorg
+                pystray_includes.append('pystray._xorg')
+            except ImportError:
+                pass
+        
+        print(f"   Pystray includes: {len(pystray_includes)} modules")
+        
+    except ImportError:
+        print("   Warning: pystray not found")
+    
+    return pystray_includes
+
 try:
     print(f"🖥️  Platform detected: {platform.system()} ({platform.machine()})")
 except UnicodeEncodeError:
@@ -95,7 +130,6 @@ if is_windows:
         'pythoncom', 'pywintypes', 'comtypes', 'pycaw'
     ])
     platform_includes.extend([
-        'pystray._win32', 'pystray._util.win32',
         'win32api', 'win32gui', 'win32con', 'win32clipboard',
         'pythoncom', 'pywintypes'
     ])
@@ -104,7 +138,6 @@ elif is_macos:
         'AppKit', 'Foundation', 'Cocoa', 'objc'
     ])
     platform_includes.extend([
-        'pystray._darwin', 'pystray._util.darwin',
         # macOS-specific numpy fixes
         'numpy._distributor_init',
     ])
@@ -143,12 +176,11 @@ build_options = {
     ] + platform_packages,
     'includes': [
         # Common includes
-        'pystray', 'pystray._base', 'pystray._util',
         'PIL', 'PIL.Image', 'PIL.ImageDraw',
         'aubio', 'sounddevice',
         'sentry_sdk.integrations.logging', 'icmplib.sockets',
         'bokeh.io', 'tornado.web', 'jinja2.ext',
-    ] + platform_includes + get_numpy_includes(),
+    ] + platform_includes + get_numpy_includes() + get_pystray_includes(),
     'excludes': [
         # GUI frameworks we don't use
         'tkinter', 'PyQt5', 'PyQt6', 'PySide2', 'PySide6', 'wx',
