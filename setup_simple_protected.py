@@ -33,17 +33,17 @@ is_linux = current_platform == 'linux'
 def get_numpy_includes():
     """Get numpy includes that work across different numpy versions"""
     numpy_includes = []
-    
+
     try:
         import numpy
         numpy_version = numpy.__version__
-        
+
         # Basic numpy modules that should always work
         basic_includes = [
             'numpy.core', 'numpy.lib', 'numpy.random',
             'numpy.fft', 'numpy.linalg', 'numpy.ma'
         ]
-        
+
         # Version-specific modules to try
         optional_includes = [
             'numpy.core._methods',
@@ -52,10 +52,10 @@ def get_numpy_includes():
             'numpy.core.multiarray',
             'numpy.core.umath'
         ]
-        
+
         # Add basic includes
         numpy_includes.extend(basic_includes)
-        
+
         # Try to include optional modules safely
         for module_name in optional_includes:
             try:
@@ -64,29 +64,29 @@ def get_numpy_includes():
             except ImportError:
                 # Skip modules that don't exist in this numpy version
                 pass
-        
+
         print(f"   Numpy version: {numpy_version}")
         print(f"   Numpy includes: {len(numpy_includes)} modules")
-        
+
         # Special handling for macOS numpy issues
         if is_macos:
             # Remove problematic modules on macOS
             problematic_modules = ['numpy.core._methods']
             numpy_includes = [mod for mod in numpy_includes if mod not in problematic_modules]
             print(f"   macOS: Filtered to {len(numpy_includes)} safe modules")
-        
+
     except ImportError:
         print("   Warning: numpy not found, skipping numpy-specific includes")
-    
+
     return numpy_includes
 
 def get_pystray_includes():
     """Get pystray includes that work on current platform"""
     pystray_includes = ['pystray', 'pystray._base']
-    
+
     try:
         import pystray
-        
+
         # Try platform-specific modules
         if is_windows:
             try:
@@ -107,25 +107,25 @@ def get_pystray_includes():
                 pystray_includes.append('pystray._xorg')
             except ImportError:
                 pass
-        
+
         print(f"   Pystray includes: {len(pystray_includes)} modules")
-        
+
     except ImportError:
         print("   Warning: pystray not found")
-    
+
     return pystray_includes
 
 def get_pynput_includes():
     """Get pynput includes for current platform"""
     pynput_includes = []
-    
+
     try:
         import pynput
-        
+
         # Basic pynput modules
         basic_modules = ['pynput', 'pynput.keyboard', 'pynput.mouse']
         pynput_includes.extend(basic_modules)
-        
+
         # Platform-specific modules
         if is_windows:
             win_modules = [
@@ -139,7 +139,7 @@ def get_pynput_includes():
                     pynput_includes.append(module_name)
                 except ImportError:
                     pass
-                    
+
         elif is_macos:
             mac_modules = [
                 'pynput.keyboard._darwin',
@@ -153,7 +153,7 @@ def get_pynput_includes():
                     pynput_includes.append(module_name)
                 except ImportError:
                     print(f"   Warning: {module_name} not available")
-                    
+
         elif is_linux:
             linux_modules = [
                 'pynput.keyboard._xorg',
@@ -166,12 +166,12 @@ def get_pynput_includes():
                     pynput_includes.append(module_name)
                 except ImportError:
                     pass
-        
+
         print(f"   Pynput includes: {len(pynput_includes)} modules")
-        
+
     except ImportError:
         print("   Warning: pynput not found, hotkeys will be disabled")
-    
+
     return pynput_includes
 
 try:
@@ -223,7 +223,7 @@ build_options = {
         'textwrap', 'io', 'contextlib', 'types', 'inspect', 'importlib',
         'pkgutil', 'email', 'html', 'http', 'urllib.parse', 'urllib.request',
         'urllib.error',
-        
+
         # Third-party packages
         'certifi', 'charset_normalizer', 'idna', 'requests', 'numpy', 'PIL',
         'pystray', 'pynput', 'psutil', 'serial', 'zeroconf', 'ifaddr',
@@ -243,30 +243,30 @@ build_options = {
     'excludes': [
         # GUI frameworks we don't use
         'tkinter', 'PyQt5', 'PyQt6', 'PySide2', 'PySide6', 'wx',
-        
+
         # Development and testing
         'unittest', 'test', 'pytest', 'nose', 'coverage',
         'distutils', 'setuptools', 'pip', 'wheel',
-        'cx_Freeze', 'pyinstaller',
-        
+        'cx_Freeze',
+
         # Documentation
         'sphinx', 'docutils', 'pydoc',
-        
+
         # Interactive environments
         'IPython', 'jupyter', 'notebook', 'qtconsole',
-        
+
         # Test modules
         'matplotlib.tests', 'numpy.tests', 'scipy.tests',
         'pandas.tests', 'PIL.tests', 'tornado.test',
         'aiohttp.test_utils', 'bokeh.tests', 'gevent.tests',
         'psutil.tests', 'win32com.test', 'comtypes.test',
-        
+
         # Numpy modules that might cause issues
         'numpy.core._methods', 'numpy.core._multiarray_tests',
         'numpy.core._operand_flag_tests', 'numpy.core._rational_tests',
         'numpy.core._struct_ufunc_tests', 'numpy.core._umath_tests',
         'numpy.distutils', 'numpy.f2py', 'numpy.testing',
-        
+
         # Other potentially problematic modules
         'curses', 'readline', 'rlcompleter',
         'pdb', 'bdb', 'cmd', 'code',
@@ -294,7 +294,7 @@ def get_executable_config():
         'copyright': '© 2024 WiFi Led Studio',
         'shortcut_name': 'WiFi Led Studio',
     }
-    
+
     if is_windows:
         config.update({
             'base': 'Win32GUI',
@@ -314,7 +314,7 @@ def get_executable_config():
             'target_name': 'WiFi Led Studio',
             'icon': os.path.join(base_dir, 'icons', 'wifiledstudio.png'),
         })
-    
+
     return config
 
 # Executable configuration
@@ -325,27 +325,27 @@ def create_macos_app_bundle():
     """Create macOS .app bundle after cx-freeze build"""
     if not is_macos:
         return
-    
+
     import shutil
     import plistlib
-    
+
     build_dir = build_options['build_exe']
     app_name = 'WiFi Led Studio.app'
     app_path = os.path.join(os.path.dirname(build_dir), app_name)
-    
+
     try:
         print(f"🍎 Creating macOS .app bundle: {app_path}")
     except UnicodeEncodeError:
         print(f"Creating macOS .app bundle: {app_path}")
-    
+
     # Create .app structure
     contents_dir = os.path.join(app_path, 'Contents')
     macos_dir = os.path.join(contents_dir, 'MacOS')
     resources_dir = os.path.join(contents_dir, 'Resources')
-    
+
     os.makedirs(macos_dir, exist_ok=True)
     os.makedirs(resources_dir, exist_ok=True)
-    
+
     # Move cx-freeze build to MacOS directory
     if os.path.exists(build_dir):
         # Copy all files from build directory to MacOS
@@ -358,7 +358,7 @@ def create_macos_app_bundle():
                 shutil.copytree(src, dst)
             else:
                 shutil.copy2(src, dst)
-    
+
     # Create Info.plist
     info_plist = {
         'CFBundleName': 'WiFi Led Studio',
@@ -386,28 +386,28 @@ def create_macos_app_bundle():
             '_services._dns-sd._udp'
         ]
     }
-    
+
     plist_path = os.path.join(contents_dir, 'Info.plist')
     with open(plist_path, 'wb') as f:
         plistlib.dump(info_plist, f)
-    
+
     # Copy icon if exists
     icon_src = os.path.join(base_dir, 'icons', 'WiFi Led Studio.icns')
     if os.path.exists(icon_src):
         shutil.copy2(icon_src, os.path.join(resources_dir, 'WiFi Led Studio.icns'))
-    
+
     # Make executable
     executable_path = os.path.join(macos_dir, 'WiFi Led Studio')
     if os.path.exists(executable_path):
         os.chmod(executable_path, 0o755)
-    
+
     try:
         print(f"✅ macOS .app bundle created successfully!")
         print(f"📦 Location: {app_path}")
     except UnicodeEncodeError:
         print(f"macOS .app bundle created successfully!")
         print(f"Location: {app_path}")
-    
+
     # Clean up original build directory
     if os.path.exists(build_dir):
         shutil.rmtree(build_dir)

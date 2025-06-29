@@ -680,21 +680,17 @@ async def resolve_destination(
 
 
 def currently_frozen():
-    """Checks to see if running in a frozen environment such as pyinstaller or pyupdater package
+    """Checks to see if running in a frozen environment such as cx_Freeze or pyupdater package
     Args:
         Nil
 
     Returns:
         boolean
     """
-    # Check for PyInstaller
-    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
-        return True
-    
     # Check for cx_Freeze
     if getattr(sys, "frozen", False):
         return True
-    
+
     return False
 
 
@@ -708,13 +704,8 @@ def get_icon_path(icon_filename) -> str:
     """
     if currently_frozen():
         # For frozen/built applications
-        if hasattr(sys, '_MEIPASS'):
-            # PyInstaller
-            base_path = sys._MEIPASS
-        else:
-            # cx_Freeze
-            base_path = os.path.dirname(sys.executable)
-        
+        base_path = os.path.dirname(sys.executable)
+
         # Try multiple locations for frozen app
         possible_paths = [
             os.path.join(base_path, "icons", icon_filename),
@@ -722,17 +713,17 @@ def get_icon_path(icon_filename) -> str:
             os.path.join(base_path, "lib", "wls", icon_filename),
             os.path.join(base_path, "lib", icon_filename),
         ]
-        
+
         for icon_location in possible_paths:
             if os.path.isfile(icon_location):
                 _LOGGER.info(f"Found icon at {icon_location}")
                 return icon_location
-        
+
         # If not found, log all attempted paths
         _LOGGER.error(f"Icon {icon_filename} not found in any of these locations:")
         for path in possible_paths:
             _LOGGER.error(f"  - {path}")
-        
+
         # Return first path as fallback
         return possible_paths[0]
     else:
@@ -977,7 +968,6 @@ class RegistryLoader:
 
         # If running in developer mode autoreload the registry when any file
         # within the package changes.
-        # Check wls is not running as a single exe built using pyinstaller
         # (sys frozen flag).
         if wls.dev_enabled() and not currently_frozen():
             import_or_install("watchdog")

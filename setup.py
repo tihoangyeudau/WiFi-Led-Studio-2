@@ -42,7 +42,6 @@ INSTALL_REQUIRES = [
     "voluptuous>=0.14.1",
     "zeroconf~=0.119.0",
     "pillow>=10.1.0",
-    "pyinstaller==6.1.0",
     "cx-freeze>=7.2.2",
     "pynput>=1.7.6",
     # Conditional Requirement
