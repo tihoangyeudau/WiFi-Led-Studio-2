@@ -92,6 +92,15 @@ def main():
             except Exception as e:
                 print(f"⚠️  App test: {e}")
         
+        # Step 8: Fix encoding issues
+        print("\n🔤 Step 8: Fixing encoding...")
+        try:
+            result = subprocess.run([sys.executable, 'fix_encoding_macos.py'], 
+                                  check=True, text=True)
+            print("✅ Encoding fixes applied")
+        except subprocess.CalledProcessError as e:
+            print(f"⚠️  Encoding fix had issues: {e}")
+        
         return True
     else:
         print("❌ App bundle not found")
@@ -146,6 +155,7 @@ def show_troubleshooting():
     print("   - Check Console.app for error messages")
     print("   - Try running from terminal for debug output")
     print("   - Verify all dependencies are included")
+    print("   - Fix encoding issues: python3 fix_encoding_macos.py")
     print()
     print("3. If build fails:")
     print("   - Run debug script: python3 debug_macos_build.py")

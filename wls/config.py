@@ -175,10 +175,12 @@ def create_default_config(config_dir: str) -> str:
         return config_path
 
     except OSError:
+        # Use logging instead of print to avoid encoding issues
+        logger = logging.getLogger(__name__)
         try:
-            print(f"Không thể tạo tệp cấu hình mặc định {config_path}.")
+            logger.error("Không thể tạo tệp cấu hình mặc định %s", config_path)
         except UnicodeEncodeError:
-            print(f"Cannot create default config file {config_path}.")
+            logger.error("Cannot create default config file %s", config_path)
 
         return None
 

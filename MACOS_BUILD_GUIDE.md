@@ -53,7 +53,10 @@ These mean dependencies are missing from the build.
 #### Warning: "This process is not trusted! Input event monitoring will not be possible"
 This means accessibility permissions are needed for hotkeys.
 
-**Quick Fix: Use Hotkeys Build (handles all dependencies)**
+#### Error: "UnicodeEncodeError: 'ascii' codec can't encode character"
+This is an encoding issue with Vietnamese text on macOS.
+
+**Quick Fix: Use Hotkeys Build (handles all issues)**
 ```bash
 python3 build_macos_with_hotkeys.py
 ```
@@ -68,6 +71,9 @@ python3 fix_pynput_macos.py
 
 # Fix accessibility permissions
 python3 fix_accessibility_macos.py
+
+# Fix encoding issues
+python3 fix_encoding_macos.py
 
 # Check all dependencies
 python3 check_dependencies_macos.py
