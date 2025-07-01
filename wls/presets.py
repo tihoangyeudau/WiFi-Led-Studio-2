@@ -1965,4 +1965,5 @@ wls_presets = {
     "water": {"reset": {"config": {}, "name": "Đặt lại"}},
     "twinklefox": {"reset": {"config": {}, "name": "Đặt lại"}},
     "vumetter": {"reset": {"config": {}, "name": "Đặt lại"}},
+    "template1d": {"reset": {"config": {}, "name": "Đặt lại"}},
 }
