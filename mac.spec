@@ -1,15 +1,21 @@
 # -*- mode: python ; coding: utf-8 -*-
+# Standard macOS build (source code visible)
+# For bytecode-protected build, use: mac_protected.spec
+#
+# To build with bytecode protection:
+# 1. Run: python3 simple_protect.py
+# 2. Run: pyinstaller mac_protected.spec
+# Or use: python3 build_mac_protected.py
 import os
 import sys
 from PyInstaller.utils.hooks import copy_metadata
 datas = [   ('/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons', 'icons/'),
             ('/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons/tray.png', '.'),
-            ('/usr/local/bin/build/WiFi Led Studio-3.4.0.app/Contents/MacOS/lib/wls', 'wls/'),
-            ('/usr/local/bin/build/WiFi Led Studio-3.4.0.app/Contents/MacOS/lib/wls_frontend', 'wls_frontend/'),
+            ('/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/wls', 'wls/'),
+            ('/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2//wls_frontend', 'wls_frontend/'),
             ('/usr/local/bin/build/WiFi Led Studio-3.4.0.app/Contents/MacOS/lib/xyzservices', 'xyzservices/')]
+
 datas += copy_metadata('bokeh')
-
-
 block_cipher = None
 
 a = Analysis(['./wls/__main__.py'],

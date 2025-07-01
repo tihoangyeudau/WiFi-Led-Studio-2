@@ -13,6 +13,10 @@ def compile_directory(source_dir, output_dir):
     print(f"Compiling {source_dir} to {output_dir}...")
 
     for root, dirs, files in os.walk(source_dir):
+        # Skip __pycache__ directories
+        if '__pycache__' in dirs:
+            dirs.remove('__pycache__')
+            
         for file in files:
             if file.endswith('.py'):
                 source_path = os.path.join(root, file)
@@ -22,15 +26,22 @@ def compile_directory(source_dir, output_dir):
                 output_file_dir = os.path.join(output_dir, os.path.dirname(rel_path))
                 os.makedirs(output_file_dir, exist_ok=True)
 
+                # For __main__.py, we need to keep both .py and .pyc
+                if file == '__main__.py':
+                    # Copy the original .py file (needed for PyInstaller entry point)
+                    shutil.copy2(source_path, os.path.join(output_file_dir, file))
+                    print(f"  📄 {rel_path} (kept as .py for entry point)")
+                
                 # Compile to .pyc
                 pyc_path = os.path.join(output_file_dir, file + 'c')
                 try:
                     py_compile.compile(source_path, pyc_path, doraise=True)
-                    print(f"  ✓ {rel_path}")
+                    print(f"  ✓ {rel_path} → {file}c")
                 except Exception as e:
                     print(f"  ✗ {rel_path}: {e}")
                     # Fallback: copy source file
-                    shutil.copy2(source_path, os.path.join(output_file_dir, file))
+                    if file != '__main__.py':  # Don't duplicate __main__.py
+                        shutil.copy2(source_path, os.path.join(output_file_dir, file))
             else:
                 # Copy non-Python files
                 source_path = os.path.join(root, file)
@@ -38,6 +49,7 @@ def compile_directory(source_dir, output_dir):
                 output_path = os.path.join(output_dir, rel_path)
                 os.makedirs(os.path.dirname(output_path), exist_ok=True)
                 shutil.copy2(source_path, output_path)
+                print(f"  📁 {rel_path}")
 
 def protect_source():
     """Simple source protection"""
