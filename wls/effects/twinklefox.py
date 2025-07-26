@@ -10,7 +10,7 @@ from wls.effects.hsv_effect import HSVEffect
 # Inspired by https://gist.github.com/kriegsman/756ea6dcae8e30845b5a / twinklefox_base from https://github.com/Aircoookie/WLED/blob/main/wled00/FX.cpp
 # rewritten in a manner suited to a machine with numpy and more RAM and CPU than a microcontroller
 class Twinklefox(AudioReactiveEffect, HSVEffect):
-    NAME = "Lấp lánh"
+    NAME = "Ánh sao"
     CATEGORY = "1. Hiệu ứng màu"
 
     _power_funcs = {

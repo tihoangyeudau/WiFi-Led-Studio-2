@@ -49,10 +49,10 @@ class BarAudioEffect(AudioReactiveEffect, GradientEffect):
 
     def on_activate(self, pixel_count):
         self.beat_oscillator = 0
+        self.beat_now = 0
         self.phase = 0
         self.color_idx = 0
         self.bar_len = 0.3
-        self.beat_count = 0
         self.last_beat = 0.0
 
     def audio_data_updated(self, data):
@@ -61,15 +61,15 @@ class BarAudioEffect(AudioReactiveEffect, GradientEffect):
         self.beat_oscillator = (
             self.beat_oscillator + self._config["beat_offset"]
         ) % 1.0
-        self.beat_count = data.beat_counter
-
-        # color change and phase
-        if self.last_beat > 0.2 and self.beat_oscillator < 0.1:
+        # Only change phase when beat oscillator completes a cycle (near 0)
+        # This prevents interrupting the bar movement mid-cycle
+        if self.last_beat > 0.8 and self.beat_oscillator < 0.2:
             self.phase = 1 - self.phase  # flip flop 0->1, 1->0
             if self.phase == 0:
                 # 8 colors, 4 beats to a bar
                 self.color_idx += self._config["color_step"]
                 self.color_idx = self.color_idx % 1  # loop back to zero
+                
         self.last_beat = self.beat_oscillator
 
     def render(self):
@@ -81,6 +81,10 @@ class BarAudioEffect(AudioReactiveEffect, GradientEffect):
             x = -((self.beat_oscillator - 1) ** 2) + 1
         elif self._config["ease_method"] == "linear":
             x = self.beat_oscillator
+
+        # Initialize default values
+        bar_start = 0
+        bar_end = 0
 
         # Compute position of bar start and stop
         if self._config["mode"] == "wipe":
@@ -110,20 +114,11 @@ class BarAudioEffect(AudioReactiveEffect, GradientEffect):
 
         # Construct the bar
         color = self.get_gradient_color(self.color_idx)
-        if self._config["beat_skip"] != "none" and (
-            (
-                (self.beat_count == 0 or self.beat_count == 1)
-                if (self._config["skip_every"] == 2)
-                else not self.beat_count % 2
-            )
-            == (self._config["beat_skip"] == "even")
-        ):
-            color = np.array([0, 0, 0])
-        
         self.pixels = np.zeros(np.shape(self.pixels))
-        self.pixels[
-            int(self.pixel_count * bar_start) : int(
-                self.pixel_count * bar_end
-            ),
-            :,
-        ] = color
+        
+        # Ensure valid range
+        start_pixel = max(0, min(int(self.pixel_count * bar_start), self.pixel_count))
+        end_pixel = max(0, min(int(self.pixel_count * bar_end), self.pixel_count))
+        
+        if start_pixel < end_pixel and end_pixel <= self.pixel_count:
+            self.pixels[start_pixel:end_pixel, :] = color
