@@ -11,6 +11,14 @@ class BeatTwinkleAudioEffect(AudioReactiveEffect, GradientEffect):
     NAME = "Lấp lánh"
     CATEGORY = "2. Hiệu ứng nháy theo nhạc"
 
+    _power_funcs = {
+        "Nhịp": "beat_power",
+        "Trầm": "bass_power",
+        "Thấp (nhịp+trầm)": "lows_power",
+        "Trung": "mids_power",
+        "Cao": "high_power",
+    }
+
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
@@ -33,23 +41,41 @@ class BeatTwinkleAudioEffect(AudioReactiveEffect, GradientEffect):
                 description="Màu ngẫu nhiên cho mỗi ngôi sao",
                 default=True,
             ): bool,
+            vol.Optional(
+                "frequency_range",
+                description="Dải tần số để phát hiện nhịp",
+                default="Thấp (nhịp+trầm)",
+            ): vol.In(list(_power_funcs.keys())),
+            vol.Optional(
+                "beat_threshold",
+                description="Ngưỡng phát hiện nhịp",
+                default=0.3,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.1, max=1.0)),
         }
     )
 
     def on_activate(self, pixel_count):
         self.prev_output = np.zeros((3, pixel_count))
         self.beat_detected = False
+        self.current_power = 0.0
+        self.prev_beat_detected = False  # Track previous beat state
 
         # Beat detection variables
         self.beat_history = []
         self.last_beat_time = 0
 
     def config_updated(self, config):
-        pass
+        self.power_func = self._power_funcs[self._config["frequency_range"]]
 
     def audio_data_updated(self, data):
-        # Use WLS2's built-in beat detection
-        self.beat_detected = data.volume_beat_now()
+        # Get power from selected frequency range
+        self.current_power = getattr(data, self.power_func)()
+        # Detect beat based on power threshold
+        current_beat = self.current_power > self._config["beat_threshold"]
+        
+        # Only trigger on beat edge (from no beat to beat)
+        self.beat_detected = current_beat and not self.prev_beat_detected
+        self.prev_beat_detected = current_beat
 
     def render(self):
         # Apply decay to previous output

@@ -12,6 +12,14 @@ class DirectionChangerAudioEffect(GradientEffect, AudioReactiveEffect):
     NAME = "Đảo chiều"
     CATEGORY = "2. Hiệu ứng nháy theo nhạc"
 
+    _power_funcs = {
+        "Nhịp": "beat_power",
+        "Trầm": "bass_power",
+        "Thấp (nhịp+trầm)": "lows_power",
+        "Trung": "mids_power",
+        "Cao": "high_power",
+    }
+
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
@@ -29,6 +37,16 @@ class DirectionChangerAudioEffect(GradientEffect, AudioReactiveEffect):
                 description="Số thanh cùng hướng trước khi đổi",
                 default=1,
             ): vol.All(vol.Coerce(int), vol.Range(min=1, max=10)),
+            vol.Optional(
+                "frequency_range",
+                description="Dải tần số để phát hiện nhịp",
+                default="Thấp (nhịp+trầm)",
+            ): vol.In(list(_power_funcs.keys())),
+            vol.Optional(
+                "beat_threshold",
+                description="Ngưỡng phát hiện nhịp",
+                default=0.3,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.1, max=1.0)),
             vol.Optional(
                 "gradient_roll",
                 description="Tốc độ dải mầu",
@@ -60,13 +78,21 @@ class DirectionChangerAudioEffect(GradientEffect, AudioReactiveEffect):
         self.current_bar_length_right = 0
 
         self.beat_detected = False
+        self.current_power = 0.0
+        self.prev_beat_detected = False  # Track previous beat state
 
     def config_updated(self, config):
-        pass
+        self.power_func = self._power_funcs[self._config["frequency_range"]]
 
     def audio_data_updated(self, data):
-        # Use WLS2's built-in beat detection or force beat for testing
-        self.beat_detected = data.volume_beat_now()
+        # Get power from selected frequency range
+        self.current_power = getattr(data, self.power_func)()
+        # Detect beat based on power threshold
+        current_beat = self.current_power > self._config["beat_threshold"]
+        
+        # Only trigger on beat edge (from no beat to beat)
+        self.beat_detected = current_beat and not self.prev_beat_detected
+        self.prev_beat_detected = current_beat
 
     def render(self):
         # Calculate movement steps based on bar_speed
@@ -165,40 +191,7 @@ class DirectionChangerAudioEffect(GradientEffect, AudioReactiveEffect):
         # Gradient roll will automatically change colors over time
         return self.get_gradient_color(0.5)
 
-    def _process_right_side(self, steps):
-        """Process right side movement"""
-        # Store last color for continuing bars
-        last_color = [
-            self.output_right[0][0] if self.output_right_length > 0 else 0,
-            self.output_right[1][0] if self.output_right_length > 0 else 0,
-            self.output_right[2][0] if self.output_right_length > 0 else 0
-        ]
 
-        # Roll array right
-        self.output_right = np.roll(self.output_right, steps, axis=1)
-
-        # Clear rolled pixels
-        if steps < self.output_right_length:
-            self.output_right[:, :steps] = 0
-        else:
-            self.output_right[:, :] = 0
-
-        # Continue existing bar
-        if 0 < self.current_bar_length_right < self._config["bar_length"]:
-            bar_length = self._config["bar_length"]
-            missing_leds = min(steps, bar_length - self.current_bar_length_right)
-
-            start_idx = max(0, steps - missing_leds)
-            end_idx = min(self.output_right_length, steps)
-
-            if start_idx < end_idx:
-                self.output_right[0][start_idx:end_idx] = last_color[0]
-                self.output_right[1][start_idx:end_idx] = last_color[1]
-                self.output_right[2][start_idx:end_idx] = last_color[2]
-
-            self.current_bar_length_right += missing_leds
-            if self.current_bar_length_right >= bar_length:
-                self.current_bar_length_right = 0
 
     def _add_new_bar(self, steps):
         """Add new bar when beat is detected"""
@@ -238,21 +231,3 @@ class DirectionChangerAudioEffect(GradientEffect, AudioReactiveEffect):
 
             self.current_bar_length_right = leds_to_show
 
-    def _get_roll_steps(self, current_speed):
-        """Calculate movement steps based on speed"""
-        max_counter = 1
-        steps = 0
-
-        self.speed_counter += current_speed
-
-        if self.speed_counter > max_counter:
-            self.speed_counter = 0
-
-            if (max_counter / current_speed) < 1:
-                steps = int(1 / (max_counter / current_speed))
-            else:
-                steps = 1
-        else:
-            steps = 0
-
-        return steps

@@ -10,27 +10,35 @@ class BeatCometAudioEffect(AudioReactiveEffect, GradientEffect):
     NAME = "Sao chổi"
     CATEGORY = "2. Hiệu ứng nháy theo nhạc"
 
+    _power_funcs = {
+        "Nhịp": "beat_power",
+        "Trầm": "bass_power",
+        "Thấp (nhịp+trầm)": "lows_power",
+        "Trung": "mids_power",
+        "Cao": "high_power",
+    }
+
     CONFIG_SCHEMA = vol.Schema(
         {
             vol.Optional(
                 "speed",
                 description="Tốc độ trượt",
-                default=0.5,
+                default=1,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.1, max=2.0)),
             vol.Optional(
                 "bar_length",
                 description="Độ dài thanh",
-                default=15,
+                default=20,
             ): vol.All(vol.Coerce(int), vol.Range(min=3, max=50)),
             vol.Optional(
                 "cometr_length",
                 description="Độ dài trượt khi có beat",
-                default=25,
+                default=35,
             ): vol.All(vol.Coerce(int), vol.Range(min=1, max=50)),
             vol.Optional(
                 "decay",
                 description="Độ mờ dần",
-                default=0.5,
+                default=0.6,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.1, max=0.99)),
             vol.Optional(
                 "random_color",
@@ -48,6 +56,16 @@ class BeatCometAudioEffect(AudioReactiveEffect, GradientEffect):
                 default=True,
             ): bool,
             vol.Optional(
+                "frequency_range",
+                description="Dải tần số để phát hiện nhịp",
+                default="Thấp (nhịp+trầm)",
+            ): vol.In(list(_power_funcs.keys())),
+            vol.Optional(
+                "beat_threshold",
+                description="Ngưỡng phát hiện nhịp",
+                default=0.3,
+            ): vol.All(vol.Coerce(float), vol.Range(min=0.1, max=1.0)),
+            vol.Optional(
                 "gradient_roll",
                 description="Tốc độ dải mầu",
                 default=1,
@@ -60,6 +78,8 @@ class BeatCometAudioEffect(AudioReactiveEffect, GradientEffect):
         self.prev_output = np.zeros((3, pixel_count))
         self.speed_counter = 0
         self.beat_detected = False
+        self.current_power = 0.0
+        self.prev_beat_detected = False  # Track previous beat state
 
         # Beat detection variables
         self.beat_history = []
@@ -80,9 +100,18 @@ class BeatCometAudioEffect(AudioReactiveEffect, GradientEffect):
         # Current bar color (will be updated when beat detected or random_color = True)
         self.current_bar_color = self._get_bar_color()
 
+    def config_updated(self, config):
+        self.power_func = self._power_funcs[self._config["frequency_range"]]
+
     def audio_data_updated(self, data):
-        # Use WLS2's built-in beat detection
-        self.beat_detected = data.volume_beat_now()
+        # Get power from selected frequency range
+        self.current_power = getattr(data, self.power_func)()
+        # Detect beat based on power threshold
+        current_beat = self.current_power > self._config["beat_threshold"]
+
+        # Only trigger on beat edge (from no beat to beat)
+        self.beat_detected = current_beat and not self.prev_beat_detected
+        self.prev_beat_detected = current_beat
 
         # Handle beat detection for smooth sliding
         if self.beat_detected:
