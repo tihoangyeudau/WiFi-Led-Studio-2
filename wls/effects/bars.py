@@ -16,8 +16,8 @@ class BarsAudioEffect(AudioReactiveEffect, GradientEffect):
             vol.Optional(
                 "resolution",
                 description="Độ phân giải (số thanh)",
-                default=8,
-            ): vol.All(vol.Coerce(int), vol.Range(min=4, max=32)),
+                default=4,
+            ): vol.All(vol.Coerce(int), vol.Range(min=2, max=32)),
             vol.Optional(
                 "sensitivity",
                 description="Độ nhạy",
@@ -61,8 +61,8 @@ class BarsAudioEffect(AudioReactiveEffect, GradientEffect):
         if not hasattr(self, 'current_melbank'):
             return
 
-        # Get resolution (number of blocks)
-        resolution = self._config.get("resolution", 8)
+        # Get resolution (number of blocks) and auto-adjust to not exceed pixel_count
+        resolution = min(self._config.get("resolution", 8), self.pixel_count)
 
         # Process melbank data like original effect_bars.py
         y = np.copy(self.current_melbank)

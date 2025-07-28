@@ -49,7 +49,7 @@ class BeatTwinkleAudioEffect(AudioReactiveEffect, GradientEffect):
             vol.Optional(
                 "beat_threshold",
                 description="Ngưỡng phát hiện nhịp",
-                default=0.3,
+                default=0.2,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.1, max=1.0)),
         }
     )
@@ -72,7 +72,7 @@ class BeatTwinkleAudioEffect(AudioReactiveEffect, GradientEffect):
         self.current_power = getattr(data, self.power_func)()
         # Detect beat based on power threshold
         current_beat = self.current_power > self._config["beat_threshold"]
-        
+
         # Only trigger on beat edge (from no beat to beat)
         self.beat_detected = current_beat and not self.prev_beat_detected
         self.prev_beat_detected = current_beat

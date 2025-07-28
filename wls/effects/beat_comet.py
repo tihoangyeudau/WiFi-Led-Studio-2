@@ -63,7 +63,7 @@ class BeatCometAudioEffect(AudioReactiveEffect, GradientEffect):
             vol.Optional(
                 "beat_threshold",
                 description="Ngưỡng phát hiện nhịp",
-                default=0.3,
+                default=0.2,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.1, max=1.0)),
             vol.Optional(
                 "gradient_roll",
