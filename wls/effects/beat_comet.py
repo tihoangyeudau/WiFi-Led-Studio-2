@@ -28,12 +28,12 @@ class BeatCometAudioEffect(AudioReactiveEffect, GradientEffect):
             vol.Optional(
                 "bar_length",
                 description="Độ dài thanh",
-                default=20,
+                default=15,
             ): vol.All(vol.Coerce(int), vol.Range(min=3, max=50)),
             vol.Optional(
                 "cometr_length",
                 description="Độ dài trượt khi có beat",
-                default=35,
+                default=30,
             ): vol.All(vol.Coerce(int), vol.Range(min=1, max=50)),
             vol.Optional(
                 "decay",

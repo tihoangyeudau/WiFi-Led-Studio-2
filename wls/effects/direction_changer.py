@@ -28,7 +28,7 @@ class DirectionChangerAudioEffect(GradientEffect, AudioReactiveEffect):
             vol.Optional(
                 "bar_speed",
                 description="Tốc độ thanh",
-                default=1,
+                default=0.9,
             ): vol.All(vol.Coerce(float), vol.Range(min=0.1, max=3.0)),
             vol.Optional(
                 "bars_in_same_direction",

@@ -5,7 +5,7 @@ wls_presets = {
             "config": {
                 "background_brightness": 1,
                 "background_color": "black",
-                "blur": 10,
+                "blur": 4,
                 "brightness": 1,
                 "color_step": 0.125,
                 "ease_method": "ease_in_out",
@@ -57,7 +57,7 @@ wls_presets = {
             "config": {
                 "background_brightness": 1,
                 "background_color": "black",
-                "blur": 7.9,
+                "blur": 4,
                 "brightness": 1,
                 "color_step": 0.18,
                 "ease_method": "ease_in_out",
@@ -75,7 +75,7 @@ wls_presets = {
             "config": {
                 "background_brightness": 1,
                 "background_color": "black",
-                "blur": 5,
+                "blur": 2,
                 "brightness": 1,
                 "color_step": 0.125,
                 "ease_method": "ease_in_out",

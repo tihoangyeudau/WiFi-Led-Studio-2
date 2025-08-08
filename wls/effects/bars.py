@@ -16,7 +16,7 @@ class BarsAudioEffect(AudioReactiveEffect, GradientEffect):
             vol.Optional(
                 "resolution",
                 description="Độ phân giải (số thanh)",
-                default=4,
+                default=5,
             ): vol.All(vol.Coerce(int), vol.Range(min=2, max=32)),
             vol.Optional(
                 "sensitivity",
