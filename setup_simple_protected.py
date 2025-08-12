@@ -152,7 +152,6 @@ build_options = {
         'jinja2.ext',
     ],
     'excludes': [
-        'tkinter',
         'unittest',
         'test',
         'distutils',
