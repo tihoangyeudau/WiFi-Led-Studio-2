@@ -315,7 +315,7 @@ class HotkeyManager:
                 return
 
             # Get list of available effects from registry
-            available_effects = list(self.wls_core.effects.classes().keys())
+            available_effects = [effect for effect in self.wls_core.effects.classes().keys() if effect != 'screen_capture']
             if not available_effects:
                 return
 

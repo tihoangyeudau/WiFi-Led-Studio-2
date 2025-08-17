@@ -250,13 +250,14 @@ class ScenesEndpoint(RestEndpoint):
                 if virtual.active_effect:
                     # prevent crash from trying to save copy / span transitions
                     # which appear active even when the virtual is not!!!
-                    if not isinstance(virtual.active_effect, DummyEffect):
+                    # Also skip "screen_capture" effect as it's a system effect
+                    if not isinstance(virtual.active_effect, DummyEffect) and virtual.active_effect.type != "screen_capture":
                         effect["type"] = virtual.active_effect.type
                         effect["config"] = virtual.active_effect.config
                         # effect['name'] = virtual.active_effect.name
                     else:
                         _LOGGER.debug(
-                            f"Skipping DummyEffect for virtual {virtual.id}"
+                            f"Skipping DummyEffect or screen_capture effect for virtual {virtual.id}"
                         )
                 scene_config["virtuals"][virtual.id] = effect
         else:

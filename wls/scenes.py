@@ -71,7 +71,7 @@ class Scenes:
         virtual_effects = {}
         for virtual in scene_config["virtuals"]:
             effect = {}
-            if virtual.active_effect:
+            if virtual.active_effect and virtual.active_effect.type not in ["dummy", "screen_capture"]:
                 effect["type"] = virtual.active_effect.type
                 effect["config"] = virtual.active_effect.config
             virtual_effects[virtual.id] = effect

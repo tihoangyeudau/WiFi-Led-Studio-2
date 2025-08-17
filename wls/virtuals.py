@@ -350,8 +350,8 @@ class Virtual:
                 else:
                     self._config["last_state"] = True
 
-                # Không lưu "dummy" effect vì nó không phải là effect thực sự
-                if effect.type != "dummy":
+                # Không lưu "dummy" và "screen_capture" effect vì chúng không phải là effect thực sự
+                if effect.type not in ["dummy", "screen_capture"]:
                     if "last_effect" not in self._config:
                         self._config["last_effect"] = effect.type
                     else:
@@ -1161,7 +1161,8 @@ def update_effect_config(config, virtual_id, effect):
         None
     """
     # Skip DummyEffect as it doesn't have type attribute and shouldn't be saved
-    if isinstance(effect, DummyEffect):
+    # Also skip "screen_capture" effect as it's a system effect that shouldn't be saved
+    if isinstance(effect, DummyEffect) or (hasattr(effect, 'type') and effect.type == "screen_capture"):
         return
 
     # Store as both the active effect to protect existing code, and one of effects

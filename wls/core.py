@@ -1099,8 +1099,8 @@ class WlsCore:
 
             self.current_effect = effect_type
 
-            # Không lưu "dummy" effect vì nó không phải là effect thực sự
-            if effect_type != "dummy":
+            # Không lưu "dummy" và "screen_capture" effect vì chúng không phải là effect thực sự
+            if effect_type not in ["dummy", "screen_capture"]:
                 for virtual in self.virtuals.values():
                     if hasattr(virtual, 'is_device') and virtual.is_device == device_id:
                         if hasattr(virtual, '_config'):
@@ -1148,8 +1148,8 @@ class WlsCore:
             if not success:
                 return
 
-            # Không lưu "dummy" effect vì nó không phải là effect thực sự
-            if effect_type != "dummy":
+            # Không lưu "dummy" và "screen_capture" effect vì chúng không phải là effect thực sự
+            if effect_type not in ["dummy", "screen_capture"]:
                 for virtual in self.virtuals.values():
                     if hasattr(virtual, 'is_device') and virtual.is_device is not None:
                         device_id = virtual.is_device
@@ -1519,7 +1519,7 @@ class WlsCore:
             # First pass: collect all effect information
             for effect_type in self._effects_types_cache:
                 # Skip abstract base classes and internal effects
-                if effect_type.startswith('_') or effect_type == 'Effect':
+                if effect_type.startswith('_') or effect_type == 'Effect' or effect_type == 'screen_capture':
                     continue
 
                 effect_class = self._effects_registry_cache.get(effect_type)
