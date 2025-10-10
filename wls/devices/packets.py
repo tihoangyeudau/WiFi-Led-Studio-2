@@ -106,47 +106,6 @@ def build_dnrgb_packet(
     packet.extend(byteData.flatten().tobytes())
     return packet
 
-
-def build_skydimondusb_rainbowmusicled_dot_com_0981373223_packet(data: np.ndarray, color_order: str):
-    """
-    Generic SkydimondUSB serial packet encoding
-
-    Header: [A, d, a, pixel count high byte, pixel count low byte, pixel count checksum]
-    Byte 	Description
-    4 + n*3 	Red Value
-    5 + n*3 	Green Value
-    6 + n*3 	Blue Value
-    """
-    pixel_length = len(data)
-    packet = bytearray(
-        [
-            ord("T"),
-            ord("n"),
-            ord("h"),
-            (pixel_length >> 8),
-            (pixel_length & 0x00FF),
-        ]
-    )  # high byte, then low byte
-    packet.extend([packet[3] ^ packet[4] ^ 0x55])  # checksum
-
-    byteData = data.astype(np.dtype("B"))
-    # if color_order == "RGB": pass
-    if color_order == "GRB":
-        byteData[:, [1, 0]] = byteData[:, [0, 1]]  # swap columns
-    elif color_order == "BGR":
-        byteData[:, [2, 0]] = byteData[:, [0, 2]]
-    elif color_order == "RBG":
-        byteData[:, [2, 1]] = byteData[:, [1, 2]]
-    elif color_order == "BRG":
-        byteData[:, [2, 0]] = byteData[:, [0, 2]]
-        byteData[:, [2, 1]] = byteData[:, [1, 2]]
-    elif color_order == "GBR":
-        byteData[:, [2, 0]] = byteData[:, [0, 2]]
-        byteData[:, [1, 0]] = byteData[:, [0, 1]]
-    packet.extend(byteData.flatten().tobytes())
-    return packet
-
-
 def build_skydimondusbpro_rainbowmusicled_dot_com_0981373223_packet(data: np.ndarray, color_order: str):
     """
     Generic Skydimond USB serial packet encoding

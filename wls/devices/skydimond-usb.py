@@ -49,14 +49,9 @@ class SkydimondUSBDevice(SerialDevice):
             return
 
         try:
-            if self.version == 115200:
-                self.serial.write(
-                    packets.build_skydimondusb_rainbowmusicled_dot_com_0981373223_packet(data, self.color_order)
-                )
-            else:
-                self.serial.write(
-                    packets.build_skydimondusbpro_rainbowmusicled_dot_com_0981373223_packet(data, self.color_order)
-                )
+            self.serial.write(
+                packets.build_skydimondusbpro_rainbowmusicled_dot_com_0981373223_packet(data, self.color_order)
+            )
         except serial.SerialException as e:
             _LOGGER.error(f"Không thể gửi dữ liệu: {str(e)}")
             time.sleep(2)

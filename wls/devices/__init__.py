@@ -404,7 +404,7 @@ class UDPDevice(NetworkedDevice):
         self._sock = None
 
 # Constants
-VERSION_ORDERS = ["Pro Max", "Thường"]
+VERSION_ORDERS = ["Pro Max"]
 LED_ID_ORDERS = ["_Auto_"]
 MAX_RETRIES = 1  # Maximum number of reconnection attempts
 MANUFACTURERS = ['wch.cn', 'FTDI', 'Microsoft', 'Silicon Labs']
@@ -453,10 +453,9 @@ class SerialDevice(Device):
 
     def _get_version_baudrate(self):
         version_mapping = {
-            "Pro Max": 1000000,
-            "Thường": 115200
+            "Pro Max": 1000000
         }
-        return version_mapping.get(self._config["version"], 115200)
+        return version_mapping.get(self._config["version"], 1000000)
 
     def establish_connection(self):
         if self.com_port is None:
