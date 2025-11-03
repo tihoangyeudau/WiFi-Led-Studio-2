@@ -67,7 +67,7 @@ CORE_CONFIG_SCHEMA = vol.Schema(
     {
         vol.Optional("host", default="localhost"): str,
         vol.Optional("port", default=8090): int,
-        vol.Optional("port_s", default=8443): int,
+        vol.Optional("port_s", default=8092): int,
         vol.Optional("dev_mode", default=False): bool,
         vol.Optional("devices", default=[]): list,
         vol.Optional("virtuals", default=[]): list,
