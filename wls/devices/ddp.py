@@ -32,7 +32,7 @@ class DDPDevice(UDPDevice):
     REPLY = 0x04
     STORAGE = 0x08
     TIME = 0x10
-    DATATYPE = 0x01
+    DATATYPE = 0x0B
     SOURCE = 0x01
     TIMEOUT = 1
 
