@@ -28,6 +28,10 @@ const DeviceCardWrapper = ({ virtual, index }) => {
     setDialogOpenAddVirtual(true, virtual)
   };
 
+  const handleEditDevice = (device) => {
+    setDialogOpenAddDevice(true, device)
+  };
+
   const handleClearEffect = () => {
     clearVirtualEffect(virtual).then(() => {
       setFade(true)
@@ -81,6 +85,7 @@ const DeviceCardWrapper = ({ virtual, index }) => {
       index={index}
       handleDeleteDevice={()=>handleDeleteDevice(virtual)}
       handleEditVirtual={()=>handleEditVirtual(virtual)}
+      handleEditDevice={()=> handleEditDevice(virtuals[virtual]?.is_device)}
       handleClearEffect={()=>handleClearEffect(virtual)}
       handlePlayPause={()=>handlePlayPause()}
       linkTo={`/device/${virtuals[virtual]?.id}`}

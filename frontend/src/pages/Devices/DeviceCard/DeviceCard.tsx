@@ -6,6 +6,7 @@ import Button from '@material-ui/core/Button';
 import SettingsIcon from '@material-ui/icons/Settings';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import TuneIcon from '@material-ui/icons/Tune';
+import BuildIcon from '@material-ui/icons/Build';
 import { NavLink } from 'react-router-dom';
 import Collapse from '@material-ui/core/Collapse';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -36,6 +37,7 @@ const DeviceCard = ({
   index,
   handleDeleteDevice,
   handleEditVirtual,
+  handleEditDevice,
   handleClearEffect,
   handlePlayPause,
   linkTo,
@@ -313,7 +315,19 @@ const DeviceCard = ({
                 />
 
                 {isDevice ? (
-                  null
+                  <Button
+                    variant="text"
+                    color={color}
+                    size="small"
+                    startIcon={<BuildIcon />}
+                    className={`step-devices-four-${index}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleEditDevice(isDevice);
+                    }}
+                  >
+                    Sửa đèn
+                  </Button>
                 ) : (
                   <EditVirtuals
                     label="Sửa đèn ảo"

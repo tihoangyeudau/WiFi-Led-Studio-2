@@ -51,12 +51,12 @@ class Device(BaseRegistry):
                 ): str,
                 vol.Optional(
                     "center_offset",
-                    description="Số lượng LED bù vào trung tâm của đèn",
+                    description="Di chuyển trung tâm dải LED để căn giữa hiệu ứng",
                     default=0,
                 ): int,
                 vol.Optional(
                     "refresh_rate",
-                    description="Target rate that pixels are sent to the device",
+                    description="Tần số làm mới tối đa gửi đến đèn LED (FPS)",
                     default=next(
                         (f for f in AVAILABLE_FPS if f >= 60),
                         list(AVAILABLE_FPS)[-1],
