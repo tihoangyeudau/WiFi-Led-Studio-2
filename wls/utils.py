@@ -691,6 +691,10 @@ def currently_frozen():
     if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
         return True
     
+    # Check for Nuitka (sets __compiled__ in every compiled module)
+    if "__compiled__" in globals():
+        return True
+
     # Check for cx_Freeze
     if getattr(sys, "frozen", False):
         return True
@@ -712,7 +716,7 @@ def get_icon_path(icon_filename) -> str:
             # PyInstaller
             base_path = sys._MEIPASS
         else:
-            # cx_Freeze
+            # Nuitka / cx_Freeze
             base_path = os.path.dirname(sys.executable)
         
         # Try multiple locations for frozen app

@@ -1,0 +1,121 @@
+name: Build App (Nuitka)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    tags: ["v*"]
+
+jobs:
+  build-macos:
+    name: Build App (macOS)
+    runs-on: macos-latest
+    env:
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      APPLE_CERT_P12_BASE64: ${{ secrets.APPLE_CERT_P12_BASE64 }}
+    steps:
+      - name: Check out code from GitHub
+        uses: actions/checkout@v4
+      - name: Install build dependencies
+        run: |
+          brew install portaudio aubio ccache
+      - name: Setup Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Restore ccache
+        uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: ccache-macos-${{ github.sha }}
+          restore-keys: |
+            ccache-macos-
+      - name: Install Wls
+        env:
+          # aubio 0.4.9 declares ufunc callbacks without const, which recent
+          # clang rejects as an error
+          CFLAGS: -Wno-error=incompatible-function-pointer-types
+        run: |
+          python -m pip install -U pip wheel setuptools
+          pip install --pre .
+      - name: Import signing certificate
+        if: env.APPLE_CERT_P12_BASE64 != ''
+        env:
+          APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+        run: |
+          KEYCHAIN="$RUNNER_TEMP/signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(uuidgen)"
+          echo "$APPLE_CERT_P12_BASE64" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN" \
+            -P "$APPLE_CERT_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: \
+            -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security list-keychains -d user -s "$KEYCHAIN" login.keychain
+          rm -f "$RUNNER_TEMP/cert.p12"
+          SIGN_ID="$(security find-identity -v -p codesigning "$KEYCHAIN" \
+            | grep 'Developer ID Application' | head -n 1 | awk '{print $2}')"
+          [ -n "$SIGN_ID" ] || { echo "No Developer ID identity in certificate"; exit 1; }
+          echo "SIGN_ID=$SIGN_ID" >> "$GITHUB_ENV"
+      - name: Build app with Nuitka
+        run: ./build_nuitka_mac.sh
+      - name: Package app
+        run: |
+          ditto -c -k --keepParent "dist_nuitka/WiFi Led Studio.app" WiFi-Led-Studio-macOS.zip
+      - name: Upload app
+        uses: actions/upload-artifact@v4
+        with:
+          name: WiFi-Led-Studio-macOS
+          path: WiFi-Led-Studio-macOS.zip
+          if-no-files-found: error
+
+  build-windows:
+    name: Build App (Windows)
+    runs-on: windows-latest
+    steps:
+      - name: Check out code from GitHub
+        uses: actions/checkout@v4
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Wls
+        run: |
+          python -m pip install -U pip wheel setuptools
+          pip install --pre .
+          pip install nuitka ordered-set zstandard
+      - name: Build app with Nuitka
+        shell: pwsh
+        run: |
+          python -m nuitka `
+            --standalone `
+            --assume-yes-for-downloads `
+            --output-dir=dist_nuitka `
+            --output-filename="WiFi Led Studio.exe" `
+            --windows-console-mode=disable `
+            --windows-icon-from-ico=icons/wifiledstudio.ico `
+            --include-package=wls `
+            --include-package=wls_frontend `
+            --include-package=pynput `
+            --include-package=pystray `
+            --include-package=sentry_sdk `
+            --include-package-data=wls `
+            --include-package-data=bokeh `
+            --include-package-data=xyzservices `
+            --include-data-dir=wls_frontend=wls_frontend `
+            --include-data-dir=icons=icons `
+            --include-data-files=icons/tray.png=tray.png `
+            wls/__main__.py
+      - name: Package app
+        shell: pwsh
+        run: |
+          Rename-Item dist_nuitka/__main__.dist "WiFi Led Studio"
+          Compress-Archive -Path "dist_nuitka/WiFi Led Studio" -DestinationPath WiFi-Led-Studio-Windows.zip
+      - name: Upload app
+        uses: actions/upload-artifact@v4
+        with:
+          name: WiFi-Led-Studio-Windows
+          path: WiFi-Led-Studio-Windows.zip
+          if-no-files-found: error

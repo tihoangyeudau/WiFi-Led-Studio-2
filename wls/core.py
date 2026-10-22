@@ -18,7 +18,6 @@ elif sys.platform == "darwin":
         NSDistributedNotificationCenter
     )
 
-import inspect
 import io
 import sys
 
@@ -26,46 +25,50 @@ import pystray
 from pystray import Menu
 from pystray import MenuItem as _PystrayMenuItem
 
-# Stock pystray has no per-item icons. Keep the `icon` keyword working
-# everywhere and render it ourselves on macOS.
-if "icon" in inspect.signature(_PystrayMenuItem.__init__).parameters:
-    MenuItem = _PystrayMenuItem
-else:
 
-    class MenuItem(_PystrayMenuItem):
-        def __init__(self, *args, icon=None, **kwargs):
-            super().__init__(*args, **kwargs)
-            self.icon = icon
+class MenuItem(_PystrayMenuItem):
+    """MenuItem accepting an `icon` image, which stock pystray lacks.
 
-    if sys.platform == "darwin":
-        _create_menu_item = pystray.Icon._create_menu_item
+    The image is only rendered on macOS (see below); elsewhere it is ignored.
+    """
 
-        def _create_menu_item_with_icon(self, descriptor, callbacks):
-            menu_item = _create_menu_item(self, descriptor, callbacks)
-            image = getattr(descriptor, "icon", None)
-            if image is not None:
-                from AppKit import NSImage
-                from Foundation import NSData, NSMakeSize
+    def __init__(self, *args, icon=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.icon = icon
 
-                buffer = io.BytesIO()
-                image.convert("RGBA").resize((32, 32)).save(buffer, "png")
-                ns_image = NSImage.alloc().initWithData_(
-                    NSData.dataWithBytes_length_(
-                        buffer.getvalue(), len(buffer.getvalue())
-                    )
-                )
+
+if sys.platform == "darwin":
+    _create_menu_item = pystray.Icon._create_menu_item
+
+    def _create_menu_item_with_icon(self, descriptor, callbacks):
+        menu_item = _create_menu_item(self, descriptor, callbacks)
+        image = getattr(descriptor, "icon", None)
+        if image is not None:
+            from AppKit import NSImage
+            from Foundation import NSData, NSMakeSize
+
+            buffer = io.BytesIO()
+            image.convert("RGBA").resize((32, 32)).save(buffer, "png")
+            ns_image = NSImage.alloc().initWithData_(NSData(buffer.getvalue()))
+            if ns_image is not None:
                 ns_image.setSize_(NSMakeSize(16, 16))
                 menu_item.setImage_(ns_image)
-            return menu_item
+            logging.getLogger(__name__).debug(
+                "Menu icon: %s valid=%s size=%s",
+                descriptor.text,
+                ns_image is not None and ns_image.isValid(),
+                ns_image is not None and tuple(ns_image.size()),
+            )
+        return menu_item
 
-        pystray.Icon._create_menu_item = _create_menu_item_with_icon
+    pystray.Icon._create_menu_item = _create_menu_item_with_icon
 
-        from wls.mac_notify import notify as _native_notify
+    from wls.mac_notify import notify as _native_notify
 
-        def _notify(self, message, title=None):
-            _native_notify(message, title)
+    def _notify(self, message, title=None):
+        _native_notify(message, title)
 
-        pystray.Icon._notify = _notify
+    pystray.Icon._notify = _notify
 
 from wls.platform_utils import (
     set_selected_device,

@@ -9,11 +9,6 @@ from aiohttp import web
 import wls_frontend
 from wls.api import RestApi
 
-try:
-    base_path = sys._MEIPASS
-except BaseException:
-    base_path = os.path.abspath(".")
-
 _LOGGER = logging.getLogger(__name__)
 
 

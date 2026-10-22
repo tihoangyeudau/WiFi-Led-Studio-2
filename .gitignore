@@ -73,3 +73,6 @@ frontend/*.eslintcache
 wls/effects/__pycache__/*
 wls/__pycache__/*
 __pycache__/*
+
+# Nuitka build output
+dist_nuitka/
