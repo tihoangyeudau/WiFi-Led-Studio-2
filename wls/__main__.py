@@ -272,6 +272,29 @@ def parse_args():
     return parser.parse_args()
 
 
+def _run_pystray_on_main_thread(pystray):
+    """AppKit aborts when a status item is touched off the main thread, but
+    the tray setup and the core's menu refreshes run on worker threads."""
+    import functools
+    import threading
+
+    from PyObjCTools import AppHelper
+
+    icon_cls = pystray.Icon
+
+    def on_main(method):
+        @functools.wraps(method)
+        def wrapper(self, *args, **kwargs):
+            if threading.current_thread() is threading.main_thread():
+                return method(self, *args, **kwargs)
+            AppHelper.callAfter(method, self, *args, **kwargs)
+
+        return wrapper
+
+    for name in ("_show", "_hide", "_update_icon", "_update_title", "_update_menu"):
+        setattr(icon_cls, name, on_main(getattr(icon_cls, name)))
+
+
 def log_packages():
     from platform import (
         processor,
@@ -282,17 +305,16 @@ def log_packages():
         system,
     )
 
-    from pkg_resources import working_set
+    from importlib.metadata import distributions
 
     _LOGGER.debug(f"{system()} : {release()} : {processor()}")
     _LOGGER.debug(
         f"{python_version()} : {python_build()} : {python_implementation()}"
     )
     _LOGGER.debug("Packages")
-    dists = [d for d in working_set]
-    dists.sort(key=lambda x: x.project_name)
+    dists = sorted(distributions(), key=lambda x: x.metadata["Name"] or "")
     for dist in dists:
-        _LOGGER.debug(f"{dist.project_name} : {dist.version}")
+        _LOGGER.debug(f"{dist.metadata['Name']} : {dist.version}")
 
 
 def main():
@@ -358,6 +380,9 @@ def main():
             sys.exit(0)
             # Exit with code 3 to indicate that there was an error creating the tray icon.
             sys.exit(3)
+
+        if sys.platform == "darwin":
+            _run_pystray_on_main_thread(pystray)
 
         from PIL import Image
 

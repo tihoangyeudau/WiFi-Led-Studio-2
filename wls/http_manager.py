@@ -118,7 +118,8 @@ class HttpServer:
         if self._wls.icon is not None:
             if self._wls.icon.HAS_NOTIFICATION:
                 self._wls.icon.notify(
-                    f"Không thể bắt đầu: một cái gì đó đang chạy trên cổng {self.port}\nWiFi Led Studio đã chạy chưa?"
+                    f"Không thể bắt đầu: một cái gì đó đang chạy trên cổng {self.port}\nWiFi Led Studio đã chạy chưa?",
+                    "WiFi Led Studio",
                 )
         time.sleep(2)
         self._wls.stop(1)

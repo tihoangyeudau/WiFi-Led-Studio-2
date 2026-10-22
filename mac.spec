@@ -9,11 +9,13 @@
 import os
 import sys
 from PyInstaller.utils.hooks import copy_metadata
-datas = [   ('/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons', 'icons/'),
-            ('/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons/tray.png', '.'),
-            ('/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/wls', 'wls/'),
-            ('/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2//wls_frontend', 'wls_frontend/'),
-            ('/usr/local/bin/build/WiFi Led Studio-3.4.0.app/Contents/MacOS/lib/xyzservices', 'xyzservices/')]
+from PyInstaller.utils.hooks import collect_data_files
+ROOT = os.path.abspath(SPECPATH)
+datas = [   (os.path.join(ROOT, 'icons'), 'icons/'),
+            (os.path.join(ROOT, 'icons/tray.png'), '.'),
+            (os.path.join(ROOT, 'wls'), 'wls/'),
+            (os.path.join(ROOT, 'wls_frontend'), 'wls_frontend/')]
+datas += collect_data_files('xyzservices')
 
 datas += copy_metadata('bokeh')
 block_cipher = None
@@ -55,6 +57,7 @@ a = Analysis(['./wls/__main__.py'],
                             "serial",
                             "pystray",
                             "pystray._darwin",
+                            "UserNotifications",
                             "serial.tools.list_ports",
                             "icmplib",
                             "aiohttp_cors",
@@ -106,8 +109,8 @@ coll = COLLECT(exe,
 app = BUNDLE(
             coll,
             name='WiFi Led Studio.app',
-            icon='/Users/phamtuantrung/Documents/GitHub/WiFi-Led-Studio-2/icons/WiFi Led Studio.icns',
-            bundle_identifier='com.rml.rmlapp',
+            icon=os.path.join(ROOT, 'icons/WiFi Led Studio.icns'),
+            bundle_identifier='com.rml.wifiledstudio',
             info_plist={
                 'NSMicrophoneUsageDescription': 'WiFi Led Studio needs microphone access to capture audio for light effects and visualizations',
                 'NSAppleEventsUsageDescription': 'WiFi Led Studio needs to control other applications to synchronize light effects with media playback',

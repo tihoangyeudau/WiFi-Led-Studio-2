@@ -6,7 +6,7 @@ import shutil
 import sys
 
 import voluptuous as vol
-from pkg_resources import parse_version
+from packaging.version import parse as parse_version
 
 from wls.consts import CONFIGURATION_VERSION
 

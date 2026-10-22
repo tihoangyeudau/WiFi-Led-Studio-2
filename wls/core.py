@@ -18,7 +18,55 @@ elif sys.platform == "darwin":
         NSDistributedNotificationCenter
     )
 
-from pystray import Menu, MenuItem
+import inspect
+import io
+import sys
+
+import pystray
+from pystray import Menu
+from pystray import MenuItem as _PystrayMenuItem
+
+# Stock pystray has no per-item icons. Keep the `icon` keyword working
+# everywhere and render it ourselves on macOS.
+if "icon" in inspect.signature(_PystrayMenuItem.__init__).parameters:
+    MenuItem = _PystrayMenuItem
+else:
+
+    class MenuItem(_PystrayMenuItem):
+        def __init__(self, *args, icon=None, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.icon = icon
+
+    if sys.platform == "darwin":
+        _create_menu_item = pystray.Icon._create_menu_item
+
+        def _create_menu_item_with_icon(self, descriptor, callbacks):
+            menu_item = _create_menu_item(self, descriptor, callbacks)
+            image = getattr(descriptor, "icon", None)
+            if image is not None:
+                from AppKit import NSImage
+                from Foundation import NSData, NSMakeSize
+
+                buffer = io.BytesIO()
+                image.convert("RGBA").resize((32, 32)).save(buffer, "png")
+                ns_image = NSImage.alloc().initWithData_(
+                    NSData.dataWithBytes_length_(
+                        buffer.getvalue(), len(buffer.getvalue())
+                    )
+                )
+                ns_image.setSize_(NSMakeSize(16, 16))
+                menu_item.setImage_(ns_image)
+            return menu_item
+
+        pystray.Icon._create_menu_item = _create_menu_item_with_icon
+
+        from wls.mac_notify import notify as _native_notify
+
+        def _notify(self, message, title=None):
+            _native_notify(message, title)
+
+        pystray.Icon._notify = _notify
+
 from wls.platform_utils import (
     set_selected_device,
     set_device_enabled,

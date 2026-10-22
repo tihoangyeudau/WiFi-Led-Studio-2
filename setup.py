@@ -30,6 +30,7 @@ INSTALL_REQUIRES = [
     "cython>=3.0.7",
     "certifi>=2023.11.17",
     "multidict>=6.0.4",
+    "packaging>=21.0",
     "paho-mqtt>=1.6.1",
     "psutil>=5.9.7",
     "pyserial>=3.5",
@@ -44,6 +45,7 @@ INSTALL_REQUIRES = [
     "pillow>=10.1.0",
     "cx-freeze>=7.2.2",
     "pynput>=1.7.6",
+    'pyobjc-framework-UserNotifications>=8.0; platform_system == "Darwin"',
     'cx-freeze>=7.2.2; platform_system == "Windows"',
     'pyinstaller>=6.14.1; platform_system != "Windows"',
     # Conditional Requirement
