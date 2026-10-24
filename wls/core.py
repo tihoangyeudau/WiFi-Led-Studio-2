@@ -1,4 +1,4 @@
-﻿import asyncio
+import asyncio
 import logging
 import sys
 import os
@@ -69,6 +69,105 @@ if sys.platform == "darwin":
         _native_notify(message, title)
 
     pystray.Icon._notify = _notify
+
+elif sys.platform == "win32":
+    _create_menu_item = pystray.Icon._create_menu_item
+
+    import pystray._util.win32 as _pystray_win32
+
+    class _BITMAPINFOHEADER(ctypes.Structure):
+        _fields_ = [
+            ("biSize", wintypes.DWORD),
+            ("biWidth", wintypes.LONG),
+            ("biHeight", wintypes.LONG),
+            ("biPlanes", wintypes.WORD),
+            ("biBitCount", wintypes.WORD),
+            ("biCompression", wintypes.DWORD),
+            ("biSizeImage", wintypes.DWORD),
+            ("biXPelsPerMeter", wintypes.LONG),
+            ("biYPelsPerMeter", wintypes.LONG),
+            ("biClrUsed", wintypes.DWORD),
+            ("biClrImportant", wintypes.DWORD),
+        ]
+
+    class _BITMAPINFO(ctypes.Structure):
+        _fields_ = [
+            ("bmiHeader", _BITMAPINFOHEADER),
+            ("bmiColors", wintypes.DWORD * 3),
+        ]
+
+    _menu_hbitmap_cache = {}
+
+    def _pil_to_hbitmap(img, size=(16, 16)):
+        cache_key = (id(img), size)
+        if cache_key in _menu_hbitmap_cache:
+            return _menu_hbitmap_cache[cache_key]
+
+        try:
+            from PIL import Image
+
+            img_rgba = img.convert("RGBA").resize(size, Image.Resampling.LANCZOS)
+            w, h = size
+            raw_data = bytearray(w * h * 4)
+            pixels = img_rgba.load()
+            idx = 0
+            for y in range(h):
+                for x in range(w):
+                    r, g, b, a = pixels[x, y]
+                    if a == 0:
+                        raw_data[idx : idx + 4] = b"\x00\x00\x00\x00"
+                    else:
+                        raw_data[idx] = (b * a) // 255
+                        raw_data[idx + 1] = (g * a) // 255
+                        raw_data[idx + 2] = (r * a) // 255
+                        raw_data[idx + 3] = a
+                    idx += 4
+
+            bi = _BITMAPINFO()
+            bi.bmiHeader.biSize = ctypes.sizeof(_BITMAPINFOHEADER)
+            bi.bmiHeader.biWidth = w
+            bi.bmiHeader.biHeight = -h  # top-down DIB
+            bi.bmiHeader.biPlanes = 1
+            bi.bmiHeader.biBitCount = 32
+            bi.bmiHeader.biCompression = 0  # BI_RGB
+
+            ppvBits = ctypes.c_void_p()
+            hdc = ctypes.windll.user32.GetDC(0)
+            hbitmap = ctypes.windll.gdi32.CreateDIBSection(
+                hdc,
+                ctypes.byref(bi),
+                0,
+                ctypes.byref(ppvBits),
+                None,
+                0,
+            )
+            ctypes.windll.user32.ReleaseDC(0, hdc)
+
+            if hbitmap and ppvBits:
+                ctypes.memmove(ppvBits, bytes(raw_data), len(raw_data))
+
+            _menu_hbitmap_cache[cache_key] = hbitmap
+            return hbitmap
+        except Exception as e:
+            logging.getLogger(__name__).warning("Lỗi tạo hbitmap cho menu: %s", e)
+            return None
+
+    def _create_menu_item_with_icon(self, descriptor, callbacks):
+        menu_item = _create_menu_item(self, descriptor, callbacks)
+        image = getattr(descriptor, "icon", None)
+        if image is not None:
+            try:
+                cx = ctypes.windll.user32.GetSystemMetrics(49) or 16
+                cy = ctypes.windll.user32.GetSystemMetrics(50) or 16
+                hbmp = _pil_to_hbitmap(image, (cx, cy))
+                if hbmp:
+                    menu_item.fMask |= _pystray_win32.MIIM_BITMAP
+                    menu_item.hbmpItem = hbmp
+            except Exception as e:
+                logging.getLogger(__name__).warning("Lỗi gán menu icon Win32: %s", e)
+        return menu_item
+
+    pystray.Icon._create_menu_item = _create_menu_item_with_icon
 
 from wls.platform_utils import (
     set_selected_device,

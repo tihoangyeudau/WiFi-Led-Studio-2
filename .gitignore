@@ -76,3 +76,7 @@ __pycache__/*
 
 # Nuitka build output
 dist_nuitka/
+
+.tmp_aubio
+WiFi-Led-Studio-Windows.zip
+*.zip

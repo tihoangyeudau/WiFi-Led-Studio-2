@@ -17,14 +17,27 @@ For non-development purposes run:
 
 import argparse
 import logging
+from logging.handlers import RotatingFileHandler
 import os
 import sys
-import psutil
 import time
 
-from logging.handlers import RotatingFileHandler
-
-from wls.effects.audio import AudioAnalysisSource
+if sys.platform == "win32":
+    exe_dir = os.path.dirname(sys.executable)
+    if hasattr(os, "add_dll_directory"):
+        try:
+            os.add_dll_directory(exe_dir)
+        except Exception:
+            pass
+        if os.path.isdir(exe_dir):
+            for item in os.listdir(exe_dir):
+                if item.endswith(".libs"):
+                    libs_path = os.path.join(exe_dir, item)
+                    if os.path.isdir(libs_path):
+                        try:
+                            os.add_dll_directory(libs_path)
+                        except Exception:
+                            pass
 
 import psutil
 import sounddevice as sd
@@ -36,6 +49,7 @@ from wls.consts import (
     REQUIRED_PYTHON_VERSION,
 )
 from wls.core import WlsCore
+from wls.effects.audio import AudioAnalysisSource
 from wls.utils import currently_frozen, get_icon_path
 
 if sys.platform == "win32":
@@ -43,31 +57,24 @@ if sys.platform == "win32":
         try:
             if process.name() == "rmlapp.exe":
                 process.terminate()
-        except psutil.NoSuchProcess:
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
             pass
 elif sys.platform == "darwin":
     for proc in psutil.process_iter(['pid', 'name', 'status']):
         try:
-            # Tìm process rmlapp đang hoạt động (không phải zombie)
             if proc.info['name'] == 'rmlapp' and proc.status() != psutil.STATUS_ZOMBIE:
-
-                # Kill toàn bộ cây process con
                 for child in proc.children(recursive=True):
                     try:
                         child.kill()
                     except (psutil.NoSuchProcess, psutil.AccessDenied):
                         pass
-
-                # Force kill process cha
                 try:
-                    proc.kill()  # Gửi SIGKILL
+                    proc.kill()
                 except psutil.NoSuchProcess:
                     pass
-
-                # Chờ xác nhận process đã dừng
                 time.sleep(0.2)
                 if proc.is_running():
-                    os.kill(proc.pid, 9)  # Fallback dùng OS kill
+                    os.kill(proc.pid, 9)
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             continue
 
@@ -319,6 +326,29 @@ def log_packages():
 
 def main():
     """Main entry point allowing external calls"""
+    if sys.platform == "win32":
+        if sys.stdout is None:
+            try:
+                sys.stdout = open(os.devnull, "w", encoding="utf-8", errors="replace")
+            except Exception:
+                pass
+        elif hasattr(sys.stdout, "reconfigure"):
+            try:
+                sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+            except Exception:
+                pass
+
+        if sys.stderr is None:
+            try:
+                sys.stderr = open(os.devnull, "w", encoding="utf-8", errors="replace")
+            except Exception:
+                pass
+        elif hasattr(sys.stderr, "reconfigure"):
+            try:
+                sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+            except Exception:
+                pass
+
     args = parse_args()
     config_helpers.ensure_config_directory(args.config)
     setup_logging(args.loglevel, config_dir=args.config)

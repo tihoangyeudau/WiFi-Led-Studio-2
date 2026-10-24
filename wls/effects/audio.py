@@ -100,12 +100,18 @@ class AudioInputSource:
 
             for i, device in enumerate(sd.query_devices()):
                 device_name = device['name']
-                if (default_output in device_name) and (default_output != device_name):
+                if (
+                    device.get('max_input_channels', 0) > 0
+                    and (
+                        (default_output in device_name and default_output != device_name)
+                        or "[loopback]" in device_name.lower()
+                    )
+                ):
                     default_loopback_index = i
                     break  # Thoát khỏi vòng lặp sau khi tìm thấy thiết bị phù hợp
             else:
-                _LOGGER.warning("Không tìm thấy thiết bị loopback")
-                default_loopback_index = None
+                _LOGGER.warning("Không tìm thấy thiết bị loopback, sử dụng thiết bị đầu vào mặc định")
+                default_loopback_index = sd.default.device[0] if sd.default.device[0] != -1 else None
 
         except Exception as e:
             _LOGGER.error(f"Lỗi khi truy vấn thiết bị âm thanh: {str(e)}")
@@ -374,7 +380,7 @@ class AudioInputSource:
         self._frequency_domain_x = np.linspace(0, MIC_RATE, freq_domain_length)
 
         # Hàm mở stream âm thanh
-        def open_audio_stream(device_idx):
+        def open_audio_stream(device_idx, is_fallback=False):
             """
             Opens an audio stream for the specified input device.
             Parameters:
@@ -392,13 +398,24 @@ class AudioInputSource:
                 return
 
             device = input_devices[device_idx]
-            channels = None
+            input_ch = device.get("max_input_channels", 0)
+            if input_ch <= 0:
+                _LOGGER.warning(
+                    f"Thiết bị '{device.get('name')}' không có kênh đầu vào (max_input_channels={input_ch})."
+                )
+                if not is_fallback and default_device is not None and default_device != device_idx:
+                    open_audio_stream(default_device, is_fallback=True)
+                else:
+                    self.deactivate()
+                return
+
             if (
                 hostapis[device["hostapi"]]["name"] == "Windows WASAPI"
                 and "Loopback" in device["name"]
             ):
+                channels = min(2, max(1, input_ch))
                 _LOGGER.info(
-                    f"Loopback device detected: {device['name']} with {device['max_input_channels']} channels"
+                    f"Loopback device detected: {device['name']} with {channels} channels"
                 )
             else:
                 # if are not a windows loopback device, we will downmix to mono
@@ -436,8 +453,12 @@ class AudioInputSource:
                 _LOGGER.critical(f"Không thể mở Thiết bị Âm thanh: {e}. Đang vô hiệu hóa.")
                 self.deactivate()
             except sd.PortAudioError as e:
-                _LOGGER.error(f"Lỗi PortAudio: {e}. Đang trả về thiết bị đầu vào mặc định.")
-                open_audio_stream(default_device)
+                _LOGGER.error(f"Lỗi PortAudio: {e} khi mở device {device_idx} ({device.get('name')}) channels={channels}. Đang trả về thiết bị đầu vào mặc định.")
+                if not is_fallback and default_device is not None and default_device != device_idx:
+                    open_audio_stream(default_device, is_fallback=True)
+                else:
+                    _LOGGER.critical("Không thể mở thiết bị âm thanh mặc định. Đang vô hiệu hoá.")
+                    self.deactivate()
 
         try:
             open_audio_stream(device_idx)
@@ -454,9 +475,13 @@ class AudioInputSource:
 
     def subscribe(self, callback):
         """Registers a callback with the input source"""
-        self._callbacks.append(callback)
+        if callback not in self._callbacks:
+            self._callbacks.append(callback)
         if len(self._callbacks) > 0 and not self._audio_stream_active:
-            self.activate()
+            now = time.time()
+            if not hasattr(self, "_last_activate_attempt") or (now - self._last_activate_attempt) > 2.0:
+                self._last_activate_attempt = now
+                self.activate()
         if self._timer is not None:
             self._timer.cancel()
             self._timer = None

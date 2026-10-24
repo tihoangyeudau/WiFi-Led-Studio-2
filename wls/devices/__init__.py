@@ -14,6 +14,11 @@ import voluptuous as vol
 
 from wls.config import save_config
 from wls.events import DeviceCreatedEvent, DeviceUpdateEvent, Event
+from wls.platform_utils import (
+    check_and_resolve_signalrgb_conflict,
+    reset_signalrgb_notification,
+    is_serial_access_denied,
+)
 from wls.utils import (
     AVAILABLE_FPS,
     RML,
@@ -411,9 +416,9 @@ MANUFACTURERS = ['wch.cn', 'FTDI', 'Microsoft', 'Silicon Labs']
 
 def find_available_com_ports():
     if sys.platform == 'win32':
-        return [port.device for port in serial.tools.list_ports.comports() if (port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description)]
+        return [port.device for port in serial.tools.list_ports.comports() if ((port.manufacturer or "") in MANUFACTURERS and "Bluetooth" not in (port.description or ""))]
     elif sys.platform == "darwin":
-        return [port.device for port in serial.tools.list_ports.comports() if ("cu.usbserial" in port.name or "cu.wchusbserial" in port.name)]
+        return [port.device for port in serial.tools.list_ports.comports() if ("cu.usbserial" in (port.name or "") or "cu.wchusbserial" in (port.name or ""))]
 
 
 class AvailableCOMPorts:
@@ -457,6 +462,14 @@ class SerialDevice(Device):
         }
         return version_mapping.get(self._config["version"], 1000000)
 
+    def _get_current_language(self):
+        try:
+            if hasattr(self, '_wls') and hasattr(self._wls, 'get_language'):
+                return self._wls.get_language()
+        except Exception:
+            pass
+        return "vi"
+
     def establish_connection(self):
         if self.com_port is None:
             _LOGGER.warning("Không có cổng COM được chỉ định hoặc không tìm thấy")
@@ -467,10 +480,13 @@ class SerialDevice(Device):
 
             if self.serial and self.serial.isOpen():
                 super().activate()
+                reset_signalrgb_notification()
                 return True
         except serial.SerialException as e:
             _LOGGER.error(f"Không truy cập được cổng {self.com_port}: {str(e)}")
             self.serial = None
+            if is_serial_access_denied(e):
+                check_and_resolve_signalrgb_conflict(self._get_current_language())
 
         return False
 
@@ -480,11 +496,11 @@ class SerialDevice(Device):
     def _get_available_ports(self):
         if sys.platform == 'win32':
             if self.version == 1000000:
-                return [port for port in serial.tools.list_ports.comports() if "wch.cn" in port.manufacturer]
+                return [port for port in serial.tools.list_ports.comports() if "wch.cn" in (port.manufacturer or "")]
             else:
-                return [port for port in serial.tools.list_ports.comports() if (port.manufacturer in MANUFACTURERS and "Bluetooth" not in port.description)]
+                return [port for port in serial.tools.list_ports.comports() if ((port.manufacturer or "") in MANUFACTURERS and "Bluetooth" not in (port.description or ""))]
         else:
-            return [port for port in serial.tools.list_ports.comports() if ("cu.usbserial" in port.name or "cu.wchusbserial" in port.name)]
+            return [port for port in serial.tools.list_ports.comports() if ("cu.usbserial" in (port.name or "") or "cu.wchusbserial" in (port.name or ""))]
 
     def reconnect(self):
         with self._reconnect_lock:  # Đảm bảo chỉ một luồng thực hiện reconnect
@@ -581,9 +597,11 @@ class SerialDevice(Device):
 
             self.serial = serial.Serial(self.com_port, self.version, timeout=1)
 
-        except serial.SerialException:
-            _LOGGER.error(f"Không truy cập được cổng {self.com_port}")
+        except serial.SerialException as e:
+            _LOGGER.error(f"Không truy cập được cổng {self.com_port}: {str(e)}")
             self.serial = None
+            if is_serial_access_denied(e):
+                check_and_resolve_signalrgb_conflict(self._get_current_language())
             return False
 
     def serial_check_id_method(self):
@@ -641,9 +659,11 @@ class SerialDevice(Device):
 
         try:
             self.serial = serial.Serial(self.com_port, self.version, timeout=1)
-        except serial.SerialException:
-            _LOGGER.error(f"Không truy cập được cổng {self.com_port}")
+        except serial.SerialException as e:
+            _LOGGER.error(f"Không truy cập được cổng {self.com_port}: {str(e)}")
             self.serial = None
+            if is_serial_access_denied(e):
+                check_and_resolve_signalrgb_conflict(self._get_current_language())
             return False
 
         self.reset_serial_port()
@@ -695,6 +715,7 @@ class SerialDevice(Device):
                 if m_response == "ok":
                     _LOGGER.debug(f"Đã nhận tín hiệu: ok => Đã chuyển chế độ Ambilight cho cổng {self.com_port}")
                     self.establish_connection()
+                    reset_signalrgb_notification()
                     return True
                 else:
                     _LOGGER.warning("Không nhận được tín hiệu: ok")

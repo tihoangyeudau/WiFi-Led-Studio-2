@@ -37,7 +37,7 @@ jobs:
           CFLAGS: -Wno-error=incompatible-function-pointer-types
         run: |
           python -m pip install -U pip wheel setuptools
-          pip install --pre .
+          pip install --pre . "bokeh~=3.1.0"
       - name: Import signing certificate
         if: env.APPLE_CERT_P12_BASE64 != ''
         env:
@@ -84,35 +84,12 @@ jobs:
       - name: Install Wls
         run: |
           python -m pip install -U pip wheel setuptools
-          pip install --pre .
-          pip install nuitka ordered-set zstandard
+          pip install "numpy<2.0.0,>=1.26.0" "pandas<2.3.0"
+          pip install --pre . "bokeh~=3.1.0"
+          pip install -U nuitka ordered-set zstandard pycaw comtypes
       - name: Build app with Nuitka
         shell: pwsh
-        run: |
-          python -m nuitka `
-            --standalone `
-            --assume-yes-for-downloads `
-            --output-dir=dist_nuitka `
-            --output-filename="WiFi Led Studio.exe" `
-            --windows-console-mode=disable `
-            --windows-icon-from-ico=icons/wifiledstudio.ico `
-            --include-package=wls `
-            --include-package=wls_frontend `
-            --include-package=pynput `
-            --include-package=pystray `
-            --include-package=sentry_sdk `
-            --include-package-data=wls `
-            --include-package-data=bokeh `
-            --include-package-data=xyzservices `
-            --include-data-dir=wls_frontend=wls_frontend `
-            --include-data-dir=icons=icons `
-            --include-data-files=icons/tray.png=tray.png `
-            wls/__main__.py
-      - name: Package app
-        shell: pwsh
-        run: |
-          Rename-Item dist_nuitka/__main__.dist "WiFi Led Studio"
-          Compress-Archive -Path "dist_nuitka/WiFi Led Studio" -DestinationPath WiFi-Led-Studio-Windows.zip
+        run: ./build_nuitka_win.ps1 -Zip -SmokeTest
       - name: Upload app
         uses: actions/upload-artifact@v4
         with:

@@ -99,7 +99,7 @@ class HttpServer:
             self.base_url = ("http{}://localhost:{}").format(
                 "s" if ssl_context else "", port
             )
-        print(("Bắt đầu giao diện web tại {}").format(self.base_url))
+        _LOGGER.info(("Bắt đầu giao diện web tại {}").format(self.base_url))
 
     def handle_start_error(self, error):
         _LOGGER.error(

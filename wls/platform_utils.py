@@ -7,12 +7,15 @@ import os
 import sys
 import logging
 import subprocess
+import re
+import threading
 
 _LOGGER = logging.getLogger(__name__)
 
 # Import platform-specific modules
 if sys.platform == "win32":
     import winreg
+    import ctypes
 elif sys.platform == "darwin":
     import plistlib
     import subprocess
@@ -553,3 +556,151 @@ def set_hotkeys_enabled_setting(enabled):
         return False
     
     return False
+
+
+# ==============================================================================
+# SignalRGB Port Conflict Detection & Auto-Resolution
+# ==============================================================================
+
+_SIGNALRGB_NOTIFICATION_SHOWN = False
+
+
+def is_signalrgb_running():
+    """Check if SignalRGB or SignalRgbLauncher is running on Windows."""
+    if sys.platform != "win32":
+        return False
+    try:
+        import psutil
+        for proc in psutil.process_iter(['name']):
+            try:
+                name = (proc.info.get('name') or '').lower()
+                if name in ('signalrgb.exe', 'signalrgblauncher.exe'):
+                    return True
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                pass
+    except Exception as e:
+        _LOGGER.debug(f"psutil check failed: {e}")
+        try:
+            output = subprocess.check_output(
+                'tasklist /FI "IMAGENAME eq SignalRgb.exe" /NH',
+                shell=True,
+                creationflags=0x08000000 if hasattr(subprocess, 'CREATE_NO_WINDOW') else 0
+            ).decode('latin-1', errors='ignore')
+            if "SignalRgb.exe" in output:
+                return True
+        except Exception:
+            pass
+    return False
+
+
+def show_signalrgb_conflict_dialog(is_english=False):
+    """Display non-blocking native Windows MessageBox alerting user about SignalRGB port conflict."""
+    if sys.platform != "win32":
+        return
+
+    def _worker():
+        try:
+            MB_ICONINFORMATION = 0x00000040
+            MB_OK = 0x00000000
+            MB_TOPMOST = 0x00040000
+            MB_SETFOREGROUND = 0x00010000
+            flags = MB_ICONINFORMATION | MB_OK | MB_TOPMOST | MB_SETFOREGROUND
+
+            if is_english:
+                title = "WiFi Led Studio - SignalRGB Conflict"
+                msg = (
+                    "SignalRGB is currently occupying the CH340 COM port used by Skydimond LED!\n\n"
+                    "WiFi Led Studio has automatically updated SignalRGB plugin settings to release the port.\n"
+                    "Please CLOSE SignalRGB completely and REOPEN it to finish connecting."
+                )
+            else:
+                title = "WiFi Led Studio - Xung đột cổng SignalRGB"
+                msg = (
+                    "Phát hiện SignalRGB đang chiếm cổng USB (CH340) của đèn LED Skydimond!\n\n"
+                    "WiFi Led Studio đã tự động cấu hình lại plugin của SignalRGB để giải phóng cổng COM.\n"
+                    "Vui lòng TẮT ứng dụng SignalRGB rồi MỞ LẠI để hoàn tất kết nối."
+                )
+            ctypes.windll.user32.MessageBoxW(0, msg, title, flags)
+        except Exception as e:
+            _LOGGER.error(f"Error displaying SignalRGB conflict dialog: {e}")
+
+    t = threading.Thread(target=_worker, daemon=True)
+    t.start()
+
+
+def reset_signalrgb_notification():
+    """Reset the notification flag so future conflicts can be notified."""
+    global _SIGNALRGB_NOTIFICATION_SHOWN
+    _SIGNALRGB_NOTIFICATION_SHOWN = False
+
+
+def is_serial_access_denied(exception):
+    """Check if a serial exception indicates port access was denied by another application (Windows only)."""
+    if sys.platform != "win32" or exception is None:
+        return False
+    msg = str(exception).lower()
+    return "access is denied" in msg or "permissionerror" in msg or "permission error" in msg or "denied" in msg
+
+
+def check_and_resolve_signalrgb_conflict(language="vi"):
+    """
+    Check if SignalRGB occupies the CH340 COM port.
+    Silently patches VortxEngine plugin:
+    export function ProductId() { return 0x7523; } -> export function ProductId() { return 0x0000; }
+    and alerts the user once via a non-blocking dialog to restart SignalRGB.
+    """
+    global _SIGNALRGB_NOTIFICATION_SHOWN
+    if sys.platform != "win32":
+        return
+
+    local_app_data = os.environ.get("LOCALAPPDATA")
+    if not local_app_data:
+        return
+
+    vortx_dir = os.path.join(local_app_data, "VortxEngine")
+    if not os.path.isdir(vortx_dir):
+        return
+
+    any_patched = False
+    try:
+        # Scan all app-* version directories dynamically
+        for entry in os.listdir(vortx_dir):
+            if entry.startswith("app-"):
+                app_path = os.path.join(vortx_dir, entry)
+                if os.path.isdir(app_path):
+                    for root, _, files in os.walk(app_path):
+                        if "OEM_Devices_Controller.js" in files:
+                            plugin_path = os.path.join(root, "OEM_Devices_Controller.js")
+                            try:
+                                with open(plugin_path, "r", encoding="utf-8") as f:
+                                    content = f.read()
+
+                                if "0x7523" in content:
+                                    original_content = content
+                                    new_content = re.sub(
+                                        r"export\s+function\s+ProductId\s*\(\)\s*\{\s*return\s+0x7523\s*;\s*\}",
+                                        "export function ProductId() { return 0x0000; }",
+                                        content
+                                    )
+                                    if new_content == original_content:
+                                        new_content = content.replace("return 0x7523;", "return 0x0000;")
+
+                                    if new_content != original_content:
+                                        with open(plugin_path, "w", encoding="utf-8") as f:
+                                            f.write(new_content)
+                                        any_patched = True
+                                        _LOGGER.info(
+                                            f"Đã tự động cấu hình lại plugin SignalRGB tại: {plugin_path} (ProductId 0x7523 -> 0x0000)"
+                                        )
+                            except Exception as e:
+                                _LOGGER.warning(f"Không thể đọc/ghi plugin SignalRGB tại {plugin_path}: {e}")
+    except Exception as e:
+        _LOGGER.warning(f"Lỗi khi quét thư mục VortxEngine: {e}")
+
+    signal_running = is_signalrgb_running()
+
+    # Show notification if file was just patched OR SignalRGB is running and occupying the port
+    if (any_patched or signal_running) and not _SIGNALRGB_NOTIFICATION_SHOWN:
+        _SIGNALRGB_NOTIFICATION_SHOWN = True
+        is_english = (language == "en")
+        show_signalrgb_conflict_dialog(is_english)
